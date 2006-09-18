@@ -35,12 +35,18 @@ static inline void curve_clear(curve_ptr c)
     c->curve_clear(c);
 }
 
+static inline void point_set_inf(point_ptr p)
+{
+    p->inf_flag = 1;
+}
+
 static inline void point_init(point_ptr p, curve_ptr c)
 {
     field_ptr f = c->field;
     element_init(p->x, f);
     element_init(p->y, f);
     p->curve = c;
+    point_set_inf(p);
 }
 
 static inline void point_clear(point_ptr p)
@@ -91,11 +97,6 @@ size_t point_out_str(FILE *stream, int base, point_ptr p);
 static inline void point_mul(point_ptr r, mpz_ptr n, point_ptr p)
 {
     r->curve->mul(r, n, p);
-}
-
-static inline void point_set_inf(point_ptr p)
-{
-    p->inf_flag = 1;
 }
 
 static inline int point_is_inf(point_ptr p)

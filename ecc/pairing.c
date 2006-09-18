@@ -110,15 +110,19 @@ void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t *fops, void *ctx)
 
 void pairing_init_inp_buf (pairing_t pairing, const char *buf, size_t len)
 {
-  assert (buf);
-  tracker_t t;
-  tracker_init (&t, buf, len);
-  pairing_init_inp_generic (pairing, &fops_buf, &t);
+    assert (buf);
+    tracker_t t;
+    tracker_init (&t, buf, len);
+    pairing_init_inp_generic (pairing, &fops_buf, &t);
 }
 
 void pairing_init_inp_str(pairing_t pairing, FILE *stream)
 {
-  assert (stream);
-  pairing_init_inp_generic (pairing, &fops_str, stream);
+    assert (stream);
+    pairing_init_inp_generic (pairing, &fops_str, stream);
 }
 
+void pairing_clear(pairing_t pairing)
+{
+    //TODO
+}

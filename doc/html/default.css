@@ -3,6 +3,10 @@ body {
     font-family: verdana, arial, sans-serif;
 }
 
+tt, code {
+    font-family: andale mono, courier new, courier, monospace;
+}
+
 div.TOC {
     float: left;
     width: 13em;
@@ -49,4 +53,8 @@ h2 {
     border: 1px solid #aaaaaa;
     background-color: #f9f9f9;
     padding: 0.17em;
+}
+
+.parameter {
+    font-style: italic;
 }

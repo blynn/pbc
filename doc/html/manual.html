@@ -1,604 +1,378 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
-<HTML
-><HEAD
-><TITLE
->PBC Library 0.2 Manual</TITLE
-><META
-NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
-REL="STYLESHEET"
-TYPE="text/css"
-HREF="default.css"></HEAD
-><BODY
-CLASS="book"
-BGCOLOR="#FFFFFF"
-TEXT="#000000"
-LINK="#0000FF"
-VLINK="#840084"
-ALINK="#0000FF"
-><DIV
-CLASS="BOOK"
-><A
-NAME="AEN1"
-></A
-><DIV
-CLASS="TITLEPAGE"
-><H1
-CLASS="title"
-><A
-NAME="AEN2"
->PBC Library 0.2 Manual</A
-></H1
-><H3
-CLASS="author"
-><A
-NAME="AEN4"
-></A
->Ben Lynn</H3
-><HR></DIV
-><DIV
-CLASS="TOC"
-><DL
-><DT
-><B
->Table of Contents</B
-></DT
-><DT
-><A
-HREF="#AEN7"
->Overview</A
-></DT
-><DT
->1. <A
-HREF="#AEN16"
->Testing the Library</A
-></DT
-><DD
-><DL
-><DT
-><A
-HREF="#AEN19"
->Quick Start</A
-></DT
-><DT
-><A
-HREF="#AEN25"
->Test Programs</A
-></DT
-></DL
-></DD
-><DT
->2. <A
-HREF="#AEN62"
->The PBC API</A
-></DT
-><DT
->3. <A
-HREF="#AEN80"
->Pairing Types</A
-></DT
-><DD
-><DL
-><DT
-><A
-HREF="#AEN84"
->Type A</A
-></DT
-><DT
-><A
-HREF="#AEN94"
->Type B</A
-></DT
-><DT
-><A
-HREF="#AEN99"
->Type C</A
-></DT
-><DT
-><A
-HREF="#AEN103"
->Type D</A
-></DT
-><DT
-><A
-HREF="#AEN112"
->Type E</A
-></DT
-><DT
-><A
-HREF="#AEN121"
->Type F</A
-></DT
-><DT
-><A
-HREF="#AEN126"
->BGN Curves</A
-></DT
-></DL
-></DD
-></DL
-></DIV
-><DIV
-CLASS="preface"
-><HR><H1
-><A
-NAME="AEN7"
-></A
->Overview</H1
-><P
->&#13;Pairing-based cryptography centers around a particular function with
-interesting properties.
-</P
-><P
->&#13;Let G1, G2, GT be cyclic groups of prime order r. Let g1 be a generator of G1
-and g2 be a generator of G2. Let e be a function
-</P
-><P
->&#13;e : G1 x G2 --&#62; GT
-</P
-><P
->&#13;that is efficiently computable with e(g1, g2) != 1 (nondegenerate) and
-e(g1^a, g2^b) = e(g1,g2)^ab (bilinear) for all integers a,b. We refer to
-this function e as a bilinear map or a pairing. When G1 = G2 we say that
-the pairing is symmetric, otherwise we say the pairing is asymmetric.
-</P
-><P
->&#13;With a few more conditions (for example, we may require the discrete log
-problem to be hard in G1 and the existence of an efficiently computable
-isomorphism from G2 to G1), these pairings can be used to build a wide
-variety of cryptosystems.
-</P
-><P
->&#13;The PBC library builds groups G1, G2, GT and a pairing from given
-parameters. The underlying mathematics behind the groups are
-abstracted away in the interface.
-</P
-><P
->&#13;Routines to generate pairing parameters of are also provided.
-</P
-></DIV
-><DIV
-CLASS="chapter"
-><HR><H1
-><A
-NAME="AEN16"
-></A
->Chapter 1. Testing the Library</H1
-><P
->&#13;Several test programs and curve parameters are bundled with the library.
-</P
-><DIV
-CLASS="section"
-><HR><H2
-CLASS="section"
-><A
-NAME="AEN19"
->Quick Start</A
-></H2
-><P
->&#13;After compilation succeeds, try:
-</P
-><PRE
-CLASS="screen"
->test/testpairing &#60; a.param
-test/benchmark &#60; c159.param
-test/testibe &#60; e.param
-</PRE
-><P
->&#13;The <TT
-CLASS="filename"
->*.param</TT
->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>PBC Library Manual</title><link rel="stylesheet" href="default.css" type="text/css"><meta name="generator" content="DocBook XSL Stylesheets V1.70.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="book" lang="en"><div class="titlepage"><div><div><h1 class="title"><a name="id2242389"></a>PBC Library Manual</h1></div><div><div class="author"><h3 class="author"><span class="firstname">Ben</span> <span class="surname">Lynn</span></h3></div></div></div><hr></div><div class="toc"><ul><li><span class="preface"><a href="#id2533043">Preface</a></span></li><li><span class="chapter"><a href="#id2514231">1. Overview</a></span></li><li><span class="chapter"><a href="#id2530997">2. Installing PBC</a></span><ul><li><span class="section"><a href="#id2531027">Testing the Library</a></span></li><li><span class="section"><a href="#id2531058">Test Programs</a></span></li></ul></li><li><span class="chapter"><a href="#id2488090">3. PBC Basics</a></span><ul><li><span class="section"><a href="#id2488095">Headers and Libraries</a></span></li><li><span class="section"><a href="#id2488120">Types</a></span></li><li><span class="section"><a href="#id2488166">Some Function Classes</a></span></li><li><span class="section"><a href="#id2488731">Variable Conventions</a></span></li></ul></li><li><span class="chapter"><a href="#id2488071">4. Pairing Functions</a></span><ul><li><span class="section"><a href="#id2488427">Initializing Pairings</a></span></li></ul></li><li><span class="chapter"><a href="#id2488075">5. Element Functions</a></span><ul><li><span class="section"><a href="#id2502935">Initializing Elements</a></span></li></ul></li><li><span class="chapter"><a href="#id2502425">6. Pairing Types</a></span><ul><li><span class="section"><a href="#id2502446">Type A</a></span></li><li><span class="section"><a href="#id2502507">Type B</a></span></li><li><span class="section"><a href="#id2502535">Type C</a></span></li><li><span class="section"><a href="#id2502555">Type D</a></span></li><li><span class="section"><a href="#id2502613">Type E</a></span></li><li><span class="section"><a href="#id2502660">Type F</a></span></li><li><span class="section"><a href="#id2502684">Type G</a></span></li><li><span class="section"><a href="#id2502693">BGN Curves</a></span></li></ul></li></ul></div><div class="preface" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="id2533043"></a>Preface</h2></div></div></div><p>
+This manual describes how to install and use the PBC pairing-based
+cryptography library version 0.3.
+It is modeled on that of GMP. I believe it is likely that
+someone using PBC would have used GMP or a similar library before so
+hopefully having a similar manual will make learning PBC easier.
+</p></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="id2514231"></a>Chapter 1. Overview</h2></div></div></div><p>
+The PBC library is a C library designed to make it easy to implement
+pairing-based cryptosystems. It provides an abstract interface to a
+cyclic group with a bilinear pairing, and the programmer does not need
+to worry about, or even know about elliptic curves.
+</p><p>
+It is built on top of GMP, another C library which performs arbitrary
+precision arithmetic on integers, rationals and floats with strong emphasis on
+portability and speed.
+</p><p>
+The PBC library homepage: <a href="http://rooster.stanford.edu/~ben/pbc/" target="_top">
+http://rooster.stanford.edu/~ben/pbc/</a>
+</p><p>
+The GMP library homepage: <a href="http://www.swox.com/gmp/" target="_top">
+http://www.swox.com/gmp/</a>
+</p></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="id2530997"></a>Chapter 2. Installing PBC</h2></div></div></div><p>
+The PBC library needs the GMP library, which can be found at
+<a href="http://www.swox.com/gmp/" target="_top">http://www.swox.com/gmp/</a>
+</p><p>
+This build system has been tested and works on Linux and Mac OS X with a
+fink installation.  You may need to specify paths via LDFLAGS and
+CPPFLAGS if libraries are located in places other than the default
+assumed in configure.ac.  See ./configure --help for more information.
+</p><pre class="screen">
+./configure
+make
+make install
+</pre><p>
+PBC uses some GNU C extensions, notably nested functions, and also
+printf extensions. The latter may be safely commented out as it is only
+used in demonstration programs.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2531027"></a>Testing the Library</h2></div></div></div><p>
+Several test programs and curve parameters are bundled with the library.
+After compilation succeeds, try:
+</p><pre class="screen">test/testpairing &lt; param/a.param
+test/benchmark &lt; param/c159.param
+test/testibe &lt; param/e.param
+</pre><p>
+The <code class="filename">*.param</code>
 files contain pairing parameters one might typically use in
 a real cryptosystem. Many of the test programs read the parameters
 from standard input.
-</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H2
-CLASS="section"
-><A
-NAME="AEN25"
->Test Programs</A
-></H2
-><P
-></P
-><DIV
-CLASS="variablelist"
-><DL
-><DT
->listmnt</DT
-><DD
-><P
->&#13;Searches for discriminants D that lead to MNT curves with subgroups
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2531058"></a>Test Programs</h2></div></div></div><div class="variablelist"><dl><dt><span class="term">listmnt</span></dt><dd><p>
+Searches for discriminants D that lead to MNT curves with subgroups
 of prime order.
-</P
-></DD
-><DT
->genaparam, gencparam, geneparam, genfparam, genbgn</DT
-><DD
-><P
->&#13;Prints parameters for a curve suitable for computing pairings of a given
+</p></dd><dt><span class="term">genaparam, </span><span class="term">gencparam, </span><span class="term">geneparam, </span><span class="term">genfparam, </span><span class="term">genbgn</span></dt><dd><p>
+Prints parameters for a curve suitable for computing pairings of a given
 type. The output can be fed to some of the other test programs.
-</P
-><P
->&#13;The program <B
-CLASS="command"
->gencparam</B
->
+</p><p>
+The program <span><strong class="command">gencparam</strong></span>
 should be given a discriminant as the first argument.
-</P
-></DD
-><DT
->testhilbert</DT
-><DD
-><P
->&#13;Prints the Hilbert polynomial for a given discriminant.
-</P
-></DD
-><DT
->testsig, testibe</DT
-><DD
-><P
->&#13;These programs read curve parameters on standard input and perform computations
+</p></dd><dt><span class="term">testhilbert</span></dt><dd><p>
+Prints the Hilbert polynomial for a given discriminant.
+</p></dd><dt><span class="term">testsig, </span><span class="term">testibe</span></dt><dd><p>
+These programs read curve parameters on standard input and perform computations
 that would be required in an implementation of the Boneh-Lynn-Shacham
 short signature scheme and the Boneh-Franklin identity-based encryption scheme.
-</P
-></DD
-><DT
->testbb, testbls, testbbs, testibs</DT
-><DD
-><P
->&#13;These test programs are more realistic, and test the implementations
+</p></dd><dt><span class="term">testbb, </span><span class="term">testbls, </span><span class="term">testbbs, </span><span class="term">testibs</span></dt><dd><p>
+These test programs are more realistic, and test the implementations
 of the Boneh-Boyen, Boneh-Lynn-Shacham, Boneh-Boyen-Shacham signature schemes
 and the Cha-Cheon and Sakai-Kasahara-Schnorr identity-based signature schemes
-</P
-></DD
-><DT
->benchmark</DT
-><DD
-><P
->&#13;Reads pairing parameters on standard input and benchmarks the pairing.
-</P
-></DD
-></DL
-></DIV
-></DIV
-></DIV
-><DIV
-CLASS="chapter"
-><HR><H1
-><A
-NAME="AEN62"
-></A
->Chapter 2. The PBC API</H1
-><P
->&#13;Programs using the PBC library should include the file
-<TT
-CLASS="filename"
->pbc.h</TT
->:
-</P
-><PRE
-CLASS="programlisting"
->#include "pbc.h"
-</PRE
-><P
->&#13;and linked against the PBC library, e.g.
-</P
-><PRE
-CLASS="screen"
->gcc program.c -L. -lpbc</PRE
-><P
->&#13;The file <TT
-CLASS="filename"
->pbc.h</TT
-> includes <TT
-CLASS="filename"
->gmp.h</TT
->
+</p></dd><dt><span class="term">benchmark</span></dt><dd><p>
+Reads pairing parameters on standard input and benchmarks the pairing.
+</p></dd></dl></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="id2488090"></a>Chapter 3. PBC Basics</h2></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2488095"></a>Headers and Libraries</h2></div></div></div><p>
+Programs using the PBC library should include the file
+<code class="filename">pbc.h</code>:
+</p><pre class="programlisting">#include &lt;pbc.h&gt;
+</pre><p>
+and linked against the PBC library, e.g.
+</p><pre class="screen">gcc program.c -L. -lpbc</pre><p>
+The file <code class="filename">pbc.h</code> includes <code class="filename">gmp.h</code>
 thus all GMP functions are available.
-To use a pairing, first declare and initialize:
-</P
-><PRE
-CLASS="programlisting"
->pairing_t pairing;
-pairing_init_inp_str(pairing, stdin);
-</PRE
-><P
->&#13;In this case, the pairing parameters are fed to the program on standard
-input (e.g. "./program &#60; a.param"). Now pairing-&#62;G1, pairing-&#62;G2,
-pairing-&#62;GT and bilinear_map() can be used as follows.
+</p><p>
+The PBC signatures library is currently bundled with PBC.
+Documentation will eventually written for it, but for now look
+at sample signature programs in the test directory.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2488120"></a>Types</h2></div></div></div><p>
+Since the PBC library is built on top of GMP, the GMP types
+are available. PBC types are similar to GMP types.
+The following example is paraphrased from an example in the GMP
+manual, and shows how to declare the PBC data type
+<span class="type">element_t</span>.
+</p><pre class="programlisting">    element_t sum;
+     
+    struct foo { element_t x, y; };
+
+    element_t vec[20];
+</pre><p>
+The <span class="type">pairing_t</span> data type holds bilinear pairing
+parameter information. There are other data types but for many
+pairing-based cryptography applications they are only needed internally.
+</p><p>
+Examples of other data types defined by PBC are <span class="type">field_t</span>
+for rings and fields and <span class="type">mpc_t</span> for complex arbitrary
+precision floats.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2488166"></a>Some Function Classes</h2></div></div></div><p>
+PBC contains several classes of functions.
+</p><div class="orderedlist"><ol type="1"><li><p>
+Functions for dealing with bilinear pairing parameters begin with
+with <code class="function">pairing_</code>.
+</p></li><li><p>
+Functions for operating on elements of groups, rings and fields begin
+with <code class="function">element_</code>.
+</p></li><li><p>
+Functions that generate pairing parameters, that is, find elliptic curves
+where efficiently computable bilinear pairings exist.
+The sample parameters bundled
+are adequate for many cryptosystems, but there may be a need to generate
+more.
+</p></li><li><p>
+Miscellaneous functions, such as ones controlling how random bits are
+generated.
+</p></li></ol></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2488731"></a>Variable Conventions</h2></div></div></div><p>
+PBC follows GMP in several respects:
+</p><div class="orderedlist"><ol type="1"><li><p>
+Output arguments generally precede input arguments.
+</p></li><li><p>
+The same variable can be used as input and output in one call.
+</p></li><li><p>
+Before a variable may be used it must be initialized exactly once.
+When no longer needed it must be cleared. For efficiency, unnecessary
+initializating and clearing should be avoided.
+</p></li><li><p>
+PBC variables ending with <span class="type">_t</span> behave the same as
+GMP variables in function calls, that is effectively as call-by references.
+In other words, as in GMP, if a function that modifies an input variable,
+that variable remains modified when control return is returned to the caller.
+</p></li><li><p>
+Variables automatically allocate memory via <code class="function">malloc()</code>
+when needed. Unlike GMP, there is no simple way to change the memory
+allocator yet.
+</p></li><li><p>
+The <span class="type">element_t</span> type is small (but certain other types
+are not).
+</p></li></ol></div><p>
+On the other hand, <span class="type">element_t</span> is more complex than
+GMP types in that the same data type is used for elements of different
+algebraic structures, such as elliptic curve groups, polynomial rings
+and finite fields. Many functions assume the inputs come from the
+same algebraic structure and trouble can arise if for example one
+attempts to add a polynomial to a point on an elliptic curve.
+</p><p>
+Another difference is that the programmer is expected to access some
+internal fields of the <span class="type">pairing_t</span> data type, though I intend
+to write wrappers to fix this.
+</p></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="id2488071"></a>Chapter 4. Pairing Functions</h2></div></div></div><p>
+Most likely a pairing-based cryptography application will need to
+instantiate a bilinear pairing before performing any other PBC
+operations.
+</p><p>
+Particular instantiations of bilinear pairings are stored in the data
+type <span class="type">pairing_t</span>. Functions that operate on them
+start with <code class="function">pairing_</code>.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2488427"></a>Initializing Pairings</h2></div></div></div><p>
+Before a pairing may be used, it must be initialized.
+The only way this can be done is to load pairing parameters into
+a <span class="type">pairing_t</span> variable using one of the functions
+beginning with <code class="function">pairing_init_inp_</code>. For example,
+</p><pre class="programlisting">{
+    pairing_t pairing;
+
+    pairing_init_inp_str(pairing, stdin);
+}
+</pre><p>
+will initialize <em class="parameter"><code>pairing</code></em> with
+parameters are fed to the program on standard
+input (e.g. "./program &lt; param/a.param").
+</p><div class="variablelist"><dl><dt><span class="term">
+<code class="function">
+void <span><strong class="command">pairing_init_inp_generic</strong></span>(<em class="parameter"><code>pairing_t pairing, fetch_ops_t *fops, void *ctx</code></em>)
+</code>
+</span></dt><dd><p>
+TODO
+</p></dd><dt><span class="term">
+<code class="function">
+void <span><strong class="command">pairing_init_inp_buf</strong></span>(<em class="parameter"><code>pairing_t pairing, const char *buf, size_t len</code></em>)
+</code>
+</span></dt><dd><p>
+Read in pairing parameters from array of characters <em class="parameter"><code>buf</code></em> of length <em class="parameter"><code>len</code></em>
+and use them to initialize <em class="parameter"><code>pairing</code></em>.
+</p></dd><dt><span class="term">
+<code class="function">
+void <span><strong class="command">pairing_init_inp_str</strong></span>(<em class="parameter"><code>pairing_t pairing, FILE *stream</code></em>)
+</code>
+</span></dt><dd><p>
+Read in pairing parameters from <em class="parameter"><code>stream</code></em>
+and use them to initialize <em class="parameter"><code>pairing</code></em>.
+</p></dd><dt><span class="term">
+<code class="function">
+void <span><strong class="command">pairing_clear</strong></span>(<em class="parameter"><code>pairing_t pairing</code></em>)
+</code>
+</span></dt><dd><p>
+Free the space occupied by <em class="parameter"><code>pairing</code></em>. Call
+whenever a <span class="type">pairing_t</span> variable is no longer needed.
+</p></dd></dl></div></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="id2488075"></a>Chapter 5. Element Functions</h2></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2502935"></a>Initializing Elements</h2></div></div></div><div class="variablelist"><dl><dt><span class="term">
+<code class="function">
+void <span><strong class="command">element_init</strong></span>(<em class="parameter"><code>element_ptr e, field_ptr f</code></em>)
+</code>
+</span></dt><dd><p>
+Initialize <em class="parameter"><code>e</code></em> to be an element of the group, ring or field <em class="parameter"><code>f</code></em>
+and set it to be the zero element.
+</p></dd><dt><span class="term">
+<code class="function">
+void <span><strong class="command">element_clear</strong></span>(<em class="parameter"><code>element_ptr e</code></em>)
+</code>
+</span></dt><dd><p>
+Free the space occupied by <em class="parameter"><code>e</code></em>. Call this when
+the variable <em class="parameter"><code>e</code></em> is no longer needed.
+</p></dd></dl></div><p>
+Now pairing-&gt;G1, pairing-&gt;G2,
+pairing-&gt;GT and bilinear_map() can be used as follows.
 Declare and initialize some group elements:
-</P
-><PRE
-CLASS="programlisting"
->element_t x, y, z;
-element_init(x, pairing-&#62;G1);
-element_init(y, pairing-&#62;G2);
-element_init(z, pairing-&#62;GT);
-</PRE
-><P
->&#13;To pick random elements of G1, G2 and compute a pairing:
-</P
-><PRE
-CLASS="programlisting"
->element_random(x);
+</p><pre class="programlisting">element_t x, y, z;
+element_init(x, pairing-&gt;G1);
+element_init(y, pairing-&gt;G2);
+element_init(z, pairing-&gt;GT);
+</pre><p>
+To pick random elements of G1, G2 and compute a pairing:
+</p><pre class="programlisting">element_random(x);
 element_random(y);
 bilinear_map(z, x, y, pairing);
-</PRE
-><P
->&#13;Now z = e(x, y).
-</P
-><P
->&#13;To raise x by some random exponent r:
-</P
-><PRE
-CLASS="programlisting"
->element_t r;
-element_init(r, pairing-&#62;Zr);
+</pre><p>
+Now z = e(x, y).
+</p><p>
+To raise x by some random exponent r:
+</p><pre class="programlisting">element_t r;
+element_init(r, pairing-&gt;Zr);
 element_random(r);
 element_pow_fp(x, x, r);
-</PRE
-></DIV
-><DIV
-CLASS="chapter"
-><HR><H1
-><A
-NAME="AEN80"
-></A
->Chapter 3. Pairing Types</H1
-><P
->&#13;The PBC library implements the pairing using different types of curves.
+</pre></div></div><div class="chapter" lang="en"><div class="titlepage"><div><div><h2 class="title"><a name="id2502425"></a>Chapter 6. Pairing Types</h2></div></div></div><p>
+The PBC library implements the pairing using different types of curves.
 Which curve to use depends on the application. To make it easy to refer to
 them, I have labelled them with letters. See below for the details.
-</P
-><P
->&#13;The library provides pairing parameters useful in typical pairing-based
+</p><p>
+The library provides pairing parameters useful in typical pairing-based
 cryptosystems. If you're not interested in what the details are, always
 use Type A when a fast pairing is desired, and Type F when short
 group elements are needed. Type C are not as slow as type F, but cannot
 be quite as short.
-</P
-><DIV
-CLASS="section"
-><HR><H2
-CLASS="section"
-><A
-NAME="AEN84"
->Type A</A
-></H2
-><P
->&#13;We use the curve y^2 = x^3 + x over the field F_q for some prime q.
+</p><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2502446"></a>Type A</h2></div></div></div><p>
+We use the curve y^2 = x^3 + x over the field F_q for some prime q.
 It turns out #E(F_q) = q + 1 and #E(F_q^2) = (q+1)^2.
 Thus the embedding degree k is 2.
-</P
-><P
->&#13;We set things up so that q + 1 = r * h, for a particular r. For speed,
+</p><p>
+We set things up so that q + 1 = r * h, for a particular r. For speed,
 we pick r to be a Solinas prime, that is, r has the form 2^a +- 2^b +- 1
-for some integers 0 &#60; b &#60; a.
-</P
-><P
->&#13;We also choose q = -1 mod 12 so we can implement F_q^2 as F_q[i]
+for some integers 0 &lt; b &lt; a.
+</p><p>
+We also choose q = -1 mod 12 so we can implement F_q^2 as F_q[i]
 (where i = sqrt(-1)). Also, since q = -1 mod 3, cube roots in F_q
 are easy to compute. This latter feature may be removed because I have
 not found a use for it yet (in which case only q = -1 mod 4 is guaranteed).
-</P
-><P
->&#13;Pairings on type A curves are the fast and ought to be used where the
+</p><p>
+Pairings on type A curves are the fast and ought to be used where the
 main concern is efficiency. Typically, r should be about 160 bits long
 and q about 512 bits. In this case, elements of groups G1 and G2 take
 512 bits to represent.
-</P
-><P
->&#13;Additionally, the pairing is symmetric, that is G1 and G2 are in fact
+</p><p>
+Additionally, the pairing is symmetric, that is G1 and G2 are in fact
 the same group.
-</P
-><P
->&#13;<CODE
-CLASS="function"
->a_param</CODE
-> struct fields:
-<P
-CLASS="literallayout"
-><br>
-exp2,&nbsp;exp1,&nbsp;sign1,&nbsp;sign0,&nbsp;r:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;r&nbsp;=&nbsp;2^exp2&nbsp;+&nbsp;sign1&nbsp;*&nbsp;2^exp1&nbsp;+&nbsp;sign0&nbsp;*&nbsp;1&nbsp;(Solinas&nbsp;prime)<br>
-q,&nbsp;h:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;r&nbsp;*&nbsp;h&nbsp;=&nbsp;q&nbsp;+&nbsp;1<br>
-&nbsp;&nbsp;&nbsp;&nbsp;q&nbsp;is&nbsp;a&nbsp;prime,&nbsp;h&nbsp;is&nbsp;a&nbsp;multiple&nbsp;of&nbsp;12&nbsp;(thus&nbsp;q&nbsp;=&nbsp;-1&nbsp;mod&nbsp;12)<br>
-</P
->
-</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H2
-CLASS="section"
-><A
-NAME="AEN94"
->Type B</A
-></H2
-><P
->&#13;This type is reserved for the curve y^2 = x^3 + 1 over F_q with
+</p><p>
+<code class="function">a_param</code> struct fields:
+</p><div class="literallayout"><p><br>
+exp2, exp1, sign1, sign0, r:<br>
+    r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1 (Solinas prime)<br>
+q, h:<br>
+    r * h = q + 1<br>
+    q is a prime, h is a multiple of 12 (thus q = -1 mod 12)<br>
+</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2502507"></a>Type B</h2></div></div></div><p>
+This type is reserved for the curve y^2 = x^3 + 1 over F_q with
 q = -1 mod 12. It has yet to be implemented as I have not seen a compelling
 reason to use it.
-</P
-><P
->&#13;There are advantages unique to this curve however. Since cube roots in F_q
+</p><p>
+There are advantages unique to this curve however. Since cube roots in F_q
 are fast and guaranteed to exist, for any given value of y, it is easy to
 solve for x. Also, the coefficient of x is zero in the curve equation,
 simplifying some equations (e.g. point doubling).
-</P
-><P
->&#13;There is also at least one drawback when compared with the similar type A
+</p><p>
+There is also at least one drawback when compared with the similar type A
 pairing. If symmetry of the pairing is insisted upon, some optimizations are
 not possible. If ever implemented, perhaps I will divide this case into two
 subtypes, one symmetric, and the other asymmetric but slightly faster.
-</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H2
-CLASS="section"
-><A
-NAME="AEN99"
->Type C</A
-></H2
-><P
->&#13;This type is reserved for supersingular curves with embedding degree 6.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2502535"></a>Type C</h2></div></div></div><p>
+This type is reserved for supersingular curves with embedding degree 6.
 Pairings are fast as optimizations specific to fields of characteristic 3
 may be used. The embedding degree of 6 also means the representations of
 elements of G1 are short.
-</P
-><P
->&#13;On the other hand, the low characteristic also makes these curves more
+</p><p>
+On the other hand, the low characteristic also makes these curves more
 susceptible to Coppersmith's attack, so slightly larger fields are needed
 for security. Because of this, I have no plans to implement them in the
 immediate future.
-</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H2
-CLASS="section"
-><A
-NAME="AEN103"
->Type D</A
-></H2
-><P
->&#13;These are ordinary curves of with embedding degree 6, whose orders are prime
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2502555"></a>Type D</h2></div></div></div><p>
+These are ordinary curves of with embedding degree 6, whose orders are prime
 or a prime multiplied by a small constant. These are constructed using the
 method due to MNT.
-</P
-><P
->&#13;A type C curve is defined over some field F_q and has order h * r where
+</p><p>
+A type C curve is defined over some field F_q and has order h * r where
 r is a prime and h is a small constant. Over the field F_q^6 its order is
 a multiple of r^2.
-</P
-><P
->&#13;Typically the order of the curve E is around 170 bits, as is F_q, the base
+</p><p>
+Typically the order of the curve E is around 170 bits, as is F_q, the base
 field, thus q^k is around the 1024-bit mark which is commonly considered
 good enough.
-</P
-><P
->&#13;Using type C pairings allows elements of group G1 to be quite short, typically
+</p><p>
+Using type C pairings allows elements of group G1 to be quite short, typically
 170-bits. Because of a certain trick, elements of group G2 need only be 3 times
 longer, that is, about 510 bits rather than 6 times long. They are not quite
 as short as type F pairings, but much faster.
-</P
-><P
-CLASS="literallayout"
-><br>
-c_param&nbsp;struct&nbsp;fields:<br>
-q&nbsp;&nbsp;&nbsp;F_q&nbsp;is&nbsp;the&nbsp;base&nbsp;field<br>
-n&nbsp;&nbsp;&nbsp;#&nbsp;of&nbsp;points&nbsp;in&nbsp;E(F_q)<br>
-r&nbsp;&nbsp;&nbsp;large&nbsp;prime&nbsp;dividing&nbsp;n<br>
-h&nbsp;&nbsp;&nbsp;n&nbsp;=&nbsp;h&nbsp;*&nbsp;r<br>
-a&nbsp;&nbsp;&nbsp;E&nbsp;is&nbsp;given&nbsp;by&nbsp;y^2&nbsp;=&nbsp;x^3&nbsp;+&nbsp;ax&nbsp;+&nbsp;b<br>
+</p><div class="literallayout"><p><br>
+c_param struct fields:<br>
+q   F_q is the base field<br>
+n   # of points in E(F_q)<br>
+r   large prime dividing n<br>
+h   n = h * r<br>
+a   E is given by y^2 = x^3 + ax + b<br>
 b<br>
-nk&nbsp;&nbsp;#&nbsp;of&nbsp;points&nbsp;in&nbsp;E(F_q^k)<br>
-hk&nbsp;&nbsp;nk&nbsp;=&nbsp;hk&nbsp;*&nbsp;r&nbsp;*&nbsp;r<br>
-</P
-><P
->&#13;I sometimes refer to a type C curve as a triplet of numbers:
+nk  # of points in E(F_q^k)<br>
+hk  nk = hk * r * r<br>
+</p></div><p>
+I sometimes refer to a type C curve as a triplet of numbers:
 the discriminant, the number of bits in the prime q, and the number of
-bits in the prime r. The <B
-CLASS="command"
->listmnt</B
-> program prints
+bits in the prime r. The <span><strong class="command">listmnt</strong></span> program prints
 these numbers.
 The bundled type C curve parameters are the curves
 9563-201-181, 62003-159-158 and 496659-224-224.
-</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H2
-CLASS="section"
-><A
-NAME="AEN112"
->Type E</A
-></H2
-><P
->&#13;The CM (Complex Multiplication) method of constructing elliptic curves
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2502613"></a>Type E</h2></div></div></div><p>
+The CM (Complex Multiplication) method of constructing elliptic curves
 starts with the Diophantine equation
-</P
-><P
-CLASS="literallayout"
-><br>
-&nbsp;&nbsp;&nbsp;&nbsp;DV^2&nbsp;=&nbsp;4q&nbsp;-&nbsp;t^2<br>
-</P
-><P
->&#13;If t = 2 and q = D r^2 h^2 + 1 for some prime r (which we choose to
+</p><div class="literallayout"><p><br>
+    DV^2 = 4q - t^2<br>
+</p></div><p>
+If t = 2 and q = D r^2 h^2 + 1 for some prime r (which we choose to
 be a Solinas prime) and some integer h, we find that this equation is easily
 solved with V = 2rh.
-</P
-><P
->&#13;Thus it is easy to find a curve (over the field F_q) with order q - 1.
+</p><p>
+Thus it is easy to find a curve (over the field F_q) with order q - 1.
 Note r^2 divides q - 1, thus we have an embedding degree of 1.
-</P
-><P
->&#13;Hence all computations necessary for the pairing can be done in F_q alone.
+</p><p>
+Hence all computations necessary for the pairing can be done in F_q alone.
 There is never any need to extend F_q.
-</P
-><P
->&#13;As q is typically 1024 bits, group elements take a lot of space to represent.
+</p><p>
+As q is typically 1024 bits, group elements take a lot of space to represent.
 Moreover, many optimizations do not apply to this type, resulting in a slower
 pairing.
-</P
-><P
->&#13;This pairing is kept as a reserve, in case some day it is discovered
+</p><p>
+This pairing is kept as a reserve, in case some day it is discovered
 that discrete log in field extensions is easier to solve than previously
 thought.
-</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H2
-CLASS="section"
-><A
-NAME="AEN121"
->Type F</A
-></H2
-><P
->&#13;Using carefully crafted polynomials, k = 12 pairings can be constructed.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2502660"></a>Type F</h2></div></div></div><p>
+Using carefully crafted polynomials, k = 12 pairings can be constructed.
 Only 160 bits are needed to represent elements of one group, and 320 bits
 for the other.
-</P
-><P
->&#13;They should be used when the top priority is to minimize bandwidth (e.g.
+</p><p>
+They should be used when the top priority is to minimize bandwidth (e.g.
 short signatures). The pairing is slower than the other types.
-</P
-><P
->&#13;Also, k = 12 allows higher security short signatures. (k = 6 curves cannot
+</p><p>
+Also, k = 12 allows higher security short signatures. (k = 6 curves cannot
 be used to scale security from 160-bits to say 256-bits because finite
 field attacks are subexponential.)
-</P
-></DIV
-><DIV
-CLASS="section"
-><HR><H2
-CLASS="section"
-><A
-NAME="AEN126"
->BGN Curves</A
-></H2
-><P
->&#13;These are curves containing a subgroup of a specified order. Boneh, Goh and
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2502684"></a>Type G</h2></div></div></div><p>
+k = 10 curves may also be constructed.
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id2502693"></a>BGN Curves</h2></div></div></div><p>
+These are curves containing a subgroup of a specified order. Boneh, Goh and
 Nissim have use for an elliptic curve with subgroup order N = pq for large
 primes p, q.
-</P
-><P
->&#13;To implement them, Type A curves can be used, only instead of a Solinas
+</p><p>
+To implement them, Type A curves can be used, only instead of a Solinas
 prime, we generate curves with a given group order. Type B can also
 be used (and that is what is suggested in their paper) but this is less
 desirable.
-</P
-></DIV
-></DIV
-></DIV
-></BODY
-></HTML
->
+</p></div></div></div></body></html>

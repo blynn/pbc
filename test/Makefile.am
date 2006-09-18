@@ -26,10 +26,10 @@ testpoly_SOURCES = testpoly.c
 sing_SOURCES = sing.c
 
 testbls_SOURCES = testbls.c
-testbls_LDADD = ../libpbc.la ../sig/libsig.la
+testbls_LDADD = ../libpbc.la ../sig/libpbc_sig.la
 
 testibs_SOURCES = testibs.c
-testibs_LDADD = ../libpbc.la ../sig/libsig.la
+testibs_LDADD = ../libpbc.la ../sig/libpbc_sig.la
 
 testbb_SOURCES = testbb.c
-testbb_LDADD = ../libpbc.la ../sig/libsig.la
+testbb_LDADD = ../libpbc.la ../sig/libpbc_sig.la

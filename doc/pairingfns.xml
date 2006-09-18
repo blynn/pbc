@@ -1,0 +1,79 @@
+<chapter>
+<title>Pairing Functions</title>
+<para>
+Most likely a pairing-based cryptography application will need to
+instantiate a bilinear pairing before performing any other PBC
+operations.
+</para>
+<para>
+Particular instantiations of bilinear pairings are stored in the data
+type <type>pairing_t</type>. Functions that operate on them
+start with <function>pairing_</function>.
+</para>
+<section>
+<title>Initializing Pairings</title>
+<para>
+Before a pairing may be used, it must be initialized.
+The only way this can be done is to load pairing parameters into
+a <type>pairing_t</type> variable using one of the functions
+beginning with <function>pairing_init_inp_</function>. For example,
+</para>
+<programlisting>{
+    pairing_t pairing;
+
+    pairing_init_inp_str(pairing, stdin);
+}
+</programlisting>
+<para>
+will initialize <parameter>pairing</parameter> with
+parameters are fed to the program on standard
+input (e.g. "./program &lt; param/a.param").
+</para>
+<variablelist>
+<varlistentry><term>
+<function>
+void <command>pairing_init_inp_generic</command>(<parameter>pairing_t pairing, fetch_ops_t *fops, void *ctx</parameter>)
+</function>
+</term>
+<listitem><para>
+TODO
+</para></listitem>
+</varlistentry>
+
+<varlistentry><term>
+<function>
+void <command>pairing_init_inp_buf</command>(<parameter>pairing_t pairing, const char *buf, size_t len</parameter>)
+</function>
+</term>
+<listitem><para>
+Read in pairing parameters from array of characters <parameter>buf</parameter> of length <parameter>len</parameter>
+and use them to initialize <parameter>pairing</parameter>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry><term>
+<function>
+void <command>pairing_init_inp_str</command>(<parameter>pairing_t pairing, FILE *stream</parameter>)
+</function>
+</term>
+<listitem><para>
+Read in pairing parameters from <parameter>stream</parameter>
+and use them to initialize <parameter>pairing</parameter>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry><term>
+<function>
+void <command>pairing_clear</command>(<parameter>pairing_t pairing</parameter>)
+</function>
+</term>
+<listitem><para>
+Free the space occupied by <parameter>pairing</parameter>. Call
+whenever a <type>pairing_t</type> variable is no longer needed.
+</para></listitem>
+</varlistentry>
+
+</variablelist>
+
+</section>
+</chapter>

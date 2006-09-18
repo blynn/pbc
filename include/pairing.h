@@ -26,9 +26,28 @@ struct pairing_s {
 typedef struct pairing_s pairing_t[1];
 typedef struct pairing_s *pairing_ptr;
 
+/*@manual
+TODO
+*/
 void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t *fops, void *ctx);
+
+/*@manual
+Read in pairing parameters from array of characters ''buf'' of length ''len''
+and use them to initialize ''pairing''.
+*/
 void pairing_init_inp_buf(pairing_t pairing, const char *buf, size_t len);
+
+/*@manual
+Read in pairing parameters from ''stream''
+and use them to initialize ''pairing''.
+*/
 void pairing_init_inp_str(pairing_t pairing, FILE *stream);
+
+/*@manual
+Free the space occupied by ''pairing''. Call
+whenever a <type>pairing_t</type> variable is no longer needed.
+*/
+void pairing_clear(pairing_t pairing);
 
 static inline void bilinear_map(element_t out, element_t in1, element_t in2,
     pairing_t pairing) {

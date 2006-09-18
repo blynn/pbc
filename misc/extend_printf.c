@@ -1,3 +1,8 @@
+//uses GNU C extensions to extend printf so that '%B' can print out element_t's
+//Cons: less portable, printf behaves differently, possible spurious warnings if
+//printf() is used, and no warnings checked if element_printf() is used
+//TODO (eventually): write element_printf() explicitly, i.e. without using GNU C
+//features and so that printf() is not affected
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>

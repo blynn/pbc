@@ -1,5 +1,5 @@
 //Boneh-Boyen signatures demo
-#include "sig.h"
+#include "pbc_sig.h"
 
 int main(void)
 {

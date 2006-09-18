@@ -1,3 +1,14 @@
+Mon Sep 18 08:51:31 PDT 2006
+
+The sig library has been renamed to the pbc_sig library.
+
+It turns out the GNU build system was deleteing a.param every time
+./configure was run, so I moved *.param to the new param subdirectory.
+
+Minor fixes. Some work on the manual.
+
+[0.3.1]
+
 Sun Sep 17 17:16:22 PDT 2006
 
 Started a git repository at http://rooster.stanford.edu/~ben/pbc/pbc.git

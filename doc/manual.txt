@@ -1,87 +1,95 @@
 
 
-PBC Library 0.2 Manual
+PBC Library Manual
 
 
 Ben Lynn
 
 -------------------------------------------------------------------------------
 
+* Preface
+* 1._Overview
+* 2._Installing_PBC
 
-  Table of Contents
+  o Testing_the_Library
+  o Test_Programs
 
-  Overview
+* 3._PBC_Basics
 
-  1. Testing_the_Library
+  o Headers_and_Libraries
+  o Types
+  o Some_Function_Classes
+  o Variable_Conventions
 
+* 4._Pairing_Functions
 
-        Quick_Start
+  o Initializing_Pairings
 
-        Test_Programs
+* 5._Element_Functions
 
+  o Initializing_Elements
 
-  2. The_PBC_API
+* 6._Pairing_Types
 
-  3. Pairing_Types
-
-
-        Type_A
-
-        Type_B
-
-        Type_C
-
-        Type_D
-
-        Type_E
-
-        Type_F
-
-        BGN_Curves
-
-
--------------------------------------------------------------------------------
+  o Type_A
+  o Type_B
+  o Type_C
+  o Type_D
+  o Type_E
+  o Type_F
+  o Type_G
+  o BGN_Curves
 
 
-Overview
 
-Pairing-based cryptography centers around a particular function with
-interesting properties.
-Let G1, G2, GT be cyclic groups of prime order r. Let g1 be a generator of G1
-and g2 be a generator of G2. Let e be a function
-e : G1 x G2 --> GT
-that is efficiently computable with e(g1, g2) != 1 (nondegenerate) and e(g1^a,
-g2^b) = e(g1,g2)^ab (bilinear) for all integers a,b. We refer to this function
-e as a bilinear map or a pairing. When G1 = G2 we say that the pairing is
-symmetric, otherwise we say the pairing is asymmetric.
-With a few more conditions (for example, we may require the discrete log
-problem to be hard in G1 and the existence of an efficiently computable
-isomorphism from G2 to G1), these pairings can be used to build a wide variety
-of cryptosystems.
-The PBC library builds groups G1, G2, GT and a pairing from given parameters.
-The underlying mathematics behind the groups are abstracted away in the
-interface.
-Routines to generate pairing parameters of are also provided.
--------------------------------------------------------------------------------
+Preface
 
+This manual describes how to install and use the PBC pairing-based cryptography
+library version 0.3. It is modeled on that of GMP. I believe it is likely that
+someone using PBC would have used GMP or a similar library before so hopefully
+having a similar manual will make learning PBC easier.
 
-Chapter 1. Testing the Library
+Chapter 1. Overview
 
-Several test programs and curve parameters are bundled with the library.
--------------------------------------------------------------------------------
+The PBC library is a C library designed to make it easy to implement pairing-
+based cryptosystems. It provides an abstract interface to a cyclic group with a
+bilinear pairing, and the programmer does not need to worry about, or even know
+about elliptic curves.
+It is built on top of GMP, another C library which performs arbitrary precision
+arithmetic on integers, rationals and floats with strong emphasis on
+portability and speed.
+The PBC library homepage: http://rooster.stanford.edu/~ben/pbc/
+The GMP library homepage: http://www.swox.com/gmp/
 
-Quick Start
+Chapter 2. Installing PBC
 
-After compilation succeeds, try:
+The PBC library needs the GMP library, which can be found at http://
+www.swox.com/gmp/
+This build system has been tested and works on Linux and Mac OS X with a fink
+installation. You may need to specify paths via LDFLAGS and CPPFLAGS if
+libraries are located in places other than the default assumed in configure.ac.
+See ./configure --help for more information.
 
-  test/testpairing < a.param
-  test/benchmark < c159.param
-  test/testibe < e.param
+  ./configure
+  make
+  make install
+
+PBC uses some GNU C extensions, notably nested functions, and also printf
+extensions. The latter may be safely commented out as it is only used in
+demonstration programs.
+
+Testing the Library
+
+Several test programs and curve parameters are bundled with the library. After
+compilation succeeds, try:
+
+  test/testpairing < param/a.param
+  test/benchmark < param/c159.param
+  test/testibe < param/e.param
 
 The *.param files contain pairing parameters one might typically use in a real
 cryptosystem. Many of the test programs read the parameters from standard
 input.
--------------------------------------------------------------------------------
 
 Test Programs
 
@@ -115,29 +123,144 @@ Test Programs
   benchmark
       Reads pairing parameters on standard input and benchmarks the pairing.
 
--------------------------------------------------------------------------------
+
+Chapter 3. PBC Basics
 
 
-Chapter 2. The PBC API
+Headers and Libraries
 
 Programs using the PBC library should include the file pbc.h:
 
-  #include "pbc.h"
+  #include <pbc.h>
 
 and linked against the PBC library, e.g.
 
   gcc program.c -L. -lpbc
 
-The file pbc.h includes gmp.h thus all GMP functions are available. To use a
-pairing, first declare and initialize:
+The file pbc.h includes gmp.h thus all GMP functions are available.
+The PBC signatures library is currently bundled with PBC. Documentation will
+eventually written for it, but for now look at sample signature programs in the
+test directory.
 
-  pairing_t pairing;
-  pairing_init_inp_str(pairing, stdin);
+Types
 
-In this case, the pairing parameters are fed to the program on standard input
-(e.g. "./program < a.param"). Now pairing->G1, pairing->G2, pairing->GT and
-bilinear_map() can be used as follows. Declare and initialize some group
-elements:
+Since the PBC library is built on top of GMP, the GMP types are available. PBC
+types are similar to GMP types. The following example is paraphrased from an
+example in the GMP manual, and shows how to declare the PBC data type
+element_t.
+
+      element_t sum;
+
+      struct foo { element_t x, y; };
+
+      element_t vec[20];
+
+The pairing_t data type holds bilinear pairing parameter information. There are
+other data types but for many pairing-based cryptography applications they are
+only needed internally.
+Examples of other data types defined by PBC are field_t for rings and fields
+and mpc_t for complex arbitrary precision floats.
+
+Some Function Classes
+
+PBC contains several classes of functions.
+
+  1. Functions for dealing with bilinear pairing parameters begin with with
+     pairing_.
+  2. Functions for operating on elements of groups, rings and fields begin with
+     element_.
+  3. Functions that generate pairing parameters, that is, find elliptic curves
+     where efficiently computable bilinear pairings exist. The sample
+     parameters bundled are adequate for many cryptosystems, but there may be a
+     need to generate more.
+  4. Miscellaneous functions, such as ones controlling how random bits are
+     generated.
+
+
+Variable Conventions
+
+PBC follows GMP in several respects:
+
+  1. Output arguments generally precede input arguments.
+  2. The same variable can be used as input and output in one call.
+  3. Before a variable may be used it must be initialized exactly once. When no
+     longer needed it must be cleared. For efficiency, unnecessary
+     initializating and clearing should be avoided.
+  4. PBC variables ending with _t behave the same as GMP variables in function
+     calls, that is effectively as call-by references. In other words, as in
+     GMP, if a function that modifies an input variable, that variable remains
+     modified when control return is returned to the caller.
+  5. Variables automatically allocate memory via malloc() when needed. Unlike
+     GMP, there is no simple way to change the memory allocator yet.
+  6. The element_t type is small (but certain other types are not).
+
+On the other hand, element_t is more complex than GMP types in that the same
+data type is used for elements of different algebraic structures, such as
+elliptic curve groups, polynomial rings and finite fields. Many functions
+assume the inputs come from the same algebraic structure and trouble can arise
+if for example one attempts to add a polynomial to a point on an elliptic
+curve.
+Another difference is that the programmer is expected to access some internal
+fields of the pairing_t data type, though I intend to write wrappers to fix
+this.
+
+Chapter 4. Pairing Functions
+
+Most likely a pairing-based cryptography application will need to instantiate a
+bilinear pairing before performing any other PBC operations.
+Particular instantiations of bilinear pairings are stored in the data type
+pairing_t. Functions that operate on them start with pairing_.
+
+Initializing Pairings
+
+Before a pairing may be used, it must be initialized. The only way this can be
+done is to load pairing parameters into a pairing_t variable using one of the
+functions beginning with pairing_init_inp_. For example,
+
+  {
+      pairing_t pairing;
+
+      pairing_init_inp_str(pairing, stdin);
+  }
+
+will initialize pairing with parameters are fed to the program on standard
+input (e.g. "./program < param/a.param").
+
+
+  void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t *fops, void
+  *ctx)
+      TODO
+
+  void pairing_init_inp_buf(pairing_t pairing, const char *buf, size_t len)
+      Read in pairing parameters from array of characters buf of length len and
+      use them to initialize pairing.
+
+  void pairing_init_inp_str(pairing_t pairing, FILE *stream)
+      Read in pairing parameters from stream and use them to initialize
+      pairing.
+
+  void pairing_clear(pairing_t pairing)
+      Free the space occupied by pairing. Call whenever a pairing_t variable is
+      no longer needed.
+
+
+Chapter 5. Element Functions
+
+
+Initializing Elements
+
+
+
+  void element_init(element_ptr e, field_ptr f)
+      Initialize e to be an element of the group, ring or field f and set it to
+      be the zero element.
+
+  void element_clear(element_ptr e)
+      Free the space occupied by e. Call this when the variable e is no longer
+      needed.
+
+Now pairing->G1, pairing->G2, pairing->GT and bilinear_map() can be used as
+follows. Declare and initialize some group elements:
 
   element_t x, y, z;
   element_init(x, pairing->G1);
@@ -158,10 +281,8 @@ To raise x by some random exponent r:
   element_random(r);
   element_pow_fp(x, x, r);
 
--------------------------------------------------------------------------------
 
-
-Chapter 3. Pairing Types
+Chapter 6. Pairing Types
 
 The PBC library implements the pairing using different types of curves. Which
 curve to use depends on the application. To make it easy to refer to them, I
@@ -170,7 +291,6 @@ The library provides pairing parameters useful in typical pairing-based
 cryptosystems. If you're not interested in what the details are, always use
 Type A when a fast pairing is desired, and Type F when short group elements are
 needed. Type C are not as slow as type F, but cannot be quite as short.
--------------------------------------------------------------------------------
 
 Type A
 
@@ -196,7 +316,6 @@ exp2, exp1, sign1, sign0, r:
 q, h:
     r * h = q + 1
     q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
--------------------------------------------------------------------------------
 
 Type B
 
@@ -210,7 +329,6 @@ There is also at least one drawback when compared with the similar type A
 pairing. If symmetry of the pairing is insisted upon, some optimizations are
 not possible. If ever implemented, perhaps I will divide this case into two
 subtypes, one symmetric, and the other asymmetric but slightly faster.
--------------------------------------------------------------------------------
 
 Type C
 
@@ -222,7 +340,6 @@ On the other hand, the low characteristic also makes these curves more
 susceptible to Coppersmith's attack, so slightly larger fields are needed for
 security. Because of this, I have no plans to implement them in the immediate
 future.
--------------------------------------------------------------------------------
 
 Type D
 
@@ -253,7 +370,6 @@ I sometimes refer to a type C curve as a triplet of numbers: the discriminant,
 the number of bits in the prime q, and the number of bits in the prime r. The
 listmnt program prints these numbers. The bundled type C curve parameters are
 the curves 9563-201-181, 62003-159-158 and 496659-224-224.
--------------------------------------------------------------------------------
 
 Type E
 
@@ -273,7 +389,6 @@ Moreover, many optimizations do not apply to this type, resulting in a slower
 pairing.
 This pairing is kept as a reserve, in case some day it is discovered that
 discrete log in field extensions is easier to solve than previously thought.
--------------------------------------------------------------------------------
 
 Type F
 
@@ -285,7 +400,10 @@ signatures). The pairing is slower than the other types.
 Also, k = 12 allows higher security short signatures. (k = 6 curves cannot be
 used to scale security from 160-bits to say 256-bits because finite field
 attacks are subexponential.)
--------------------------------------------------------------------------------
+
+Type G
+
+k = 10 curves may also be constructed.
 
 BGN Curves
 

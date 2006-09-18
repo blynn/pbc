@@ -4,11 +4,11 @@ maintainer-clean-local:
 
 AM_CPPFLAGS = -I../include
 
-lib_LTLIBRARIES = libsig.la
-include_HEADERS = ../include/sig.h
+lib_LTLIBRARIES = libpbc_sig.la
+include_HEADERS = ../include/pbc_sig.h
 
 # this should really be a versioned dir, i.e., $(includedir)/pbc-0.2.16/pbc
 library_includedir = $(includedir)/pbc
-library_include_HEADERS = ../include/sig.h
+library_include_HEADERS = ../include/pbc_sig.h
 
-libsig_la_SOURCES = hash.c sig.c
+libpbc_sig_la_SOURCES = hash.c sig.c

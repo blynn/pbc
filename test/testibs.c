@@ -1,5 +1,5 @@
 //Cha-Cheon and Sakai-Kasahara-Schnorr Identity-Based Signatures demo
-#include "sig.h"
+#include "pbc_sig.h"
 
 int main(void)
 {

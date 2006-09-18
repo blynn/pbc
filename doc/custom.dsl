@@ -9,6 +9,8 @@
 <style-specification id="print" use="print-stylesheet">
 <style-specification-body> 
 
+;; don't remember where I found the original version of this file (Ben)
+
 ;; customize the print stylesheet
 
 </style-specification-body>
@@ -19,6 +21,7 @@
 ;; customize the html stylesheet
 
 (define %stylesheet% "default.css")
+(define (chunk-section-depth) 0)
 (define %stylesheet-type% "text/css")
 
 </style-specification-body>

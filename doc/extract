@@ -1,0 +1,34 @@
+#!/usr/bin/gawk -f
+# hack to extract GMP-style documentation from source
+/^\/\*@/ {
+    n = 0
+    getline
+    while ($0 != "*/") {
+	a[n] = $0
+	n++
+	getline
+    }
+
+    print "<varlistentry><term>"
+    print "<function>"
+#    do {
+#	getline
+#	print
+#    } while (!match($0, ";") && !match($0, "{"))
+    getline
+    sub("static inline ", "")
+    s = gensub(" (\\w*)\\(", " <command>\\1</command>(", 1)
+    s = gensub("\\((.*)\\)", "(<parameter>\\1</parameter>)", 1, s)
+    gsub(";", "", s);
+    print s
+    print "</function>"
+    print "</term>"
+    
+    print "<listitem><para>"
+    for(i=0; i<n; i++) {
+	a[i] = gensub("''(\\w*)''", "<parameter>\\1</parameter>", "g", a[i])
+	print a[i]
+    }
+    print "</para></listitem>"
+    print "</varlistentry>\n"
+}

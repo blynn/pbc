@@ -1,7 +1,7 @@
 //pairing-based signatures library
 #include <string.h> //for memcmp()
 
-#include "sig.h"
+#include "pbc_sig.h"
 #include "hash.h"
 
 void bls_sign(unsigned char *sig, unsigned int hashlen, unsigned char *hash,

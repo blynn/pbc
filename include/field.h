@@ -61,12 +61,20 @@ typedef struct field_s field_t[1];
 
 typedef void (*fieldmap)(element_t dst, element_t src);
 
+/*@manual
+Initialize ''e'' to be an element of the group, ring or field ''f''
+and set it to be the zero element.
+*/
 static inline void element_init(element_ptr e, field_ptr f)
 {
     e->field = f;
     f->init(e);
 }
 
+/*@manual
+Free the space occupied by ''e''. Call this when
+the variable ''e'' is no longer needed.
+*/
 static inline void element_clear(element_ptr e)
 {
     e->field->clear(e);

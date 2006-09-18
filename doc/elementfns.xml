@@ -1,0 +1,59 @@
+<chapter>
+<title>Element Functions</title>
+
+<section>
+<title>Initializing Elements</title>
+<variablelist>
+<varlistentry><term>
+<function>
+void <command>element_init</command>(<parameter>element_ptr e, field_ptr f</parameter>)
+</function>
+</term>
+<listitem><para>
+Initialize <parameter>e</parameter> to be an element of the group, ring or field <parameter>f</parameter>
+and set it to be the zero element.
+</para></listitem>
+</varlistentry>
+
+<varlistentry><term>
+<function>
+void <command>element_clear</command>(<parameter>element_ptr e</parameter>)
+</function>
+</term>
+<listitem><para>
+Free the space occupied by <parameter>e</parameter>. Call this when
+the variable <parameter>e</parameter> is no longer needed.
+</para></listitem>
+</varlistentry>
+
+</variablelist>
+
+<para>
+Now pairing->G1, pairing->G2,
+pairing->GT and bilinear_map() can be used as follows.
+Declare and initialize some group elements:
+</para>
+<programlisting>element_t x, y, z;
+element_init(x, pairing->G1);
+element_init(y, pairing->G2);
+element_init(z, pairing->GT);
+</programlisting><para>
+To pick random elements of G1, G2 and compute a pairing:
+</para>
+<programlisting>element_random(x);
+element_random(y);
+bilinear_map(z, x, y, pairing);
+</programlisting>
+<para>
+Now z = e(x, y).
+</para>
+<para>
+To raise x by some random exponent r:
+</para>
+<programlisting>element_t r;
+element_init(r, pairing->Zr);
+element_random(r);
+element_pow_fp(x, x, r);
+</programlisting>
+</section>
+</chapter>

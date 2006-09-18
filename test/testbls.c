@@ -1,6 +1,6 @@
 //Boneh-Lynn-Shacham short signatures demo
 //This one uses the signature library and is more realistic
-#include "sig.h"
+#include "pbc_sig.h"
 
 int main(void)
 {

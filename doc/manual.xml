@@ -1,60 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-               "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+               "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
+    [
+    <!ENTITY chapter_basics SYSTEM "basics.xml">
+    <!ENTITY chapter_pairingfns SYSTEM "pairingfns.xml">
+    <!ENTITY chapter_elementfns SYSTEM "elementfns.xml">
+    ]
+>
 <book>
 <bookinfo>
-    <title>PBC Library 0.2 Manual</title>
+    <title>PBC Library Manual</title>
     <author><firstname>Ben</firstname><surname>Lynn</surname></author>
-    <!--
     <copyright><year>2006</year><holder>Ben Lynn</holder></copyright>
-    -->
 </bookinfo>
-<preface><title>Overview</title>
+<preface><title>Preface</title>
 <para>
-Pairing-based cryptography centers around a particular function with
-interesting properties.
-</para>
-<para>
-Let G1, G2, GT be cyclic groups of prime order r. Let g1 be a generator of G1
-and g2 be a generator of G2. Let e be a function
-</para>
-<para>
-e : G1 x G2 --> GT
-</para>
-<para>
-that is efficiently computable with e(g1, g2) != 1 (nondegenerate) and
-e(g1^a, g2^b) = e(g1,g2)^ab (bilinear) for all integers a,b. We refer to
-this function e as a bilinear map or a pairing. When G1 = G2 we say that
-the pairing is symmetric, otherwise we say the pairing is asymmetric.
-</para>
-<para>
-With a few more conditions (for example, we may require the discrete log
-problem to be hard in G1 and the existence of an efficiently computable
-isomorphism from G2 to G1), these pairings can be used to build a wide
-variety of cryptosystems.
-</para>
-<para>
-The PBC library builds groups G1, G2, GT and a pairing from given
-parameters. The underlying mathematics behind the groups are
-abstracted away in the interface.
-</para>
-<para>
-Routines to generate pairing parameters of are also provided.
+This manual describes how to install and use the PBC pairing-based
+cryptography library version 0.3.
+It is modeled on that of GMP. I believe it is likely that
+someone using PBC would have used GMP or a similar library before so
+hopefully having a similar manual will make learning PBC easier.
 </para>
 </preface>
-<chapter>
+<chapter><title>Overview</title>
+<para>
+The PBC library is a C library designed to make it easy to implement
+pairing-based cryptosystems. It provides an abstract interface to a
+cyclic group with a bilinear pairing, and the programmer does not need
+to worry about, or even know about elliptic curves.
+</para>
+<para>
+It is built on top of GMP, another C library which performs arbitrary
+precision arithmetic on integers, rationals and floats with strong emphasis on
+portability and speed.
+</para>
+<para>
+The PBC library homepage: <ulink url="http://rooster.stanford.edu/~ben/pbc/">
+http://rooster.stanford.edu/~ben/pbc/</ulink>
+</para>
+<para>
+The GMP library homepage: <ulink url="http://www.swox.com/gmp/">
+http://www.swox.com/gmp/</ulink>
+</para>
+</chapter>
+<chapter><title>Installing PBC</title>
+<para>
+The PBC library needs the GMP library, which can be found at
+<ulink url="http://www.swox.com/gmp/">http://www.swox.com/gmp/</ulink>
+</para>
+<para>
+This build system has been tested and works on Linux and Mac OS X with a
+fink installation.  You may need to specify paths via LDFLAGS and
+CPPFLAGS if libraries are located in places other than the default
+assumed in configure.ac.  See ./configure --help for more information.
+</para>
+<screen>
+./configure
+make
+make install
+</screen>
+<para>
+PBC uses some GNU C extensions, notably nested functions, and also
+printf extensions. The latter may be safely commented out as it is only
+used in demonstration programs.
+</para>
+<section>
 <title>Testing the Library</title>
 <para>
 Several test programs and curve parameters are bundled with the library.
-</para>
-<section>
-<title>Quick Start</title>
-<para>
 After compilation succeeds, try:
 </para>
-<screen>test/testpairing &lt; a.param
-test/benchmark &lt; c159.param
-test/testibe &lt; e.param
+<screen>test/testpairing &lt; param/a.param
+test/benchmark &lt; param/c159.param
+test/testibe &lt; param/e.param
 </screen>
 <para>
 The <filename>*.param</filename>
@@ -123,55 +141,9 @@ Reads pairing parameters on standard input and benchmarks the pairing.
 </variablelist>
 </section>
 </chapter>
-<chapter>
-<title>The PBC API</title>
-<para>
-Programs using the PBC library should include the file
-<filename>pbc.h</filename>:
-</para>
-<programlisting>#include "pbc.h"
-</programlisting>
-<para>
-and linked against the PBC library, e.g.
-</para>
-<screen>gcc program.c -L. -lpbc</screen>
-<para>
-The file <filename>pbc.h</filename> includes <filename>gmp.h</filename>
-thus all GMP functions are available.
-To use a pairing, first declare and initialize:
-</para>
-<programlisting>pairing_t pairing;
-pairing_init_inp_str(pairing, stdin);
-</programlisting>
-<para>
-In this case, the pairing parameters are fed to the program on standard
-input (e.g. "./program &lt; a.param"). Now pairing->G1, pairing->G2,
-pairing->GT and bilinear_map() can be used as follows.
-Declare and initialize some group elements:
-</para>
-<programlisting>element_t x, y, z;
-element_init(x, pairing->G1);
-element_init(y, pairing->G2);
-element_init(z, pairing->GT);
-</programlisting><para>
-To pick random elements of G1, G2 and compute a pairing:
-</para>
-<programlisting>element_random(x);
-element_random(y);
-bilinear_map(z, x, y, pairing);
-</programlisting>
-<para>
-Now z = e(x, y).
-</para>
-<para>
-To raise x by some random exponent r:
-</para>
-<programlisting>element_t r;
-element_init(r, pairing->Zr);
-element_random(r);
-element_pow_fp(x, x, r);
-</programlisting>
-</chapter>
+&chapter_basics;
+&chapter_pairingfns;
+&chapter_elementfns;
 <chapter>
 <title>Pairing Types</title>
 <para>
@@ -215,6 +187,7 @@ the same group.
 </para>
 <para>
 <function>a_param</function> struct fields:
+</para>
 <literallayout>
 exp2, exp1, sign1, sign0, r:
     r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1 (Solinas prime)
@@ -222,7 +195,6 @@ q, h:
     r * h = q + 1
     q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
 </literallayout>
-</para>
 </section>
 <section><title>Type B</title>
 <para>
