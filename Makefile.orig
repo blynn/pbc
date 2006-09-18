@@ -1,5 +1,6 @@
 #Original PBC Makefile
 #Autotools are recommended instead but this should still work
+#e.g. make -f Makefile.orig
 VERSION := 0.3.0
 PROJNAME := pbc
 # these (uppercase) variables apply to gmake-builtin rules
@@ -92,6 +93,7 @@ DISTNAME := $(PROJNAME)-$(VERSION)
 dist: $(ALLFILES) clean depend
 	-rm -rf $(DISTNAME)
 	mkdir $(DISTNAME)
+	cg-log > $(DISTNAME)/ChangeLog
 	cp -rl --parents $(ALLFILES) $(DISTNAME)
 	tar chfz $(DISTNAME).tgz $(DISTNAME)
 	-rm -rf $(DISTNAME)

@@ -5,12 +5,11 @@ The PBC library needs the GMP library, which can be found at
 
     http://www.swox.com/gmp/
 
-This build system has been tested and works on linux and os x with a
+This build system has been tested and works on Linux and Mac OS X with a
 fink installation.  You may need to specify paths via LDFLAGS and
 CPPFLAGS if libraries are located in places other than the default
 assumed in configure.ac.  See ./configure --help for more information.
 
-./setup
 ./configure
 make
 make install
