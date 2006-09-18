@@ -1,0 +1,11 @@
+#!/bin/bash -x
+
+libtoolize --force --copy 
+aclocal-1.9 
+autoheader
+automake-1.9 --add-missing --copy --gnu 
+autoconf 
+
+if test -f config.status; then
+    sh config.status
+fi

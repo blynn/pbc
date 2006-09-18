@@ -1,0 +1,604 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>PBC Library 0.2 Manual</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="default.css"></HEAD
+><BODY
+CLASS="book"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="BOOK"
+><A
+NAME="AEN1"
+></A
+><DIV
+CLASS="TITLEPAGE"
+><H1
+CLASS="title"
+><A
+NAME="AEN2"
+>PBC Library 0.2 Manual</A
+></H1
+><H3
+CLASS="author"
+><A
+NAME="AEN4"
+></A
+>Ben Lynn</H3
+><HR></DIV
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="#AEN7"
+>Overview</A
+></DT
+><DT
+>1. <A
+HREF="#AEN16"
+>Testing the Library</A
+></DT
+><DD
+><DL
+><DT
+><A
+HREF="#AEN19"
+>Quick Start</A
+></DT
+><DT
+><A
+HREF="#AEN25"
+>Test Programs</A
+></DT
+></DL
+></DD
+><DT
+>2. <A
+HREF="#AEN62"
+>The PBC API</A
+></DT
+><DT
+>3. <A
+HREF="#AEN80"
+>Pairing Types</A
+></DT
+><DD
+><DL
+><DT
+><A
+HREF="#AEN84"
+>Type A</A
+></DT
+><DT
+><A
+HREF="#AEN94"
+>Type B</A
+></DT
+><DT
+><A
+HREF="#AEN99"
+>Type C</A
+></DT
+><DT
+><A
+HREF="#AEN103"
+>Type D</A
+></DT
+><DT
+><A
+HREF="#AEN112"
+>Type E</A
+></DT
+><DT
+><A
+HREF="#AEN121"
+>Type F</A
+></DT
+><DT
+><A
+HREF="#AEN126"
+>BGN Curves</A
+></DT
+></DL
+></DD
+></DL
+></DIV
+><DIV
+CLASS="preface"
+><HR><H1
+><A
+NAME="AEN7"
+></A
+>Overview</H1
+><P
+>&#13;Pairing-based cryptography centers around a particular function with
+interesting properties.
+</P
+><P
+>&#13;Let G1, G2, GT be cyclic groups of prime order r. Let g1 be a generator of G1
+and g2 be a generator of G2. Let e be a function
+</P
+><P
+>&#13;e : G1 x G2 --&#62; GT
+</P
+><P
+>&#13;that is efficiently computable with e(g1, g2) != 1 (nondegenerate) and
+e(g1^a, g2^b) = e(g1,g2)^ab (bilinear) for all integers a,b. We refer to
+this function e as a bilinear map or a pairing. When G1 = G2 we say that
+the pairing is symmetric, otherwise we say the pairing is asymmetric.
+</P
+><P
+>&#13;With a few more conditions (for example, we may require the discrete log
+problem to be hard in G1 and the existence of an efficiently computable
+isomorphism from G2 to G1), these pairings can be used to build a wide
+variety of cryptosystems.
+</P
+><P
+>&#13;The PBC library builds groups G1, G2, GT and a pairing from given
+parameters. The underlying mathematics behind the groups are
+abstracted away in the interface.
+</P
+><P
+>&#13;Routines to generate pairing parameters of are also provided.
+</P
+></DIV
+><DIV
+CLASS="chapter"
+><HR><H1
+><A
+NAME="AEN16"
+></A
+>Chapter 1. Testing the Library</H1
+><P
+>&#13;Several test programs and curve parameters are bundled with the library.
+</P
+><DIV
+CLASS="section"
+><HR><H2
+CLASS="section"
+><A
+NAME="AEN19"
+>Quick Start</A
+></H2
+><P
+>&#13;After compilation succeeds, try:
+</P
+><PRE
+CLASS="screen"
+>test/testpairing &#60; a.param
+test/benchmark &#60; c159.param
+test/testibe &#60; e.param
+</PRE
+><P
+>&#13;The <TT
+CLASS="filename"
+>*.param</TT
+>
+files contain pairing parameters one might typically use in
+a real cryptosystem. Many of the test programs read the parameters
+from standard input.
+</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H2
+CLASS="section"
+><A
+NAME="AEN25"
+>Test Programs</A
+></H2
+><P
+></P
+><DIV
+CLASS="variablelist"
+><DL
+><DT
+>listmnt</DT
+><DD
+><P
+>&#13;Searches for discriminants D that lead to MNT curves with subgroups
+of prime order.
+</P
+></DD
+><DT
+>genaparam, gencparam, geneparam, genfparam, genbgn</DT
+><DD
+><P
+>&#13;Prints parameters for a curve suitable for computing pairings of a given
+type. The output can be fed to some of the other test programs.
+</P
+><P
+>&#13;The program <B
+CLASS="command"
+>gencparam</B
+>
+should be given a discriminant as the first argument.
+</P
+></DD
+><DT
+>testhilbert</DT
+><DD
+><P
+>&#13;Prints the Hilbert polynomial for a given discriminant.
+</P
+></DD
+><DT
+>testsig, testibe</DT
+><DD
+><P
+>&#13;These programs read curve parameters on standard input and perform computations
+that would be required in an implementation of the Boneh-Lynn-Shacham
+short signature scheme and the Boneh-Franklin identity-based encryption scheme.
+</P
+></DD
+><DT
+>testbb, testbls, testbbs, testibs</DT
+><DD
+><P
+>&#13;These test programs are more realistic, and test the implementations
+of the Boneh-Boyen, Boneh-Lynn-Shacham, Boneh-Boyen-Shacham signature schemes
+and the Cha-Cheon and Sakai-Kasahara-Schnorr identity-based signature schemes
+</P
+></DD
+><DT
+>benchmark</DT
+><DD
+><P
+>&#13;Reads pairing parameters on standard input and benchmarks the pairing.
+</P
+></DD
+></DL
+></DIV
+></DIV
+></DIV
+><DIV
+CLASS="chapter"
+><HR><H1
+><A
+NAME="AEN62"
+></A
+>Chapter 2. The PBC API</H1
+><P
+>&#13;Programs using the PBC library should include the file
+<TT
+CLASS="filename"
+>pbc.h</TT
+>:
+</P
+><PRE
+CLASS="programlisting"
+>#include "pbc.h"
+</PRE
+><P
+>&#13;and linked against the PBC library, e.g.
+</P
+><PRE
+CLASS="screen"
+>gcc program.c -L. -lpbc</PRE
+><P
+>&#13;The file <TT
+CLASS="filename"
+>pbc.h</TT
+> includes <TT
+CLASS="filename"
+>gmp.h</TT
+>
+thus all GMP functions are available.
+To use a pairing, first declare and initialize:
+</P
+><PRE
+CLASS="programlisting"
+>pairing_t pairing;
+pairing_init_inp_str(pairing, stdin);
+</PRE
+><P
+>&#13;In this case, the pairing parameters are fed to the program on standard
+input (e.g. "./program &#60; a.param"). Now pairing-&#62;G1, pairing-&#62;G2,
+pairing-&#62;GT and bilinear_map() can be used as follows.
+Declare and initialize some group elements:
+</P
+><PRE
+CLASS="programlisting"
+>element_t x, y, z;
+element_init(x, pairing-&#62;G1);
+element_init(y, pairing-&#62;G2);
+element_init(z, pairing-&#62;GT);
+</PRE
+><P
+>&#13;To pick random elements of G1, G2 and compute a pairing:
+</P
+><PRE
+CLASS="programlisting"
+>element_random(x);
+element_random(y);
+bilinear_map(z, x, y, pairing);
+</PRE
+><P
+>&#13;Now z = e(x, y).
+</P
+><P
+>&#13;To raise x by some random exponent r:
+</P
+><PRE
+CLASS="programlisting"
+>element_t r;
+element_init(r, pairing-&#62;Zr);
+element_random(r);
+element_pow_fp(x, x, r);
+</PRE
+></DIV
+><DIV
+CLASS="chapter"
+><HR><H1
+><A
+NAME="AEN80"
+></A
+>Chapter 3. Pairing Types</H1
+><P
+>&#13;The PBC library implements the pairing using different types of curves.
+Which curve to use depends on the application. To make it easy to refer to
+them, I have labelled them with letters. See below for the details.
+</P
+><P
+>&#13;The library provides pairing parameters useful in typical pairing-based
+cryptosystems. If you're not interested in what the details are, always
+use Type A when a fast pairing is desired, and Type F when short
+group elements are needed. Type C are not as slow as type F, but cannot
+be quite as short.
+</P
+><DIV
+CLASS="section"
+><HR><H2
+CLASS="section"
+><A
+NAME="AEN84"
+>Type A</A
+></H2
+><P
+>&#13;We use the curve y^2 = x^3 + x over the field F_q for some prime q.
+It turns out #E(F_q) = q + 1 and #E(F_q^2) = (q+1)^2.
+Thus the embedding degree k is 2.
+</P
+><P
+>&#13;We set things up so that q + 1 = r * h, for a particular r. For speed,
+we pick r to be a Solinas prime, that is, r has the form 2^a +- 2^b +- 1
+for some integers 0 &#60; b &#60; a.
+</P
+><P
+>&#13;We also choose q = -1 mod 12 so we can implement F_q^2 as F_q[i]
+(where i = sqrt(-1)). Also, since q = -1 mod 3, cube roots in F_q
+are easy to compute. This latter feature may be removed because I have
+not found a use for it yet (in which case only q = -1 mod 4 is guaranteed).
+</P
+><P
+>&#13;Pairings on type A curves are the fast and ought to be used where the
+main concern is efficiency. Typically, r should be about 160 bits long
+and q about 512 bits. In this case, elements of groups G1 and G2 take
+512 bits to represent.
+</P
+><P
+>&#13;Additionally, the pairing is symmetric, that is G1 and G2 are in fact
+the same group.
+</P
+><P
+>&#13;<CODE
+CLASS="function"
+>a_param</CODE
+> struct fields:
+<P
+CLASS="literallayout"
+><br>
+exp2,&nbsp;exp1,&nbsp;sign1,&nbsp;sign0,&nbsp;r:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;r&nbsp;=&nbsp;2^exp2&nbsp;+&nbsp;sign1&nbsp;*&nbsp;2^exp1&nbsp;+&nbsp;sign0&nbsp;*&nbsp;1&nbsp;(Solinas&nbsp;prime)<br>
+q,&nbsp;h:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;r&nbsp;*&nbsp;h&nbsp;=&nbsp;q&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;q&nbsp;is&nbsp;a&nbsp;prime,&nbsp;h&nbsp;is&nbsp;a&nbsp;multiple&nbsp;of&nbsp;12&nbsp;(thus&nbsp;q&nbsp;=&nbsp;-1&nbsp;mod&nbsp;12)<br>
+</P
+>
+</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H2
+CLASS="section"
+><A
+NAME="AEN94"
+>Type B</A
+></H2
+><P
+>&#13;This type is reserved for the curve y^2 = x^3 + 1 over F_q with
+q = -1 mod 12. It has yet to be implemented as I have not seen a compelling
+reason to use it.
+</P
+><P
+>&#13;There are advantages unique to this curve however. Since cube roots in F_q
+are fast and guaranteed to exist, for any given value of y, it is easy to
+solve for x. Also, the coefficient of x is zero in the curve equation,
+simplifying some equations (e.g. point doubling).
+</P
+><P
+>&#13;There is also at least one drawback when compared with the similar type A
+pairing. If symmetry of the pairing is insisted upon, some optimizations are
+not possible. If ever implemented, perhaps I will divide this case into two
+subtypes, one symmetric, and the other asymmetric but slightly faster.
+</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H2
+CLASS="section"
+><A
+NAME="AEN99"
+>Type C</A
+></H2
+><P
+>&#13;This type is reserved for supersingular curves with embedding degree 6.
+Pairings are fast as optimizations specific to fields of characteristic 3
+may be used. The embedding degree of 6 also means the representations of
+elements of G1 are short.
+</P
+><P
+>&#13;On the other hand, the low characteristic also makes these curves more
+susceptible to Coppersmith's attack, so slightly larger fields are needed
+for security. Because of this, I have no plans to implement them in the
+immediate future.
+</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H2
+CLASS="section"
+><A
+NAME="AEN103"
+>Type D</A
+></H2
+><P
+>&#13;These are ordinary curves of with embedding degree 6, whose orders are prime
+or a prime multiplied by a small constant. These are constructed using the
+method due to MNT.
+</P
+><P
+>&#13;A type C curve is defined over some field F_q and has order h * r where
+r is a prime and h is a small constant. Over the field F_q^6 its order is
+a multiple of r^2.
+</P
+><P
+>&#13;Typically the order of the curve E is around 170 bits, as is F_q, the base
+field, thus q^k is around the 1024-bit mark which is commonly considered
+good enough.
+</P
+><P
+>&#13;Using type C pairings allows elements of group G1 to be quite short, typically
+170-bits. Because of a certain trick, elements of group G2 need only be 3 times
+longer, that is, about 510 bits rather than 6 times long. They are not quite
+as short as type F pairings, but much faster.
+</P
+><P
+CLASS="literallayout"
+><br>
+c_param&nbsp;struct&nbsp;fields:<br>
+q&nbsp;&nbsp;&nbsp;F_q&nbsp;is&nbsp;the&nbsp;base&nbsp;field<br>
+n&nbsp;&nbsp;&nbsp;#&nbsp;of&nbsp;points&nbsp;in&nbsp;E(F_q)<br>
+r&nbsp;&nbsp;&nbsp;large&nbsp;prime&nbsp;dividing&nbsp;n<br>
+h&nbsp;&nbsp;&nbsp;n&nbsp;=&nbsp;h&nbsp;*&nbsp;r<br>
+a&nbsp;&nbsp;&nbsp;E&nbsp;is&nbsp;given&nbsp;by&nbsp;y^2&nbsp;=&nbsp;x^3&nbsp;+&nbsp;ax&nbsp;+&nbsp;b<br>
+b<br>
+nk&nbsp;&nbsp;#&nbsp;of&nbsp;points&nbsp;in&nbsp;E(F_q^k)<br>
+hk&nbsp;&nbsp;nk&nbsp;=&nbsp;hk&nbsp;*&nbsp;r&nbsp;*&nbsp;r<br>
+</P
+><P
+>&#13;I sometimes refer to a type C curve as a triplet of numbers:
+the discriminant, the number of bits in the prime q, and the number of
+bits in the prime r. The <B
+CLASS="command"
+>listmnt</B
+> program prints
+these numbers.
+The bundled type C curve parameters are the curves
+9563-201-181, 62003-159-158 and 496659-224-224.
+</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H2
+CLASS="section"
+><A
+NAME="AEN112"
+>Type E</A
+></H2
+><P
+>&#13;The CM (Complex Multiplication) method of constructing elliptic curves
+starts with the Diophantine equation
+</P
+><P
+CLASS="literallayout"
+><br>
+&nbsp;&nbsp;&nbsp;&nbsp;DV^2&nbsp;=&nbsp;4q&nbsp;-&nbsp;t^2<br>
+</P
+><P
+>&#13;If t = 2 and q = D r^2 h^2 + 1 for some prime r (which we choose to
+be a Solinas prime) and some integer h, we find that this equation is easily
+solved with V = 2rh.
+</P
+><P
+>&#13;Thus it is easy to find a curve (over the field F_q) with order q - 1.
+Note r^2 divides q - 1, thus we have an embedding degree of 1.
+</P
+><P
+>&#13;Hence all computations necessary for the pairing can be done in F_q alone.
+There is never any need to extend F_q.
+</P
+><P
+>&#13;As q is typically 1024 bits, group elements take a lot of space to represent.
+Moreover, many optimizations do not apply to this type, resulting in a slower
+pairing.
+</P
+><P
+>&#13;This pairing is kept as a reserve, in case some day it is discovered
+that discrete log in field extensions is easier to solve than previously
+thought.
+</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H2
+CLASS="section"
+><A
+NAME="AEN121"
+>Type F</A
+></H2
+><P
+>&#13;Using carefully crafted polynomials, k = 12 pairings can be constructed.
+Only 160 bits are needed to represent elements of one group, and 320 bits
+for the other.
+</P
+><P
+>&#13;They should be used when the top priority is to minimize bandwidth (e.g.
+short signatures). The pairing is slower than the other types.
+</P
+><P
+>&#13;Also, k = 12 allows higher security short signatures. (k = 6 curves cannot
+be used to scale security from 160-bits to say 256-bits because finite
+field attacks are subexponential.)
+</P
+></DIV
+><DIV
+CLASS="section"
+><HR><H2
+CLASS="section"
+><A
+NAME="AEN126"
+>BGN Curves</A
+></H2
+><P
+>&#13;These are curves containing a subgroup of a specified order. Boneh, Goh and
+Nissim have use for an elliptic curve with subgroup order N = pq for large
+primes p, q.
+</P
+><P
+>&#13;To implement them, Type A curves can be used, only instead of a Solinas
+prime, we generate curves with a given group order. Type B can also
+be used (and that is what is suggested in their paper) but this is less
+desirable.
+</P
+></DIV
+></DIV
+></DIV
+></BODY
+></HTML
+>

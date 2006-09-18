@@ -1,0 +1,52 @@
+body {
+    font-size: 90%;
+    font-family: verdana, arial, sans-serif;
+}
+
+div.TOC {
+    float: left;
+    width: 13em;
+    font-size: 90%;
+
+    border: 1px solid #aaaaaa;
+    background-color: #f9f9f9;
+    padding: 0.17em;
+}
+
+hr {
+    display: none;
+}
+
+div.chapter, div.preface {
+    border-left: 13em solid white;
+    padding-left: 1em;
+}
+
+h1.title {
+    border: 1px solid #aaaaaa;
+    background-color: #f9f9f9;
+    padding: 0.17em;
+}
+
+div.chapter h1, div.preface h1 {
+    padding-top: 0.5em;
+    padding-bottom: 0.17em;
+    margin: 0;
+    font-weight: normal;
+    border-bottom: 1px solid #aaaaaa;
+}
+
+h2 {
+    padding-top: 0.5em;
+    padding-bottom: 0.17em;
+    margin: 0;
+    font-weight: normal;
+    border-bottom: 1px solid #aaaaaa;
+}
+
+.programlisting, .screen {
+    margin: 0;
+    border: 1px solid #aaaaaa;
+    background-color: #f9f9f9;
+    padding: 0.17em;
+}

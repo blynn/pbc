@@ -1,0 +1,297 @@
+
+
+PBC Library 0.2 Manual
+
+
+Ben Lynn
+
+-------------------------------------------------------------------------------
+
+
+  Table of Contents
+
+  Overview
+
+  1. Testing_the_Library
+
+
+        Quick_Start
+
+        Test_Programs
+
+
+  2. The_PBC_API
+
+  3. Pairing_Types
+
+
+        Type_A
+
+        Type_B
+
+        Type_C
+
+        Type_D
+
+        Type_E
+
+        Type_F
+
+        BGN_Curves
+
+
+-------------------------------------------------------------------------------
+
+
+Overview
+
+Pairing-based cryptography centers around a particular function with
+interesting properties.
+Let G1, G2, GT be cyclic groups of prime order r. Let g1 be a generator of G1
+and g2 be a generator of G2. Let e be a function
+e : G1 x G2 --> GT
+that is efficiently computable with e(g1, g2) != 1 (nondegenerate) and e(g1^a,
+g2^b) = e(g1,g2)^ab (bilinear) for all integers a,b. We refer to this function
+e as a bilinear map or a pairing. When G1 = G2 we say that the pairing is
+symmetric, otherwise we say the pairing is asymmetric.
+With a few more conditions (for example, we may require the discrete log
+problem to be hard in G1 and the existence of an efficiently computable
+isomorphism from G2 to G1), these pairings can be used to build a wide variety
+of cryptosystems.
+The PBC library builds groups G1, G2, GT and a pairing from given parameters.
+The underlying mathematics behind the groups are abstracted away in the
+interface.
+Routines to generate pairing parameters of are also provided.
+-------------------------------------------------------------------------------
+
+
+Chapter 1. Testing the Library
+
+Several test programs and curve parameters are bundled with the library.
+-------------------------------------------------------------------------------
+
+Quick Start
+
+After compilation succeeds, try:
+
+  test/testpairing < a.param
+  test/benchmark < c159.param
+  test/testibe < e.param
+
+The *.param files contain pairing parameters one might typically use in a real
+cryptosystem. Many of the test programs read the parameters from standard
+input.
+-------------------------------------------------------------------------------
+
+Test Programs
+
+
+
+  listmnt
+      Searches for discriminants D that lead to MNT curves with subgroups of
+      prime order.
+
+  genaparam, gencparam, geneparam, genfparam, genbgn
+      Prints parameters for a curve suitable for computing pairings of a given
+      type. The output can be fed to some of the other test programs.
+      The program gencparam should be given a discriminant as the first
+      argument.
+
+  testhilbert
+      Prints the Hilbert polynomial for a given discriminant.
+
+  testsig, testibe
+      These programs read curve parameters on standard input and perform
+      computations that would be required in an implementation of the Boneh-
+      Lynn-Shacham short signature scheme and the Boneh-Franklin identity-based
+      encryption scheme.
+
+  testbb, testbls, testbbs, testibs
+      These test programs are more realistic, and test the implementations of
+      the Boneh-Boyen, Boneh-Lynn-Shacham, Boneh-Boyen-Shacham signature
+      schemes and the Cha-Cheon and Sakai-Kasahara-Schnorr identity-based
+      signature schemes
+
+  benchmark
+      Reads pairing parameters on standard input and benchmarks the pairing.
+
+-------------------------------------------------------------------------------
+
+
+Chapter 2. The PBC API
+
+Programs using the PBC library should include the file pbc.h:
+
+  #include "pbc.h"
+
+and linked against the PBC library, e.g.
+
+  gcc program.c -L. -lpbc
+
+The file pbc.h includes gmp.h thus all GMP functions are available. To use a
+pairing, first declare and initialize:
+
+  pairing_t pairing;
+  pairing_init_inp_str(pairing, stdin);
+
+In this case, the pairing parameters are fed to the program on standard input
+(e.g. "./program < a.param"). Now pairing->G1, pairing->G2, pairing->GT and
+bilinear_map() can be used as follows. Declare and initialize some group
+elements:
+
+  element_t x, y, z;
+  element_init(x, pairing->G1);
+  element_init(y, pairing->G2);
+  element_init(z, pairing->GT);
+
+To pick random elements of G1, G2 and compute a pairing:
+
+  element_random(x);
+  element_random(y);
+  bilinear_map(z, x, y, pairing);
+
+Now z = e(x, y).
+To raise x by some random exponent r:
+
+  element_t r;
+  element_init(r, pairing->Zr);
+  element_random(r);
+  element_pow_fp(x, x, r);
+
+-------------------------------------------------------------------------------
+
+
+Chapter 3. Pairing Types
+
+The PBC library implements the pairing using different types of curves. Which
+curve to use depends on the application. To make it easy to refer to them, I
+have labelled them with letters. See below for the details.
+The library provides pairing parameters useful in typical pairing-based
+cryptosystems. If you're not interested in what the details are, always use
+Type A when a fast pairing is desired, and Type F when short group elements are
+needed. Type C are not as slow as type F, but cannot be quite as short.
+-------------------------------------------------------------------------------
+
+Type A
+
+We use the curve y^2 = x^3 + x over the field F_q for some prime q. It turns
+out #E(F_q) = q + 1 and #E(F_q^2) = (q+1)^2. Thus the embedding degree k is 2.
+We set things up so that q + 1 = r * h, for a particular r. For speed, we pick
+r to be a Solinas prime, that is, r has the form 2^a +- 2^b +- 1 for some
+integers 0 < b < a.
+We also choose q = -1 mod 12 so we can implement F_q^2 as F_q[i] (where i =
+sqrt(-1)). Also, since q = -1 mod 3, cube roots in F_q are easy to compute.
+This latter feature may be removed because I have not found a use for it yet
+(in which case only q = -1 mod 4 is guaranteed).
+Pairings on type A curves are the fast and ought to be used where the main
+concern is efficiency. Typically, r should be about 160 bits long and q about
+512 bits. In this case, elements of groups G1 and G2 take 512 bits to
+represent.
+Additionally, the pairing is symmetric, that is G1 and G2 are in fact the same
+group.
+a_param struct fields:
+
+exp2, exp1, sign1, sign0, r:
+    r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1 (Solinas prime)
+q, h:
+    r * h = q + 1
+    q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
+-------------------------------------------------------------------------------
+
+Type B
+
+This type is reserved for the curve y^2 = x^3 + 1 over F_q with q = -1 mod 12.
+It has yet to be implemented as I have not seen a compelling reason to use it.
+There are advantages unique to this curve however. Since cube roots in F_q are
+fast and guaranteed to exist, for any given value of y, it is easy to solve for
+x. Also, the coefficient of x is zero in the curve equation, simplifying some
+equations (e.g. point doubling).
+There is also at least one drawback when compared with the similar type A
+pairing. If symmetry of the pairing is insisted upon, some optimizations are
+not possible. If ever implemented, perhaps I will divide this case into two
+subtypes, one symmetric, and the other asymmetric but slightly faster.
+-------------------------------------------------------------------------------
+
+Type C
+
+This type is reserved for supersingular curves with embedding degree 6.
+Pairings are fast as optimizations specific to fields of characteristic 3 may
+be used. The embedding degree of 6 also means the representations of elements
+of G1 are short.
+On the other hand, the low characteristic also makes these curves more
+susceptible to Coppersmith's attack, so slightly larger fields are needed for
+security. Because of this, I have no plans to implement them in the immediate
+future.
+-------------------------------------------------------------------------------
+
+Type D
+
+These are ordinary curves of with embedding degree 6, whose orders are prime or
+a prime multiplied by a small constant. These are constructed using the method
+due to MNT.
+A type C curve is defined over some field F_q and has order h * r where r is a
+prime and h is a small constant. Over the field F_q^6 its order is a multiple
+of r^2.
+Typically the order of the curve E is around 170 bits, as is F_q, the base
+field, thus q^k is around the 1024-bit mark which is commonly considered good
+enough.
+Using type C pairings allows elements of group G1 to be quite short, typically
+170-bits. Because of a certain trick, elements of group G2 need only be 3 times
+longer, that is, about 510 bits rather than 6 times long. They are not quite as
+short as type F pairings, but much faster.
+
+c_param struct fields:
+q   F_q is the base field
+n   # of points in E(F_q)
+r   large prime dividing n
+h   n = h * r
+a   E is given by y^2 = x^3 + ax + b
+b
+nk  # of points in E(F_q^k)
+hk  nk = hk * r * r
+I sometimes refer to a type C curve as a triplet of numbers: the discriminant,
+the number of bits in the prime q, and the number of bits in the prime r. The
+listmnt program prints these numbers. The bundled type C curve parameters are
+the curves 9563-201-181, 62003-159-158 and 496659-224-224.
+-------------------------------------------------------------------------------
+
+Type E
+
+The CM (Complex Multiplication) method of constructing elliptic curves starts
+with the Diophantine equation
+
+    DV^2 = 4q - t^2
+If t = 2 and q = D r^2 h^2 + 1 for some prime r (which we choose to be a
+Solinas prime) and some integer h, we find that this equation is easily solved
+with V = 2rh.
+Thus it is easy to find a curve (over the field F_q) with order q - 1. Note r^2
+divides q - 1, thus we have an embedding degree of 1.
+Hence all computations necessary for the pairing can be done in F_q alone.
+There is never any need to extend F_q.
+As q is typically 1024 bits, group elements take a lot of space to represent.
+Moreover, many optimizations do not apply to this type, resulting in a slower
+pairing.
+This pairing is kept as a reserve, in case some day it is discovered that
+discrete log in field extensions is easier to solve than previously thought.
+-------------------------------------------------------------------------------
+
+Type F
+
+Using carefully crafted polynomials, k = 12 pairings can be constructed. Only
+160 bits are needed to represent elements of one group, and 320 bits for the
+other.
+They should be used when the top priority is to minimize bandwidth (e.g. short
+signatures). The pairing is slower than the other types.
+Also, k = 12 allows higher security short signatures. (k = 6 curves cannot be
+used to scale security from 160-bits to say 256-bits because finite field
+attacks are subexponential.)
+-------------------------------------------------------------------------------
+
+BGN Curves
+
+These are curves containing a subgroup of a specified order. Boneh, Goh and
+Nissim have use for an elliptic curve with subgroup order N = pq for large
+primes p, q.
+To implement them, Type A curves can be used, only instead of a Solinas prime,
+we generate curves with a given group order. Type B can also be used (and that
+is what is suggested in their paper) but this is less desirable.

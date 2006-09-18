@@ -1,0 +1,7 @@
+#!/bin/bash
+#report pairing times for each type of parameter
+for p in a d159 d201 d224 e f
+do
+    echo -en $p'\t'
+    test/benchmark < $p.param | tail -n 1 | awk '{print $5}'
+done

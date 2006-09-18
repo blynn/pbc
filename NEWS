@@ -1,0 +1,716 @@
+Sun Sep 17 13:44:01 PDT 2006
+
+Renamed CREDITS (which is what the Linux kernel source calls it) to AUTHORS
+(the autotools expect this).
+
+element_out_str() now returns the number of bytes output, or zero on error.
+
+Wrote element_printf(), usage example: element_printf("x = %B\n", x).
+I chose 'B' because it is the first unused uppercase letter.
+It works by using a GNU C feature to extend printf(), so printf() can
+be used now, but I prefer to call the wrapper element_printf() to avoid
+warnings. Also, in the future I may choose to preserve printf() and
+so only element_printf() acts as a modified printf(), but this is a bit more
+work.
+
+My original makefile is called Makefile.orig which I may phase out.
+A contributed modified version, Makefile.mingw, can be used to build PBC
+on Windows.
+
+Sat Sep 16 21:53:19 PDT 2006
+
+Merged patch I received from Joseph Cooley <cooley@ll.mit.edu>
+In his words:
+
+*****
+
+1. builds on mac os x (10.4.7 with xcode 2.3 and fink) and linux
+(debian sarge w^P/ 2.6 kernel) using autotools.  The install detects
+an os x fink installation and uses it if present (http://
+fink.sourceforge.net).
+
+./setup (requires autotools)
+./configure
+make
+make install
+
+2. builds on windows with mingw using Makefile.mingw (thanks to Rob
+Figueiredo, an MIT master's student, and Roger Khazan a staff member
+at MIT Lincoln Laboratory).
+
+3. pairings can now be input from a memory buffer in addition to the
+old method of using a FILE, i.e., pairing_init_inp_{buf,str}.
+
+4. a majority of the compile-time warnings are eliminated
+
+5. other misc mods...
+
+*****
+
+Renamed type C to type D, to bring the notation in line with my thesis.
+Now singular curves are types A-C and ordinary are D-G. Also, the lettering
+better corresponds to the chronological order the different types were
+introduced in cryptography literature.
+
+Thu Apr  6 03:07:58 PDT 2006
+
+Very minor change: hilbert.c no longer bothers initializing
+fpxmod if a root has been guessed. Would be slightly better if
+it evaluated g instead of calling gcd to check this.
+
+Wed Apr  5 14:09:47 PDT 2006
+
+Commented out Sakai-Kasahara Schnorr-type identity-based signature code
+due to patent issues.
+
+[0.2.16]
+
+Sun Apr  2 21:45:04 PDT 2006
+
+19.c now computes Tate pairing on all of E(F_19).
+
+Sat Apr  1 19:06:07 PST 2006
+
+Dedicated n=3 polymod_square. Doesn't help much:
+
+a	0.027435
+c159	0.062489
+c201	0.092209
+c224	0.113961
+e	0.116698
+f	0.287696
+
+Fri Mar 31 14:57:24 PST 2006
+
+Rewrote manual in docbook format.
+
+[0.2.14]
+
+Sped up exponentiation for some cases by using element_square instead
+of element_mul. This helps with some pairings, and also MNT curve generation.
+(On myth, 62003 went from 38 to 25 seconds.)
+
+Cantor-Zassenhaus was also slightly inefficient: only need to pick
+random polynomials of degree 1 since we're looking for roots.
+(On myth, 496659 takes under 10 minutes.)
+
+Fixed gross inefficiencies in polymod_mul(), polymod_square() somehow
+overlooked until now. Can speed them up further using Karatsuba.
+(On myth, 496659 takes about 2 minutes, with the majority of the time
+spent computing the Hilbert polynomial.)
+
+[0.2.15]
+
+Changed fq_mul and fi_mul to use Karatsuba trick. Shaves a little time
+off some of the pairings.
+
+On my laptop:
+
+a	0.027393
+c159	0.073682
+c201	0.108573
+c224	0.132863
+e	0.116717
+f	0.317651
+
+Wrote genallcparams script.
+
+Dedicated degree three extension (generalized) Karatsuba multiplication.
+Speeds up type C pairings.
+
+a	0.027486
+c159	0.064680
+c201	0.095671
+c224	0.117340
+e	0.117025
+f	0.321630
+
+Added degree six (generalized) Karatsuba multiplication, speeds up type F.
+
+a	0.026937
+c159	0.064683
+c201	0.094786
+c224	0.116889
+e	0.116680
+f	0.287985
+
+Wrote list_hilbert script.
+
+Thu Mar 30 19:01:36 PST 2006
+
+More cleanup and reorganization. Removed spurious printf("\n"); in genbgn.c.
+Changed output format of listmnt.
+
+hilbert.c prints a line for each j being computed. Can see
+the progress of the computation of the Hilbert polynomial.
+
+Renamed testmnt to gencparam.
+
+Added c224.param curve parameters to the distribution.
+
+Thu Mar 30 13:43:48 PST 2006
+
+Computation of pi now depends on precision. (Uses Chudnnovsky brothers'
+Ramanujan formula.)
+
+Improved listmnt, testmnt and testhilbert.
+
+Tested code on D = 496659. On the "myth" machine (dual Xeon 3.2GHz) it
+takes about 2 minutes to compute the Hilbert polynomial, and about 20 minutes
+total to compute the curve.
+
+[0.2.13]
+
+Thu Mar 30 02:08:03 PST 2006
+
+Started cleaning up hilbert.c. Added correct method of estimating required
+precision. Changed exp() so that it doesn't blindly do 1000 iterations
+every time.
+
+Fixed bug: mnt.c froze when listp empty! Wrote listmnt.c.
+
+Fri Mar 24 17:32:00 PST 2006
+
+Wrote toy example showing a case where Tate pairing works but
+Weil pairing doesn't. (Take E: y^2 = x^3 + x + 6 over F_19,
+consider E[3] in F_19.)
+
+Fri Mar 24 11:17:35 PST 2006
+
+Removed memory leak in e_param.c.
+
+Sat Mar 11 11:15:43 PST 2006
+
+Added "report_times" script. Sample output:
+
+a	0.031184
+c159	0.091094
+c201	0.137328
+e	0.116652
+f	0.563350
+
+[0.2.12]
+
+Sat Mar 11 01:41:39 PST 2006
+
+Changed BB code to use wrappers for reading/writing x-coordinates only.
+
+Put Matt Steiner's broadcast encryption code in the "bce" directory. Renamed
+variables named "index" to avoid naming conflict (with C library's index()
+function).
+
+Fri Mar 10 17:32:22 PST 2006
+
+Having all the source files in the same directory is becoming unwieldy.
+Starting the split them into subdirectories. For now, just about all
+include files are in the include subdirectory.
+
+Added Cha-Cheon and Sakai-Kasahara-Schnorr identity-based signatures.
+
+Thu Feb  2 00:57:58 PST 2006
+
+Removed id from pairing data type. If I need something like that I'll
+put it in a different file.
+
+Added BGN curves. Using type A curves instead of B (as suggested in the paper)
+as they are better.
+
+[0.2.11]
+
+Mon Jan 30 12:08:58 PST 2006
+
+Point compression: changed how the bit represents which solution for y to
+choose. Before it depended on the quadratic nonresidue chosen for the field
+which makes it less portable.
+
+Now it calls a new function: element_sign(), which satisfies
+sign(x) = -sign(-x) in {-1, 0, 1}
+
+For n in Z_p, sign(n) = 1 if 0 < n < p/2, -1 if p/2 < n < p, 0 otherwise
+For a polynomial f = a_n x^n + ... + a_0 in Z_p[x],
+sign(f) = sign(a_i) where i is the smallest i such that sign(a_i) is nonzero.
+If no such i exists, sign(f) = 0.
+
+[0.2.10]
+
+Sun Jan 29 22:17:37 PST 2006
+
+Added wrapper functions for reading and writing compressed points/x-coordinate
+only. As usual, no type checking is done, so these will probably crash if
+given elements that aren't points on elliptic curves.
+
+int element_to_bytes_x_only(unsigned char *data, element_ptr e);
+int element_from_bytes_x_only(element_ptr e, unsigned char *data);
+int element_length_in_bytes_x_only(element_ptr e);
+int element_to_bytes_compressed(unsigned char *data, element_ptr e);
+int element_from_bytes_compressed(element_ptr e, unsigned char *data);
+int element_length_in_bytes_compressed(element_ptr e);
+
+See sig.c for how these are used.
+
+[0.2.9]
+
+Fri May 13 16:29:33 PDT 2005
+
+k=12 curves work. I named them "type F". With Tate exponentiation optimization,
+I currently have average pairing time = 0.513449.
+
+[0.2.8]
+
+Minor code cleanup: wrote phi_warning(), generic_is_almost_ddh() automatically
+gets assigned, fixed missing function prototype in f_param.h
+
+Wed May 11 22:26:40 PDT 2005
+
+Started work on k=12 curves.
+
+Sun May  1 02:07:55 PDT 2005
+
+Applied Hovav Shacham's patch for sliding windows in element_pow, which
+helps type A and C curves.
+
+a	0.027675
+c159	0.081290
+c201	0.120937
+e	0.113991
+
+The previous version doesn't compile(!) While trying to track down a memory
+leak, I had renamed element_init() and element_clear(), and neglected to
+rename them back.
+
+[0.2.7]
+
+Thu Apr 28 16:13:08 PDT 2005
+
+Projective coordinates for type E doesn't seem to help either.
+Only type A appears to benefit.
+
+Got rid of unnecessary checks in do_line()'s.
+
+Skip last iteration of Miller's algorithm for type C curves too.
+
+a	0.029473
+c159	0.084754
+c201	0.127662
+e	0.113903
+
+[0.2.6]
+
+Thu Apr 28 12:27:29 PDT 2005
+
+Fixed memory leak in polymod_invert().
+
+Implemented projective coordinates for type C curves, but it doesn't
+seem to help much.
+
+[0.2.5]
+
+Wed Apr 27 22:59:07 PDT 2005
+
+My Montgomery reduction code is slower than modular arithmetic.
+Jumped down to lower level GMP functions, but that doesn't help either.
+Perhaps I'm getting a lot of cache misses? Will try again later.
+
+Implemented projective coordinates for Miller's algorithm in type A curves
+but not much speed gained.
+
+Number of bits in generated Solinas primes now exactly match input length.
+Generated new type A and type E parameters: the groups sizes are now
+exactly 160 bits.
+
+Benchmarks:
+
+a	0.030629
+c159	0.084919
+c201	0.127738
+e	0.153693
+
+Optimized type E curves so miller() is only called once.
+
+e	0.113905
+
+[0.2.4]
+
+Tue Apr 26 20:14:07 PDT 2005
+
+Each field can have its own pow() routine. Replaced F_p's generic pow
+with mpz_powm which helps with type e curves. (Now "benchmark" gives
+0.225739 seconds for e.param.)
+
+Added to_mpz() to field.h in preparation for implementing F_p using
+Montgomery multiplication.
+
+[0.2.3]
+
+Tue Apr 26 14:15:19 PDT 2005
+
+Added wrapper mpz_is0 so I can benchmark different ways of checking whether
+an mpz is zero.
+
+Simple way to speed things up is to avoid mods in add and sub in F_p.
+Benchmarks:
+
+a	0.030167
+c159	0.087812
+c201	0.132314
+e	0.311877
+
+field_init_curve_group() didn't call field_init.
+
+Mon Apr 25 23:01:10 PDT 2005
+
+The function e_miller() in e_param.c now uses the fact that the prime is
+a Solinas prime. It so happens that e.param uses a prime of low Hamming
+weight so no speedup is noticeable for that case.
+
+Added element_mul_mpz, element_mul_si, mpc_mul_2exp. Found more places to
+use element_square. Minor speedup:
+
+./benchmark < a.param:
+average pairing time = 0.030620
+
+./benchmark < c201.param:
+average pairing time = 0.146534
+
+./benchmark < c159.param:
+average pairing time = 0.099526
+
+./benchmark < e.param:
+average pairing time = 0.311183
+
+Bugfix in mpc.c mpc_muli() was modifying input instead of output.
+
+[0.2.2]
+
+Mon Apr 25 13:39:23 PDT 2005
+
+Implemented singular curve y^2 = x^3 + x^2, though it will probably
+never be used. See e_param.c. Also cleaned up e_param.c code: no need
+for mapbase.
+
+"polymod" field no longer piggybacks on the "poly" field, as changing
+the number of coefficients in the polynomial dynamic makes less sense when
+it is more or less fixed. Minor speedup obtained.
+
+Plugged memory leak in c_param.c (in pairing_even_k)
+
+[0.2.1]
+
+Added element_square(). Along with polymod modification, helps a tiny bit:
+
+./benchmark < a.param:
+average pairing time = 0.030729
+
+./benchmark < c201.param:
+average pairing time = 0.152720
+
+./benchmark < c159.param:
+average pairing time = 0.104067
+
+Sun Apr 24 13:36:59 PDT 2005
+
+c_param's now save a particular minimal polynomial and quadratic nonresidue
+so F_q can be extended to F_q^d and F_q^k deterministically.
+
+Moved part of mnt.c to c_param.c, and other parts to hilbert.c.
+
+[0.2.0]
+
+Sun Apr 24 03:07:26 PDT 2005
+
+Wrote documentation. Inspired by GMP, I renamed LICENSE to COPYING and
+rewrote README. The technical details are now in manual.txt. Also created
+INSTALL and AUTHORS.
+
+For the record, on my laptop:
+
+./benchmark < a.param:
+average pairing time = 0.032055
+
+./benchmark < c201.param:
+average pairing time = 0.156073
+
+./benchmark < c159.param:
+average pairing time = 0.109618
+
+My old timings are too large because benchmark sends a lot of data to
+standard output, which causes my terminal program to hog the CPU.
+This time I piped the output to a file.
+
+Sat Apr 23 21:54:16 PDT 2005
+
+Decided to name curve types as follows:
+
+a_param: solinas_param in the old code. y^2 = x^3 + x
+c_param: cc_param in the old code. MNT curves with k=6, though the code
+can easily be extended to other k
+e_param: k=1 CM curves with Solinas primes.
+
+b_param: reserved for the curve y^2 = x^3 + x. (May have to split into
+subcases b1, b2 for symmetric, asymmetric pairings.)
+d_param: reserved for supersingular curves with k=6.
+
+Now param files contain an extra "type" field.
+
+Bug fix: poly_out_str was always using base 10
+
+Sat Apr 23 14:52:15 PDT 2005
+
+Moved random functions to random.c. Some cleanup.
+k=1 CM curves.
+
+Fri Apr 22 15:27:22 PDT 2005
+
+Makefile update from Hovav. Makes libraries now.
+
+Fri Apr 22 10:52:50 PDT 2005
+
+Bugfix: polymod_from_bytes() wasn't allocating space for the coefficients.
+
+[0.1.5]
+
+Thu Apr 21 22:51:24 PDT 2005
+
+Many changes due to Hovav Shacham <hovav@cs.stanford.edu>:
+    - Bugfix in curve.c: cc_add() wasn't clearing inf_flag.
+    - New improved Makefile.
+    - General code cleanup to get rid of most compiler warnings.
+    - element_pow2, element_pow3 for faster computation of expressions
+    such as g^x h^y. (Multi-exponentiation.)
+    - BBS demo program optimizations: e.g. precomputations,
+    multi-exponentiations
+
+Wed Apr 20 23:35:55 PDT 2005
+
+Memory leak in field_init_polymod/compute_x_powers() (darray_init called twice)
+
+[0.1.3]
+
+Output bugs: printing various parameters of cc_param_t and solinas_param_t
+to standard output instead of given stream.
+
+[0.1.4]
+
+Wed Apr 20 14:11:29 PDT 2005
+
+Tate exponentiation optimization for k = 6 curves. Timings are much better.
+
+e.g: output of benchmark.c on my laptop:
+average pairing time = 0.170114
+
+[0.1.2]
+
+Renamed example.txt to 201.txt, created 159.txt which is more likely to
+be used in a typical cryptosystem.
+
+Wed Apr 20 02:28:37 PDT 2005
+
+Fixed bug in poly.c causing "polymod" fields to incorrectly report element
+lengths. Generalized fieldi to fieldquadratic, kept fieldi as special case
+for efficiency.
+
+Twist curve optimization for MNT curves of even embedding degree. Uses
+denominator elimination now.
+
+solinas_pairing() can handle Solinas primes of all kinds now.
+
+[0.1.1]
+
+Tue Apr 19 14:02:31 PDT 2005
+
+Wrote code to help detect memory leaks. (Compile with -include leak.h and
+link with leak.o to allow mem_report() to work.)
+
+Plugged memory leaks: poly_clear, polymod_mul, poly_const_mul,
+field_clear_polymod (in clear())
+
+[0.1.0]
+
+Tue Apr 19 01:12:55 PDT 2005
+
+Moved code around, wrote new version of cc_miller() to do most operations
+in base field. Optimized Tate exponentiation for Solinas prime case. Wrote
+simple benchmark program. Fixed memory leak: field->order was not being
+freed.
+
+Mon Apr 18 15:04:10 PDT 2005
+
+Optimized Miller's algorithm for Solinas prime case.
+
+Sun Apr 17 02:13:11 PDT 2005
+
+Got rid of point_extend, cc_init_extend. Instead, pass a map around.
+fieldmap_t gone. Have to pass domains and ranges when needed,
+but most of the time it seems only the map itself is needed.
+
+k=2 curves work, but Solinas prime optimizations yet to be written.
+
+[0.0.6]
+
+Sat Apr 16 16:38:19 PDT 2005
+
+Implementing k=2 supersingular curves with Solinas primes.
+
+Sat Apr 16 04:10:25 PDT 2005
+
+Cleaned up the way nonquadratic residues are computed. Only computed when
+needed, and result is cached.
+
+Fri Apr 15 12:06:03 PDT 2005
+
+fieldi.c operational.
+
+Fri Apr 15 01:49:01 PDT 2005
+
+curve_init_cc_j calls curve_init_cc_ab now.
+
+Started work on fieldi.c, which extends any input field by [i] where
+i is a square root of -1. Does not check if -1 already has square roots
+in the base field.
+
+Thu Apr 14 02:17:09 PDT 2005
+
+Fixed bug in curve_group_from_bytes(). Forgot to unset inf_flag. Also
+realized that my code can't read/write the point at infinity, which is not
+a problem for cryptography.
+
+BBS group signatures implemented, except no hashing is done.
+
+[0.0.5]
+
+Fri Apr  8 12:08:58 PDT 2005
+
+[0.0.4]
+
+Fri Apr  8 03:54:27 PDT 2005
+
+Added serialization routines for `curve_group' fields. Fixed a bug where
+polymod was computing the fixed_length_in_bytes incorrectly.
+(Had `poly->field' instead of `p->field'.) Thus elements of pairing->G1
+and pairing->G2 can be serialized.
+
+Thu Feb  3 14:03:34 PST 2005
+
+[0.0.3]
+
+Mon Jan 31 00:22:14 PST 2005
+
+Changed random function interfaces slightly so they can have state.
+Small change: now call random_set_file("/dev/urandom") to use /dev/urandom.
+
+Thu Jan 27 00:06:37 PST 2005
+
+Cleaned up random functions a little. Can choose to use /dev/urandom now
+by calling random_set_devrandom().
+
+Sun Jan 23 20:48:01 PST 2005
+
+Fixed BB signatures bug: had inited a variable twice by accident, the
+second time it was being placed in the wrong group.
+
+[0.0.2]
+
+Tue Jan 18 13:52:47 PST 2005
+
+BB signatures coded. Just about to test them.
+
+Sun Dec 26 02:58:54 PST 2004
+
+Coded routines to serialize and deserialize element_t, though only for
+the rings needed for the pairing, i.e. F_p and F_p^k.
+
+Wrote testbls program, BLS signature library works, but at the moment
+only the signature can be read from and written to disk.
+
+Tue Dec 21 02:30:50 PST 2004
+
+Working on BLS signature library.
+Changed out_str functions to take base argument, like GMP.
+
+Thu Dec  9 13:22:06 PST 2004
+
+Got rid of pbc_init().
+Wrote IBE demo, testibe.c and short signatures demo, testsig.c.
+
+[0.0.1]
+
+Wed Dec  8 15:21:43 PST 2004
+
+Abstraction complete.
+
+Wed Dec  8 03:36:10 PST 2004
+
+Started work on abstracting pairing (the `pairing_t' data type).
+
+Mon Dec  6 18:46:08 PST 2004
+
+Minor fixes, cleanup. First release.
+
+[0.0.0]
+
+Wed Nov 24 03:20:31 PST 2004
+
+Finally have a single program that starts with a given D and generates
+a k=6 curve.
+
+Tue Nov 23 19:08:21 PST 2004
+
+Compute integral part of input to mpc_exp separately so that the Taylor
+series converges quickly.
+
+Tue Nov 23 01:51:51 PST 2004
+
+Fixed bug in hilbert_poly (multiplcation by (X^2 - 2 Re(j)X + |j|^2) was
+wrong).
+
+Mon Nov 22 18:49:29 PST 2004
+
+Integrating pell equation solver with hilbert poly code.
+
+Fri Nov 19 14:36:18 PST 2004
+
+hilbert_poly() works, but still need code to change the precision
+of the computatons for higher D.
+
+Fri Nov 19 04:21:05 PST 2004
+
+Started work on computing Hilbert polys. Can compute j's, just need
+to multiply them together and round to integers.
+
+Is old code faster? Is it better to compute real exp, sin and cos functions
+rather than one complex power series for complex exp()?
+
+Wed Nov 17 23:11:38 PST 2004
+
+Complex numbers. Miller's algorithm optimizations: can scale points by
+any element of the base field due to final exponentiation, i.e. use
+projective version of doubling and mixin.
+Intend to modify original one so it works on embedding degree 1 curves.
+
+Wed Nov 17 04:05:39 PST 2004
+
+Finally found bug that was messing up Tate pairing.
+v = v + b instead of v = v + c in miller_line()
+
+Tue Nov  9 23:42:27 PST 2004
+
+Bugfix: field_init_polymod assumes input polynomial is irreducible, but
+poly_is_irred() calls this without caring.
+
+Tue Nov  9 14:22:26 PST 2004
+
+Fixed bug in random polynomial generator. Also in poly_irred test
+code: it was only looking for GCD = +- 1, rather than GCD = any unit
+
+Mon Nov  8 01:13:39 PST 2004
+
+Implemented Cantor-Zassenhaus algorithm for finding square roots.
+(Is this the same as Legendre's method?)
+
+Thu Nov  4 14:33:06 PST 2004
+
+Polynomial rings. (Perhaps need to rename "field" data structure to ring.)
+
+Sun Oct 31 11:44:44 PST 2004
+
+Very basic infrastructure. F_p implemented.

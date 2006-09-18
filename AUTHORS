@@ -1,0 +1,25 @@
+PBC library credits
+
+If your name should be here but you don't see it please contact me as I
+may have forgotten to update this file.
+
+Ben Lynn <blynn@cs.stanford.edu> (Main author)
+
+Hovav Shacham <hovav@hovav.net>
+    Multiexponentiation
+    Sliding windows exponentiaion
+    Makefile
+    BBS optimizations
+
+Matt Steiner <MattS@cs.stanford.edu>
+    Boneh-Waters broadcast encryption
+
+Joseph Cooley <cooley@ll.mit.edu>
+    Autotools
+    Mac OS X build (via xcode, fink)
+    Pairings can be read from memory buffer
+    Removed many compile-time warnings
+    Miscellaneous improvements
+    
+Rob Figueiredo <r0b@MIT.EDU>, Roger Khazan <rkh@ll.mit.edu>
+    Windows build (via mingw)

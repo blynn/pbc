@@ -1,0 +1,11 @@
+#!/bin/bash
+
+function doit {
+    test/testhilbert $1
+}
+
+for ((i=3; i<10000000; i=i+4))
+do
+    doit $i
+    doit $((i+1))
+done

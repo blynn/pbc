@@ -1,0 +1,19 @@
+THE PBC LIBARY
+
+The PBC (Pairing-Based Crypto) library is a C library providing low-level
+routines for pairing-based cryptosystems. It provides an interface for
+cyclic groups and a bilinear pairing defined on them that are thought to
+be cryptographically secure. The interface abstracts the mathematical details
+away from the programmer, so no knowledge of elliptic curves is needed to use
+the library.
+
+The PBC library also contains routines to generate curves suitable for use
+in a bilinear pairing.
+
+See the manual (doc/manual.txt or doc/html/manual.html) for more information.
+
+The PBC library is released under the GNU General Public License. See the
+file COPYING for details.
+
+------------------------------------------------------------------------------
+Ben Lynn <blynn@cs.stanford.edu>
