@@ -9,9 +9,9 @@ int main(void)
     double t0, t1, ttotal;
 
     pairing_init_inp_str(pairing, stdin);
-    element_init(x, pairing->G1);
-    element_init(y, pairing->G2);
-    element_init(r, pairing->GT);
+    element_init_G1(x, pairing);
+    element_init_G2(y, pairing);
+    element_init_GT(r, pairing);
 
     n = 10;
     ttotal = 0.0;

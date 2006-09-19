@@ -1,5 +1,7 @@
 
 
+
+
 PBC Library Manual
 
 
@@ -44,6 +46,8 @@ Copyright Â© 2006 Ben Lynn
 
         Initializing_Elements
 
+        Assigning_Elements
+
 
   6._Pairing_Types
 
@@ -73,7 +77,7 @@ library version 0.3. It is modeled on that of GMP. I believe it is likely that
 someone using PBC would have used GMP or a similar library before so hopefully
 having a similar manual will make learning PBC easier.
 
-ChapterÂ 1.Â Overview
+Chapter 1. Overview
 
 The PBC library is a C library designed to make it easy to implement pairing-
 based cryptosystems. It provides an abstract interface to a cyclic group with a
@@ -85,7 +89,7 @@ portability and speed.
 The PBC library homepage: http://rooster.stanford.edu/~ben/pbc/
 The GMP library homepage: http://www.swox.com/gmp/
 
-ChapterÂ 2.Â Installing PBC
+Chapter 2. Installing PBC
 
 The PBC library needs the GMP library, which can be found at http://
 www.swox.com/gmp/
@@ -148,7 +152,7 @@ Test Programs
       Reads pairing parameters on standard input and benchmarks the pairing.
 
 
-ChapterÂ 3.Â PBC Basics
+Chapter 3. PBC Basics
 
 This chapter gives a high-level view of the library, and explains various
 design choices and conventions.
@@ -230,7 +234,7 @@ Another difference is that the programmer is expected to access some internal
 fields of the pairing_t data type, though I intend to write wrappers to fix
 this.
 
-ChapterÂ 4.Â Pairing Functions
+Chapter 4. Pairing Functions
 
 An application will most likely need to instantiate a bilinear pairing before
 performing any other PBC operations.
@@ -242,9 +246,9 @@ pairing_t. Functions that operate on them start with pairing_.
 
 Initializing Pairings
 
-Before a pairing may be used, it must be initialized. The only way this can be
-done is to load pairing parameters into a pairing_t variable using one of the
-functions beginning with pairing_init_inp_. For example,
+The only way to initialize a pairing is to provide pairing parameters to a
+pairing_t variable using one of the functions beginning with pairing_init_inp_.
+For example,
 
   {
       pairing_t pairing;
@@ -253,7 +257,7 @@ functions beginning with pairing_init_inp_. For example,
   }
 
 will initialize pairing with parameters are fed to the program on standard
-input (e.g. "./program < param/a.param").
+input.
 
 
   void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t *fops, void
@@ -273,7 +277,7 @@ input (e.g. "./program < param/a.param").
       no longer needed.
 
 
-ChapterÂ 5.Â Element Functions
+Chapter 5. Element Functions
 
 Elements of groups, rings and fields are stored in the element_t data type.
 Variables of this type must be initialized before use, and should be cleared
@@ -281,9 +285,13 @@ after they are no longer needed.
 The element_ functions must be used with caution. Just as division by zero does
 not make sense for integers, some operations may not make sense for particular
 elements. For example, in a ring, one cannot in general invert elements.
+Another caveat is that many of these functions assume their arguments come from
+the same ring, group or field. No implicit type casting is performed.
 
 Initializing Elements
 
+When an element is initialized it is associated with an algebraic structure,
+such as a particular finite field or elliptic curve group.
 
 
   void element_init(element_ptr e, field_ptr f)
@@ -293,6 +301,33 @@ Initializing Elements
   void element_clear(element_ptr e)
       Free the space occupied by e. Call this when the variable e is no longer
       needed.
+
+  void element_init_G1(element_t e, pairing_t pairing)
+
+  void element_init_G2(element_t e, pairing_t pairing)
+
+  void element_init_GT(element_t e, pairing_t pairing)
+      Initialize e to be an element of the group G1, G2 or GT of pairing.
+
+
+Assigning Elements
+
+
+
+  void element_set0(element_ptr e)
+      Set e to zero.
+
+  void element_set1(element_ptr e)
+      Set e to one.
+
+  void element_set_si(element_ptr e, signed long int i)
+      Set e to i.
+
+  void element_set_mpz(element_ptr e, mpz_ptr z)
+      Set e to z.
+
+  void element_set(element_ptr e, element_ptr a)
+      Set e to a.
 
 Now pairing->G1, pairing->G2, pairing->GT and bilinear_map() can be used as
 follows. Declare and initialize some group elements:
@@ -317,7 +352,7 @@ To raise x by some random exponent r:
   element_pow_fp(x, x, r);
 
 
-ChapterÂ 6.Â Pairing Types
+Chapter 6. Pairing Types
 
 The PBC library implements the pairing using different types of curves. Which
 curve to use depends on the application. To make it easy to refer to them, I
@@ -346,11 +381,11 @@ Additionally, the pairing is symmetric, that is G1 and G2 are in fact the same
 group.
 a_param struct fields:
 
-exp2,Â exp1,Â sign1,Â sign0,Â r:
-Â Â Â Â rÂ =Â 2^exp2Â +Â sign1Â *Â 2^exp1Â +Â sign0Â *Â 1Â (SolinasÂ prime)
-q,Â h:
-Â Â Â Â rÂ *Â hÂ =Â qÂ +Â 1
-Â Â Â Â qÂ isÂ aÂ prime,Â hÂ isÂ aÂ multipleÂ ofÂ 12Â (thusÂ qÂ =Â -1Â modÂ 12)
+exp2, exp1, sign1, sign0, r:
+    r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1 (Solinas prime)
+q, h:
+    r * h = q + 1
+    q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
 
 Type B
 
@@ -392,15 +427,15 @@ Using type C pairings allows elements of group G1 to be quite short, typically
 longer, that is, about 510 bits rather than 6 times long. They are not quite as
 short as type F pairings, but much faster.
 
-c_paramÂ structÂ fields:
-qÂ Â Â F_qÂ isÂ theÂ baseÂ field
-nÂ Â Â #Â ofÂ pointsÂ inÂ E(F_q)
-rÂ Â Â largeÂ primeÂ dividingÂ n
-hÂ Â Â nÂ =Â hÂ *Â r
-aÂ Â Â EÂ isÂ givenÂ byÂ y^2Â =Â x^3Â +Â axÂ +Â b
+c_param struct fields:
+q   F_q is the base field
+n   # of points in E(F_q)
+r   large prime dividing n
+h   n = h * r
+a   E is given by y^2 = x^3 + ax + b
 b
-nkÂ Â #Â ofÂ pointsÂ inÂ E(F_q^k)
-hkÂ Â nkÂ =Â hkÂ *Â rÂ *Â r
+nk  # of points in E(F_q^k)
+hk  nk = hk * r * r
 I sometimes refer to a type C curve as a triplet of numbers: the discriminant,
 the number of bits in the prime q, and the number of bits in the prime r. The
 listmnt program prints these numbers. The bundled type C curve parameters are
@@ -411,7 +446,7 @@ Type E
 The CM (Complex Multiplication) method of constructing elliptic curves starts
 with the Diophantine equation
 
-Â Â Â Â DV^2Â =Â 4qÂ -Â t^2
+    DV^2 = 4q - t^2
 If t = 2 and q = D r^2 h^2 + 1 for some prime r (which we choose to be a
 Solinas prime) and some integer h, we find that this equation is easily solved
 with V = 2rh.

@@ -5,6 +5,10 @@
     <!ENTITY chapter_basics SYSTEM "basics.xml">
     <!ENTITY chapter_pairingfns SYSTEM "pairingfns.xml">
     <!ENTITY chapter_elementfns SYSTEM "elementfns.xml">
+
+    <!ENTITY einit SYSTEM "gen/einit.xml">
+    <!ENTITY eassign SYSTEM "gen/eassign.xml">
+    <!ENTITY pinit SYSTEM "gen/pairing_init.xml">
     ]
 >
 <book>

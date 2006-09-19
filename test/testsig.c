@@ -11,46 +11,36 @@ int main(void)
 
     pairing_init_inp_str(pairing, stdin);
 
-    element_init(g, pairing->G2);
-    element_init(pubkey, pairing->G2);
-    element_init(h, pairing->G1);
-    element_init(sig, pairing->G1);
-    element_init(s, pairing->GT);
+    element_init_G2(g, pairing);
+    element_init_G2(pubkey, pairing);
+    element_init_G1(h, pairing);
+    element_init_G1(sig, pairing);
+    element_init_GT(s, pairing);
     mpz_init(secret);
 
     printf("Short signature test\n");
 
     //generate system parameters
     element_random(g);
-    printf("system parameter g = ");
-    element_out_str(stdout, 0, g);
-    printf("\n");
+    element_printf("system parameter g = %B\n", g);
 
     //generate private key
     pbc_mpz_random(secret, pairing->r);
-    printf("private key = ");
-    mpz_out_str(stdout, 0, secret);
-    printf("\n");
+    element_printf("private key = %Z\n", secret);
 
     //compute corresponding public key
     element_pow(pubkey, g, secret);
-    printf("public key = ");
-    element_out_str(stdout, 0, pubkey);
-    printf("\n");
+    element_printf("public key = %B\n", pubkey);
 
     //generate element from a hash
     //for toy examples, should check that pairing(g, h) != 1
     element_from_hash(h, 13, "hashofmessage");
-    printf("message hash = ");
-    element_out_str(stdout, 0, h);
-    printf("\n");
+    element_printf("message hash = %B\n", h);
 
     //h^secret is the signature
     //in real life: only output the first coordinate
     element_pow(sig, h, secret);
-    printf("signature = ");
-    element_out_str(stdout, 0, sig);
-    printf("\n");
+    element_printf("signature = %B\n", sig);
 
     {
 	int n = element_length_in_bytes_compressed(sig);
@@ -64,23 +54,17 @@ int main(void)
 	printf("\n");
 
 	element_from_bytes_compressed(sig, data);
-	printf("uncompressed = ");
-	element_out_str(stdout, 0, sig);
-	printf("\n");
+	element_printf("uncompressed = %B\n", sig);
     }
 
     //verification part 1
     bilinear_map(s, sig, g, pairing);
-    printf("f(sig, g) = ");
-    element_out_str(stdout, 0, s);
-    printf("\n");
+    element_printf("f(sig, g) = %B\n", s);
 
     //verification part 2
     //should match above
     bilinear_map(s, h, pubkey, pairing);
-    printf("f(message hash, pubkey) = ");
-    element_out_str(stdout, 0, s);
-    printf("\n");
+    element_printf("f(message hash, pubkey) = %B\n", s);
 
     return 0;
 }

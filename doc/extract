@@ -1,6 +1,8 @@
 #!/usr/bin/gawk -f
 # hack to extract GMP-style documentation from source
 /^\/\*@/ {
+    outfile = "gen/" gensub(".*manual ", "", 1) ".xml"
+    print "Writing to " outfile
     n = 0
     getline
     while ($0 != "*/") {
@@ -9,8 +11,8 @@
 	getline
     }
 
-    print "<varlistentry><term>"
-    print "<function>"
+    print "<varlistentry><term>" > outfile
+    print "<function>" > outfile
 #    do {
 #	getline
 #	print
@@ -20,15 +22,15 @@
     s = gensub(" (\\w*)\\(", " <command>\\1</command>(", 1)
     s = gensub("\\((.*)\\)", "(<parameter>\\1</parameter>)", 1, s)
     gsub(";", "", s);
-    print s
-    print "</function>"
-    print "</term>"
+    print s > outfile
+    print "</function>" > outfile
+    print "</term>" > outfile
     
-    print "<listitem><para>"
+    print "<listitem><para>" > outfile
     for(i=0; i<n; i++) {
 	a[i] = gensub("''(\\w*)''", "<parameter>\\1</parameter>", "g", a[i])
-	print a[i]
+	print a[i] > outfile
     }
-    print "</para></listitem>"
-    print "</varlistentry>\n"
+    print "</para></listitem>" > outfile
+    print "</varlistentry>\n" > outfile
 }

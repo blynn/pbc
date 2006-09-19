@@ -61,4 +61,26 @@ static inline int is_almost_coddh(element_t a, element_t b,
 	element_t c, element_t d, pairing_t pairing) {
     return pairing->is_almost_coddh(a, b, c, d, pairing);
 }
+
+/*@manual einit
+*/
+static inline void element_init_G1(element_t e, pairing_t pairing)
+{
+    element_init(e, pairing->G1);
+}
+
+/*@manual einit
+*/
+static inline void element_init_G2(element_t e, pairing_t pairing)
+{
+    element_init(e, pairing->G2);
+}
+
+/*@manual einit
+Initialize ''e'' to be an element of the group G1, G2 or GT of ''pairing''.
+*/
+static inline void element_init_GT(element_t e, pairing_t pairing)
+{
+    element_init(e, pairing->GT);
+}
 #endif //PAIRING_H

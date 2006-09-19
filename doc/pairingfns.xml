@@ -19,9 +19,9 @@ start with <function>pairing_</function>.
 <section>
 <title>Initializing Pairings</title>
 <para>
-Before a pairing may be used, it must be initialized.
-The only way this can be done is to load pairing parameters into
-a <type>pairing_t</type> variable using one of the functions
+The only way to initialize a pairing
+is to provide pairing parameters to a <type>pairing_t</type>
+variable using one of the functions
 beginning with <function>pairing_init_inp_</function>. For example,
 </para>
 <programlisting>{
@@ -33,52 +33,10 @@ beginning with <function>pairing_init_inp_</function>. For example,
 <para>
 will initialize <parameter>pairing</parameter> with
 parameters are fed to the program on standard
-input (e.g. "./program &lt; param/a.param").
+input.
 </para>
 <variablelist>
-<varlistentry><term>
-<function>
-void <command>pairing_init_inp_generic</command>(<parameter>pairing_t pairing, fetch_ops_t *fops, void *ctx</parameter>)
-</function>
-</term>
-<listitem><para>
-TODO
-</para></listitem>
-</varlistentry>
-
-<varlistentry><term>
-<function>
-void <command>pairing_init_inp_buf</command>(<parameter>pairing_t pairing, const char *buf, size_t len</parameter>)
-</function>
-</term>
-<listitem><para>
-Read in pairing parameters from array of characters <parameter>buf</parameter> of length <parameter>len</parameter>
-and use them to initialize <parameter>pairing</parameter>.
-</para></listitem>
-</varlistentry>
-
-<varlistentry><term>
-<function>
-void <command>pairing_init_inp_str</command>(<parameter>pairing_t pairing, FILE *stream</parameter>)
-</function>
-</term>
-<listitem><para>
-Read in pairing parameters from <parameter>stream</parameter>
-and use them to initialize <parameter>pairing</parameter>.
-</para></listitem>
-</varlistentry>
-
-<varlistentry><term>
-<function>
-void <command>pairing_clear</command>(<parameter>pairing_t pairing</parameter>)
-</function>
-</term>
-<listitem><para>
-Free the space occupied by <parameter>pairing</parameter>. Call
-whenever a <type>pairing_t</type> variable is no longer needed.
-</para></listitem>
-</varlistentry>
-
+&pinit;
 </variablelist>
 
 </section>

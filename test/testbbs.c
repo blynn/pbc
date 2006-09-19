@@ -59,12 +59,12 @@ void bbs_gen(bbs_group_public_key_t gpk, bbs_manager_private_key_t gmsk,
 
     gpk->param = param;
     gmsk->param = param;
-    element_init(gpk->g1, pairing->G1);
-    element_init(gpk->g2, pairing->G2);
-    element_init(gpk->h, pairing->G1);
-    element_init(gpk->u, pairing->G1);
-    element_init(gpk->v, pairing->G1);
-    element_init(gpk->w, pairing->G2);
+    element_init_G1(gpk->g1, pairing);
+    element_init_G2(gpk->g2, pairing);
+    element_init_G1(gpk->h, pairing);
+    element_init_G1(gpk->u, pairing);
+    element_init_G1(gpk->v, pairing);
+    element_init_G2(gpk->w, pairing);
     mpz_init(gmsk->xi1);
     mpz_init(gmsk->xi2);
     mpz_init(gamma);
@@ -84,7 +84,7 @@ void bbs_gen(bbs_group_public_key_t gpk, bbs_manager_private_key_t gmsk,
 
     for (i=0; i<n; i++) {
 	gsk[i]->param = param;
-	element_init(gsk[i]->A, pairing->G1);
+	element_init_G1(gsk[i]->A, pairing);
 	element_init(gsk[i]->x, pairing->Zr);
 
 	element_random(gsk[i]->x);
@@ -95,16 +95,16 @@ void bbs_gen(bbs_group_public_key_t gpk, bbs_manager_private_key_t gmsk,
 
         /* do some precomputation */
         /* TODO: could instead compute from e(g1,g2) ... */
-        element_init(gsk[i]->pr_A_g2, pairing->GT);
+        element_init_GT(gsk[i]->pr_A_g2, pairing);
         bilinear_map(gsk[i]->pr_A_g2, gsk[i]->A, gpk->g2, pairing);
     }
 
 
     /* do some precomputation */
-    element_init(gpk->pr_g1_g2, pairing->GT);
-    element_init(gpk->pr_g1_g2_inv, pairing->GT);
-    element_init(gpk->pr_h_g2, pairing->GT);
-    element_init(gpk->pr_h_w, pairing->GT);
+    element_init_GT(gpk->pr_g1_g2, pairing);
+    element_init_GT(gpk->pr_g1_g2_inv, pairing);
+    element_init_GT(gpk->pr_h_g2, pairing);
+    element_init_GT(gpk->pr_h_w, pairing);
     bilinear_map(gpk->pr_g1_g2, gpk->g1, gpk->g2, pairing);
     element_invert(gpk->pr_g1_g2_inv, gpk->pr_g1_g2);
     bilinear_map(gpk->pr_h_g2, gpk->h, gpk->g2, pairing);
@@ -137,14 +137,14 @@ void bbs_sign(unsigned char *sig,
     UNUSED_VAR (hashlen);
     UNUSED_VAR (hash);
 
-    element_init(T1, pairing->G1);
-    element_init(T2, pairing->G1);
-    element_init(T3, pairing->G1);
-    element_init(R1, pairing->G1);
-    element_init(R2, pairing->G1);
-    element_init(R3, pairing->GT);
-    element_init(R4, pairing->G1);
-    element_init(R5, pairing->G1);
+    element_init_G1(T1, pairing);
+    element_init_G1(T2, pairing);
+    element_init_G1(T3, pairing);
+    element_init_G1(R1, pairing);
+    element_init_G1(R2, pairing);
+    element_init_GT(R3, pairing);
+    element_init_G1(R4, pairing);
+    element_init_G1(R5, pairing);
 
     element_init(c, Fp);
     element_init(alpha, Fp); element_random(alpha);
@@ -153,8 +153,8 @@ void bbs_sign(unsigned char *sig,
     //temp variables
     element_init(z0, Fp);
     element_init(z1, Fp);
-    element_init(et0, pairing->GT);
-    element_init(e10, pairing->G1);
+    element_init_GT(et0, pairing);
+    element_init_G1(e10, pairing);
 
     element_init(ralpha, Fp); element_random(ralpha);
     element_init(rbeta, Fp); element_random(rbeta);
@@ -294,14 +294,14 @@ int bbs_verify(unsigned char *sig,
     UNUSED_VAR (hashlen);
     UNUSED_VAR (hash);
 
-    element_init(T1, pairing->G1);
-    element_init(T2, pairing->G1);
-    element_init(T3, pairing->G1);
-    element_init(R1, pairing->G1);
-    element_init(R2, pairing->G1);
-    element_init(R3, pairing->GT);
-    element_init(R4, pairing->G1);
-    element_init(R5, pairing->G1);
+    element_init_G1(T1, pairing);
+    element_init_G1(T2, pairing);
+    element_init_G1(T3, pairing);
+    element_init_G1(R1, pairing);
+    element_init_G1(R2, pairing);
+    element_init_GT(R3, pairing);
+    element_init_G1(R4, pairing);
+    element_init_G1(R5, pairing);
 
     element_init(c, Fp);
     element_init(salpha, Fp);
@@ -310,10 +310,10 @@ int bbs_verify(unsigned char *sig,
     element_init(sdelta1, Fp);
     element_init(sdelta2, Fp);
 
-    element_init(e10, pairing->G1);
-    element_init(e20, pairing->G2);
-    element_init(e21, pairing->G2);
-    element_init(et0, pairing->GT);
+    element_init_G1(e10, pairing);
+    element_init_G2(e20, pairing);
+    element_init_G2(e21, pairing);
+    element_init_GT(et0, pairing);
     element_init(z0, Fp);
     element_init(z1, Fp);
 
@@ -433,14 +433,14 @@ int bbs_open(element_t A, bbs_group_public_key_t gpk, bbs_manager_private_key_t 
     UNUSED_VAR (hash);
 
     //TODO: consolidate with verify
-    element_init(T1, pairing->G1);
-    element_init(T2, pairing->G1);
-    element_init(T3, pairing->G1);
-    element_init(R1, pairing->G1);
-    element_init(R2, pairing->G1);
-    element_init(R3, pairing->GT);
-    element_init(R4, pairing->G1);
-    element_init(R5, pairing->G1);
+    element_init_G1(T1, pairing);
+    element_init_G1(T2, pairing);
+    element_init_G1(T3, pairing);
+    element_init_G1(R1, pairing);
+    element_init_G1(R2, pairing);
+    element_init_GT(R3, pairing);
+    element_init_G1(R4, pairing);
+    element_init_G1(R5, pairing);
 
     element_init(c, Fp);
     element_init(salpha, Fp);
@@ -449,8 +449,8 @@ int bbs_open(element_t A, bbs_group_public_key_t gpk, bbs_manager_private_key_t 
     element_init(sdelta1, Fp);
     element_init(sdelta2, Fp);
 
-    element_init(e10, pairing->G1);
-    element_init(et0, pairing->GT);
+    element_init_G1(e10, pairing);
+    element_init_GT(et0, pairing);
     element_init(z0, Fp);
 
     readptr += element_from_bytes(T1, readptr);
@@ -574,7 +574,7 @@ int main(void)
     t1 = get_time();
     printf("%fs elapsed\n", t1 - t0);
     t0 = t1;
-    element_init(A, pairing->G1);
+    element_init_G1(A, pairing);
     bbs_open(A, gpk, gmsk, 0, NULL, sig);
     printf("open A = ");
     element_out_str(stdout, 0, A);

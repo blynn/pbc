@@ -14,12 +14,12 @@ int main(void)
 
 
     pairing_init_inp_str(pairing, stdin);
-    element_init(g, pairing->G1);
-    element_init(zg, pairing->G1);
-    element_init(rg, pairing->G1);
-    element_init(h, pairing->G2);
-    element_init(zh, pairing->G2);
-    element_init(s, pairing->GT);
+    element_init_G1(g, pairing);
+    element_init_G1(zg, pairing);
+    element_init_G1(rg, pairing);
+    element_init_G2(h, pairing);
+    element_init_G2(zh, pairing);
+    element_init_GT(s, pairing);
     mpz_init(master);
     mpz_init(r);
 

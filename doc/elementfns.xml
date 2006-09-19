@@ -12,31 +12,24 @@ Just as division by zero does not make sense for integers,
 some operations may not make sense for particular elements. For example,
 in a ring, one cannot in general invert elements.
 </para>
+<para>
+Another caveat is that many of these functions assume their arguments come
+from the same ring, group or field. No implicit type casting is performed.
+</para>
 <section>
 <title>Initializing Elements</title>
+<para>
+When an element is initialized it is associated with an algebraic structure,
+such as a particular finite field or elliptic curve group.
+</para>
 <variablelist>
-<varlistentry><term>
-<function>
-void <command>element_init</command>(<parameter>element_ptr e, field_ptr f</parameter>)
-</function>
-</term>
-<listitem><para>
-Initialize <parameter>e</parameter> to be an element of the group, ring or field <parameter>f</parameter>
-and set it to be the zero element.
-</para></listitem>
-</varlistentry>
-
-<varlistentry><term>
-<function>
-void <command>element_clear</command>(<parameter>element_ptr e</parameter>)
-</function>
-</term>
-<listitem><para>
-Free the space occupied by <parameter>e</parameter>. Call this when
-the variable <parameter>e</parameter> is no longer needed.
-</para></listitem>
-</varlistentry>
-
+&einit;
+</variablelist>
+</section>
+<section>
+<title>Assigning Elements</title>
+<variablelist>
+&eassign;
 </variablelist>
 
 <para>

@@ -9,11 +9,11 @@ int main(void)
 
     pairing_init_inp_str(pairing, stdin);
 
-    element_init(g, pairing->G1);
-    element_init(zg, pairing->G1);
-    element_init(h, pairing->G2);
-    element_init(zh, pairing->G2);
-    element_init(x, pairing->GT);
+    element_init_G1(g, pairing);
+    element_init_G1(zg, pairing);
+    element_init_G2(h, pairing);
+    element_init_G2(zh, pairing);
+    element_init_GT(x, pairing);
     element_random(g);
     element_random(h);
     //pairing->phi(g, h, pairing);
@@ -85,11 +85,11 @@ int main(void)
     //gmp_leak_check();
     pairing_init_inp_str(pairing, stdin);
 
-    element_init(x, pairing->G1);
-    element_init(y, pairing->G2);
-    element_init(x2, pairing->G1);
-    element_init(y2, pairing->G2);
-    element_init(r, pairing->GT);
+    element_init_G1(x, pairing);
+    element_init_G2(y, pairing);
+    element_init_G1(x2, pairing);
+    element_init_G2(y2, pairing);
+    element_init_GT(r, pairing);
 
     if (1) {
 	int i;

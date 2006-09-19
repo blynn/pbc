@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include <string.h>
+#include "utils.h"
 #include "symtab.h"
 
 struct entry_s {
@@ -8,13 +7,6 @@ struct entry_s {
 };
 typedef struct entry_s *entry_ptr;
 typedef struct entry_s entry_t[1];
-
-static inline char *strclone(char *src)
-{
-    char *dst = malloc(strlen(src) + 1);
-    if (dst) strcpy(dst, src);
-    return dst;
-}
 
 void symtab_init(symtab_t t)
 {

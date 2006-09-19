@@ -1,7 +1,5 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "pairing.h"
 #include "a_param.h"
 #include "d_param.h"
@@ -10,13 +8,7 @@
 #include "bgn_param.h"
 #include "parse.h"
 #include "tracker.h"
-
-static inline char *strclone(char *src)
-{
-    char *dst = malloc(strlen(src) + 1);
-    if (dst) strcpy(dst, src);
-    return dst;
-}
+#include "utils.h"
 
 int generic_is_almost_coddh(element_ptr a, element_ptr b,
 	element_ptr c, element_ptr d, pairing_t pairing)

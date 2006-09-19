@@ -1,6 +1,4 @@
 #include <assert.h>
-#include <stdlib.h>
-#include <string.h>
 #include "utils.h"
 #include "param.h"
 #include "parse.h"
@@ -26,13 +24,6 @@ void param_out_int(FILE *stream, char *s, int i)
     mpz_set_si(z, i);
     param_out_mpz(stream, s, z);
     mpz_clear(z);
-}
-
-static inline char *strclone(char *src)
-{
-    char *dst = malloc(strlen(src) + 1);
-    if (dst) strcpy(dst, src);
-    return dst;
 }
 
 void param_read_generic (symtab_t tab, fetch_ops_t *fops, void *ctx)
