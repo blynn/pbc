@@ -1,0 +1,20 @@
+#!/bin/bash
+gawk '/<div class="toc">/ {
+    do {
+	print $0
+	getline
+    } while (!match($0, "</div>"));
+    print "</div>"
+    exit
+}' < pretty/index.html > toc.tmp
+for a in pretty/*.html
+do
+    if [ $a != "pretty/index.html" ]
+    then
+	sed '/<body/{n; r toc.tmp
+a <div class="content">
+} ' -i $a
+	sed '/^<\/body/i </div>' -i $a
+    fi
+done
+rm toc.tmp

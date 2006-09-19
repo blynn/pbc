@@ -1,6 +1,17 @@
 <chapter>
 <title>Element Functions</title>
-
+<para>
+Elements of groups, rings and fields are stored in the <type>element_t</type>
+data type. Variables of this type
+must be initialized before use, and should be cleared after they are no longer
+needed.
+</para>
+<para>
+The <function>element_</function> functions must be used with caution.
+Just as division by zero does not make sense for integers,
+some operations may not make sense for particular elements. For example,
+in a ring, one cannot in general invert elements.
+</para>
 <section>
 <title>Initializing Elements</title>
 <variablelist>

@@ -21,7 +21,7 @@ ALLFILES := include/*.h \
 	Makefile.orig configure.ac Makefile.am Makefile.mingw setup \
 	sig/Makefile.am test/Makefile.am bce/Makefile.am \
 	AUTHORS NEWS COPYING README INSTALL ChangeLog \
-	doc/extract doc/custom.dsl doc/*.x[ms]l doc/html/default.css doc/Makefile \
+	doc/extract doc/*.x[ms]l doc/default.css doc/Makefile \
 	param/*.param report_times genalldparams list_hilbert
 
 # source file list.

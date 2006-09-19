@@ -61,7 +61,7 @@ typedef struct field_s field_t[1];
 
 typedef void (*fieldmap)(element_t dst, element_t src);
 
-/*@manual
+/*@manual einit
 Initialize ''e'' to be an element of the group, ring or field ''f''
 and set it to be the zero element.
 */
@@ -71,14 +71,13 @@ static inline void element_init(element_ptr e, field_ptr f)
     f->init(e);
 }
 
-/*@manual
+/*@manual einit
 Free the space occupied by ''e''. Call this when
 the variable ''e'' is no longer needed.
 */
 static inline void element_clear(element_ptr e)
 {
     e->field->clear(e);
-    //e->field = NULL;
 }
 
 static inline size_t element_out_str(FILE *stream, int base, element_ptr e)
@@ -89,29 +88,44 @@ static inline size_t element_out_str(FILE *stream, int base, element_ptr e)
 int element_fprintf(FILE *stream, const char *format, ...);
 int element_printf(const char *format, ...);
 
-static inline void element_set_si(element_ptr e, signed long int i)
-{
-    e->field->set_si(e, i);
-}
-
-static inline void element_set_mpz(element_ptr e, mpz_ptr z)
-{
-    e->field->set_mpz(e, z);
-}
-
+/*@manual eassign
+Set ''e'' to zero.
+*/
 static inline void element_set0(element_ptr e)
 {
     e->field->set0(e);
 }
 
+/*@manual eassign
+Set ''e'' to one.
+*/
 static inline void element_set1(element_ptr e)
 {
     e->field->set1(e);
 }
 
-static inline void element_set(element_ptr x, element_ptr a)
+/*@manual eassign
+Set ''e'' to ''i''.
+*/
+static inline void element_set_si(element_ptr e, signed long int i)
 {
-    x->field->set(x, a);
+    e->field->set_si(e, i);
+}
+
+/*@manual eassign
+Set ''e'' to ''z''.
+*/
+static inline void element_set_mpz(element_ptr e, mpz_ptr z)
+{
+    e->field->set_mpz(e, z);
+}
+
+/*@manual eassign
+Set ''e'' to ''a''.
+*/
+static inline void element_set(element_ptr e, element_ptr a)
+{
+    e->field->set(e, a);
 }
 
 static inline void element_add(element_ptr n, element_ptr a, element_ptr b)

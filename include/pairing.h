@@ -26,24 +26,24 @@ struct pairing_s {
 typedef struct pairing_s pairing_t[1];
 typedef struct pairing_s *pairing_ptr;
 
-/*@manual
+/*@manual pairing_init
 TODO
 */
 void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t *fops, void *ctx);
 
-/*@manual
+/*@manual pairing_init
 Read in pairing parameters from array of characters ''buf'' of length ''len''
 and use them to initialize ''pairing''.
 */
 void pairing_init_inp_buf(pairing_t pairing, const char *buf, size_t len);
 
-/*@manual
+/*@manual pairing_init
 Read in pairing parameters from ''stream''
 and use them to initialize ''pairing''.
 */
 void pairing_init_inp_str(pairing_t pairing, FILE *stream);
 
-/*@manual
+/*@manual pairing_init
 Free the space occupied by ''pairing''. Call
 whenever a <type>pairing_t</type> variable is no longer needed.
 */

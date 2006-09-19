@@ -7,6 +7,14 @@ tt, code {
     font-family: andale mono, courier new, courier, monospace;
 }
 
+.author {
+    display : none;
+}
+
+.copyright {
+    display : none;
+}
+
 div.TOC {
     float: left;
     width: 13em;

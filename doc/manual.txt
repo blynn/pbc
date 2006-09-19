@@ -5,40 +5,64 @@ PBC Library Manual
 
 Ben Lynn
 
+Copyright Â© 2006 Ben Lynn
 -------------------------------------------------------------------------------
 
-* Preface
-* 1._Overview
-* 2._Installing_PBC
 
-  o Testing_the_Library
-  o Test_Programs
+  Preface
 
-* 3._PBC_Basics
+  1._Overview
 
-  o Headers_and_Libraries
-  o Types
-  o Some_Function_Classes
-  o Variable_Conventions
+  2._Installing_PBC
 
-* 4._Pairing_Functions
 
-  o Initializing_Pairings
+        Testing_the_Library
 
-* 5._Element_Functions
+        Test_Programs
 
-  o Initializing_Elements
 
-* 6._Pairing_Types
+  3._PBC_Basics
 
-  o Type_A
-  o Type_B
-  o Type_C
-  o Type_D
-  o Type_E
-  o Type_F
-  o Type_G
-  o BGN_Curves
+
+        Headers_and_Libraries
+
+        Types
+
+        Function_Classes
+
+        Variable_Conventions
+
+
+  4._Pairing_Functions
+
+
+        Initializing_Pairings
+
+
+  5._Element_Functions
+
+
+        Initializing_Elements
+
+
+  6._Pairing_Types
+
+
+        Type_A
+
+        Type_B
+
+        Type_C
+
+        Type_D
+
+        Type_E
+
+        Type_F
+
+        Type_G
+
+        BGN_Curves
 
 
 
@@ -49,7 +73,7 @@ library version 0.3. It is modeled on that of GMP. I believe it is likely that
 someone using PBC would have used GMP or a similar library before so hopefully
 having a similar manual will make learning PBC easier.
 
-Chapter 1. Overview
+ChapterÂ 1.Â Overview
 
 The PBC library is a C library designed to make it easy to implement pairing-
 based cryptosystems. It provides an abstract interface to a cyclic group with a
@@ -61,7 +85,7 @@ portability and speed.
 The PBC library homepage: http://rooster.stanford.edu/~ben/pbc/
 The GMP library homepage: http://www.swox.com/gmp/
 
-Chapter 2. Installing PBC
+ChapterÂ 2.Â Installing PBC
 
 The PBC library needs the GMP library, which can be found at http://
 www.swox.com/gmp/
@@ -124,8 +148,10 @@ Test Programs
       Reads pairing parameters on standard input and benchmarks the pairing.
 
 
-Chapter 3. PBC Basics
+ChapterÂ 3.Â PBC Basics
 
+This chapter gives a high-level view of the library, and explains various
+design choices and conventions.
 
 Headers and Libraries
 
@@ -161,7 +187,7 @@ only needed internally.
 Examples of other data types defined by PBC are field_t for rings and fields
 and mpc_t for complex arbitrary precision floats.
 
-Some Function Classes
+Function Classes
 
 PBC contains several classes of functions.
 
@@ -204,10 +230,13 @@ Another difference is that the programmer is expected to access some internal
 fields of the pairing_t data type, though I intend to write wrappers to fix
 this.
 
-Chapter 4. Pairing Functions
+ChapterÂ 4.Â Pairing Functions
 
-Most likely a pairing-based cryptography application will need to instantiate a
-bilinear pairing before performing any other PBC operations.
+An application will most likely need to instantiate a bilinear pairing before
+performing any other PBC operations.
+Parameters for various pairings are bundled with PBC and should be suitable for
+cryptographic use. Most programs will probably want to start by initializing a
+pairing by reading a set of pairing parameters.
 Particular instantiations of bilinear pairings are stored in the data type
 pairing_t. Functions that operate on them start with pairing_.
 
@@ -244,8 +273,14 @@ input (e.g. "./program < param/a.param").
       no longer needed.
 
 
-Chapter 5. Element Functions
+ChapterÂ 5.Â Element Functions
 
+Elements of groups, rings and fields are stored in the element_t data type.
+Variables of this type must be initialized before use, and should be cleared
+after they are no longer needed.
+The element_ functions must be used with caution. Just as division by zero does
+not make sense for integers, some operations may not make sense for particular
+elements. For example, in a ring, one cannot in general invert elements.
 
 Initializing Elements
 
@@ -282,7 +317,7 @@ To raise x by some random exponent r:
   element_pow_fp(x, x, r);
 
 
-Chapter 6. Pairing Types
+ChapterÂ 6.Â Pairing Types
 
 The PBC library implements the pairing using different types of curves. Which
 curve to use depends on the application. To make it easy to refer to them, I
@@ -311,11 +346,11 @@ Additionally, the pairing is symmetric, that is G1 and G2 are in fact the same
 group.
 a_param struct fields:
 
-exp2, exp1, sign1, sign0, r:
-    r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1 (Solinas prime)
-q, h:
-    r * h = q + 1
-    q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
+exp2,Â exp1,Â sign1,Â sign0,Â r:
+Â Â Â Â rÂ =Â 2^exp2Â +Â sign1Â *Â 2^exp1Â +Â sign0Â *Â 1Â (SolinasÂ prime)
+q,Â h:
+Â Â Â Â rÂ *Â hÂ =Â qÂ +Â 1
+Â Â Â Â qÂ isÂ aÂ prime,Â hÂ isÂ aÂ multipleÂ ofÂ 12Â (thusÂ qÂ =Â -1Â modÂ 12)
 
 Type B
 
@@ -357,15 +392,15 @@ Using type C pairings allows elements of group G1 to be quite short, typically
 longer, that is, about 510 bits rather than 6 times long. They are not quite as
 short as type F pairings, but much faster.
 
-c_param struct fields:
-q   F_q is the base field
-n   # of points in E(F_q)
-r   large prime dividing n
-h   n = h * r
-a   E is given by y^2 = x^3 + ax + b
+c_paramÂ structÂ fields:
+qÂ Â Â F_qÂ isÂ theÂ baseÂ field
+nÂ Â Â #Â ofÂ pointsÂ inÂ E(F_q)
+rÂ Â Â largeÂ primeÂ dividingÂ n
+hÂ Â Â nÂ =Â hÂ *Â r
+aÂ Â Â EÂ isÂ givenÂ byÂ y^2Â =Â x^3Â +Â axÂ +Â b
 b
-nk  # of points in E(F_q^k)
-hk  nk = hk * r * r
+nkÂ Â #Â ofÂ pointsÂ inÂ E(F_q^k)
+hkÂ Â nkÂ =Â hkÂ *Â rÂ *Â r
 I sometimes refer to a type C curve as a triplet of numbers: the discriminant,
 the number of bits in the prime q, and the number of bits in the prime r. The
 listmnt program prints these numbers. The bundled type C curve parameters are
@@ -376,7 +411,7 @@ Type E
 The CM (Complex Multiplication) method of constructing elliptic curves starts
 with the Diophantine equation
 
-    DV^2 = 4q - t^2
+Â Â Â Â DV^2Â =Â 4qÂ -Â t^2
 If t = 2 and q = D r^2 h^2 + 1 for some prime r (which we choose to be a
 Solinas prime) and some integer h, we find that this equation is easily solved
 with V = 2rh.
