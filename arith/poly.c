@@ -596,7 +596,7 @@ static int polymod_is_sqr(element_ptr e)
     mpz_sub_ui(z, e->field->order, 1);
     mpz_divexact_ui(z, z, 2);
 
-    element_pow(e0, e, z);
+    element_pow_mpz(e0, e, z);
     res = element_is1(e0);
     element_clear(e0);
     return res;
@@ -1458,7 +1458,7 @@ int poly_is_irred_degfac(element_ptr f, darray_t factor)
     for (i=0; i<n; i++) {
 	mpz_divexact(z, deg, factor->item[i]);
 	mpz_pow_ui(z, basef->order, mpz_get_ui(z));
-	element_pow(xpow, x, z);
+	element_pow_mpz(xpow, x, z);
 	element_sub(xpow, xpow, x);
 	if (element_is0(xpow)) {
 	    goto done;
@@ -1469,7 +1469,7 @@ int poly_is_irred_degfac(element_ptr f, darray_t factor)
     }
 
     mpz_pow_ui(z, basef->order, poly_degree(f));
-    element_pow(xpow, x, z);
+    element_pow_mpz(xpow, x, z);
     element_sub(xpow, xpow, x);
     if (element_is0(xpow)) res = 1;
 

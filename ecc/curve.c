@@ -264,8 +264,8 @@ void cc_frobenius(point_ptr r, point_ptr p, mpz_ptr q)
 	point_set_inf(r);
 	return;
     }
-    element_pow(r->x, p->x, q);
-    element_pow(r->y, p->y, q);
+    element_pow_mpz(r->x, p->x, q);
+    element_pow_mpz(r->y, p->y, q);
 }
 
 void curve_init_cc_ab(curve_ptr c, element_ptr a, element_ptr b)

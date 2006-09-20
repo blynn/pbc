@@ -167,7 +167,7 @@ static void fp_mul_si(element_ptr e, element_ptr a, signed long int op)
     mpn_tdiv_qr(qp, e->data, 0, tmp, t + 1, p->primelimbs, t);
 }
 
-static void fp_pow(element_ptr n, element_ptr a, mpz_ptr op)
+static void fp_pow_mpz(element_ptr n, element_ptr a, mpz_ptr op)
 {
     mpz_t z;
     mpz_init(z);
@@ -269,18 +269,18 @@ static void fp_tonelli(element_ptr x, element_ptr a)
     for (i=2; i<=s; i++) {
 	mpz_sub_ui(t0, a->field->order, 1);
 	mpz_tdiv_q_2exp(t0, t0, i);
-	element_pow(e0, ginv, e);
+	element_pow_mpz(e0, ginv, e);
 	element_mul(e0, e0, a);
-	element_pow(e0, e0, t0);
+	element_pow_mpz(e0, e0, t0);
 	if (!element_is1(e0)) mpz_setbit(e, i-1);
     }
-    element_pow(e0, ginv, e);
+    element_pow_mpz(e0, ginv, e);
     element_mul(e0, e0, a);
     mpz_add_ui(t, t, 1);
     mpz_tdiv_q_2exp(t, t, 1);
-    element_pow(e0, e0, t);
+    element_pow_mpz(e0, e0, t);
     mpz_tdiv_q_2exp(e, e, 1);
-    element_pow(x, nqr, e);
+    element_pow_mpz(x, nqr, e);
     /* TODO: this would be a good place to use element_pow2 ... -hs */
     element_mul(x, x, e0);
     mpz_clear(t);
@@ -354,7 +354,7 @@ void field_init_fast_fp(field_ptr f, mpz_t prime)
     f->mul = fp_mul;
     f->mul_mpz = fp_mul_mpz;
     f->mul_si = fp_mul_si;
-    f->pow = fp_pow;
+    f->pow_mpz = fp_pow_mpz;
     f->neg = fp_neg;
     f->cmp = fp_cmp;
     f->invert = fp_invert;

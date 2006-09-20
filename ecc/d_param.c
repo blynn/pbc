@@ -296,7 +296,7 @@ static void cc_miller(element_t res, mpz_t q, point_t P,
 static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing)
 {
     mnt_pairing_data_ptr p = pairing->data;
-    element_pow(out, in, p->tateexp);
+    element_pow_mpz(out, in, p->tateexp);
 }
 
 static void cc_pairing(element_ptr out, element_ptr in1, element_ptr in2,
@@ -812,13 +812,13 @@ static void cc_tatepower_even_k(element_ptr out, element_ptr in, pairing_t pairi
 	element_mul(e0, e0, in);
 	element_invert(e0, e0);
 	element_mul(out, e3, e0);
-	element_pow(out, out, p->tateexp);
+	element_pow_mpz(out, out, p->tateexp);
 	element_clear(e0);
 	element_clear(e1);
 	element_clear(e2);
 	element_clear(e3);
     } else {
-	element_pow(out, in, p->tateexp);
+	element_pow_mpz(out, in, p->tateexp);
     }
 }
 
@@ -1001,7 +1001,7 @@ static void pairing_init_c_param_even_k(pairing_t pairing, d_param_t param)
 	for (i=1; i<=4; i++) {
 	    element_ptr e = p->xpowq[i] = malloc(sizeof(element_t));
 	    element_init(e, p->Fqd);
-	    element_pow(e0, e0, q);
+	    element_pow_mpz(e0, e0, q);
 	    element_set(e, e0);
 	}
 	element_clear(e0);

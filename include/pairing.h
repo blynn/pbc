@@ -20,6 +20,7 @@ struct pairing_s {
 	    element_ptr c, element_ptr d,
 	    struct pairing_s *p);
     //char *id;
+    void (*clear_func)(struct pairing_s *);
     void *data;
 };
 
@@ -54,6 +55,68 @@ static inline void bilinear_map(element_t out, element_t in1, element_t in2,
     pairing->map(out, in1, in2, pairing);
 }
 
+/*@manual pairing_op
+Apply the bilinear map described by ''pairing''. The element ''out''
+will be set to the map applied to ''in1'' and ''in2'' (in that order).
+''in1'' must be in the group G1,
+''in2'' must be in the group G2, and
+''out'' must be in the group GT.
+*/
+static inline void pairing_apply(element_t out, element_t in1, element_t in2,
+    pairing_t pairing) {
+    pairing->map(out, in1, in2, pairing);
+}
+
+/*@manual pairing_op
+Returns the length in bytes needed to represent an element of G1.
+*/
+static inline int pairing_length_in_bytes_G1(pairing_t pairing)
+{
+    return pairing->G1->fixed_length_in_bytes;
+}
+
+/*@manual pairing_op
+Returns the length in bytes needed to represent the x-coordinate of
+an element of G1.
+*/
+static inline int pairing_length_in_bytes_x_only_G1(pairing_t pairing)
+{
+    return pairing->G1->fixed_length_in_bytes / 2;
+}
+
+/*@manual pairing_op
+Returns the length in bytes needed to represent an element of G2.
+*/
+static inline int pairing_length_in_bytes_G2(pairing_t pairing)
+{
+    return pairing->G2->fixed_length_in_bytes;
+}
+
+/*@manual pairing_op
+Returns the length in bytes needed to represent the x-coordinate of
+an element of G2.
+*/
+static inline int pairing_length_in_bytes_x_only_G2(pairing_t pairing)
+{
+    return pairing->G2->fixed_length_in_bytes / 2;
+}
+
+/*@manual pairing_op
+Returns the length in bytes needed to represent an element of GT.
+*/
+static inline int pairing_length_in_bytes_GT(pairing_t pairing)
+{
+    return pairing->GT->fixed_length_in_bytes;
+}
+
+/*@manual pairing_op
+Returns the length in bytes needed to represent an element of Zr.
+*/
+static inline int pairing_length_in_bytes_Zr(pairing_t pairing)
+{
+    return pairing->Zr->fixed_length_in_bytes;
+}
+
 int generic_is_almost_coddh(element_ptr a, element_ptr b,
 	element_ptr c, element_ptr d, pairing_t pairing);
 
@@ -62,25 +125,34 @@ static inline int is_almost_coddh(element_t a, element_t b,
     return pairing->is_almost_coddh(a, b, c, d, pairing);
 }
 
-/*@manual einit
+/*@manual einit.1
 */
 static inline void element_init_G1(element_t e, pairing_t pairing)
 {
     element_init(e, pairing->G1);
 }
 
-/*@manual einit
+/*@manual einit.1
 */
 static inline void element_init_G2(element_t e, pairing_t pairing)
 {
     element_init(e, pairing->G2);
 }
 
-/*@manual einit
+/*@manual einit.1
 Initialize ''e'' to be an element of the group G1, G2 or GT of ''pairing''.
 */
 static inline void element_init_GT(element_t e, pairing_t pairing)
 {
     element_init(e, pairing->GT);
+}
+
+/*@manual einit.1
+Initialize ''e'' to be an element of the ring Zr of ''pairing''.
+r is the order of the groups G1, G2 and GT.
+*/
+static inline void element_init_Zr(element_t e, pairing_t pairing)
+{
+    element_init(e, pairing->Zr);
 }
 #endif //PAIRING_H

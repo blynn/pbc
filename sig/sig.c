@@ -9,9 +9,9 @@ void bls_sign(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
 {
     element_t h;
 
-    element_init(h, sk->param->pairing->G1);
+    element_init_G1(h, sk->param->pairing);
     element_from_hash(h, hashlen, hash);
-    element_pow(h, h, sk->x);
+    element_pow_zn(h, h, sk->x);
     element_to_bytes_x_only(sig, h);
 
     element_clear(h);
@@ -25,11 +25,11 @@ int bls_verify(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
     element_t h;
     int res;
 
-    field_ptr G1 = pk->param->pairing->G1;
+    pairing_ptr pairing = pk->param->pairing;
 
-    element_init(h, G1);
+    element_init_G1(h, pairing);
     element_from_hash(h, hashlen, hash);
-    element_init(hx, G1);
+    element_init_G1(hx, pairing);
     element_from_bytes_x_only(hx, sig);
 
     res = is_almost_coddh(h, hx, pk->param->g, pk->gx, pk->param->pairing);
@@ -40,26 +40,26 @@ int bls_verify(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
 void bls_gen_sys_param(bls_sys_param_t param, pairing_t pairing)
 {
     param->pairing = pairing;
-    element_init(param->g, pairing->G2);
+    element_init_G2(param->g, pairing);
     element_random(param->g);
-    //signature is only one coordinate
-    param->signature_length = pairing->G1->fixed_length_in_bytes / 2;
+    param->signature_length = pairing_length_in_bytes_x_only_G1(pairing);
 }
 
 void bls_gen(bls_public_key_t pk, bls_private_key_t sk, bls_sys_param_t param)
 {
     pk->param = sk->param = param;
-    mpz_init(sk->x);
-    element_init(pk->gx, param->pairing->G2);
-    pbc_mpz_random(sk->x, param->pairing->r);
-    element_pow(pk->gx, param->g, sk->x);
+    element_init_G2(pk->gx, param->pairing);
+    element_init_Zr(sk->x, param->pairing);
+    element_random(sk->x);
+    element_pow_zn(pk->gx, param->g, sk->x);
 }
 
 void bb_gen_sys_param(bb_sys_param_t param, pairing_t pairing)
 {
     param->pairing = pairing;
     //signature is a point (only need one coordinate) and an element of Z_r
-    param->signature_length = pairing->G1->fixed_length_in_bytes + mpz_sizeinbase(pairing->r, 2);
+    param->signature_length = pairing_length_in_bytes_x_only_G1(pairing)
+	    + pairing_length_in_bytes_Zr(pairing);
 }
 
 void bb_gen(bb_public_key_t pk, bb_private_key_t sk, bb_sys_param_t param)
@@ -75,12 +75,11 @@ void bb_gen(bb_public_key_t pk, bb_private_key_t sk, bb_sys_param_t param)
     element_init(pk->g2, param->pairing->G2);
     element_init(pk->z, param->pairing->GT);
     element_random(pk->g2);
-    //TODO: use trace map to find g1
     element_random(pk->g1);
     element_init(pk->u, param->pairing->G2);
     element_init(pk->v, param->pairing->G2);
-    element_pow_fp(pk->u, pk->g2, sk->x);
-    element_pow_fp(pk->v, pk->g2, sk->y);
+    element_pow_zn(pk->u, pk->g2, sk->x);
+    element_pow_zn(pk->v, pk->g2, sk->y);
     bilinear_map(pk->z, pk->g1, pk->g2, param->pairing);
 }
 
@@ -105,7 +104,7 @@ void bb_sign(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
     element_add(z, z, m);
     element_invert(z, z);
     element_init(sigma, pairing->G1);
-    element_pow_fp(sigma, pk->g1, z);
+    element_pow_zn(sigma, pk->g1, z);
 
     len = element_to_bytes_x_only(sig, sigma);
     element_to_bytes(&sig[len], r);
@@ -140,8 +139,8 @@ int bb_verify(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
     element_init(t1, pairing->G2);
     element_init(t2, pairing->GT);
 
-    element_pow(t0, pk->g2, m->data);
-    element_pow(t1, pk->v, r->data);
+    element_pow_zn(t0, pk->g2, m);
+    element_pow_zn(t1, pk->v, r);
     element_mul(t0, t0, t1);
     element_mul(t0, t0, pk->u);
     bilinear_map(t2, sigma, t0, pairing);
@@ -169,7 +168,7 @@ void ib_setup(ib_sys_param_t param, ib_master_key_t master, pairing_t pairing)
     element_random(param->g);
     element_init(master->x, pairing->Zr);
     element_random(master->x);
-    element_pow(param->gx, param->g, master->x->data);
+    element_pow_zn(param->gx, param->g, master->x);
     master->param = param;
 }
 
@@ -181,7 +180,7 @@ void ib_extract(ib_private_key_t priv, unsigned int idlen, unsigned char *id,
     element_init(priv->d, sk->param->pairing->G1);
     element_init(priv->q, sk->param->pairing->G1);
     element_from_hash(priv->q, idlen, id);
-    element_pow(priv->d, priv->q, sk->x->data);
+    element_pow_zn(priv->d, priv->q, sk->x);
 }
 
 int ib_keyagree_length(ib_sys_param_t param)
@@ -223,7 +222,7 @@ void cc_sign(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
     element_init(v, sk->param->pairing->G1);
 
     element_init(u, sk->param->pairing->G1);
-    element_pow(u, sk->q, r->data);
+    element_pow_zn(u, sk->q, r);
 
     buf = malloc(len = element_length_in_bytes(u));
     element_to_bytes(buf, u);
@@ -235,7 +234,7 @@ void cc_sign(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
 
     element_from_hash(h, hash_length, digest);
     element_add(r, r, h);
-    element_pow(v, sk->d, r->data);
+    element_pow_zn(v, sk->d, r);
     len = element_to_bytes(sig, u);
     element_to_bytes(&sig[len], v);
 
@@ -276,7 +275,7 @@ int cc_verify(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
 
     element_from_hash(h, hash_length, digest);
     element_from_hash(temp, idlen, id);
-    element_pow(temp, temp, h->data);
+    element_pow_zn(temp, temp, h);
     element_mul(temp, temp, u);
 
     res = is_almost_coddh(temp, v, param->g, param->gx, param->pairing);
@@ -310,7 +309,7 @@ void skschnorr_sign(unsigned char *sig, unsigned int hashlen, unsigned char *has
     element_random(r);
 
     element_init(v, sk->param->pairing->G2);
-    element_pow(v, sk->param->g, r->data);
+    element_pow_zn(v, sk->param->g, r);
     bilinear_map(e, sk->q, v, sk->param->pairing);
 
     buf = malloc(len = element_length_in_bytes(e));
@@ -322,8 +321,8 @@ void skschnorr_sign(unsigned char *sig, unsigned int hashlen, unsigned char *has
     free(buf);
 
     element_from_hash(h, hash_length, sig);
-    element_pow(u, sk->d, h->data);
-    element_pow(temp, sk->q, r->data);
+    element_pow_zn(u, sk->d, h);
+    element_pow_zn(temp, sk->q, r);
     element_mul(u, u, temp);
     element_to_bytes(&sig[hash_length], u);
 
@@ -360,7 +359,7 @@ int skschnorr_verify(unsigned char *sig, unsigned int hashlen, unsigned char *ha
     element_from_hash(h, hash_length, sig);
     element_neg(h, h);
 
-    element_pow(v, param->gx, h->data);
+    element_pow_zn(v, param->gx, h);
 
     element_from_bytes(u, &sig[hash_length]);
     bilinear_map(e, u, param->g, param->pairing);

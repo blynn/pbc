@@ -20,7 +20,15 @@
     getline
     sub("static inline ", "")
     s = gensub(" (\\w*)\\(", " <command>\\1</command>(", 1)
-    s = gensub("\\((.*)\\)", "(<parameter>\\1</parameter>)", 1, s)
+    s = gensub("\\((.*$)", "(<parameter>\\1", 1, s)
+    gsub(",", "</parameter><parameter>", s)
+    while (!match(s, ")")) {
+	print s > outfile
+	getline
+	s = $0
+	gsub(",", "</parameter><parameter>", s)
+    }
+    s = gensub("(.*)\\)", "\\1</parameter>)", 1, s)
     gsub(";", "", s);
     print s > outfile
     print "</function>" > outfile

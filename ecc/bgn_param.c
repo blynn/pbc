@@ -188,12 +188,12 @@ static void bgn_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 
     //Tate exponentiation
     //simpler but slower:
-    //element_pow(out, f, p->tateexp);
+    //element_pow_mpz(out, f, p->tateexp);
     //use this trick instead:
     element_invert(f0, f);
     element_neg(fi_im(f), fi_im(f));
     element_mul(f, f, f0);
-    element_pow(out, f, p->h);
+    element_pow_mpz(out, f, p->h);
 
     element_clear(f);
     element_clear(f0);

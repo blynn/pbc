@@ -1,0 +1,29 @@
+<appendix><title>Contributors</title>
+<para>
+Ben Lynn wrote the original PBC library and documentation and is still
+maintaining and developing it.
+</para>
+<para>
+Hovav Shacham wrote multiexponentiation and sliding windows
+exponentiation routines, Makefile improvements, and many
+BBS signature scheme optimizations.
+</para>
+<para>
+Matt Steiner implemented the Boneh-Waters broadcast encryption.
+</para>
+<para>
+Joseph Cooley wrote the GNU build system files,
+tested the library on Mac OS X, and added miscellaneous improvements.
+Among other things,
+pairings can be read from memory buffer and
+most compile-time warnings were removed.
+</para>
+<para>
+Rob Figueiredo, Roger Khazan wrote changes which allow the PBC library
+to be compiled on Windows (via mingw)
+</para>
+<para>
+If you're not mentioned here but should be, please let me know!
+(blynn at cs dot stanford dot edu).
+</para>
+</appendix>

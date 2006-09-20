@@ -569,7 +569,7 @@ int findroot(element_ptr root, element_ptr poly)
     printf("\n");
     */
 fprintf(stderr, "findroot: degree %d...\n", poly_degree(poly));
-    element_pow(p, x, q);
+    element_pow_mpz(p, x, q);
     element_sub(p, p, x);
 
     element_polymod_to_poly(g, p);
@@ -611,7 +611,7 @@ step_random:
 
 	    element_poly_to_polymod_truncate(p, r);
 fprintf(stderr, "findroot: degree %d...\n", poly_degree(g));
-	    element_pow(p, p, q);
+	    element_pow_mpz(p, p, q);
 
 	    element_polymod_to_poly(r, p);
 	    element_clear(p);

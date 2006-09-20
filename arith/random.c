@@ -65,7 +65,7 @@ void random_set_file(char *filename)
     current_random_data = filename;
 }
 
-//TODO: use a linked list
+//TODO: use a linked list, or have some other way of managing RNGs
 
 static void (*kludge_mpz_random)(mpz_t, mpz_t, void *) = deterministic_mpz_random;
 static void *kludge_random_data;

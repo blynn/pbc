@@ -586,7 +586,7 @@ static void e_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     point_random(R);
     point_add(QR, Q, R);
     e_miller(out, in1->data, QR->x, QR->y, R->x, R->y, p);
-    element_pow(out, out, p->tateexp);
+    element_pow_mpz(out, out, p->tateexp);
     point_clear(R);
     point_clear(QR);
 }
@@ -769,7 +769,7 @@ static void sn_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     sn_miller(e0, pairing->r, in1->data, R->x, R->y);
     element_invert(e0, e0);
     element_mul(out, out, e0);
-    //element_pow(out, out, p->tateexp);
+    //element_pow_mpz(out, out, p->tateexp);
     point_clear(R);
     point_clear(QR);
 }

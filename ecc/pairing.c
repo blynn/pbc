@@ -116,5 +116,6 @@ void pairing_init_inp_str(pairing_t pairing, FILE *stream)
 
 void pairing_clear(pairing_t pairing)
 {
-    //TODO
+    //TODO: unsafe to call until all pairing types have implemented this
+    if (0) pairing->clear_func(pairing);
 }

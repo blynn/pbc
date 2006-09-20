@@ -19,9 +19,9 @@ int main(void)
   global_broadcast_params_t gbs;
 
   //Global Setup
-  Setup_global_broadcast_params(&gbs, N, "c201.param");
+  Setup_global_broadcast_params(&gbs, N, "d201.param");
   
-  if(0 && DEBUG) {
+  if(1 && DEBUG) {
     printf("\ng = ");  
     element_out_str(stdout, 0, gbs->g);
     printf("\nh = ");  

@@ -36,7 +36,7 @@ typedef struct bbs_group_private_key_s *bbs_group_private_key_ptr;
 
 struct bbs_manager_private_key_s {
     bbs_sys_param_ptr param;
-    mpz_t xi1, xi2;
+    element_t xi1, xi2;
 };
 typedef struct bbs_manager_private_key_s bbs_manager_private_key_t[1];
 typedef struct bbs_manager_private_key_s *bbs_manager_private_key_ptr;
@@ -52,9 +52,8 @@ void bbs_gen(bbs_group_public_key_t gpk, bbs_manager_private_key_t gmsk,
 	int n, bbs_group_private_key_t *gsk, bbs_sys_param_t param)
 {
     pairing_ptr pairing = param->pairing;
-    mpz_t z0;
-    mpz_t gamma;
-    mpz_ptr r = pairing->r;
+    element_t z0;
+    element_t gamma;
     int i;
 
     gpk->param = param;
@@ -65,33 +64,32 @@ void bbs_gen(bbs_group_public_key_t gpk, bbs_manager_private_key_t gmsk,
     element_init_G1(gpk->u, pairing);
     element_init_G1(gpk->v, pairing);
     element_init_G2(gpk->w, pairing);
-    mpz_init(gmsk->xi1);
-    mpz_init(gmsk->xi2);
-    mpz_init(gamma);
-    mpz_init(z0);
+    element_init_Zr(gmsk->xi1, pairing);
+    element_init_Zr(gmsk->xi2, pairing);
+    element_init_Zr(z0, pairing);
+    element_init_Zr(gamma, pairing);
 
     element_random(gpk->g2);
     element_random(gpk->g1);
     element_random(gpk->h);
-    pbc_mpz_random(gmsk->xi1, r);
-    pbc_mpz_random(gmsk->xi2, r);
-    mpz_invert(z0, gmsk->xi1, r);
-    element_pow(gpk->u, gpk->h, z0);
-    mpz_invert(z0, gmsk->xi2, r);
-    element_pow(gpk->v, gpk->h, z0);
-    pbc_mpz_random(gamma, r);
-    element_pow(gpk->w, gpk->g2, gamma);
+    element_random(gmsk->xi1);
+    element_random(gmsk->xi2);
+    element_invert(z0, gmsk->xi1);
+    element_pow_zn(gpk->u, gpk->h, z0);
+    element_invert(z0, gmsk->xi2);
+    element_pow_zn(gpk->v, gpk->h, z0);
+    element_random(gamma);
+    element_pow_zn(gpk->w, gpk->g2, gamma);
 
     for (i=0; i<n; i++) {
 	gsk[i]->param = param;
 	element_init_G1(gsk[i]->A, pairing);
-	element_init(gsk[i]->x, pairing->Zr);
+	element_init_Zr(gsk[i]->x, pairing);
 
 	element_random(gsk[i]->x);
-	//TODO: "->data" is bad
-	mpz_add(z0, gamma, gsk[i]->x->data);
-	mpz_invert(z0, z0, r);
-	element_pow(gsk[i]->A, gpk->g1, z0);
+	element_add(z0, gamma, gsk[i]->x);
+	element_invert(z0, z0);
+	element_pow_zn(gsk[i]->A, gpk->g1, z0);
 
         /* do some precomputation */
         /* TODO: could instead compute from e(g1,g2) ... */
@@ -110,13 +108,8 @@ void bbs_gen(bbs_group_public_key_t gpk, bbs_manager_private_key_t gmsk,
     bilinear_map(gpk->pr_h_g2, gpk->h, gpk->g2, pairing);
     bilinear_map(gpk->pr_h_w, gpk->h, gpk->w, pairing);
 
-
-    mpz_clear(z0);
-    mpz_clear(gamma);
-}
-
-static mpz_ptr to_mpz(element_t e) {
-    return e->data;
+    element_clear(z0);
+    element_clear(gamma);
 }
 
 void bbs_sign(unsigned char *sig,
@@ -162,16 +155,16 @@ void bbs_sign(unsigned char *sig,
     element_init(rdelta1, Fp); element_random(rdelta1);
     element_init(rdelta2, Fp); element_random(rdelta2);
 
-    element_pow(T1, gpk->u, to_mpz(alpha));
-    element_pow(T2, gpk->v, to_mpz(beta));
+    element_pow_zn(T1, gpk->u, alpha);
+    element_pow_zn(T2, gpk->v, beta);
     element_add(z0, alpha, beta);
 
-    element_pow(T3, gpk->h, to_mpz(z0));
+    element_pow_zn(T3, gpk->h, z0);
     element_mul(T3, T3, gsk->A);
 
-    element_pow(R1, gpk->u, to_mpz(ralpha));
+    element_pow_zn(R1, gpk->u, ralpha);
 
-    element_pow(R2, gpk->v, to_mpz(rbeta));
+    element_pow_zn(R2, gpk->v, rbeta);
 
     /*
      * rather than computing e(T3,g2), note that T3 = A h^{alpha+beta},
@@ -180,35 +173,35 @@ void bbs_sign(unsigned char *sig,
      */
 
     //bilinear_map(et0, T3, gpk->g2, pairing);  /* precomputed */
-    element_pow(et0, gpk->pr_h_g2, to_mpz(z0)); /* NB. here z0 = alpha+beta */
+    element_pow_zn(et0, gpk->pr_h_g2, z0); /* NB. here z0 = alpha+beta */
     element_mul(et0, et0, gsk->pr_A_g2);
-    //element_pow(R3, et0, to_mpz(rx));
+    //element_pow_zn(R3, et0, rx);
 
     // bilinear_map(et0, gpk->h, gpk->w, pairing);  /* precomputed */
     element_add(z0, ralpha, rbeta);
     element_neg(z0, z0);
-    //element_pow(et0, gpk->pr_h_w, to_mpz(z0));
+    //element_pow_zn(et0, gpk->pr_h_w, z0);
     //element_mul(R3, R3, et0);
     // bilinear_map(et0, gpk->h, gpk->g2, pairing);  /* precomputed */
     element_add(z1, rdelta1, rdelta2);
     element_neg(z1, z1);
-    //element_pow(et0, gpk->pr_h_g2, to_mpz(z1));
+    //element_pow_zn(et0, gpk->pr_h_g2, z1);
     //element_mul(R3, R3, et0);
 
-    element_pow3(R3, et0, to_mpz(rx),
-                 gpk->pr_h_w, to_mpz(z0), gpk->pr_h_g2, to_mpz(z1));
+    element_pow3_zn(R3, et0, rx,
+                 gpk->pr_h_w, z0, gpk->pr_h_g2, z1);
 
-    //element_pow(R4, T1, to_mpz(rx));
+    //element_pow_zn(R4, T1, rx);
     element_neg(z0, rdelta1);
-    //element_pow(e10, gpk->u, to_mpz(z0));
+    //element_pow_zn(e10, gpk->u, z0);
     //element_mul(R4, R4, e10);
-    element_pow2(R4, T1, to_mpz(rx), gpk->u, to_mpz(z0));
+    element_pow2_zn(R4, T1, rx, gpk->u, z0);
 
-    //element_pow(R5, T2, to_mpz(rx));
+    //element_pow_zn(R5, T2, rx);
     element_neg(z0, rdelta2);
-    //element_pow(e10, gpk->v, to_mpz(z0));
+    //element_pow_zn(e10, gpk->v, z0);
     //element_mul(R5, R5, e10);
-    element_pow2(R5, T2, to_mpz(rx), gpk->v, to_mpz(z0));
+    element_pow2_zn(R5, T2, rx, gpk->v, z0);
 
     //TODO: c should be the hash of T's and R's
     element_random(c);
@@ -319,27 +312,27 @@ int bbs_verify(unsigned char *sig,
 
     element_neg(z0, c);
 
-    //element_pow(R1, gpk->u, to_mpz(salpha));
-    //element_pow(e10, T1, to_mpz(z0));
+    //element_pow_zn(R1, gpk->u, salpha);
+    //element_pow_zn(e10, T1, z0);
     //element_mul(R1, R1, e10);
-    element_pow2(R1, gpk->u, to_mpz(salpha), T1, to_mpz(z0));
+    element_pow2_zn(R1, gpk->u, salpha, T1, z0);
 
-    //element_pow(R2, gpk->v, to_mpz(sbeta));
-    //element_pow(e10, T2, to_mpz(z0));
+    //element_pow_zn(R2, gpk->v, sbeta);
+    //element_pow_zn(e10, T2, z0);
     //element_mul(R2, R2, e10);
-    element_pow2(R2, gpk->v, to_mpz(sbeta), T2, to_mpz(z0));
+    element_pow2_zn(R2, gpk->v, sbeta, T2, z0);
 
     element_neg(z0, sdelta1);
-    //element_pow(R4, gpk->u, to_mpz(z0));
-    //element_pow(e10, T1, to_mpz(sx));
+    //element_pow_zn(R4, gpk->u, z0);
+    //element_pow_zn(e10, T1, sx);
     //element_mul(R4, R4, e10);
-    element_pow2(R4, gpk->u, to_mpz(z0), T1, to_mpz(sx));
+    element_pow2_zn(R4, gpk->u, z0, T1, sx);
 
     element_neg(z0, sdelta2);
-    //element_pow(R5, gpk->v, to_mpz(z0));
-    //element_pow(e10, T2, to_mpz(sx));
+    //element_pow_zn(R5, gpk->v, z0);
+    //element_pow_zn(e10, T2, sx);
     //element_mul(R5, R5, e10);
-    element_pow2(R5, gpk->v, to_mpz(z0), T2, to_mpz(sx));
+    element_pow2_zn(R5, gpk->v, z0, T2, sx);
 
 
     /*
@@ -348,26 +341,26 @@ int bbs_verify(unsigned char *sig,
      * compute these with one pairing as e(T3, g2^sx w^c).
      */
 
-    //element_pow(e20, gpk->g2, to_mpz(sx));
-    //element_pow(e21, gpk->w, to_mpz(c));
+    //element_pow_zn(e20, gpk->g2, sx);
+    //element_pow_zn(e21, gpk->w, c);
     //element_mul(e20, e20, e21);
-    element_pow2(e20, gpk->g2, to_mpz(sx), gpk->w, to_mpz(c));
+    element_pow2_zn(e20, gpk->g2, sx, gpk->w, c);
     bilinear_map(R3, T3, e20, pairing);
 
-    //element_pow(et0, gpk->pr_g1_g2_inv, to_mpz(c));
+    //element_pow_zn(et0, gpk->pr_g1_g2_inv, c);
     //element_mul(R3, R3, et0);
 
     element_add(z0, salpha, sbeta);
     element_neg(z0, z0);
-    //element_pow(et0, gpk->pr_h_w, to_mpz(z0));
+    //element_pow_zn(et0, gpk->pr_h_w, z0);
     //element_mul(R3, R3, et0);
 
     element_add(z1, sdelta1, sdelta2);
     element_neg(z1, z1);
-    //element_pow(et0, gpk->pr_h_g2, to_mpz(z1));
+    //element_pow_zn(et0, gpk->pr_h_g2, z1);
 
-    element_pow3(et0, gpk->pr_g1_g2_inv, to_mpz(c),
-                 gpk->pr_h_w, to_mpz(z0), gpk->pr_h_g2, to_mpz(z1));
+    element_pow3_zn(et0, gpk->pr_g1_g2_inv, c,
+                 gpk->pr_h_w, z0, gpk->pr_h_g2, z1);
     element_mul(R3, R3, et0);
 
 element_printf("R1: %B\n", R1);
@@ -444,51 +437,51 @@ int bbs_open(element_t A, bbs_group_public_key_t gpk, bbs_manager_private_key_t 
     readptr += element_from_bytes(sdelta2, readptr);
 
     element_neg(z0, c);
-    element_pow(R1, gpk->u, to_mpz(salpha));
-    element_pow(e10, T1, to_mpz(z0));
+    element_pow_zn(R1, gpk->u, salpha);
+    element_pow_zn(e10, T1, z0);
     element_mul(R1, R1, e10);
 
-    element_pow(R2, gpk->v, to_mpz(sbeta));
-    element_pow(e10, T2, to_mpz(z0));
+    element_pow_zn(R2, gpk->v, sbeta);
+    element_pow_zn(e10, T2, z0);
     element_mul(R2, R2, e10);
 
     element_neg(z0, sdelta1);
-    element_pow(R4, gpk->u, to_mpz(z0));
-    element_pow(e10, T1, to_mpz(sx));
+    element_pow_zn(R4, gpk->u, z0);
+    element_pow_zn(e10, T1, sx);
     element_mul(R4, R4, e10);
 
     element_neg(z0, sdelta2);
-    element_pow(R5, gpk->v, to_mpz(z0));
-    element_pow(e10, T2, to_mpz(sx));
+    element_pow_zn(R5, gpk->v, z0);
+    element_pow_zn(e10, T2, sx);
     element_mul(R5, R5, e10);
 
     bilinear_map(R3, T3, gpk->w, pairing);
     bilinear_map(et0, gpk->g1, gpk->g2, pairing);
     element_invert(et0, et0);
     element_mul(R3, R3, et0);
-    element_pow(R3, R3, to_mpz(c));
+    element_pow_zn(R3, R3, c);
 
     bilinear_map(et0, T3, gpk->g2, pairing);
-    element_pow(et0, et0, to_mpz(sx));
+    element_pow_zn(et0, et0, sx);
     element_mul(R3, R3, et0);
 
     element_add(z0, salpha, sbeta);
     element_neg(z0, z0);
     bilinear_map(et0, gpk->h, gpk->w, pairing);
-    element_pow(et0, et0, to_mpz(z0));
+    element_pow_zn(et0, et0, z0);
     element_mul(R3, R3, et0);
 
     element_add(z0, sdelta1, sdelta2);
     element_neg(z0, z0);
     bilinear_map(et0, gpk->h, gpk->g2, pairing);
-    element_pow(et0, et0, to_mpz(z0));
+    element_pow_zn(et0, et0, z0);
     element_mul(R3, R3, et0);
 
     //if mismatch result = 0;
     //} else {
 
-    element_pow(A, T1, gmsk->xi1);
-    element_pow(e10, T2, gmsk->xi2);
+    element_pow_zn(A, T1, gmsk->xi1);
+    element_pow_zn(e10, T2, gmsk->xi2);
     element_mul(A, A, e10);
     element_invert(A, A);
     element_mul(A, A, T3);

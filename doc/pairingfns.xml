@@ -36,8 +36,14 @@ parameters are fed to the program on standard
 input.
 </para>
 <variablelist>
-&pinit;
+&pairing_init;
 </variablelist>
+</section>
 
+<section>
+<title>Other Pairing Functions</title>
+<variablelist>
+&pairing_op;
+</variablelist>
 </section>
 </chapter>

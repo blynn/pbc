@@ -1,10 +1,12 @@
 /* Implementation of Boneh-Waters broadcast encryption scheme
  * Code by:  Matt Steiner   MattS@cs.stanford.edu
+ *
+ * Some changes by Ben Lynn blynn@cs.stanford.edu
+ *
  * bce.c
  */
 
 #include "pbc.h"
-#include <gmp.h>
 #include <string.h>
 #include <stdio.h>
 #include "bce.h"
@@ -30,7 +32,7 @@ void FreeBCS(broadcast_system_t bcs)
   }
   element_clear(bcs->encr_prod);
   element_clear(bcs->pub_key);  
-  mpz_clear(bcs->priv_key);
+  element_clear(bcs->priv_key);
   return;
 }
 
@@ -329,20 +331,20 @@ void LoadParams(char *systemFileName,
   }
   
   //restore h
-  element_init(p->h, p->pairing->G2);
+  element_init_G2(p->h, p->pairing);
   in(p->h, sysp);
   
   //restore hs
   for(i = 0; i < 2*p->num_users; i++) {
     if(i == p->num_users) continue;
-    element_init(p->hs[i], p->pairing->G2);
+    element_init_G2(p->hs[i], p->pairing);
     in(p->hs[i], sysp);
   }
     
   fclose(sysp);
 
   //now insert a dummy private key
-  mpz_init(s->priv_key);
+  element_init_Zr(s->priv_key, p->pairing);
   
   *gbp = p;
   *sys = s;
@@ -480,12 +482,9 @@ void BroadcastKEM_using_product(global_broadcast_params_t gbp,
     return;
   }
 
-  mpz_t t;
-  mpz_init(t);
-  pbc_mpz_random(t, gbp->pairing->r);
-  if(mpz_sgn(t) < 0) {
-    mpz_neg(t,t);
-  }
+  element_t t;
+  element_init_Zr(t, gbp->pairing);
+  element_random(t);
   
   element_init(key, gbp->pairing->GT);
   element_init(myct->C0, gbp->pairing->G2);
@@ -493,10 +492,10 @@ void BroadcastKEM_using_product(global_broadcast_params_t gbp,
   
   //COMPUTE K
   bilinear_map(key, gbp->gs[gbp->num_users-1], gbp->hs[0], gbp->pairing);
-  element_pow(key, key, t);
+  element_pow_zn(key, key, t);
 
   //COMPUTE C0
-  element_pow(myct->C0, gbp->h, t);
+  element_pow_zn(myct->C0, gbp->h, t);
 
   //COMPUTE C1
   if(DEBUG && 0) {
@@ -515,9 +514,8 @@ void BroadcastKEM_using_product(global_broadcast_params_t gbp,
     element_out_str(stdout, 0, myct->C1);    
     printf("\n");
   }
-  element_pow(myct->C1, myct->C1, t);
-
-
+  element_pow_zn(myct->C1, myct->C1, t);
+    element_clear(t);
 }
 
 void Change_decr_prod_indicies(global_broadcast_params_t gbp, int receiver, 
@@ -865,7 +863,7 @@ void Get_priv_key(global_broadcast_params_t gbp, broadcast_system_t sys,
   mykey->index = i;
   element_set(mykey->g_i,gbp->gs[i-1]);
   element_set(mykey->h_i,gbp->hs[i-1]);
-  element_pow(mykey->g_i_gamma, gbp->gs[i-1],sys->priv_key);
+  element_pow_zn(mykey->g_i_gamma, gbp->gs[i-1],sys->priv_key);
 }
 
 
@@ -880,15 +878,12 @@ void Gen_broadcast_system(global_broadcast_params_t gbp,
   broadcast_system_t my_sys;
   my_sys = malloc(sizeof(struct broadcast_system_s));
 
-  mpz_init(my_sys->priv_key);
+  element_init_Zr(my_sys->priv_key, gbp->pairing);
   
-  pbc_mpz_random(my_sys->priv_key, gbp->pairing->r);
+  element_random(my_sys->priv_key);
   
-  if(mpz_sgn(my_sys->priv_key) < 0) {
-    mpz_neg(my_sys->priv_key, my_sys->priv_key);
-  }
   element_init(my_sys->pub_key, gbp->pairing->G1);
-  element_pow(my_sys->pub_key, gbp->g, my_sys->priv_key); 
+  element_pow_zn(my_sys->pub_key, gbp->g, my_sys->priv_key); 
 
   *sys = my_sys;
 }
@@ -935,19 +930,16 @@ void Setup_global_broadcast_params(global_broadcast_params_t *sys,
   element_init(gbs->h, gbs->pairing->G2);
   element_random(gbs->h);
 
-  mpz_t alpha;
+  element_t alpha;
   //Pick a random exponent alpha
-  mpz_init(alpha);
-  pbc_mpz_random(alpha, gbs->pairing->r);
-  if(mpz_sgn(alpha) < 0) {
-    mpz_neg(alpha,alpha);
-  }
+  element_init_Zr(alpha, gbs->pairing);
+  element_random(alpha);
 
   //Make the 0th elements equal to x^alpha
   element_init(lgs[0], gbs->pairing->G1);
   element_init(lhs[0], gbs->pairing->G2);
-  element_pow(lgs[0],gbs->g, alpha);
-  element_pow(lhs[0],gbs->h, alpha);
+  element_pow_zn(lgs[0],gbs->g, alpha);
+  element_pow_zn(lhs[0],gbs->h, alpha);
 
   //Fill in the gs and the hs arrays
   for(i = 1; i < 2*num_users; i++) { 
@@ -958,9 +950,9 @@ void Setup_global_broadcast_params(global_broadcast_params_t *sys,
     }
 
     element_init(lgs[i], gbs->pairing->G1);
-    element_pow(lgs[i],lgs[i-1], alpha);
+    element_pow_zn(lgs[i],lgs[i-1], alpha);
     element_init(lhs[i], gbs->pairing->G2);
-    element_pow(lhs[i],lhs[i-1], alpha);
+    element_pow_zn(lhs[i],lhs[i-1], alpha);
     if(i == num_users+1) {
       element_clear(lgs[i-1]);
       element_clear(lhs[i-1]);
@@ -973,7 +965,7 @@ void Setup_global_broadcast_params(global_broadcast_params_t *sys,
   gbs->hs = lhs;
   
   *sys = gbs;
-  mpz_clear(alpha);
+  element_clear(alpha);
 }
 
 

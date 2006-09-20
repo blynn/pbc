@@ -1,11 +1,15 @@
 # Makefile for generating manual in various formats from DocBook sources
-.PHONY: genxml
-SRCFILES := *.xml gen/*.xml
+.PHONY: target genxml
 
-target : manual.html manual.txt chunked/index.html pretty/index.html
+target : manual.html manual.html manual.txt chunked/index.html pretty/index.html
 
-genxml : ../include/*.h
+GENFILES:=gen/*.xml
+SRCFILES:=*.xml $(GENFILES)
+
+genxml $(GENFILES) : ../include/*.h
+	-rm $(GENFILES)
 	cat ../include/*.h | ./extract
+	for a in gen/*.*.xml; do b=$${a%.*.xml}.xml; cat $$a $$b > tmp; mv tmp $$b ; rm $$a; done
 
 chunked/index.html : $(SRCFILES) custom.xsl
 	xmlto -o chunked -m custom.xsl html manual.xml

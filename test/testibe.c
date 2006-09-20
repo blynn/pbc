@@ -10,7 +10,7 @@ int main(void)
     element_t g, h, s;
     element_t rg, zg, zh;
     pairing_t pairing;
-    mpz_t master, r;
+    element_t master, r;
 
     pairing_init_inp_str(pairing, stdin);
     element_init_G1(g, pairing);
@@ -19,20 +19,20 @@ int main(void)
     element_init_G2(h, pairing);
     element_init_G2(zh, pairing);
     element_init_GT(s, pairing);
-    mpz_init(master);
-    mpz_init(r);
+    element_init_Zr(master, pairing);
+    element_init_Zr(r, pairing);
 
     printf("Identity-based encryption test program\n");
 
     //generate master secret
-    pbc_mpz_random(master, pairing->r);
-    element_printf("master secret = %Z\n", master);
+    element_random(master);
+    element_printf("master secret = %B\n", master);
 
     //generate g, compute g^master
     element_random(g);
 
     element_printf("g = %B\n", g);
-    element_pow(zg, g, master);
+    element_pow_zn(zg, g, master);
     element_printf("g^master = %B\n", zg);
 
     //pick random h, which represents what an ID might hash to
@@ -41,20 +41,20 @@ int main(void)
     element_printf("ID hashes to %B\n", h);
 
     //h^master is the corresponding private key
-    element_pow(zh, h, master);
+    element_pow_zn(zh, h, master);
     element_printf("private key = %B\n", zh);
 
     //encryption: first pick random r
-    pbc_mpz_random(r, pairing->r);
-    element_printf("random r = %Z\n", r);
+    element_random(r);
+    element_printf("random r = %B\n", r);
 
     //compute s = f(g^master, h)^r, used to encrypt the message
     bilinear_map(s, zg, h, pairing);
-    element_pow(s, s, r);
+    element_pow_zn(s, s, r);
     element_printf("f(g^master, h)^r = %B\n", s);
 
     //we transmit g^r along with the encryption
-    element_pow(rg, g, r);
+    element_pow_zn(rg, g, r);
     element_printf("g^r = %B\n", rg);
 
     //decryption: compute f(g^r, h^master)

@@ -202,7 +202,7 @@ static void tate_3(element_ptr out, point_ptr P, point_ptr Q, point_ptr R)
 
     miller(out, P, QR->x, QR->y, R->x, R->y, 3);
 
-    element_pow(out, out, six);
+    element_pow_mpz(out, out, six);
     point_clear(QR);
     element_clear(e0);
     mpz_clear(six);
@@ -256,7 +256,7 @@ static void tate_18(element_ptr out, point_ptr P, point_ptr Q, point_ptr R, poin
 
     element_invert(outd, outd);
     element_mul(out, out, outd);
-    element_pow(out, out, pow);
+    element_pow_mpz(out, out, pow);
 
     element_clear(outd);
     mpz_clear(pow);

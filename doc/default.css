@@ -3,8 +3,9 @@ body {
     font-family: verdana, arial, sans-serif;
 }
 
-tt, code, pre {
+tt, code, pre, .type {
     font-family: andale mono, courier new, courier, monospace;
+    font-size: 90%;
 }
 
 .author {

@@ -1,10 +1,12 @@
 /* Implementation of Boneh-Waters broadcast encryption scheme
    Code by:  Matt Steiner   MattS@cs.stanford.edu
+
+   Some changes by Ben Lynn blynn@cs.stanford.edu
+
    bce.h
 */
 
 #include "pbc.h"
-#include <gmp.h>
 #include <string.h>
 
 
@@ -58,7 +60,7 @@ typedef struct global_broadcast_params_s {
 typedef struct broadcast_system_s {
   element_t encr_prod;
   element_t pub_key;
-  mpz_t priv_key;
+  element_t priv_key;
 }* broadcast_system_t;
 
 /* **********************************************************

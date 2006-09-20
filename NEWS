@@ -1,3 +1,22 @@
+Wed Sep 20 02:53:07 PDT 2006
+
+Some important API changes:
+
+Introduced wrapper functions element_init_[G1|G2|GT|Zr],
+pairing_length_in_bytes_* so people writing cryptosystems won't
+need to know the internals of PBC, and don't need to use GMP functions at all.
+
+Changed test programs to reflect this, though some of the old style remains.
+There is overhead when using element_t instead of mpz_t, but the difference
+is negligible when writing pairing-based cryptosystems.
+
+I renamed element_pow() and friends to element_pow_mpz(),
+and introduced element_pow_zn() for exponents that lie a ring Z_n for
+some natural number n. I thought about calling this version element_pow(),
+but this might confuse programmers used to the old notation, and also the
+"_zn", though cumbersome, reminds the developer that the exponents must
+be elements of a ring Z_n.
+
 Mon Sep 18 08:51:31 PDT 2006
 
 The sig library has been renamed to the pbc_sig library.

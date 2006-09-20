@@ -36,7 +36,7 @@ struct field_s {
     void (*mul_mpz)(element_ptr, element_ptr, mpz_ptr);
     void (*mul_si)(element_ptr, element_ptr, signed long int);
     void (*square)(element_ptr, element_ptr);
-    void (*pow)(element_ptr, element_ptr, mpz_ptr);
+    void (*pow_mpz)(element_ptr, element_ptr, mpz_ptr);
     void (*invert)(element_ptr, element_ptr);
     void (*neg)(element_ptr, element_ptr);
     int (*cmp)(element_ptr, element_ptr);
@@ -62,13 +62,22 @@ typedef struct field_s field_t[1];
 typedef void (*fieldmap)(element_t dst, element_t src);
 
 /*@manual internal
-Initialize ''e'' to be an element of the group, ring or field ''f''
+Initialize ''e'' to be an element of the algebraic structure ''f''
 and set it to be the zero element.
 */
 static inline void element_init(element_t e, field_ptr f)
 {
     e->field = f;
     f->init(e);
+}
+
+/*@manual einit
+Initialize ''e'' to be an element of the algebraic structure that ''e2''
+lies in.
+*/
+static inline void element_init_same_as(element_t e, element_t e2)
+{
+    e2->field->init(e);
 }
 
 /*@manual einit
@@ -80,12 +89,30 @@ static inline void element_clear(element_t e)
     e->field->clear(e);
 }
 
+/*@manual eio
+Output ''e'' on ''stream'' in base ''base''. The base must be between
+2 and 36.
+*/
 static inline size_t element_out_str(FILE *stream, int base, element_t e)
 {
     return e->field->out_str(stream, base, e);
 }
 
+/*@manual eio
+*/
 int element_fprintf(FILE *stream, const char *format, ...);
+/*@manual eio
+Same as printf family
+except also has the 'B' conversion specifier for types
+of <function>element_t</function>, and 'Y', 'Z' conversion specifiers for
+<type>mpz_t</type>. For example if ''e'' is of type
+<type>element_t</type> then
+<screen>
+element_printf("%B\n", e);
+</screen>
+will print the value of ''e'' in a human-readable form on standard output.
+Side effect: once called, regular printf will act in the same manner.
+*/
 int element_printf(const char *format, ...);
 
 /*@manual eassign
@@ -176,20 +203,23 @@ static inline void element_square(element_t n, element_t a)
     n->field->square(n, a);
 }
 
-/*@manual earith
-Set ''n'' to ''a'' raised to the power ''exp'', that is
-''a'' times ''a'' times ... times ''a'' where there are ''exp'' ''a'''s
+/*@manual epow
+Set ''x'' to ''a'' raised to the power ''n'', that is
+''a'' times ''a'' times ... times ''a'' where there are ''n'' ''a'''s
 */
-static inline void element_pow(element_t x, element_t a, mpz_t exp)
+static inline void element_pow_mpz(element_t x, element_t a, mpz_t n)
 {
-    x->field->pow(x, a, exp);
+    x->field->pow_mpz(x, a, n);
 }
 
-static inline void element_pow_fp(element_t x, element_t a, element_t n)
-    //n should be an element of F_p
-    //(p should be the order of x)
+/*@manual epow
+Set ''x'' to ''a'' raised to the power ''n'', where ''n'' is
+an element of a ring Z_n for some n (typically the order
+of the algebraic structure ''x'' lies in).
+*/
+static inline void element_pow_zn(element_t x, element_t a, element_t n)
 {
-    x->field->pow(x, a, n->data);
+    x->field->pow_mpz(x, a, n->data);
 }
 
 /*@manual earith
@@ -208,9 +238,13 @@ static inline void element_invert(element_t n, element_t a)
     n->field->invert(n, a);
 }
 
-static inline void element_random(element_t n)
+/*@manual erandom
+If the ''e'' lies in a finite algebraic structure,
+this function assigns a uniformly random element to ''e''.
+*/
+static inline void element_random(element_t e)
 {
-    n->field->random(n);
+    e->field->random(e);
 }
 
 /*@manual ecmp
@@ -230,7 +264,7 @@ static inline int element_is0(element_t n)
 }
 
 /*@manual ecmp
-Returns 0 if ''a'' and ''b are the same, nonzero otherwise.
+Returns 0 if ''a'' and ''b'' are the same, nonzero otherwise.
 */
 static inline int element_cmp(element_t a, element_t b)
 {
@@ -253,10 +287,12 @@ static inline int element_sgn(element_t a)
 }
 
 /*@manual ecmp
-If ''a'' is zero, returns 0. Otherwise:
-For ''a'' in a field GF(p), returns -1 if ''a'' &lt; p, 1 otherwise.
+If ''a'' is zero, returns 0. For nozero ''a'' the behaviour depends on
+the algebraic structure.
+For ''a'' in Z_p, returns -1 if ''a'' &lt; p, 1 otherwise.
 For ''a'' in a polynomial ring, returns <function>element_sgn</function>
 called on the coefficient of the lowest degree term.
+Not implemented on elliptic curve groups yet.
 */
 static inline int element_sign(element_t a)
 {
@@ -268,21 +304,6 @@ static inline void element_sqrt(element_t a, element_t b)
     a->field->sqrt(a, b);
 }
 
-static inline void element_from_hash(element_t a, int len, void *data)
-{
-    a->field->from_hash(a, len, data);
-}
-
-static inline int element_to_bytes(unsigned char *data, element_t a)
-{
-    return a->field->to_bytes(data, a);
-}
-
-static inline int element_from_bytes(element_t a, unsigned char *data)
-{
-    return a->field->from_bytes(a, data);
-}
-
 /*@manual econvert
 Converts ''e'' to a GMP integer ''z''
 if such an operation makes sense
@@ -292,20 +313,82 @@ static inline void element_to_mpz(mpz_t z, element_t e)
     e->field->to_mpz(z, e);
 }
 
-static inline int element_length_in_bytes(element_t a)
+/*@manual econvert
+Generate an element ''e'' deterministically from
+the ''len'' bytes stored in the buffer ''data''.
+*/
+static inline void element_from_hash(element_t a, int len, void *data)
 {
-    if (a->field->fixed_length_in_bytes < 0) {
-	return a->field->length_in_bytes(a);
+    a->field->from_hash(a, len, data);
+}
+
+/*@manual etrade
+Returns the length in bytes the element ''e'' will take to represent
+*/
+static inline int element_length_in_bytes(element_t e)
+{
+    if (e->field->fixed_length_in_bytes < 0) {
+	return e->field->length_in_bytes(e);
     } else {
-	return a->field->fixed_length_in_bytes;
+	return e->field->fixed_length_in_bytes;
     }
 }
 
-void element_pow2(element_t x, element_t a1, mpz_t n1,
+/*@manual etrade
+Converts ''e'' to byte, writing the result in the buffer ''data''.
+The number of bytes it will write can be determined from calling
+<function>element_length_in_bytes()</function>.
+Returns number of bytes written.
+*/
+static inline int element_to_bytes(unsigned char *data, element_t a)
+{
+    return a->field->to_bytes(data, a);
+}
+
+/*@manual etrade
+Reads ''e'' from the buffer ''data'', and returns
+the number of bytes read.
+*/
+static inline int element_from_bytes(element_t a, unsigned char *data)
+{
+    return a->field->from_bytes(a, data);
+}
+
+/*@manual epow
+Sets ''x'' = ''a1''^''n1'' times ''a2''^''n2'', and is generally faster than
+performing two separate exponentiations.
+*/
+void element_pow2_mpz(element_t x, element_t a1, mpz_t n1,
                                  element_t a2, mpz_t n2);
-void element_pow3(element_t x, element_t a1, mpz_t n1,
+/*@manual epow
+Also sets ''x'' = ''a1''^''n1'' times ''a2''^''n2'',
+but ''n1'', ''n2'' must be elements of a ring Z_n for some integer n.
+*/
+static inline void element_pow2_zn(element_t x, element_t a1, element_t n1,
+                                 element_t a2, element_t n2)
+{
+    element_pow2_mpz(x, a1, n1->data, a2, n2->data);
+}
+
+/*@manual epow
+Sets ''x'' = ''a1''^''n1'' times ''a2^n2'' times ''a3''^''n3'',
+and is generally faster than
+performing three separate exponentiations.
+*/
+void element_pow3_mpz(element_t x, element_t a1, mpz_t n1,
                                  element_t a2, mpz_t n2,
                                  element_t a3, mpz_t n3);
+
+/*@manual epow
+Also sets ''x'' = ''a1''^''n1'' times ''a2^n2'' times ''a3''^''n3'',
+but ''n1'', ''n2'', ''n3'' must be elements of a ring Z_n for some integer n.
+*/
+static inline void element_pow3_zn(element_t x, element_t a1, element_t n1,
+                                 element_t a2, element_t n2,
+                                 element_t a3, element_t n3)
+{
+    element_pow3_mpz(x, a1, n1->data, a2, n2->data, a3, n3->data);
+}
 
 static inline void field_clear(field_ptr f)
 {
@@ -335,12 +418,43 @@ static inline void field_init_fp(field_ptr f, mpz_t prime) {
     field_init_naive_fp(f, prime);
 }
 
-//The following only work for groups of points on elliptic curves:
+/*@manual etrade
+Assumes ''e'' is a point on an elliptic curve.
+Writes the x-coordinate of ''e'' to the buffer ''data''
+*/
 int element_to_bytes_x_only(unsigned char *data, element_t e);
+/*@manual etrade
+Assumes ''e'' is a point on an elliptic curve.
+Sets ''e'' to a point with
+x-coordinate represented by the buffer ''data''. This is not unique.
+For each ''x''-coordinate, there exist two different points, at least
+for the elliptic curves in PBC. (They are inverses of each other.)
+*/
 int element_from_bytes_x_only(element_t e, unsigned char *data);
+/*@manual etrade
+Assumes ''e'' is a point on an elliptic curve.
+Returns the length in bytes needed to hold the x-coordinate of ''e''.
+*/
 int element_length_in_bytes_x_only(element_t e);
+
+/*@manual etrade
+If possible, outputs a compressed form of the element ''e'' to
+the buffer of bytes ''data''.
+Currently only implemented for points on an elliptic curve.
+*/
 int element_to_bytes_compressed(unsigned char *data, element_t e);
+
+/*@manual etrade
+Sets element ''e'' to the element in compressed form in the buffer of bytes
+''data''.
+Currently only implemented for points on an elliptic curve.
+*/
 int element_from_bytes_compressed(element_t e, unsigned char *data);
+
+/*@manual etrade
+Returns the number of bytes needed to hold ''e'' in compressed form.
+Currently only implemented for points on an elliptic curve.
+*/
 int element_length_in_bytes_compressed(element_t e);
 
 #endif //FIELD_H

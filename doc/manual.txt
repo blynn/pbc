@@ -17,12 +17,6 @@ Copyright © 2006 Ben Lynn
 
   2._Installing_PBC
 
-
-        Testing_the_Library
-
-        Test_Programs
-
-
   3._PBC_Basics
 
 
@@ -40,6 +34,8 @@ Copyright © 2006 Ben Lynn
 
         Initializing_Pairings
 
+        Other_Pairing_Functions
+
 
   5._Element_Functions
 
@@ -50,28 +46,22 @@ Copyright © 2006 Ben Lynn
 
         Converting_Elements
 
-        Arithmetic
+        Element_Arithmetic
+
+        Exponentiating_Elements
+
+        Comparing_Elements
+
+        I/O_of_Elements
+
+        Random_Elements
+
+        Element_Import/Export
 
 
-  6._Pairing_Types
+  6._Randomness_Functions
 
-
-        Type_A
-
-        Type_B
-
-        Type_C
-
-        Type_D
-
-        Type_E
-
-        Type_F
-
-        Type_G
-
-        BGN_Curves
-
+  A._Contributors
 
 
 Preface
@@ -107,52 +97,6 @@ See ./configure --help for more information.
 PBC uses some GNU C extensions, notably nested functions, and also printf
 extensions. The latter may be safely commented out as it is only used in
 demonstration programs.
-
-Testing the Library
-
-Several test programs and curve parameters are bundled with the library. After
-compilation succeeds, try:
-
-  test/testpairing < param/a.param
-  test/benchmark < param/c159.param
-  test/testibe < param/e.param
-
-The *.param files contain pairing parameters one might typically use in a real
-cryptosystem. Many of the test programs read the parameters from standard
-input.
-
-Test Programs
-
-
-
-  listmnt
-      Searches for discriminants D that lead to MNT curves with subgroups of
-      prime order.
-
-  genaparam, gencparam, geneparam, genfparam, genbgn
-      Prints parameters for a curve suitable for computing pairings of a given
-      type. The output can be fed to some of the other test programs.
-      The program gencparam should be given a discriminant as the first
-      argument.
-
-  testhilbert
-      Prints the Hilbert polynomial for a given discriminant.
-
-  testsig, testibe
-      These programs read curve parameters on standard input and perform
-      computations that would be required in an implementation of the Boneh-
-      Lynn-Shacham short signature scheme and the Boneh-Franklin identity-based
-      encryption scheme.
-
-  testbb, testbls, testbbs, testibs
-      These test programs are more realistic, and test the implementations of
-      the Boneh-Boyen, Boneh-Lynn-Shacham, Boneh-Boyen-Shacham signature
-      schemes and the Cha-Cheon and Sakai-Kasahara-Schnorr identity-based
-      signature schemes
-
-  benchmark
-      Reads pairing parameters on standard input and benchmarks the pairing.
-
 
 Chapter 3. PBC Basics
 
@@ -197,7 +141,7 @@ Function Classes
 
 PBC contains several classes of functions.
 
-  1. Functions for dealing with bilinear pairing parameters begin with with
+  1. Functions for dealing with bilinear pairing parameters begin with
      pairing_.
   2. Functions for operating on elements of groups, rings and fields begin with
      element_.
@@ -279,6 +223,37 @@ input.
       no longer needed.
 
 
+Other Pairing Functions
+
+
+
+  void pairing_apply(element_t out, element_t in1, element_t in2, pairing_t
+  pairing) {
+      Apply the bilinear map described by pairing. The element out will be set
+      to the map applied to in1 and in2 (in that order). in1 must be in the
+      group G1, in2 must be in the group G2, and out must be in the group GT.
+
+  int pairing_length_in_bytes_G1(pairing_t pairing)
+      Returns the length in bytes needed to represent an element of G1.
+
+  int pairing_length_in_bytes_x_only_G1(pairing_t pairing)
+      Returns the length in bytes needed to represent the x-coordinate of an
+      element of G1.
+
+  int pairing_length_in_bytes_G2(pairing_t pairing)
+      Returns the length in bytes needed to represent an element of G2.
+
+  int pairing_length_in_bytes_x_only_G2(pairing_t pairing)
+      Returns the length in bytes needed to represent the x-coordinate of an
+      element of G2.
+
+  int pairing_length_in_bytes_GT(pairing_t pairing)
+      Returns the length in bytes needed to represent an element of GT.
+
+  int pairing_length_in_bytes_Zr(pairing_t pairing)
+      Returns the length in bytes needed to represent an element of Zr.
+
+
 Chapter 5. Element Functions
 
 Elements of groups, rings and fields are stored in the element_t data type.
@@ -296,16 +271,23 @@ When an element is initialized it is associated with an algebraic structure,
 such as a particular finite field or elliptic curve group.
 
 
-  void element_clear(element_t e)
-      Free the space occupied by e. Call this when the variable e is no longer
-      needed.
-
   void element_init_G1(element_t e, pairing_t pairing)
 
   void element_init_G2(element_t e, pairing_t pairing)
 
   void element_init_GT(element_t e, pairing_t pairing)
       Initialize e to be an element of the group G1, G2 or GT of pairing.
+
+  void element_init_Zr(element_t e, pairing_t pairing)
+      Initialize e to be an element of the ring Zr of pairing. r is the order
+      of the groups G1, G2 and GT.
+
+  void element_init_same_as(element_t e, element_t e2)
+      Initialize e to be an element of the algebraic structure that e2 lies in.
+
+  void element_clear(element_t e)
+      Free the space occupied by e. Call this when the variable e is no longer
+      needed.
 
 
 Assigning Elements
@@ -338,8 +320,12 @@ Converting Elements
   void element_to_mpz(mpz_t z, element_t e)
       Converts e to a GMP integer z if such an operation makes sense
 
+  void element_from_hash(element_t a, int len, void *data)
+      Generate an element e deterministically from the len bytes stored in the
+      buffer data.
 
-Arithmetic
+
+Element Arithmetic
 
 All element_t arguments to this function must have been initialized to be from
 the same algebraic structure.
@@ -365,135 +351,171 @@ apply the group operation)
   void element_square(element_t n, element_t a)
       Set n to a times a.
 
+  void element_neg(element_t n, element_t a)
+      Set n to -a.
 
-Chapter 6. Pairing Types
+  void element_invert(element_t n, element_t a)
+      Set n to the inverse of a.
 
-The PBC library implements the pairing using different types of curves. Which
-curve to use depends on the application. To make it easy to refer to them, I
-have labelled them with letters. See below for the details.
-The library provides pairing parameters useful in typical pairing-based
-cryptosystems. If you're not interested in what the details are, always use
-Type A when a fast pairing is desired, and Type F when short group elements are
-needed. Type C are not as slow as type F, but cannot be quite as short.
 
-Type A
+Exponentiating Elements
 
-We use the curve y^2 = x^3 + x over the field F_q for some prime q. It turns
-out #E(F_q) = q + 1 and #E(F_q^2) = (q+1)^2. Thus the embedding degree k is 2.
-We set things up so that q + 1 = r * h, for a particular r. For speed, we pick
-r to be a Solinas prime, that is, r has the form 2^a +- 2^b +- 1 for some
-integers 0 < b < a.
-We also choose q = -1 mod 12 so we can implement F_q^2 as F_q[i] (where i =
-sqrt(-1)). Also, since q = -1 mod 3, cube roots in F_q are easy to compute.
-This latter feature may be removed because I have not found a use for it yet
-(in which case only q = -1 mod 4 is guaranteed).
-Pairings on type A curves are the fast and ought to be used where the main
-concern is efficiency. Typically, r should be about 160 bits long and q about
-512 bits. In this case, elements of groups G1 and G2 take 512 bits to
-represent.
-Additionally, the pairing is symmetric, that is G1 and G2 are in fact the same
-group.
-a_param struct fields:
+Exponentiation and multiexponentiation functions.
 
-exp2, exp1, sign1, sign0, r:
-    r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1 (Solinas prime)
-q, h:
-    r * h = q + 1
-    q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
 
-Type B
+  void element_pow_mpz(element_t x, element_t a, mpz_t n)
+      Set x to a raised to the power n, that is a times a times ... times a
+      where there are n a's
 
-This type is reserved for the curve y^2 = x^3 + 1 over F_q with q = -1 mod 12.
-It has yet to be implemented as I have not seen a compelling reason to use it.
-There are advantages unique to this curve however. Since cube roots in F_q are
-fast and guaranteed to exist, for any given value of y, it is easy to solve for
-x. Also, the coefficient of x is zero in the curve equation, simplifying some
-equations (e.g. point doubling).
-There is also at least one drawback when compared with the similar type A
-pairing. If symmetry of the pairing is insisted upon, some optimizations are
-not possible. If ever implemented, perhaps I will divide this case into two
-subtypes, one symmetric, and the other asymmetric but slightly faster.
+  void element_pow_zn(element_t x, element_t a, element_t n)
+      Set x to a raised to the power n, where n is an element of a ring Z_n for
+      some n (typically the order of the algebraic structure x lies in).
 
-Type C
+  void element_pow2_mpz(element_t x, element_t a1, mpz_t n1, element_t a2,
+  mpz_t n2)
+      Sets x = a1^n1 times a2^n2, and is generally faster than performing two
+      separate exponentiations.
 
-This type is reserved for supersingular curves with embedding degree 6.
-Pairings are fast as optimizations specific to fields of characteristic 3 may
-be used. The embedding degree of 6 also means the representations of elements
-of G1 are short.
-On the other hand, the low characteristic also makes these curves more
-susceptible to Coppersmith's attack, so slightly larger fields are needed for
-security. Because of this, I have no plans to implement them in the immediate
-future.
+  void element_pow3_mpz(element_t x, element_t a1, mpz_t n1, element_t a2,
+  mpz_t n2, element_t a3, mpz_t n3)
+      Sets x = a1^n1 times a2^n2 times a3^n3, and is generally faster than
+      performing three separate exponentiations.
 
-Type D
 
-These are ordinary curves of with embedding degree 6, whose orders are prime or
-a prime multiplied by a small constant. These are constructed using the method
-due to MNT.
-A type C curve is defined over some field F_q and has order h * r where r is a
-prime and h is a small constant. Over the field F_q^6 its order is a multiple
-of r^2.
-Typically the order of the curve E is around 170 bits, as is F_q, the base
-field, thus q^k is around the 1024-bit mark which is commonly considered good
-enough.
-Using type C pairings allows elements of group G1 to be quite short, typically
-170-bits. Because of a certain trick, elements of group G2 need only be 3 times
-longer, that is, about 510 bits rather than 6 times long. They are not quite as
-short as type F pairings, but much faster.
+Comparing Elements
 
-c_param struct fields:
-q   F_q is the base field
-n   # of points in E(F_q)
-r   large prime dividing n
-h   n = h * r
-a   E is given by y^2 = x^3 + ax + b
-b
-nk  # of points in E(F_q^k)
-hk  nk = hk * r * r
-I sometimes refer to a type C curve as a triplet of numbers: the discriminant,
-the number of bits in the prime q, and the number of bits in the prime r. The
-listmnt program prints these numbers. The bundled type C curve parameters are
-the curves 9563-201-181, 62003-159-158 and 496659-224-224.
+These functions compare elements from the same algebraic structure.
 
-Type E
 
-The CM (Complex Multiplication) method of constructing elliptic curves starts
-with the Diophantine equation
+  int element_is1(element_t n)
+      Returns 0 if n is 1, nonzero otherwise.
 
-    DV^2 = 4q - t^2
-If t = 2 and q = D r^2 h^2 + 1 for some prime r (which we choose to be a
-Solinas prime) and some integer h, we find that this equation is easily solved
-with V = 2rh.
-Thus it is easy to find a curve (over the field F_q) with order q - 1. Note r^2
-divides q - 1, thus we have an embedding degree of 1.
-Hence all computations necessary for the pairing can be done in F_q alone.
-There is never any need to extend F_q.
-As q is typically 1024 bits, group elements take a lot of space to represent.
-Moreover, many optimizations do not apply to this type, resulting in a slower
-pairing.
-This pairing is kept as a reserve, in case some day it is discovered that
-discrete log in field extensions is easier to solve than previously thought.
+  int element_is0(element_t n)
+      Returns 0 if n is 0, nonzero otherwise.
 
-Type F
+  int element_cmp(element_t a, element_t b)
+      Returns 0 if a and b are the same, nonzero otherwise.
 
-Using carefully crafted polynomials, k = 12 pairings can be constructed. Only
-160 bits are needed to represent elements of one group, and 320 bits for the
-other.
-They should be used when the top priority is to minimize bandwidth (e.g. short
-signatures). The pairing is slower than the other types.
-Also, k = 12 allows higher security short signatures. (k = 6 curves cannot be
-used to scale security from 160-bits to say 256-bits because finite field
-attacks are subexponential.)
+  int element_is_sqr(element_t a)
+      Returns 0 if a is a perfect square (quadratic residue), nonzero
+      otherwise.
 
-Type G
+  int element_sgn(element_t a)
 
-k = 10 curves may also be constructed.
+  int element_sign(element_t a)
+      If a is zero, returns 0. For nozero a the behaviour depends on the
+      algebraic structure. For a in Z_p, returns -1 if a < p, 1 otherwise. For
+      a in a polynomial ring, returns element_sgn called on the coefficient of
+      the lowest degree term. Not implemented on elliptic curve groups yet.
 
-BGN Curves
 
-These are curves containing a subgroup of a specified order. Boneh, Goh and
-Nissim have use for an elliptic curve with subgroup order N = pq for large
-primes p, q.
-To implement them, Type A curves can be used, only instead of a Solinas prime,
-we generate curves with a given group order. Type B can also be used (and that
-is what is suggested in their paper) but this is less desirable.
+I/O of Elements
+
+Functions for producing human-readable outputs for elements. Converting
+elements to and from bytes are discussed later.
+
+
+  size_t element_out_str(FILE *stream, int base, element_t e)
+      Output e on stream in base base. The base must be between 2 and 36.
+
+  int element_fprintf(FILE *stream, const char *format, ...)
+
+  int element_printf(const char *format, ...)
+      Same as printf family except also has the 'B' conversion specifier for
+      types of element_t, and 'Y', 'Z' conversion specifiers for mpz_t. For
+      example if e is of type element_t then
+
+        element_printf("%B\n", e);
+
+      will print the value of e in a human-readable form on standard output.
+      Side effect: once called, regular printf will act in the same manner.
+
+
+Random Elements
+
+Only works for finite algebraic structures. Effect on polynomial rings, fields
+of characteristic zero, etc. undefined.
+By default randomness is deterministic. See the chapter on randomness functions
+on how to control this.
+
+
+  void element_random(element_t e)
+      If the e lies in a finite algebraic structure, this function assigns a
+      uniformly random element to e.
+
+
+Element Import/Export
+
+Functions for serializing and deserializing elements.
+
+
+  int element_length_in_bytes(element_t e)
+      Returns the length in bytes the element e will take to represent
+
+  int element_to_bytes(unsigned char *data, element_t a)
+      Converts e to byte, writing the result in the buffer data. The number of
+      bytes it will write can be determined from calling
+      element_length_in_bytes(). Returns number of bytes written.
+
+  int element_from_bytes(element_t a, unsigned char *data)
+      Reads e from the buffer data, and returns the number of bytes read.
+
+  int element_to_bytes_x_only(unsigned char *data, element_t e)
+      Assumes e is a point on an elliptic curve. Writes the x-coordinate of e
+      to the buffer data
+
+  int element_from_bytes_x_only(element_t e, unsigned char *data)
+      Assumes e is a point on an elliptic curve. Sets e to a point with x-
+      coordinate represented by the buffer data. This is not unique. For each
+      x-coordinate, there exist two different points, at least for the elliptic
+      curves in PBC. (They are inverses of each other.)
+
+  int element_length_in_bytes_x_only(element_t e)
+      Assumes e is a point on an elliptic curve. Returns the length in bytes
+      needed to hold the x-coordinate of e.
+
+  int element_to_bytes_compressed(unsigned char *data, element_t e)
+      If possible, outputs a compressed form of the element e to the buffer of
+      bytes data. Currently only implemented for points on an elliptic curve.
+
+  int element_from_bytes_compressed(element_t e, unsigned char *data)
+      Sets element e to the element in compressed form in the buffer of bytes
+      data. Currently only implemented for points on an elliptic curve.
+
+  int element_length_in_bytes_compressed(element_t e)
+      Returns the number of bytes needed to hold e in compressed form.
+      Currently only implemented for points on an elliptic curve.
+
+
+Chapter 6. Randomness Functions
+
+By default PBC randomness is deterministic to make it easier to debug, and
+because different platforms have different sources of random bits.
+
+
+  void random_set_file(char *filename)
+      Uses filename as a source of random bytes. For example, on Linux one
+      might use /dev/random
+
+  void random_set_deterministic(void)
+      Use a determinstic random number generator.
+
+  void pbc_mpz_random(mpz_t z, mpz_t limit)
+      Use previously chosen random number generator to select a random z that
+      is less than limit.
+
+
+Appendix A. Contributors
+
+Ben Lynn wrote the original PBC library and documentation and is still
+maintaining and developing it.
+Hovav Shacham wrote multiexponentiation and sliding windows exponentiation
+routines, Makefile improvements, and many BBS signature scheme optimizations.
+Matt Steiner implemented the Boneh-Waters broadcast encryption.
+Joseph Cooley wrote the GNU build system files, tested the library on Mac OS X,
+and added miscellaneous improvements. Among other things, pairings can be read
+from memory buffer and most compile-time warnings were removed.
+Rob Figueiredo, Roger Khazan wrote changes which allow the PBC library to be
+compiled on Windows (via mingw)
+If you're not mentioned here but should be, please let me know! (blynn at cs
+dot stanford dot edu).

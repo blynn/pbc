@@ -7,7 +7,7 @@ int main(void)
     element_t g, h, s;
     element_t pubkey, sig;
     pairing_t pairing;
-    mpz_t secret;
+    element_t secret;
 
     pairing_init_inp_str(pairing, stdin);
 
@@ -16,7 +16,7 @@ int main(void)
     element_init_G1(h, pairing);
     element_init_G1(sig, pairing);
     element_init_GT(s, pairing);
-    mpz_init(secret);
+    element_init_Zr(secret, pairing);
 
     printf("Short signature test\n");
 
@@ -25,11 +25,11 @@ int main(void)
     element_printf("system parameter g = %B\n", g);
 
     //generate private key
-    pbc_mpz_random(secret, pairing->r);
-    element_printf("private key = %Z\n", secret);
+    element_random(secret);
+    element_printf("private key = %B\n", secret);
 
     //compute corresponding public key
-    element_pow(pubkey, g, secret);
+    element_pow_zn(pubkey, g, secret);
     element_printf("public key = %B\n", pubkey);
 
     //generate element from a hash
@@ -39,7 +39,7 @@ int main(void)
 
     //h^secret is the signature
     //in real life: only output the first coordinate
-    element_pow(sig, h, secret);
+    element_pow_zn(sig, h, secret);
     element_printf("signature = %B\n", sig);
 
     {

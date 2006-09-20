@@ -212,7 +212,7 @@ void f_param_gen(f_param_t fp, int bits)
 	point_mul(Ptest, z1, Ptest);
 	if (point_is_inf(Ptest)) {
 	    mpz_set_ui(z0, 5);
-	    element_pow(poly_coeff(f, 0), poly_coeff(f, 0), z0);
+	    element_pow_mpz(poly_coeff(f, 0), poly_coeff(f, 0), z0);
 	}
 	element_clear(e1);
 	point_clear(Ptest);
@@ -412,7 +412,7 @@ static void f_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 
     element_clear(epow);
 }
-    element_pow(out, out, p->tateexp);
+    element_pow_mpz(out, out, p->tateexp);
     element_clear(x);
     element_clear(y);
 }
@@ -501,18 +501,18 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
     //and that x^6 = -alpha
     //but this is fast enough
     element_set1(polymod_coeff(xpowq, 1));
-    element_pow(xpowq, xpowq, param->q);
-    element_pow(xpowq, xpowq, param->q);
+    element_pow_mpz(xpowq, xpowq, param->q);
+    element_pow_mpz(xpowq, xpowq, param->q);
     element_set(p->xpowq2, polymod_coeff(xpowq, 1));
 
-    element_pow(xpowq, xpowq, param->q);
-    element_pow(xpowq, xpowq, param->q);
-    element_pow(xpowq, xpowq, param->q);
-    element_pow(xpowq, xpowq, param->q);
+    element_pow_mpz(xpowq, xpowq, param->q);
+    element_pow_mpz(xpowq, xpowq, param->q);
+    element_pow_mpz(xpowq, xpowq, param->q);
+    element_pow_mpz(xpowq, xpowq, param->q);
     element_set(p->xpowq6, polymod_coeff(xpowq, 1));
 
-    element_pow(xpowq, xpowq, param->q);
-    element_pow(xpowq, xpowq, param->q);
+    element_pow_mpz(xpowq, xpowq, param->q);
+    element_pow_mpz(xpowq, xpowq, param->q);
     element_set(p->xpowq8, polymod_coeff(xpowq, 1));
 
     element_clear(xpowq);

@@ -300,12 +300,12 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 
     //Tate exponentiation
     //simpler but slower:
-    //element_pow(out, f, p->tateexp);
+    //element_pow_mpz(out, f, p->tateexp);
     //use this trick instead:
     element_invert(f0, f);
     element_neg(fi_im(f), fi_im(f));
     element_mul(f, f, f0);
-    element_pow(out, f, p->h);
+    element_pow_mpz(out, f, p->h);
 
     element_clear(f);
     element_clear(f0);
@@ -427,12 +427,12 @@ static void a_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 
     //Tate exponentiation
     //simpler but slower:
-    //element_pow(out, f, p->tateexp);
+    //element_pow_mpz(out, f, p->tateexp);
     //use this trick instead:
     element_invert(f0, f);
     element_neg(fi_im(f), fi_im(f));
     element_mul(f, f, f0);
-    element_pow(out, f, p->h);
+    element_pow_mpz(out, f, p->h);
 
     element_clear(f);
     element_clear(f0);
@@ -443,6 +443,21 @@ static void a_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     element_clear(b);
     element_clear(c);
     element_clear(e0);
+}
+
+static void pairing_clear_a_param(pairing_t pairing)
+{
+    a_pairing_data_ptr p = pairing->data;
+    curve_clear(p->Eq);
+    field_clear(p->Fq);
+    field_clear(p->Fq2);
+    mpz_clear(p->h);
+    free(pairing->data);
+
+    mpz_clear(pairing->r);
+    field_clear(pairing->Zr);
+    field_clear(pairing->G1);
+    free(pairing->G1);
 }
 
 void pairing_init_a_param(pairing_t pairing, a_param_t param)
@@ -478,4 +493,5 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
     pairing->G2 = pairing->G1;
     pairing->phi = phi_identity;
     pairing->GT = p->Fq2;
+    pairing->clear_func = pairing_clear_a_param;
 }

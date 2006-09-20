@@ -15,7 +15,7 @@ typedef struct bls_sys_param_s *bls_sys_param_ptr;
 
 struct bls_private_key_s {
     bls_sys_param_ptr param;
-    mpz_t x;
+    element_t x;
 };
 typedef struct bls_private_key_s bls_private_key_t[1];
 typedef struct bls_private_key_s *bls_private_key_ptr;

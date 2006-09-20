@@ -1,0 +1,11 @@
+<chapter>
+<title>Randomness Functions</title>
+<para>
+By default PBC randomness is deterministic to make it easier to debug,
+and because different platforms have different sources of random bits.
+</para>
+<variablelist>
+&pbcrandom;
+</variablelist>
+
+</chapter>

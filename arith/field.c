@@ -111,7 +111,7 @@ static void element_pow_wind(element_ptr x, mpz_ptr n,
     element_clear(result);
 }
 
-static void generic_pow(element_ptr x, element_ptr a, mpz_ptr n)
+static void generic_pow_mpz(element_ptr x, element_ptr a, mpz_ptr n)
 {
     int k;
     element_t *a_lookup;
@@ -127,7 +127,7 @@ static void generic_pow(element_ptr x, element_ptr a, mpz_ptr n)
     clear_pow_window(k, a_lookup);
 }
 
-void naive_generic_pow(element_ptr x, element_ptr a, mpz_ptr n)
+void naive_generic_pow_mpz(element_ptr x, element_ptr a, mpz_ptr n)
 {
     int s;
 
@@ -151,7 +151,7 @@ void naive_generic_pow(element_ptr x, element_ptr a, mpz_ptr n)
     element_clear(result);
 }
 
-void element_pow2(element_ptr x, element_ptr a1, mpz_ptr n1,
+void element_pow2_mpz(element_ptr x, element_ptr a1, mpz_ptr n1,
                                  element_ptr a2, mpz_ptr n2)
 {
     int s, s1, s2;
@@ -189,7 +189,7 @@ void element_pow2(element_ptr x, element_ptr a1, mpz_ptr n1,
     element_clear(a1a2);
 }
 
-void element_pow3(element_ptr x, element_ptr a1, mpz_ptr n1,
+void element_pow3_mpz(element_ptr x, element_ptr a1, mpz_ptr n1,
                                  element_ptr a2, mpz_ptr n2,
                                  element_ptr a3, mpz_ptr n3)
 {
@@ -293,6 +293,6 @@ void field_init(field_ptr f)
     mpz_init(f->order);
     f->square = generic_square;
     f->mul_mpz = generic_mul_mpz;
-    f->pow = generic_pow;
+    f->pow_mpz = generic_pow_mpz;
     f->mul_si = generic_mul_si;
 }

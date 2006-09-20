@@ -28,9 +28,11 @@ such as a particular finite field or elliptic curve group.
 </section>
 <section>
 <title>Assigning Elements</title>
+<para>
 These functions assign values to elements. When integers are assigned,
 they are mapped to algebraic structures canonically if it makes sense
 (e.g. rings and fields).
+</para>
 <variablelist>
 &eassign;
 </variablelist>
@@ -41,8 +43,9 @@ they are mapped to algebraic structures canonically if it makes sense
 &econvert;
 </variablelist>
 </section>
+
 <section>
-<title>Algebraic Operations</title>
+<title>Element Arithmetic</title>
 <para>
 All <type>element_t</type> arguments to this function must have been
 initialized to be from the same algebraic structure.
@@ -56,4 +59,61 @@ to apply the group operation)
 &earith;
 </variablelist>
 </section>
+
+<section>
+<title>Exponentiating Elements</title>
+<para>
+Exponentiation and multiexponentiation functions.
+</para>
+<variablelist>
+&epow;
+</variablelist>
+</section>
+
+<section>
+<title>Comparing Elements</title>
+<para>
+These functions compare elements from the same algebraic structure.
+</para>
+<variablelist>
+&ecmp;
+</variablelist>
+</section>
+
+<section>
+<title>I/O of Elements</title>
+<para>
+Functions for producing human-readable outputs for elements.
+Converting elements to and from bytes are discussed later.
+</para>
+<variablelist>
+&eio;
+</variablelist>
+</section>
+
+<section>
+<title>Random Elements</title>
+<para>
+Only works for finite algebraic structures. Effect
+on polynomial rings, fields of characteristic zero, etc. undefined.
+</para>
+<para>
+By default randomness is deterministic. See the chapter on randomness
+functions on how to control this.
+</para>
+<variablelist>
+&erandom;
+</variablelist>
+</section>
+
+<section>
+<title>Element Import/Export</title>
+<para>
+Functions for serializing and deserializing elements.
+</para>
+<variablelist>
+&etrade;
+</variablelist>
+</section>
+
 </chapter>
