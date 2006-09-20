@@ -3,7 +3,7 @@ body {
     font-family: verdana, arial, sans-serif;
 }
 
-tt, code {
+tt, code, pre {
     font-family: andale mono, courier new, courier, monospace;
 }
 
@@ -47,23 +47,23 @@ div.toc ul {
     margin: 0;
 }
 
-div.toc li ul a
+div.toc li ul a, li ul span.currentlink
 {
     font-weight: normal;
     font-size: 90%;
     padding-left: 2em;
 }
 
-a.currentlink {
-    text-decoration: none;
-    background-color: #aaaaf9;
-}
-
-div.toc a {
+div.toc a, span.currentlink{
     display:block;
     text-decoration: none;
     padding-left: 0.5em;
     color: #0000aa;
+}
+
+span.currentlink {
+    text-decoration: none;
+    background-color: #aaaaf9;
 }
 
 div.toc a:visited {
@@ -79,6 +79,8 @@ div.toc a:hover {
     border: 1px solid #aaaaaa;
     background-color: #f9f9f9;
     padding: 0.17em;
+    margin: 1em;
+    margin-right: 3em;
 }
 
 .parameter {

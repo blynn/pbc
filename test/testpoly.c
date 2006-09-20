@@ -10,9 +10,7 @@ int main(void)
     mpz_init(prime);
     mpz_set_ui(prime, 100000);
     mpz_nextprime(prime, prime);
-    printf("prime = ");
-    mpz_out_str(stdout, 0, prime);
-    printf("\n");
+    element_printf("prime = %Z\n", prime);
     field_init_fp(zp, prime);
     field_init_poly(rx, zp);
     element_init(f, rx);
@@ -37,34 +35,20 @@ int main(void)
     element_init(g, fp2);
     element_random(f);
     element_random(g);
-    printf("f: ");
-    element_out_str(stdout, 0, f);
-    printf(", g: ");
-    element_out_str(stdout, 0, g);
-    printf("\n");
+    element_printf("f: %B, g: %B\n", f, g);
     element_invert(g, f);
-    printf("inv f: ");
-    element_out_str(stdout, 0, g);
-    printf("\n");
+    element_printf("inv f: %B\n", g);
     element_mul(g, f, g);
-    printf("prod: ");
-    element_out_str(stdout, 0, g);
-    printf("\n");
+    element_printf("prod: %B\n", g);
     {
 	do {
 	    element_random(f);
 	} while (!element_is_sqr(f));
-	printf("random square f: ");
-	element_out_str(stdout, 0, f);
-	printf("\n");
+	element_printf("random square f: %B\n", f);
 	element_sqrt(f, f);
-	printf("sqrt f: ");
-	element_out_str(stdout, 0, f);
-	printf("\n");
+	element_printf("sqrt f: %B\n", f);
 	element_mul(f, f, f);
-	printf("f: ");
-	element_out_str(stdout, 0, f);
-	printf("\n");
+	element_printf("f: %B\n", f);
     }
     {
 	unsigned char *data;

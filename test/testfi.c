@@ -15,53 +15,33 @@ int main(void)
     element_init(b, fp2);
     element_init(c, fp2);
 
-    printf("field: ");
-    mpz_out_str(stdout, 0, prime);
-    printf("^2\n");
+    element_printf("field: %Z^2\n", prime);
 
     element_random(a);
     element_random(b);
-    printf("a = ");
-    element_out_str(stdout, 0, a);
-    printf(", b = ");
-    element_out_str(stdout, 0, b);
-    printf("\n");
+    element_printf("a = %B, b = %B\n", a, b);
 
     element_add(c, a, b);
-    printf("a + b = ");
-    element_out_str(stdout, 0, c);
-    printf("\n");
+    element_printf("a + b = %B\n", c);
 
     element_mul(c, a, b);
-    printf("a * b = ");
-    element_out_str(stdout, 0, c);
-    printf("\n");
+    element_printf("a * b = %B\n", c);
 
     for (;;) {
 	element_random(a);
-	printf("new a = ");
-	element_out_str(stdout, 0, a);
-	printf("\n");
+	element_printf("new a = %B\n", a);
 
 	if (element_is_sqr(a)) break;
 	printf(" is not a square\n");
     }
     element_sqrt(c, a);
-    printf("sqrt(a) = ");
-    element_out_str(stdout, 0, c);
-    printf("\n");
+    element_printf("sqrt(a) = %B\n", c);
     element_mul(c, c, c);
-    printf("sqrt(a) * sqrt(a) = ");
-    element_out_str(stdout, 0, c);
-    printf("\n");
+    element_printf("sqrt(a) * sqrt(a) = %B\n", c);
     element_invert(c, a);
-    printf("1/a = ");
-    element_out_str(stdout, 0, c);
-    printf("\n");
+    element_printf("1/a = %B\n", c);
     element_mul(c, c, a);
-    printf("1/a * a = ");
-    element_out_str(stdout, 0, c);
-    printf("\n");
+    element_printf("1/a * a = %B\n", c);
 
     return 0;
 }

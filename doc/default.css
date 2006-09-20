@@ -3,7 +3,7 @@ body {
     font-family: verdana, arial, sans-serif;
 }
 
-tt, code {
+tt, code, pre {
     font-family: andale mono, courier new, courier, monospace;
 }
 
@@ -61,6 +61,8 @@ h2 {
     border: 1px solid #aaaaaa;
     background-color: #f9f9f9;
     padding: 0.17em;
+    margin: 1em;
+    margin-right: 3em;
 }
 
 .parameter {

@@ -10,7 +10,7 @@ genxml : ../include/*.h
 chunked/index.html : $(SRCFILES) custom.xsl
 	xmlto -o chunked -m custom.xsl html manual.xml
 
-pretty/index.html : $(SRCFILES) custom-pretty.xsl makeover
+pretty/index.html : $(SRCFILES) custom-pretty.xsl makeover index.html
 	xmlto -o pretty -m custom-pretty.xsl html manual.xml
 	-ls pretty/*.html | xargs -n 1 tidy -utf8 -m -i -q
 	./makeover
@@ -24,3 +24,6 @@ manual.txt : manual.html
 
 clean :
 	-rm -rf pretty/*.html chunked/*.html manual.html manual.txt
+
+forsite:
+	tar cvfj forsite.tar.bz2 manual.txt manual.html default.css pretty chunked

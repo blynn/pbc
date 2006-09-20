@@ -240,21 +240,11 @@ void bbs_sign(unsigned char *sig,
     writeptr += element_to_bytes(writeptr, rdelta1);
     writeptr += element_to_bytes(writeptr, rdelta2);
 
-printf("R1: ");
-element_out_str(stdout, 0, R1);
-printf("\n");
-printf("R2: ");
-element_out_str(stdout, 0, R2);
-printf("\n");
-printf("R3: ");
-element_out_str(stdout, 0, R3);
-printf("\n");
-printf("R4: ");
-element_out_str(stdout, 0, R4);
-printf("\n");
-printf("R5: ");
-element_out_str(stdout, 0, R5);
-printf("\n");
+element_printf("R1: %B\n", R1);
+element_printf("R2: %B\n", R2);
+element_printf("R3: %B\n", R3);
+element_printf("R4: %B\n", R4);
+element_printf("R5: %B\n", R5);
 
     element_clear(T1);
     element_clear(T2);
@@ -380,21 +370,11 @@ int bbs_verify(unsigned char *sig,
                  gpk->pr_h_w, to_mpz(z0), gpk->pr_h_g2, to_mpz(z1));
     element_mul(R3, R3, et0);
 
-printf("R1: ");
-element_out_str(stdout, 0, R1);
-printf("\n");
-printf("R2: ");
-element_out_str(stdout, 0, R2);
-printf("\n");
-printf("R3: ");
-element_out_str(stdout, 0, R3);
-printf("\n");
-printf("R4: ");
-element_out_str(stdout, 0, R4);
-printf("\n");
-printf("R5: ");
-element_out_str(stdout, 0, R5);
-printf("\n");
+element_printf("R1: %B\n", R1);
+element_printf("R2: %B\n", R2);
+element_printf("R3: %B\n", R3);
+element_printf("R4: %B\n", R4);
+element_printf("R5: %B\n", R5);
 
     element_clear(T1);
     element_clear(T2);
@@ -576,12 +556,8 @@ int main(void)
     t0 = t1;
     element_init_G1(A, pairing);
     bbs_open(A, gpk, gmsk, 0, NULL, sig);
-    printf("open A = ");
-    element_out_str(stdout, 0, A);
-    printf("\n");
-    printf("gsk0 A = ");
-    element_out_str(stdout, 0, gsk[0]->A);
-    printf("\n");
+    element_printf("open A = %B\n", A);
+    element_printf("gsk0 A = %B\n", gsk[0]->A);
     t1 = get_time();
     printf("%fs elapsed\n", t1 - t0);
     t0 = t1;

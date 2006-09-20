@@ -17,45 +17,27 @@ int main(void)
     element_random(g);
     element_random(h);
     //pairing->phi(g, h, pairing);
-    printf("g = ");
-    element_out_str(stdout, 0, g);
-    printf("\n");
-    printf("h = ");
-    element_out_str(stdout, 0, h);
-    printf("\n");
+    element_printf("g = %B\n", g);
+    element_printf("h = %B\n", h);
     bilinear_map(x, g, h, pairing);
-    printf("f(g, h) = ");
-    element_out_str(stdout, 0, x);
-    printf("\n");
+    element_printf("f(g, h) = %B\n", x);
 
     mpz_init(z);
     pbc_mpz_random(z, pairing->r);
-    printf("z = ");
-    mpz_out_str(stdout, 0, z);
-    printf("\n");
+    element_printf("z = %Z\n", z);
 
     element_pow(x, x, z);
-    printf("f(g, h)^z = ");
-    element_out_str(stdout, 0, x);
-    printf("\n");
+    element_printf("f(g, h)^z = %B\n", x);
 
     element_pow(zg, g, z);
-    printf("g^z = ");
-    element_out_str(stdout, 0, zg);
-    printf("\n");
+    element_printf("g^z = %B\n", zg);
     bilinear_map(x, zg, h, pairing);
-    printf("f(g^z, h) = ");
-    element_out_str(stdout, 0, x);
-    printf("\n");
+    element_printf("f(g^z, h) = %B\n", x);
 
     element_pow(zh, h, z);
-    printf("h^z = ");
-    element_out_str(stdout, 0, zh);
-    printf("\n");
+    element_printf("h^z = %B\n", zh);
     bilinear_map(x, g, zh, pairing);
-    printf("f(g, h^z) = ");
-    element_out_str(stdout, 0, x);
-    printf("\n");
+    element_printf("f(g, h^z) = %B\n", x);
 
     {
 	int i;
@@ -69,70 +51,7 @@ int main(void)
 	}
 	printf("\n");
 	element_from_bytes(h, data);
-	printf("from_bytes h = ");
-	element_out_str(stdout, 0, h);
-	printf("\n");
+	element_printf("from_bytes h = %B\n", h);
     }
     return 0;
 }
-
-/*
-int main(void)
-{
-    element_t x, x2, y, y2, r;
-    pairing_t pairing;
-
-    //gmp_leak_check();
-    pairing_init_inp_str(pairing, stdin);
-
-    element_init_G1(x, pairing);
-    element_init_G2(y, pairing);
-    element_init_G1(x2, pairing);
-    element_init_G2(y2, pairing);
-    element_init_GT(r, pairing);
-
-    if (1) {
-	int i;
-	mpz_t pow;
-	mpz_init(pow);
-	element_random(y);
-	element_random(y2);
-	for (i=0; i<10; i++) {
-	pbc_mpz_random(pow, pairing->r);
-	    element_pow(y2, y, pow);
-	    //element_pow(x2, x, pow);
-	}
-	mpz_clear(pow);
-	mem_report();
-    } else {
-	element_random(x);
-	element_random(y);
-	printf("x = ");
-	element_out_str(stdout, 0, x);
-	printf("\n");
-	printf("y = ");
-	element_out_str(stdout, 0, y);
-	printf("\n");
-	element_mul(x2, x, x);
-	element_mul(y2, y, y);
-
-	bilinear_map(r, x2, y, pairing);
-	printf("e(x^2,y) = ");
-	element_out_str(stdout, 0, r);
-	printf("\n");
-
-	bilinear_map(r, x, y2, pairing);
-	printf("e(x,y^2) = ");
-	element_out_str(stdout, 0, r);
-	printf("\n");
-
-	bilinear_map(r, x, y, pairing);
-	element_mul(r, r, r);
-	printf("e(x,y)^2 = ");
-	element_out_str(stdout, 0, r);
-	printf("\n");
-    }
-
-    return 0;
-}
-*/

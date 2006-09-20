@@ -28,36 +28,32 @@ such as a particular finite field or elliptic curve group.
 </section>
 <section>
 <title>Assigning Elements</title>
+These functions assign values to elements. When integers are assigned,
+they are mapped to algebraic structures canonically if it makes sense
+(e.g. rings and fields).
 <variablelist>
 &eassign;
 </variablelist>
-
+</section>
+<section>
+<title>Converting Elements</title>
+<variablelist>
+&econvert;
+</variablelist>
+</section>
+<section>
+<title>Algebraic Operations</title>
 <para>
-Now pairing->G1, pairing->G2,
-pairing->GT and bilinear_map() can be used as follows.
-Declare and initialize some group elements:
-</para>
-<programlisting>element_t x, y, z;
-element_init(x, pairing->G1);
-element_init(y, pairing->G2);
-element_init(z, pairing->GT);
-</programlisting><para>
-To pick random elements of G1, G2 and compute a pairing:
-</para>
-<programlisting>element_random(x);
-element_random(y);
-bilinear_map(z, x, y, pairing);
-</programlisting>
-<para>
-Now z = e(x, y).
+All <type>element_t</type> arguments to this function must have been
+initialized to be from the same algebraic structure.
 </para>
 <para>
-To raise x by some random exponent r:
+The addition and multiplication functions perform addition and multiplication
+operations in rings and fields. In groups, TODO (basically both can be used
+to apply the group operation)
 </para>
-<programlisting>element_t r;
-element_init(r, pairing->Zr);
-element_random(r);
-element_pow_fp(x, x, r);
-</programlisting>
+<variablelist>
+&earith;
+</variablelist>
 </section>
 </chapter>

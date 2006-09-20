@@ -77,8 +77,11 @@ static size_t fq_out_str(FILE *stream, int base, element_ptr e)
 
 static int fq_sign(element_ptr n)
 {
+    int res;
     fq_data_ptr r = n->data;
-    return element_sign(r->x);
+    res = element_sign(r->x);
+    if (!res) return element_sign(r->y);
+    return res;
 }
 
 static void fq_add(element_ptr n, element_ptr a, element_ptr b)

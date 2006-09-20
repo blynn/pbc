@@ -1,20 +1,50 @@
 #!/bin/bash
-gawk '/<div class="toc">/ {
-    do {
+gawk '
+/<div class="toc">/ {
+    print $0
+    getline #TODO: check this is the <ul> line
+    print $0
+    print "<li><a href=\".\">PBC Library Manual</a></li>"
+    getline
+    while (!match($0, "</div>")) {
 	print $0
 	getline
-    } while (!match($0, "</div>"));
+    }
     print "</div>"
     exit
-}' < pretty/index.html > toc.tmp
+}
+' < pretty/index.html > toc.tmp
 for a in pretty/*.html
 do
     if [ $a != "pretty/index.html" ]
     then
-	sed '/<body/{n; r toc.tmp
+#add " - PBC" to titles of all pages
+    sed '/<\/title>/ s/<\/title>/ - PBC&/' -i $a
+    sed '/<body/{n; r toc.tmp
 a <div class="content">
 } ' -i $a
-	sed '/^<\/body/i </div>' -i $a
+    sed '/^<\/body/i </div>' -i $a
     fi
 done
+
+gawk '
+/<div class="book"/ {
+    i = 0
+    for(;;) {
+	getline
+	if (match($0, "<div")) i++;
+	else if (match($0, "</div")) {
+	    i--;
+	    if (i < 0) break;
+	}
+    }
+    sub("</div>","")
+}
+{ print }
+' < pretty/index.html | sed '/<body/{n; r toc.tmp
+a <div class="content">
+r index.html
+a </div>
+} ' > tmp.tmp
+mv tmp.tmp pretty/index.html
 rm toc.tmp

@@ -48,6 +48,10 @@ Copyright © 2006 Ben Lynn
 
         Assigning_Elements
 
+        Converting_Elements
+
+        Arithmetic
+
 
   6._Pairing_Types
 
@@ -73,9 +77,7 @@ Copyright © 2006 Ben Lynn
 Preface
 
 This manual describes how to install and use the PBC pairing-based cryptography
-library version 0.3. It is modeled on that of GMP. I believe it is likely that
-someone using PBC would have used GMP or a similar library before so hopefully
-having a similar manual will make learning PBC easier.
+library version 0.3. It is modeled on the GMP manual.
 
 Chapter 1. Overview
 
@@ -294,11 +296,7 @@ When an element is initialized it is associated with an algebraic structure,
 such as a particular finite field or elliptic curve group.
 
 
-  void element_init(element_ptr e, field_ptr f)
-      Initialize e to be an element of the group, ring or field f and set it to
-      be the zero element.
-
-  void element_clear(element_ptr e)
+  void element_clear(element_t e)
       Free the space occupied by e. Call this when the variable e is no longer
       needed.
 
@@ -312,44 +310,60 @@ such as a particular finite field or elliptic curve group.
 
 Assigning Elements
 
+These functions assign values to elements. When integers are assigned, they are
+mapped to algebraic structures canonically if it makes sense (e.g. rings and
+fields).
 
 
-  void element_set0(element_ptr e)
+  void element_set0(element_t e)
       Set e to zero.
 
-  void element_set1(element_ptr e)
+  void element_set1(element_t e)
       Set e to one.
 
-  void element_set_si(element_ptr e, signed long int i)
+  void element_set_si(element_t e, signed long int i)
       Set e to i.
 
-  void element_set_mpz(element_ptr e, mpz_ptr z)
+  void element_set_mpz(element_t e, mpz_t z)
       Set e to z.
 
-  void element_set(element_ptr e, element_ptr a)
+  void element_set(element_t e, element_t a)
       Set e to a.
 
-Now pairing->G1, pairing->G2, pairing->GT and bilinear_map() can be used as
-follows. Declare and initialize some group elements:
 
-  element_t x, y, z;
-  element_init(x, pairing->G1);
-  element_init(y, pairing->G2);
-  element_init(z, pairing->GT);
+Converting Elements
 
-To pick random elements of G1, G2 and compute a pairing:
 
-  element_random(x);
-  element_random(y);
-  bilinear_map(z, x, y, pairing);
 
-Now z = e(x, y).
-To raise x by some random exponent r:
+  void element_to_mpz(mpz_t z, element_t e)
+      Converts e to a GMP integer z if such an operation makes sense
 
-  element_t r;
-  element_init(r, pairing->Zr);
-  element_random(r);
-  element_pow_fp(x, x, r);
+
+Arithmetic
+
+All element_t arguments to this function must have been initialized to be from
+the same algebraic structure.
+The addition and multiplication functions perform addition and multiplication
+operations in rings and fields. In groups, TODO (basically both can be used to
+apply the group operation)
+
+
+  void element_add(element_t n, element_t a, element_t b)
+      Set n to a + b.
+
+  void element_sub(element_t n, element_t a, element_t b)
+      Set n to a - b.
+
+  void element_mul(element_t n, element_t a, element_t b)
+      Set n to a times b.
+
+  void element_mul_mpz(element_t n, element_t a, mpz_t z)
+
+  void element_mul_si(element_t n, element_t a, signed long int z)
+      Set n to a times z, that is a + a + ... + a where there are z a's.
+
+  void element_square(element_t n, element_t a)
+      Set n to a times a.
 
 
 Chapter 6. Pairing Types

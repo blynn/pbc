@@ -8,6 +8,8 @@
 
     <!ENTITY einit SYSTEM "gen/einit.xml">
     <!ENTITY eassign SYSTEM "gen/eassign.xml">
+    <!ENTITY econvert SYSTEM "gen/econvert.xml">
+    <!ENTITY earith SYSTEM "gen/earith.xml">
     <!ENTITY pinit SYSTEM "gen/pairing_init.xml">
     ]
 >
@@ -21,9 +23,7 @@
 <para>
 This manual describes how to install and use the PBC pairing-based
 cryptography library version 0.3.
-It is modeled on that of GMP. I believe it is likely that
-someone using PBC would have used GMP or a similar library before so
-hopefully having a similar manual will make learning PBC easier.
+It is modeled on the GMP manual.
 </para>
 </preface>
 <chapter><title>Overview</title>
@@ -342,4 +342,34 @@ desirable.
 </para>
 </section>
 </chapter>
+
+<!--
+<para>
+Now pairing->G1, pairing->G2,
+pairing->GT and bilinear_map() can be used as follows.
+Declare and initialize some group elements:
+</para>
+<programlisting>element_t x, y, z;
+element_init(x, pairing->G1);
+element_init(y, pairing->G2);
+element_init(z, pairing->GT);
+</programlisting><para>
+To pick random elements of G1, G2 and compute a pairing:
+</para>
+<programlisting>element_random(x);
+element_random(y);
+bilinear_map(z, x, y, pairing);
+</programlisting>
+<para>
+Now z = e(x, y).
+</para>
+<para>
+To raise x by some random exponent r:
+</para>
+<programlisting>element_t r;
+element_init(r, pairing->Zr);
+element_random(r);
+element_pow_fp(x, x, r);
+</programlisting>
+-->
 </book>

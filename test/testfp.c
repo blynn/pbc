@@ -13,8 +13,8 @@ int main()
     mpz_setbit(prime, 1024);
     mpz_setbit(prime, 70);
     mpz_nextprime(prime, prime);
-    field_init_fast_fp(fp, prime);
-    //field_init_naive_fp(fp, prime);
+    //field_init_fast_fp(fp, prime);
+    field_init_naive_fp(fp, prime);
 
     element_init(x, fp);
     element_init(y, fp);
@@ -22,24 +22,17 @@ int main()
 
     element_random(x);
     element_random(y);
-    mpz_out_str(NULL, 0, prime);
-    printf("\n");
-    element_out_str(NULL, 0, x);
-    printf("\n");
-    element_out_str(NULL, 0, y);
-    printf("\n");
+    element_printf("prime: %Z\n", prime);
+    element_printf("x: %B\n", x);
+    element_printf("y: %B\n", y);
     element_mul(z, x, y);
-    element_out_str(NULL, 0, z);
-    printf("\n");
+    element_printf("xy: %B\n", z);
     element_add(z, x, y);
-    element_out_str(NULL, 0, z);
-    printf("\n");
+    element_printf("x+y: %B\n", z);
     element_sub(z, x, y);
-    element_out_str(NULL, 0, z);
-    printf("\n");
+    element_printf("x-y: %B\n", z);
     element_invert(z, x);
-    element_out_str(NULL, 0, z);
-    printf("\n");
+    element_printf("x^-1: %B\n", z);
 
     n = 10000;
     t0 = get_time();
@@ -54,6 +47,6 @@ int main()
     element_clear(x);
     element_clear(y);
     element_clear(z);
-    mem_report();
+    //mem_report();
     return 0;
 }
