@@ -21,7 +21,7 @@ Mon Sep 18 08:51:31 PDT 2006
 
 The sig library has been renamed to the pbc_sig library.
 
-It turns out the GNU build system was deleteing a.param every time
+It turns out the GNU build system was deleting a.param every time
 ./configure was run, so I moved *.param to the new param subdirectory.
 
 Minor fixes. Some work on the manual.

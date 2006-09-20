@@ -85,11 +85,29 @@ static inline int pairing_length_in_bytes_x_only_G1(pairing_t pairing)
 }
 
 /*@manual pairing_op
+Returns the length in bytes needed to represent a compressed form of
+an element of G1. There is some overhead in decompressing.
+*/
+static inline int pairing_length_in_bytes_compressed_G1(pairing_t pairing)
+{
+    return pairing->G1->fixed_length_in_bytes / 2 + 1;
+}
+
+/*@manual pairing_op
 Returns the length in bytes needed to represent an element of G2.
 */
 static inline int pairing_length_in_bytes_G2(pairing_t pairing)
 {
     return pairing->G2->fixed_length_in_bytes;
+}
+
+/*@manual pairing_op
+Returns the length in bytes needed to represent a compressed form of
+an element of G2. There is some overhead in decompressing.
+*/
+static inline int pairing_length_in_bytes_compressed_G2(pairing_t pairing)
+{
+    return pairing->G2->fixed_length_in_bytes / 2 + 1;
 }
 
 /*@manual pairing_op
@@ -148,8 +166,8 @@ static inline void element_init_GT(element_t e, pairing_t pairing)
 }
 
 /*@manual einit.1
-Initialize ''e'' to be an element of the ring Zr of ''pairing''.
-r is the order of the groups G1, G2 and GT.
+Initialize ''e'' to be an element of the ring Z_r of ''pairing''.
+r is the order of the groups G1, G2 and GT that are involved in the pairing.
 */
 static inline void element_init_Zr(element_t e, pairing_t pairing)
 {

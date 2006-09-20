@@ -61,6 +61,14 @@ Copyright © 2006 Ben Lynn
 
   6._Randomness_Functions
 
+  7._Tutorial
+
+
+        BLS_Signatures
+
+        Import/Export
+
+
   A._Contributors
 
 
@@ -189,6 +197,10 @@ cryptographic use. Most programs will probably want to start by initializing a
 pairing by reading a set of pairing parameters.
 Particular instantiations of bilinear pairings are stored in the data type
 pairing_t. Functions that operate on them start with pairing_.
+Pairings involve three groups of prime order. The PBC library labels them G1,
+G2, and GT, and labels the order r. The pairing is a bilinear map that takes
+two elements as input, one from G1 and one from G2, and outputs an element of
+GT.
 
 Initializing Pairings
 
@@ -240,8 +252,16 @@ Other Pairing Functions
       Returns the length in bytes needed to represent the x-coordinate of an
       element of G1.
 
+  int pairing_length_in_bytes_compressed_G1(pairing_t pairing)
+      Returns the length in bytes needed to represent a compressed form of an
+      element of G1. There is some overhead in decompressing.
+
   int pairing_length_in_bytes_G2(pairing_t pairing)
       Returns the length in bytes needed to represent an element of G2.
+
+  int pairing_length_in_bytes_compressed_G2(pairing_t pairing)
+      Returns the length in bytes needed to represent a compressed form of an
+      element of G2. There is some overhead in decompressing.
 
   int pairing_length_in_bytes_x_only_G2(pairing_t pairing)
       Returns the length in bytes needed to represent the x-coordinate of an
@@ -279,8 +299,8 @@ such as a particular finite field or elliptic curve group.
       Initialize e to be an element of the group G1, G2 or GT of pairing.
 
   void element_init_Zr(element_t e, pairing_t pairing)
-      Initialize e to be an element of the ring Zr of pairing. r is the order
-      of the groups G1, G2 and GT.
+      Initialize e to be an element of the ring Z_r of pairing. r is the order
+      of the groups G1, G2 and GT that are involved in the pairing.
 
   void element_init_same_as(element_t e, element_t e2)
       Initialize e to be an element of the algebraic structure that e2 lies in.
@@ -376,10 +396,20 @@ Exponentiation and multiexponentiation functions.
       Sets x = a1^n1 times a2^n2, and is generally faster than performing two
       separate exponentiations.
 
+  void element_pow2_zn(element_t x, element_t a1, element_t n1, element_t a2,
+  element_t n2)
+      Also sets x = a1^n1 times a2^n2, but n1, n2 must be elements of a ring
+      Z_n for some integer n.
+
   void element_pow3_mpz(element_t x, element_t a1, mpz_t n1, element_t a2,
   mpz_t n2, element_t a3, mpz_t n3)
-      Sets x = a1^n1 times a2^n2 times a3^n3, and is generally faster than
+      Sets x = a1^n1 times ''a2^n2'' times a3^n3, and is generally faster than
       performing three separate exponentiations.
+
+  void element_pow3_zn(element_t x, element_t a1, element_t n1, element_t a2,
+  element_t n2, element_t a3, element_t n3)
+      Also sets x = a1^n1 times ''a2^n2'' times a3^n3, but n1, n2, n3 must be
+      elements of a ring Z_n for some integer n.
 
 
 Comparing Elements
@@ -503,6 +533,143 @@ because different platforms have different sources of random bits.
   void pbc_mpz_random(mpz_t z, mpz_t limit)
       Use previously chosen random number generator to select a random z that
       is less than limit.
+
+
+Chapter 7. Tutorial
+
+This chapter walks through how one might implement the Boneh-Lynn-Shacham (BLS)
+signature scheme using the PBC library. It is based on the file test/testsig.c.
+Recall the scheme works as follows. We have three groups G1, G2, GT of prime
+order r, and have some bilinear map e that takes two elements as input, one
+from G1 and one from G2, and outputs an element of GT.
+First we publish the system parameter g which is a randomly chosen element of
+G2.
+Now suppose Alice wishes to use the system. We generate her public and private
+keys as follows. A private key is a random element x of Zr, and the
+corresponding public key is g^x.
+To sign a message, Alice hashes the message to some element h of G1, and then
+outputs the signature h^x.
+To verify a signature sigma, one checks that e(h,g^x) = e(signature, g)
+
+BLS Signatures
+
+First we need to include pbc.h:
+
+  #include "pbc.h"
+
+Next we need to initialize a pairing:
+
+      pairing_t pairing;
+
+      pairing_init_inp_str(pairing, stdin);
+
+Later we will give pairing parameters to our program on standard input. Any
+file in the param subdirectory will suffice.
+We shall need several element_t variables to hold the system parameters, keys
+and other quantities. We declare them and initialize them,
+
+      element_t g, h;
+      element_t public_key, secret_key;
+      element_t sig;
+      element_t temp1, temp2;
+
+      element_init_G2(g, pairing);
+      element_init_G2(public_key, pairing);
+      element_init_G1(h, pairing);
+      element_init_G1(sig, pairing);
+      element_init_GT(temp1, pairing);
+      element_init_GT(temp2, pairing);
+      element_init_Zr(secret_key, pairing);
+
+generate system parameters,
+
+      element_random(g);
+
+generate a private key,
+
+      element_random(secret_key);
+
+and the corresponding public key.
+
+      element_pow_zn(public_key, g, secret_key);
+
+Now suppose we are given a message. We feed it into a standard hash algorithm,
+and say it outputs the string ABCDEF (I guess we're using the highly obscure
+SHA-48!). We now map this string to an element h of G1,
+
+      element_from_hash(h, 6, "ABCDEF");
+
+then sign it:
+
+      element_pow_zn(sig, h, secret_key);
+
+To verify this signature, we input (signature, system parameter) to the
+pairing, input (message hash, public key) to the pairing, and check the outputs
+match.
+
+      pairing_apply(temp1, sig, g, pairing);
+      pairing_apply(temp2, h, public_key, pairing);
+
+      if (!element_cmp(temp1, temp2)) {
+          printf("signature verifies\n");
+      } else {
+          printf("signature does not verify\n");
+      }
+
+
+Import/Export
+
+To be useful, at some stage the signature must be converted to bytes for
+storage or transmission:
+
+      int n = pairing_length_in_bytes_compressed_G1(pairing);
+      //alternative:
+      //int n = element_length_in_bytes_compressed(sig);
+      unsigned char *data = malloc(n);
+      element_to_bytes_compressed(data, sig);
+
+On the other end, the signature must be decompressed:
+
+      element_from_bytes_compressed(sig, data);
+
+Eliding the _compressed in the above code will also work but the buffer
+''data'' will be roughly twice as large.
+We can save more space by using the x-coordinate of the signature only
+
+      int n = pairing_length_in_bytes_x_only_G1(pairing);
+      //alternative:
+      //int n = element_length_in_bytes_x_only(sig);
+      unsigned char *data = malloc(n);
+      element_to_bytes_compressed(data, sig);
+
+but then there is a complication during verification since two different points
+have the same x-coordinate. One way to solve this problem is to guess one point
+and try to verify. If that fails, we try the other. It can be shown that the
+pairing outputs of the two points are inverses of each other, avoiding the need
+to compute a pairing the second time. (Actually, there are better ways to
+handle this.)
+
+      int n = pairing_length_in_bytes_x_only_G1(pairing);
+      //int n = element_length_in_bytes_x_only(sig);
+      unsigned char *data = malloc(n);
+
+      element_to_bytes_x_only(data, sig);
+
+      element_from_bytes_x_only(sig, data)
+
+      pairing_apply(temp1, sig, g, pairing);
+      pairing_apply(temp2, h, public_key, pairing);
+
+      if (!element_cmp(temp1, temp2)) {
+          printf("signature verifies on first guess\n");
+      } else {
+          element_invert(temp1, temp1);
+          if (!element_cmp(temp1, temp2)) {
+              printf("signature verifies on second guess\n");
+          } else {
+              printf("signature does not verify\n");
+          }
+      }
 
 
 Appendix A. Contributors

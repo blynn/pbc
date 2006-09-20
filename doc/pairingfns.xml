@@ -16,6 +16,12 @@ Particular instantiations of bilinear pairings are stored in the data
 type <type>pairing_t</type>. Functions that operate on them
 start with <function>pairing_</function>.
 </para>
+<para>
+Pairings involve three groups of prime order. The PBC library labels them
+G1, G2, and GT, and labels the order r. The pairing is
+a bilinear map that takes two elements as input,
+one from G1 and one from G2, and outputs an element of GT.
+</para>
 <section>
 <title>Initializing Pairings</title>
 <para>

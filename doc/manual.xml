@@ -6,6 +6,7 @@
     <!ENTITY chapter_pairingfns SYSTEM "pairingfns.xml">
     <!ENTITY chapter_elementfns SYSTEM "elementfns.xml">
     <!ENTITY chapter_randomfns SYSTEM "randomfns.xml">
+    <!ENTITY chapter_tutorial SYSTEM "sigex.xml">
     <!ENTITY appendix_contributors SYSTEM "contributors.xml">
 
     <!ENTITY einit SYSTEM "gen/einit.xml">
@@ -84,5 +85,6 @@ used in demonstration programs.
 &chapter_pairingfns;
 &chapter_elementfns;
 &chapter_randomfns;
+&chapter_tutorial;
 &appendix_contributors;
 </book>

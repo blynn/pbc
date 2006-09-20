@@ -4,19 +4,21 @@
 
 int main(void)
 {
-    element_t g, h, s;
-    element_t pubkey, sig;
     pairing_t pairing;
-    element_t secret;
+    element_t g, h;
+    element_t public_key, sig;
+    element_t secret_key;
+    element_t temp1, temp2;
 
     pairing_init_inp_str(pairing, stdin);
 
     element_init_G2(g, pairing);
-    element_init_G2(pubkey, pairing);
+    element_init_G2(public_key, pairing);
     element_init_G1(h, pairing);
     element_init_G1(sig, pairing);
-    element_init_GT(s, pairing);
-    element_init_Zr(secret, pairing);
+    element_init_GT(temp1, pairing);
+    element_init_GT(temp2, pairing);
+    element_init_Zr(secret_key, pairing);
 
     printf("Short signature test\n");
 
@@ -25,27 +27,29 @@ int main(void)
     element_printf("system parameter g = %B\n", g);
 
     //generate private key
-    element_random(secret);
-    element_printf("private key = %B\n", secret);
+    element_random(secret_key);
+    element_printf("private key = %B\n", secret_key);
 
     //compute corresponding public key
-    element_pow_zn(pubkey, g, secret);
-    element_printf("public key = %B\n", pubkey);
+    element_pow_zn(public_key, g, secret_key);
+    element_printf("public key = %B\n", public_key);
 
     //generate element from a hash
     //for toy examples, should check that pairing(g, h) != 1
     element_from_hash(h, 13, "hashofmessage");
     element_printf("message hash = %B\n", h);
 
-    //h^secret is the signature
+    //h^secret_key is the signature
     //in real life: only output the first coordinate
-    element_pow_zn(sig, h, secret);
+    element_pow_zn(sig, h, secret_key);
     element_printf("signature = %B\n", sig);
 
     {
-	int n = element_length_in_bytes_compressed(sig);
+	int n = pairing_length_in_bytes_compressed_G1(pairing);
+	//int n = element_length_in_bytes_compressed(sig);
 	int i;
 	unsigned char *data = malloc(n);
+
 	element_to_bytes_compressed(data, sig);
 	printf("compressed = ");
 	for (i=0; i<n; i++) {
@@ -54,17 +58,61 @@ int main(void)
 	printf("\n");
 
 	element_from_bytes_compressed(sig, data);
-	element_printf("uncompressed = %B\n", sig);
+	element_printf("decompressed = %B\n", sig);
     }
 
     //verification part 1
-    bilinear_map(s, sig, g, pairing);
-    element_printf("f(sig, g) = %B\n", s);
+    pairing_apply(temp1, sig, g, pairing);
+    element_printf("f(sig, g) = %B\n", temp1);
 
     //verification part 2
     //should match above
-    bilinear_map(s, h, pubkey, pairing);
-    element_printf("f(message hash, pubkey) = %B\n", s);
+    pairing_apply(temp2, h, public_key, pairing);
+    element_printf("f(message hash, public_key) = %B\n", temp2);
+
+    if (!element_cmp(temp1, temp2)) {
+	printf("signature verifies\n");
+    } else {
+	printf("*BUG* signature does not verify *BUG*\n");
+    }
+
+    {
+	int n = pairing_length_in_bytes_x_only_G1(pairing);
+	//int n = element_length_in_bytes_x_only(sig);
+	int i;
+	unsigned char *data = malloc(n);
+
+	element_to_bytes_x_only(data, sig);
+	printf("x-coord = ");
+	for (i=0; i<n; i++) {
+	    printf("%02X", data[i]);
+	}
+	printf("\n");
+
+	element_from_bytes_x_only(sig, data);
+	element_printf("de-x-ed = %B\n", sig);
+
+	pairing_apply(temp1, sig, g, pairing);
+	if (!element_cmp(temp1, temp2)) {
+	    printf("signature verifies on first guess\n");
+	} else {
+	    element_invert(temp1, temp1);
+	    if (!element_cmp(temp1, temp2)) {
+		printf("signature verifies on second guess\n");
+	    } else {
+		printf("*BUG* signature does not verify *BUG*\n");
+	    }
+	}
+    }
+
+    //a random signature shouldn't verify
+    element_random(sig);
+    pairing_apply(temp1, sig, g, pairing);
+    if (element_cmp(temp1, temp2)) {
+	printf("random signature doesn't verify\n");
+    } else {
+	printf("*BUG* random signature verifies *BUG*\n");
+    }
 
     return 0;
 }
