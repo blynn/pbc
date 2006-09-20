@@ -1,6 +1,6 @@
 SUBDIRS = . sig bce test 
 EXTRA_DIST = Makefile.mingw Makefile.orig param/*.param report_times list_hilbert genalldparams setup \
-	doc/extract doc/*.x[ms]l doc/default.css doc/Makefile
+	doc/pretty/pretty.css doc/makeover doc/extract doc/*.x[ms]l doc/default.css doc/Makefile
 
 CLEANFILES = *~
 maintainer-clean-local:

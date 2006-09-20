@@ -75,7 +75,7 @@ Copyright © 2006 Ben Lynn
 Preface
 
 This manual describes how to install and use the PBC pairing-based cryptography
-library version 0.3. It is modeled on the GMP manual.
+library, version 0.3.2. It is modeled on the GMP manual.
 
 Chapter 1. Overview
 
