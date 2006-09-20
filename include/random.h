@@ -5,7 +5,7 @@
 
 /*@manual pbcrandom
 Uses ''filename'' as a source of random bytes. For example,
-on Linux one might use <filename>/dev/random</filename>
+on Linux one might use <filename>/dev/random</filename>.
 */
 void random_set_file(char *filename);
 

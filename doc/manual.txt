@@ -184,9 +184,6 @@ elliptic curve groups, polynomial rings and finite fields. Many functions
 assume the inputs come from the same algebraic structure and trouble can arise
 if for example one attempts to add a polynomial to a point on an elliptic
 curve.
-Another difference is that the programmer is expected to access some internal
-fields of the pairing_t data type, though I intend to write wrappers to fix
-this.
 
 Chapter 4. Pairing Functions
 
@@ -525,7 +522,7 @@ because different platforms have different sources of random bits.
 
   void random_set_file(char *filename)
       Uses filename as a source of random bytes. For example, on Linux one
-      might use /dev/random
+      might use /dev/random.
 
   void random_set_deterministic(void)
       Use a determinstic random number generator.
@@ -549,7 +546,7 @@ keys as follows. A private key is a random element x of Zr, and the
 corresponding public key is g^x.
 To sign a message, Alice hashes the message to some element h of G1, and then
 outputs the signature h^x.
-To verify a signature sigma, one checks that e(h,g^x) = e(signature, g)
+To verify a signature sigma, one checks that e(h,g^x) = e(sigma, g).
 
 BLS Signatures
 
