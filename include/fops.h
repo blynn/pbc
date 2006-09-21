@@ -1,12 +1,14 @@
 #ifndef __FOPS_H__
 #define __FOPS_H__
 
-typedef struct fetch_ops_t {
+struct fetch_ops_s {
    int (*fops_getc) (void *ctx);
    int (*fops_ungetc) (int c, void *ctx);
-} fetch_ops_t;
+};
+typedef struct fetch_ops_s fetch_ops_t[1];
+typedef struct fetch_ops_s* fetch_ops_ptr;
 
-extern fetch_ops_t fops_buf;
-extern fetch_ops_t fops_str;
+extern struct fetch_ops_s fops_buf;
+extern struct fetch_ops_s fops_str;
 
 #endif

@@ -5,7 +5,7 @@
 #include "tracker.h"
 
 void 
-token_get_generic (token_t tok, fetch_ops_t *fops, void *ctx)
+token_get_generic (token_t tok, fetch_ops_t fops, void *ctx)
 {
   assert (fops);
   assert (ctx);

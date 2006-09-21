@@ -8,8 +8,8 @@ static int ungetc_into_buf (int c, void *ctx);
 static int getc_from_str (void *ctx);
 static int ungetc_into_str (int c, void *ctx);
 
-fetch_ops_t fops_buf = { getc_from_buf, ungetc_into_buf };
-fetch_ops_t fops_str = { getc_from_str, ungetc_into_str };
+struct fetch_ops_s fops_buf = { getc_from_buf, ungetc_into_buf };
+struct fetch_ops_s fops_str = { getc_from_str, ungetc_into_str };
 
 static int
 getc_from_buf (void *ctx)
