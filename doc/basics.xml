@@ -1,0 +1,149 @@
+<chapter>
+<title>PBC Basics</title>
+<para>
+This chapter gives a high-level view of the library, and explains
+various design choices and conventions.
+</para>
+<section>
+<title>Headers and Libraries</title>
+<para>
+Programs using the PBC library should include the file
+<filename>pbc.h</filename>:
+</para>
+<programlisting>#include &lt;pbc.h&gt;
+</programlisting>
+<para>
+and linked against the PBC library, e.g.
+</para>
+<screen>gcc program.c -L. -lpbc</screen>
+<para>
+The file <filename>pbc.h</filename> includes <filename>gmp.h</filename>
+thus all GMP functions are available.
+</para>
+<para>
+The PBC signatures library is currently bundled with PBC.
+Documentation will eventually written for it, but for now look
+at sample signature programs in the test directory.
+</para>
+</section>
+<section>
+<title>Types</title>
+<para>
+Since the PBC library is built on top of GMP, the GMP types
+are available. PBC types are similar to GMP types.
+The following example is paraphrased from an example in the GMP
+manual, and shows how to declare the PBC data type
+<type>element_t</type>.
+</para>
+<programlisting>    element_t sum;
+     
+    struct foo { element_t x, y; };
+
+    element_t vec[20];
+</programlisting>
+<para>
+The <type>pairing_t</type> data type holds bilinear pairing
+parameter information. There are other data types but for many
+pairing-based cryptography applications they are only needed internally.
+</para>
+<para>
+Examples of other data types defined by PBC are <type>field_t</type>
+for rings and fields and <type>mpc_t</type> for complex arbitrary
+precision floats.
+</para>
+</section>
+<section>
+<title>Function Classes</title>
+<para>
+PBC contains several classes of functions.
+</para>
+<orderedlist>
+    <listitem>
+<para>
+Functions for dealing with bilinear pairing parameters begin with
+<function>pairing_</function>.
+</para>
+    </listitem>
+    <listitem>
+<para>
+Functions for operating on elements of groups, rings and fields begin
+with <function>element_</function>.
+</para>
+    </listitem>
+    <listitem>
+<para>
+Functions that generate pairing parameters, that is, find elliptic curves
+where efficiently computable bilinear pairings exist.
+The sample parameters bundled
+are adequate for many cryptosystems, but there may be a need to generate
+more.
+</para>
+    </listitem>
+    <listitem>
+<para>
+Miscellaneous functions, such as ones controlling how random bits are
+generated.
+</para>
+    </listitem>
+</orderedlist>
+</section>
+<section>
+<title>Conventions</title>
+<para>
+PBC follows GMP in several respects:
+</para>
+<orderedlist>
+    <listitem>
+<para>
+Output arguments generally precede input arguments.
+</para>
+    </listitem>
+    <listitem>
+<para>
+The same variable can be used as input and output in one call.
+</para>
+    </listitem>
+    <listitem>
+<para>
+Before a variable may be used it must be initialized exactly once.
+When no longer needed it must be cleared. For efficiency, unnecessary
+initializating and clearing should be avoided.
+</para>
+    </listitem>
+    <listitem>
+<para>
+PBC variables ending with <type>_t</type> behave the same as
+GMP variables in function calls, that is effectively as call-by references.
+In other words, as in GMP, if a function that modifies an input variable,
+that variable remains modified when control return is returned to the caller.
+</para>
+    </listitem>
+    <listitem>
+<para>
+Variables automatically allocate memory via <function>malloc()</function>
+when needed. Unlike GMP, there is no simple way to change the memory
+allocator yet.
+</para>
+    </listitem>
+    <listitem>
+<para>
+The <type>element_t</type> type is small (but certain other types
+are not).
+</para>
+    </listitem>
+    <listitem>
+<para>
+PBC functions are mostly reentrant.
+</para>
+    </listitem>
+</orderedlist>
+<para>
+On the other hand, <type>element_t</type> is more complex than
+GMP types in that the same data type is used for elements of different
+algebraic structures, such as elliptic curve groups, polynomial rings
+and finite fields. Many functions assume the inputs come from the
+same algebraic structure and trouble can arise if for example one
+attempts to add a polynomial to a point on an elliptic curve.
+</para>
+</section>
+</chapter>

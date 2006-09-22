@@ -26,7 +26,7 @@ Copyright © 2006 Ben Lynn
 
         Function_Classes
 
-        Variable_Conventions
+        Conventions
 
 
   4._Pairing_Functions
@@ -61,13 +61,17 @@ Copyright © 2006 Ben Lynn
 
   6._Randomness_Functions
 
-  7._Tutorial
+  7._Pairing_Parameter_Functions
+
+  8._Tutorial
 
 
         BLS_Signatures
 
         Import/Export
 
+
+  9._PBC_Internals
 
   A._Contributors
 
@@ -161,7 +165,7 @@ PBC contains several classes of functions.
      generated.
 
 
-Variable Conventions
+Conventions
 
 PBC follows GMP in several respects:
 
@@ -177,6 +181,7 @@ PBC follows GMP in several respects:
   5. Variables automatically allocate memory via malloc() when needed. Unlike
      GMP, there is no simple way to change the memory allocator yet.
   6. The element_t type is small (but certain other types are not).
+  7. PBC functions are mostly reentrant.
 
 On the other hand, element_t is more complex than GMP types in that the same
 data type is used for elements of different algebraic structures, such as
@@ -532,7 +537,11 @@ because different platforms have different sources of random bits.
       is less than limit.
 
 
-Chapter 7. Tutorial
+Chapter 7. Pairing Parameter Functions
+
+These functions are mainly used to generate pairing parameters. TODO
+
+Chapter 8. Tutorial
 
 This chapter walks through how one might implement the Boneh-Lynn-Shacham (BLS)
 signature scheme using the PBC library. It is based on the file test/testsig.c.
@@ -560,8 +569,8 @@ Next we need to initialize a pairing:
 
       pairing_init_inp_str(pairing, stdin);
 
-Later we will give pairing parameters to our program on standard input. Any
-file in the param subdirectory will suffice.
+Later when the program is run we will give pairing parameters to our program on
+standard input. Any file in the param subdirectory will suffice.
 We shall need several element_t variables to hold the system parameters, keys
 and other quantities. We declare them and initialize them,
 
@@ -668,6 +677,61 @@ handle this.)
           }
       }
 
+
+Chapter 9. PBC Internals
+
+Information on particular algebraic structures are stored in the field_t, which
+mostly contains pointers to functions written to perform operations such as
+addition and multiplication on elements of that particular group, ring or
+field. The name algebraic_structure_t is arguably more accurate for this data
+type, but it is too cumbersome. If this causes discomfort, it may help if
+groups and rings are simply viewed as fields where certain things don't work!
+Each element_t contains a field named field to such a field_t variable. In
+fact, the only other field is data, which stores any data needed for the
+implementation of the particular algebraic structure the element resides in.
+
+  struct element_s {
+      struct field_s *field;
+      void *data;
+  };
+
+Thus when a call to one of the element_ functions, the field pointer is
+followed to see which version of the function should be called, so that for
+example modular addition is performed if the input element is an element of a
+finite field, while polynomial addition is performed for elements of a
+polynomial ring and so on.
+
+  static inline void element_add(element_t n, element_t a, element_t b)
+  {
+      n->field->add(n, a, b);
+  }
+
+This design may seem dangerous because if a programmer inadverdantly attempts
+to add a polynomial and a point on an elliptic curve, say, the code will
+compile without warnings since they have the same data type, but the results
+are undefined and the library will mostly cause a crash.
+However, I needed to set things up in this way because I wanted to be able to
+start with a finite field and then extend it an arbitrary number of times.
+(Though in practice, currently I only need to extend it twice at most.) I
+wanted to be able to swap the ground field and extension fields, which is
+trivial if they have the same data type.
+I could at least have separate data types to distinguish between groups, rings
+and fields. It is important to clearly label them differently in mathematics,
+but here it makes more sense to lump them together under the same heading, and
+just treat some kinds as handicapped.
+Moreover, even if I did have a distinct data type for every kind of algebraic
+structure, fields of prime order with different moduli would still fall under
+the same data type, again with unpleasant results if elements are mistakenly
+mixed.
+I have found that even my approach appears not to be type-safe, I almost never
+accidently mix elements from different fields. But even if this were a serious
+problem, it would not be difficult to check that the all the arguments belong
+to the same field during a function call, which also addresses the issue in the
+previous paragraph, and similarly check that the current algebraic structure
+supports the requested operation. (Of course, there should be some switch that
+could disable the checks for efficiency.) This library ought to have such a
+feature eventually to aid the less experienced, but I have other priorities at
+present.
 
 Appendix A. Contributors
 
