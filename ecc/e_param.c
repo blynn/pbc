@@ -176,19 +176,6 @@ void e_param_inp_generic (e_param_ptr p, fetch_ops_t fops, void *ctx)
     symtab_clear(tab);
 }
 
-void e_param_inp_buf (e_param_ptr p, const char *buf, size_t len)
-{
-    assert (buf);
-    tracker_t t;
-    tracker_init (&t, buf, len);
-    e_param_inp_generic (p, &fops_buf, &t);
-}
-void e_param_inp_str (e_param_ptr p, FILE *stream)
-{
-    assert (stream);
-    e_param_inp_generic (p, &fops_str, stream);
-}
-
 static void e_miller_proj(element_t res, point_t P,
 	element_ptr numx, element_ptr numy,
 	element_ptr denomx, element_ptr denomy,

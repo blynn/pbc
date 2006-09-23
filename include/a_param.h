@@ -48,18 +48,6 @@ TODO
 void a_param_inp_generic (a_param_ptr p, fetch_ops_t fops, void *ctx);
 
 /*@manual aparam_internal
-Read type A parameters in the above format into ''p''
-from the buffer ''buf'' that is
-''len'' bytes long.
-*/
-void a_param_inp_buf(a_param_ptr p, const char *buf, size_t len);
-
-/*@manual aparam_internal
-Read type A parameters in the above format into ''p'' from ''stream''.
-*/
-void a_param_inp_str(a_param_ptr p, FILE *stream);
-
-/*@manual aparam_internal
 Initializes ''pairing'' with type A parameters in ''p''.
 */
 void pairing_init_a_param(pairing_t pairing, a_param_t p);

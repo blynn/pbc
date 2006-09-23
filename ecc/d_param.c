@@ -119,20 +119,6 @@ void d_param_inp_generic (d_param_ptr p, fetch_ops_t fops, void *ctx)
     symtab_clear(tab);
 }
 
-void d_param_inp_buf (d_param_ptr p, const char *buf, size_t len)
-{
-    assert (buf);
-    tracker_t t;
-    tracker_init (&t, buf, len);
-    d_param_inp_generic (p, &fops_buf, &t);
-}
-
-void d_param_inp_str (d_param_ptr p, FILE *stream)
-{
-    assert (stream);
-    d_param_inp_generic (p, &fops_str, stream);
-}
-
 //assumes P is in the base field, Q in some field extension
 static void cc_miller(element_t res, mpz_t q, point_t P,
 	element_ptr Qx, element_ptr Qy, fieldmap mapbase)

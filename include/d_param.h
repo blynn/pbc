@@ -25,8 +25,6 @@ void d_param_init(d_param_ptr cc);
 void d_param_clear(d_param_ptr cc);
 void d_param_out_str(FILE *stream, d_param_ptr p);
 void d_param_inp_generic (d_param_ptr p, fetch_ops_t fops, void *ctx);
-void d_param_inp_buf (d_param_ptr p, const char *buf, size_t len);
-void d_param_inp_str(d_param_ptr p, FILE *stream);
 void pairing_init_c_param(pairing_t pairing, d_param_t param);
 
 static inline void d_param_init_inp_str(d_param_ptr p, FILE *stream)

@@ -68,20 +68,6 @@ void f_param_inp_generic (f_param_ptr p, fetch_ops_t fops, void *ctx)
     symtab_clear(tab);
 }
 
-void f_param_inp_buf (f_param_ptr p, const char *buf, size_t len)
-{
-    assert (buf);
-    tracker_t t;
-    tracker_init (&t, buf, len);
-    f_param_inp_generic (p, &fops_buf, &t);
-}
-
-void f_param_inp_str (f_param_ptr p, FILE *stream)
-{
-    assert (stream);
-    f_param_inp_generic (p, &fops_str, stream);
-}
-
 static void tryminusx(mpz_ptr q, mpz_ptr x)
 {
     //36x4 - 36x3 + 24x2 - 6x + 1

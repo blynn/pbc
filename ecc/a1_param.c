@@ -48,20 +48,6 @@ void a1_param_inp_generic (a1_param_ptr p, fetch_ops_t fops, void *ctx)
     symtab_clear(tab);
 }
 
-void a1_param_inp_buf (a1_param_ptr p, const char *buf, size_t len)
-{
-    assert (buf);
-    tracker_t t;
-    tracker_init (&t, buf, len);
-    a1_param_inp_generic (p, &fops_buf, &t);
-}
-
-void a1_param_inp_str (a1_param_ptr p, FILE *stream)
-{
-    assert (stream);
-    a1_param_inp_generic (p, &fops_str, stream);
-}
-
 void a1_param_gen(a1_param_t param, mpz_t order)
 {
     //if order is even, ideally check all even l, not just multiples of 4
