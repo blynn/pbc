@@ -1,3 +1,23 @@
+Sat Sep 23 15:21:39 PDT 2006
+
+BGN curves have been renamed to A1 curves. This makes more sense since
+they really are type A curves, just with composite order, and "BGN" would
+be better for referring to a certain cryptosystem, not the underlying pairing
+it uses. Also, it is possible to have other kinds of pairings with composite
+order e.g type B pairings (which have not been implemented yet).
+
+More work was done on the manual. The different types of pairing parameters
+are described, as well as some of the internal workings of PBC.
+
+I changed Joe Cooley's fetch_ops_t to comform to GMP/PBC data type conventions.
+Basically, the idea is to use arrays of length 1 to avoid having "*" and "&"
+everywhere.
+
+I moved Win32 specific code to a separate file. I want to avoid the C
+preprocessor as much as possible.
+
+[0.3.3]
+
 Wed Sep 20 04:36:11 PDT 2006
 
 [0.3.2]

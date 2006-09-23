@@ -33,5 +33,8 @@ int main(int argc, char **argv)
     d_param_from_cm(param, cm);
     fprintf(stderr, "gencparam: bits in q = %zu\n", mpz_sizeinbase(cm->q, 2));
     d_param_out_str(stdout, param);
+
+    // If we weren't exiting now, would cm_info_clear every entry of L
+    // and darray_clear L
     return 0;
 }

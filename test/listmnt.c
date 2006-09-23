@@ -20,12 +20,14 @@ int main(int argc, char **argv)
 	int qbits, rbits;
 
 	if (find_mnt6_curve(L, D, 500)) {
-	    for (; i<L->count; i++) {
-		cm = L->item[i];
+	    while (darray_count(L)) {
+		cm = darray_at(L, 0);
 		qbits = mpz_sizeinbase(cm->q, 2);
 		rbits = mpz_sizeinbase(cm->r, 2);
 		printf("%d, %d, %d\n", D, qbits, rbits);
 		fflush(stdout);
+		darray_remove_index(L, 0);
+		cm_info_clear(cm);
 	    }
 	}
     }

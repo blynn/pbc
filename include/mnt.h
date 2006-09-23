@@ -30,6 +30,7 @@ For a given discriminant D, searches for MNT curves of embedding degree 6
 suitable for cryptography (type D pairings) where the group order
 is at most ''bitlimit'' bits. For each suitable set of CM parameters found,
 a <type>cm_info_t</type> is created and appended to the dynamic array ''L''.
+Returns the number of CM parameters found.
 </para>
 <para>
 When no longer needed, <command>cm_info_clear</command> should be
