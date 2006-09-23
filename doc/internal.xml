@@ -2,13 +2,39 @@
 <title>PBC Internals</title>
 <para>
 Information on particular algebraic structures are stored in the
-<type>field_t</type>, which mostly contains pointers to functions
+<type>field_t</type> data type, which mostly contains pointers to functions
 written to perform operations such as addition and multiplication
-on elements of that particular group, ring or field. The name
-<type>algebraic_structure_t</type> is arguably more accurate for
-this data type, but it is too cumbersome. If this causes discomfort, it may
+on elements of that particular group, ring or field:
+</para>
+<programlisting>
+struct field_s {
+    ...
+    void (*init)(element_ptr);
+    void (*clear)(element_ptr);
+    ...
+    void (*add)(element_ptr, element_ptr, element_ptr);
+    void (*sub)(element_ptr, element_ptr, element_ptr);
+    void (*mul)(element_ptr, element_ptr, element_ptr);
+    ...
+};
+typedef struct field_s *field_ptr;
+typedef struct field_s field_t[1];
+</programlisting>
+<para>
+The name
+<type>algebraic_structure_t</type> is arguably more accurate,
+but far too cumbersome.
+If my naming choice causes discomfort, it may
 help if groups and rings are simply viewed as fields where certain things
 don't work!
+</para>
+<para>
+The last two lines of the above code excerpt show how GMP, and PBC, define
+data types: they are actually arrays of length one so that when
+a variable is declared, space is automatically allocated for it.
+Yet when used as a argument to a function, a pointer is passed, thus there
+is no need to explicitly allocate and deallocate memory, nor
+reference and dereference variables.
 </para>
 <para>
 Each <type>element_t</type> contains a field named <parameter>field</parameter>
@@ -16,26 +42,54 @@ to such a <type>field_t</type> variable. In fact, the only other field
 is <parameter>data</parameter>, which stores any data needed for the
 implementation of the particular algebraic structure the element resides in.
 </para>
-<screen>
+<programlisting>
 struct element_s {
     struct field_s *field;
     void *data;
 };
-</screen>
+</programlisting>
 <para>
-Thus when a call to one of the <type>element_</type> functions,
+When an <type>element_t</type> variable is initialized,
+its <parameter>field</parameter> is set, and then the initialization specific
+to that field is called to complete the initialization. Here, a line of
+code is worth a thousand words:
+</para>
+<programlisting>
+static inline void element_init(element_t e, field_ptr f)
+{
+    e->field = f;
+    f->init(e);
+}
+</programlisting>
+<para>
+Thus when a call to one of the <command>element_</command> functions,
 the <parameter>field</parameter> pointer is followed to see which
 version of the function should be called, so that for example modular
 addition is performed if the input element is an element of a finite field,
 while polynomial addition is performed for elements of a polynomial ring
 and so on.
 </para>
-<screen>
+<programlisting>
 static inline void element_add(element_t n, element_t a, element_t b)
 {
     n->field->add(n, a, b);
 }
-</screen>
+</programlisting>
+<section>
+<title>Justifying Design Decisions</title>
+<para>
+An alternative was to require the programmer to pass the field as a
+parameter, e.g. <userinput>element_add(a, b, c, F_13)</userinput>, but
+I decided the added annoyance of having to type this extra variable every
+time negated any benefits, such as obviating the need for
+the <parameter>field</parameter> pointer in
+<type>struct element_s</type>. Besides, one could always write a preprocessor
+to convert one type of notation to the other. (Speaking of which, as Hovav
+Shacham suggested, it may be nice to eventually have a converter
+that takes human-friendly infix
+operator expressions like <userinput>a = (b + c) * d</userinput> and
+outputs the assembly-like <command>element_</command> equivalents.)
+</para>
 <para>
 This design may seem dangerous because if a programmer inadverdantly attempts
 to add a polynomial and a point on an elliptic curve, say, the code
@@ -51,28 +105,50 @@ to be able to swap the ground field and extension fields,
 which is trivial if they have the same data type.
 </para>
 <para>
-I could at least have separate data types to distinguish between
-groups, rings and fields. It is important to clearly
-label them differently in mathematics, but here it makes more sense
+I could have separate data types to distinguish between
+groups, rings and fields. It is important to
+label them differently in mathematics, but here I feel it makes more sense
 to lump them together under the same heading, and just treat some kinds
 as handicapped.
 </para>
 <para>
-Moreover, even if I did have a distinct data type for every kind of
+Even if I did have a distinct data type for every kind of
 algebraic structure, fields of prime order with different moduli would still
 fall under the same data type, again with unpleasant results if elements
 are mistakenly mixed.
 </para>
 <para>
-I have found that even my approach appears not to be type-safe, I almost
+I have found that though my approach appears not to be type-safe, I almost
 never accidently mix elements from different fields. But even if this
 were a serious problem, it would not be difficult to check that
 the all the arguments belong to the same field during a function call,
 which also addresses the issue in the previous paragraph, and similarly
 check that the current algebraic structure supports the requested
-operation.
-(Of course, there should be some switch that could disable the checks
-for efficiency.) This library ought to have such a feature eventually
+operation. For example, in its simplest form:
+</para>
+<programlisting>
+void element_add(element_t n, element_t a, element_t b)
+{
+    assert(n->field == a-->field &amp;&amp; a-->field == b->field);
+    n->field->add(n, a, b);
+}
+</programlisting>
+<para>
+This library ought to have such a feature eventually
 to aid the less experienced, but I have other priorities at present.
 </para>
+<para>
+Another option is to introduce data types for each of the four pairing-related
+algebraic structures, namely G1, G2, GT and Zr, as these are the only ones
+needed for implementing pairing-based cryptosystems.
+</para>
+<para>
+A minor point: The
+<ulink url="http://www.gnu.org/software/libc/manual/html_node/Reserved-Names.html">GNU libc manual</ulink>
+states that data types ending in <type>_t</type>
+should not be used because they are reserved for future additions to C or POSIX.
+On the other hand, I want to stay consistent with GMP, and I hear ending
+data types with <type>_t</type> is common practice.
+</para>
+</section>
 </chapter>

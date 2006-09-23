@@ -52,8 +52,17 @@ initialized to be from the same algebraic structure.
 </para>
 <para>
 The addition and multiplication functions perform addition and multiplication
-operations in rings and fields. In groups, TODO (basically both can be used
-to apply the group operation)
+operations in rings and fields. For groups of points on an ellitpic curve,
+such as the G1 and G2 groups associated with pairings, both addition and
+multiplication represent the group operation (and similarly both 0 and 1
+represent the identity element).
+It is recommended that programs choose and
+one convention and stick with it to avoid confusion.
+</para>
+<para>
+In contrast, the GT group is currently
+implemented as a subgroup of a finite field, so only multiplicative operations
+should be used for GT.
 </para>
 <variablelist>
 &earith;

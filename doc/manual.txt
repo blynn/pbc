@@ -73,6 +73,10 @@ Copyright © 2006 Ben Lynn
 
   9._PBC_Internals
 
+
+        Justifying_Design_Decisions
+
+
   A._Contributors
 
 
@@ -680,12 +684,32 @@ handle this.)
 
 Chapter 9. PBC Internals
 
-Information on particular algebraic structures are stored in the field_t, which
-mostly contains pointers to functions written to perform operations such as
-addition and multiplication on elements of that particular group, ring or
-field. The name algebraic_structure_t is arguably more accurate for this data
-type, but it is too cumbersome. If this causes discomfort, it may help if
-groups and rings are simply viewed as fields where certain things don't work!
+Information on particular algebraic structures are stored in the field_t data
+type, which mostly contains pointers to functions written to perform operations
+such as addition and multiplication on elements of that particular group, ring
+or field:
+
+  struct field_s {
+      ...
+      void (*init)(element_ptr);
+      void (*clear)(element_ptr);
+      ...
+      void (*add)(element_ptr, element_ptr, element_ptr);
+      void (*sub)(element_ptr, element_ptr, element_ptr);
+      void (*mul)(element_ptr, element_ptr, element_ptr);
+      ...
+  };
+  typedef struct field_s *field_ptr;
+  typedef struct field_s field_t[1];
+
+The name algebraic_structure_t is arguably more accurate, but far too
+cumbersome. If my naming choice causes discomfort, it may help if groups and
+rings are simply viewed as fields where certain things don't work!
+The last two lines of the above code excerpt show how GMP, and PBC, define data
+types: they are actually arrays of length one so that when a variable is
+declared, space is automatically allocated for it. Yet when used as a argument
+to a function, a pointer is passed, thus there is no need to explicitly
+allocate and deallocate memory, nor reference and dereference variables.
 Each element_t contains a field named field to such a field_t variable. In
 fact, the only other field is data, which stores any data needed for the
 implementation of the particular algebraic structure the element resides in.
@@ -694,6 +718,16 @@ implementation of the particular algebraic structure the element resides in.
       struct field_s *field;
       void *data;
   };
+
+When an element_t variable is initialized, its field is set, and then the
+initialization specific to that field is called to complete the initialization.
+Here, a line of code is worth a thousand words:
+
+  static inline void element_init(element_t e, field_ptr f)
+  {
+      e->field = f;
+      f->init(e);
+  }
 
 Thus when a call to one of the element_ functions, the field pointer is
 followed to see which version of the function should be called, so that for
@@ -706,6 +740,17 @@ polynomial ring and so on.
       n->field->add(n, a, b);
   }
 
+
+Justifying Design Decisions
+
+An alternative was to require the programmer to pass the field as a parameter,
+e.g. element_add(a, b, c, F_13), but I decided the added annoyance of having to
+type this extra variable every time negated any benefits, such as obviating the
+need for the field pointer in struct element_s. Besides, one could always write
+a preprocessor to convert one type of notation to the other. (Speaking of
+which, as Hovav Shacham suggested, it may be nice to eventually have a
+converter that takes human-friendly infix operator expressions like a = (b + c)
+* d and outputs the assembly-like element_ equivalents.)
 This design may seem dangerous because if a programmer inadverdantly attempts
 to add a polynomial and a point on an elliptic curve, say, the code will
 compile without warnings since they have the same data type, but the results
@@ -728,10 +773,20 @@ accidently mix elements from different fields. But even if this were a serious
 problem, it would not be difficult to check that the all the arguments belong
 to the same field during a function call, which also addresses the issue in the
 previous paragraph, and similarly check that the current algebraic structure
-supports the requested operation. (Of course, there should be some switch that
-could disable the checks for efficiency.) This library ought to have such a
-feature eventually to aid the less experienced, but I have other priorities at
-present.
+supports the requested operation. For example, in its simplest form:
+
+  void element_add(element_t n, element_t a, element_t b)
+  {
+      assert(n->field == a-->field && a-->field == b->field);
+      n->field->add(n, a, b);
+  }
+
+This library ought to have such a feature eventually to aid the less
+experienced, but I have other priorities at present.
+A minor point: The GNU_libc_manual states that data types ending in _t should
+not be used because they are reserved for future additions to C or POSIX. On
+the other hand, I want to stay consistent with GMP, and I hear ending data
+types with _t is common practice.
 
 Appendix A. Contributors
 

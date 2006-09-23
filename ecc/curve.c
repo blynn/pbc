@@ -496,9 +496,9 @@ void field_init_curve_group(field_t f, curve_t c, mpz_t cofac)
     mpz_set(p->cofac, cofac);
     f->init = curve_group_init;
     f->clear = curve_group_clear;
-    f->invert = curve_group_invert;
-    f->mul = curve_group_mul;
-    f->set1 = curve_group_set1;
+    f->neg = f->invert = curve_group_invert;
+    f->add = f->mul = curve_group_mul;
+    f->set0 = f->set1 = curve_group_set1;
     f->set = curve_group_set;
     f->random = curve_group_random;
     f->from_hash = curve_group_from_hash;
