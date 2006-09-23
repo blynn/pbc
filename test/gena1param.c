@@ -1,10 +1,10 @@
 #include "pbc.h"
-#include "bgn_param.h"
+#include "a1_param.h"
 
 int main(void)
 {
     gmp_randstate_t rstate;
-    bgn_param_t param;
+    a1_param_t param;
     mpz_t p, q, N;
 
     mpz_init(p);
@@ -18,14 +18,14 @@ int main(void)
     mpz_nextprime(q, q);
     mpz_mul(N, p, q);
 
-    bgn_param_init(param);
-    bgn_param_gen(param, N);
+    a1_param_init(param);
+    a1_param_gen(param, N);
 
-    bgn_param_out_str(stdout, param);
+    a1_param_out_str(stdout, param);
 
     mpz_clear(p);
     mpz_clear(q);
     mpz_clear(N);
-    bgn_param_clear(param);
+    a1_param_clear(param);
     return 0;
 }

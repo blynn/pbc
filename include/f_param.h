@@ -22,7 +22,7 @@ void f_param_init(f_param_t fp);
 void f_param_clear(f_param_t fp);
 void f_param_gen(f_param_t fp, int bits);
 void f_param_out_str(FILE *stream, f_param_ptr p);
-void f_param_inp_generic (f_param_ptr p, fetch_ops_t *fops, void *ctx);
+void f_param_inp_generic (f_param_ptr p, fetch_ops_t fops, void *ctx);
 void f_param_inp_buf (f_param_ptr p, const char *buf, size_t len);
 void f_param_inp_str (f_param_ptr p, FILE *stream);
 void pairing_init_f_param(pairing_t pairing, f_param_t param);

@@ -1,37 +1,37 @@
 #include <assert.h>
-#include "bgn_param.h"
+#include "a1_param.h"
 #include "param.h"
 #include "tracker.h"
 
-struct bgn_pairing_data_s {
+struct a1_pairing_data_s {
     field_t Fp, Fp2;
     curve_t Ep;
     mpz_t h;
 };
-typedef struct bgn_pairing_data_s bgn_pairing_data_t[1];
-typedef struct bgn_pairing_data_s *bgn_pairing_data_ptr;
+typedef struct a1_pairing_data_s a1_pairing_data_t[1];
+typedef struct a1_pairing_data_s *a1_pairing_data_ptr;
 
-void bgn_param_init(bgn_param_t param)
+void a1_param_init(a1_param_t param)
 {
     mpz_init(param->p);
     mpz_init(param->n);
 }
 
-void bgn_param_clear(bgn_param_t param)
+void a1_param_clear(a1_param_t param)
 {
     mpz_clear(param->p);
     mpz_clear(param->n);
 }
 
-void bgn_param_out_str(FILE *stream, bgn_param_ptr p)
+void a1_param_out_str(FILE *stream, a1_param_ptr p)
 {
-    param_out_type(stream, "bgn");
+    param_out_type(stream, "a1");
     param_out_mpz(stream, "p", p->p);
     param_out_mpz(stream, "n", p->n);
     param_out_int(stream, "l", p->l);
 }
 
-void bgn_param_inp_generic (bgn_param_ptr p, fetch_ops_t *fops, void *ctx)
+void a1_param_inp_generic (a1_param_ptr p, fetch_ops_t fops, void *ctx)
 {
     assert (fops);
     assert (ctx);
@@ -48,21 +48,21 @@ void bgn_param_inp_generic (bgn_param_ptr p, fetch_ops_t *fops, void *ctx)
     symtab_clear(tab);
 }
 
-void bgn_param_inp_buf (bgn_param_ptr p, const char *buf, size_t len)
+void a1_param_inp_buf (a1_param_ptr p, const char *buf, size_t len)
 {
     assert (buf);
     tracker_t t;
     tracker_init (&t, buf, len);
-    bgn_param_inp_generic (p, &fops_buf, &t);
+    a1_param_inp_generic (p, &fops_buf, &t);
 }
 
-void bgn_param_inp_str (bgn_param_ptr p, FILE *stream)
+void a1_param_inp_str (a1_param_ptr p, FILE *stream)
 {
     assert (stream);
-    bgn_param_inp_generic (p, &fops_str, stream);
+    a1_param_inp_generic (p, &fops_str, stream);
 }
 
-void bgn_param_gen(bgn_param_t param, mpz_t order)
+void a1_param_gen(a1_param_t param, mpz_t order)
 {
     //if order is even, ideally check all even l, not just multiples of 4
     //but I don't see a good reason for having an even order
@@ -90,11 +90,11 @@ static void phi_identity(element_ptr out, element_ptr in, pairing_ptr pairing)
     element_set(out, in);
 }
 
-static void bgn_pairing(element_ptr out, element_ptr in1, element_ptr in2,
+static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	pairing_t pairing)
 //in1, in2 are from E(F_q), out from F_q^2
 {
-    bgn_pairing_data_ptr p = pairing->data;
+    a1_pairing_data_ptr p = pairing->data;
     point_t V;
     point_ptr P;
     element_t f, f0;
@@ -204,16 +204,16 @@ static void bgn_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     element_clear(e0);
 }
 
-void pairing_init_bgn_param(pairing_t pairing, bgn_param_t param)
+void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
 {
     element_t a, b;
     mpz_init(pairing->r);
     mpz_set(pairing->r, param->n);
     field_init_fp(pairing->Zr, pairing->r);
 
-    bgn_pairing_data_ptr p;
+    a1_pairing_data_ptr p;
 
-    p =	pairing->data = malloc(sizeof(bgn_pairing_data_t));
+    p =	pairing->data = malloc(sizeof(a1_pairing_data_t));
     mpz_init(p->h);
     mpz_set_ui(p->h, param->l);
 
@@ -233,6 +233,6 @@ void pairing_init_bgn_param(pairing_t pairing, bgn_param_t param)
     //pairing->phi = phi_identity;
     pairing->GT = p->Fp2;
 
-    pairing->map = bgn_pairing;
+    pairing->map = a1_pairing;
     pairing->phi = phi_identity;
 }

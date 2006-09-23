@@ -21,7 +21,7 @@ void e_param_init(e_param_t ep);
 void e_param_clear(e_param_t ep);
 void e_param_gen(e_param_t p, int rbits, int qbits);
 void e_param_out_str(FILE *stream, e_param_ptr p);
-void e_param_inp_generic (e_param_ptr p, fetch_ops_t *fops, void *ctx);
+void e_param_inp_generic (e_param_ptr p, fetch_ops_t fops, void *ctx);
 void e_param_inp_buf (e_param_ptr p, const char *buf, size_t len);
 void e_param_inp_str(e_param_ptr p, FILE *stream);
 void pairing_init_e_param(pairing_t pairing, e_param_t param);

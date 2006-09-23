@@ -85,7 +85,7 @@ void d_param_out_str(FILE *stream, d_param_ptr p)
     param_out_mpz(stream, "nqr", p->nqr);
 }
 
-void d_param_inp_generic (d_param_ptr p, fetch_ops_t *fops, void *ctx)
+void d_param_inp_generic (d_param_ptr p, fetch_ops_t fops, void *ctx)
 {
     assert (fops);
     assert (ctx);

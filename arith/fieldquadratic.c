@@ -338,6 +338,8 @@ void field_init_quadratic(field_ptr f, field_ptr fbase)
     p = f->data = malloc(sizeof(fq_field_data_t));
 
     element_init(p->nqr, fbase);
+    //TODO: why bother with p->nqr? even if it's needed,
+    //TODO: why not use element_ptr instead?
     element_set(p->nqr, field_get_nqr(fbase));
     p->field = fbase;
 

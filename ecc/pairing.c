@@ -5,7 +5,7 @@
 #include "d_param.h"
 #include "e_param.h"
 #include "f_param.h"
-#include "bgn_param.h"
+#include "a1_param.h"
 #include "parse.h"
 #include "tracker.h"
 #include "utils.h"
@@ -89,13 +89,13 @@ void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t *fops, void *ctx)
 	f_param_inp_generic (fp, fops, ctx);
 	pairing_init_f_param(pairing, fp);
 	f_param_clear(fp);
-    } else if (!strcmp(s, "bgn")) {
-	bgn_param_t bgnp;
+    } else if (!strcmp(s, "a1")) {
+	a1_param_t a1p;
 
-	bgn_param_init(bgnp);
-	bgn_param_inp_generic (bgnp, fops, ctx);
-	pairing_init_bgn_param(pairing, bgnp);
-	bgn_param_clear(bgnp);
+	a1_param_init(a1p);
+	a1_param_inp_generic (a1p, fops, ctx);
+	pairing_init_a1_param(pairing, a1p);
+	a1_param_clear(a1p);
     }
     token_clear(tok);
 }

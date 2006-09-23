@@ -1,3 +1,130 @@
+commit c28381adc523087cd33401d3dc87cea60c1f062b 
+tree 4802c2b8250825b1ee46542e369e666ed779db50 
+parent cf235e2923efc951816c715a5f6a690737905e45 
+author Ben Lynn <blynn@cs.stanford.edu> Sat, 23 Sep 2006 00:58:27 -0700 
+committer Ben Lynn <ben@monkey> Sat, 23 Sep 2006 00:58:27 -0700 
+
+    Can use additive or multiplicative notation for curve groups
+    
+    Described this in manual
+
+commit cf235e2923efc951816c715a5f6a690737905e45 
+tree a116f2ba0ecf7b482db60738d169721988f52c72 
+parent e4df585154182c21286c764b5dd677ea7575a492 
+author Ben Lynn <blynn@cs.stanford.edu> Fri, 22 Sep 2006 03:09:51 -0700 
+committer Ben Lynn <ben@monkey> Fri, 22 Sep 2006 03:09:51 -0700 
+
+    Manual: started writing about internals, pairing parameter functions
+    
+    Ran cg-add on certain manual files that were accidently left out
+
+commit e4df585154182c21286c764b5dd677ea7575a492 
+tree b20ce4a55756358e65247e689269a19d1c5d1d5f 
+parent 6cfbc511e86f362ba33ff2683ad1f2c8c59f192a 
+author Ben Lynn <blynn@cs.stanford.edu> Wed, 20 Sep 2006 18:19:40 -0700 
+committer Ben Lynn <ben@monkey> Wed, 20 Sep 2006 18:19:40 -0700 
+
+    Changed fetch_ops typedefs to match GMP/PBC style
+
+commit 6cfbc511e86f362ba33ff2683ad1f2c8c59f192a 
+tree 30638e12984e0e70232488dc26d4b32984f330dc 
+parent fe7c97305a908f6382de64bae17c92c1e55a583d 
+author Ben Lynn <blynn@cs.stanford.edu> Wed, 20 Sep 2006 15:14:46 -0700 
+committer Ben Lynn <ben@monkey> Wed, 20 Sep 2006 15:14:46 -0700 
+
+    Moved get_time Win32 code to new file misc/get_time.win32.c
+
+commit fe7c97305a908f6382de64bae17c92c1e55a583d 
+tree 4fb6efd1fe4fbfecc1fc776a83ae397fda6259ba 
+parent 2fef4a60b29ca32df41069b03c03ba286387524a 
+author Ben Lynn <blynn@cs.stanford.edu> Wed, 20 Sep 2006 04:42:31 -0700 
+committer Ben Lynn <ben@monkey> Wed, 20 Sep 2006 04:42:31 -0700 
+
+    pbc-0.3.2
+
+commit 2fef4a60b29ca32df41069b03c03ba286387524a 
+tree 8e1206a764db9d39f6c7aa8f3efbc6caae65e0ab 
+parent 5a1132c09b64c84d7d507b2e48dd4b2166d5c5b7 
+author Ben Lynn <blynn@cs.stanford.edu> Wed, 20 Sep 2006 04:14:32 -0700 
+committer Ben Lynn <ben@monkey> Wed, 20 Sep 2006 04:14:32 -0700 
+
+    Added tutorial chapter, changed testsig.c correspondingly
+
+commit 5a1132c09b64c84d7d507b2e48dd4b2166d5c5b7 
+tree 7239b65fdf45cc11efd63b57654012ed62dff36a 
+parent 09a984d2fc864823ef4699f266f68bb90140e584 
+author Ben Lynn <blynn@cs.stanford.edu> Wed, 20 Sep 2006 02:57:26 -0700 
+committer Ben Lynn <ben@monkey> Wed, 20 Sep 2006 02:57:26 -0700 
+
+    More documentation
+    
+    Implemented pairing_clear for type A pairings
+    
+    Renamed element_pow* functions to element_pow*_mpz
+    
+    Wrote element_pow*_zn wrappers
+    
+    Started converting test programs to use new API, avoid GMP functions
+
+commit 09a984d2fc864823ef4699f266f68bb90140e584 
+tree 9c05701fcaa7d8a14445af812a23eabc07b58266 
+parent e512cfab2a8c204b35c43fc81b118d7329f28899 
+author Ben Lynn <blynn@cs.stanford.edu> Tue, 19 Sep 2006 18:41:04 -0700 
+committer Ben Lynn <ben@monkey> Tue, 19 Sep 2006 18:41:04 -0700 
+
+    Added element_sgn() as alternative to element_sign()
+    
+    More documentation, cosmetic changes
+    
+    Use more wrappers in test programs
+    
+    Bugfix in fieldquadratic.c fq_sign()
+
+commit e512cfab2a8c204b35c43fc81b118d7329f28899 
+tree 32c4d83872f26164fb0872881a36581b844f7e02 
+parent cfb938da80b4515bc84ad7935126dc173a4e92b6 
+author Ben Lynn <blynn@cs.stanford.edu> Tue, 19 Sep 2006 03:46:33 -0700 
+committer Ben Lynn <ben@monkey> Tue, 19 Sep 2006 03:46:33 -0700 
+
+    Wrote more documentation
+    
+    Wrote some wrappers, some test sources now use them
+
+commit cfb938da80b4515bc84ad7935126dc173a4e92b6 
+tree 0b161022a74ddcf1d8005488d86e121ed006b680 
+parent 8df04da7b53c7c0c2c67b725136b6027c0be037e 
+author Ben Lynn <blynn@cs.stanford.edu> Mon, 18 Sep 2006 18:55:24 -0700 
+committer Ben Lynn <ben@monkey> Mon, 18 Sep 2006 18:55:24 -0700 
+
+    Better HTML output for manual
+
+commit 8df04da7b53c7c0c2c67b725136b6027c0be037e 
+tree b55299fecf37bd0907b9d8708e5297033ff42385 
+parent a8bd31b95ece24116cb176da03f025323f321e3a 
+author Ben Lynn <blynn@cs.stanford.edu> Mon, 18 Sep 2006 09:11:36 -0700 
+committer Ben Lynn <ben@monkey> Mon, 18 Sep 2006 09:11:36 -0700 
+
+    Worked on manual:
+    * split source into several files
+    * wrote awk script to extract docs from code comments
+    * switched from jade to xmlto for build
+    
+    Renamed sig to pbc_sig
+    
+    Moved *.param to param subdirectory
+    
+    Makefile fixes
+    
+    pbc-0.3.1
+
+commit a8bd31b95ece24116cb176da03f025323f321e3a 
+tree f14c6054a9f2888b98dbf035ddb37abb87fa12ab 
+parent 54fa0538896b04f5d28e5cb46491860b3ebdb3a7 
+author Ben Lynn <blynn@cs.stanford.edu> Sun, 17 Sep 2006 22:28:23 -0700 
+committer Ben Lynn <ben@monkey> Sun, 17 Sep 2006 22:28:23 -0700 
+
+    Restored accidently deleted a.param
+
 commit 54fa0538896b04f5d28e5cb46491860b3ebdb3a7 
 tree 9ad66a5bd9547930308fdd98072828d91bdabef7 
 author Ben Lynn <blynn@cs.stanford.edu> Sun, 17 Sep 2006 17:00:24 -0700 

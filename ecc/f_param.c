@@ -48,7 +48,7 @@ void f_param_out_str(FILE *stream, f_param_ptr p)
     param_out_mpz(stream, "alpha1", p->alpha1);
 }
 
-void f_param_inp_generic (f_param_ptr p, fetch_ops_t *fops, void *ctx)
+void f_param_inp_generic (f_param_ptr p, fetch_ops_t fops, void *ctx)
 {
     assert (fops);
     assert (ctx);

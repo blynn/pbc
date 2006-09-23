@@ -61,7 +61,11 @@ Copyright © 2006 Ben Lynn
 
   6._Randomness_Functions
 
-  7._Pairing_Parameter_Functions
+  7._Param_Functions
+
+
+        Type_A
+
 
   8._Tutorial
 
@@ -76,6 +80,10 @@ Copyright © 2006 Ben Lynn
 
         Justifying_Design_Decisions
 
+        Internal_Randomness
+
+        Type_A_Internals
+
 
   A._Contributors
 
@@ -83,7 +91,7 @@ Copyright © 2006 Ben Lynn
 Preface
 
 This manual describes how to install and use the PBC pairing-based cryptography
-library, version 0.3.2. It is modeled on the GMP manual.
+library, version 0.3.3. It is modeled on the GMP manual.
 
 Chapter 1. Overview
 
@@ -356,8 +364,13 @@ Element Arithmetic
 All element_t arguments to this function must have been initialized to be from
 the same algebraic structure.
 The addition and multiplication functions perform addition and multiplication
-operations in rings and fields. In groups, TODO (basically both can be used to
-apply the group operation)
+operations in rings and fields. For groups of points on an ellitpic curve, such
+as the G1 and G2 groups associated with pairings, both addition and
+multiplication represent the group operation (and similarly both 0 and 1
+represent the identity element). It is recommended that programs choose and one
+convention and stick with it to avoid confusion.
+In contrast, the GT group is currently implemented as a subgroup of a finite
+field, so only multiplicative operations should be used for GT.
 
 
   void element_add(element_t n, element_t a, element_t b)
@@ -541,9 +554,54 @@ because different platforms have different sources of random bits.
       is less than limit.
 
 
-Chapter 7. Pairing Parameter Functions
+Chapter 7. Param Functions
 
-These functions are mainly used to generate pairing parameters. TODO
+These functions are mainly used to generate pairing parameters. There are
+several types of pairings, which, like vitamins, are labelled with capital
+letters roughly in the order of discovery. Not all known pairing types are
+implemented in PBC.
+A good rule of thumb is to use Type A when speed is the main concern, and Type
+F when group elements must be a short as possible, though in this case Type D
+is faster and almost as short.
+
+Type A
+
+Pairings on type A curves are the fast and ought to be used where the main
+concern is efficiency. Typically, r should be about 160 bits long and q about
+512 bits. In this case, elements of groups G1 and G2 take 512 bits to
+represent.
+The file param/a.param contains parameters for a type A pairing suitable for
+cryptographic use.
+The a_param_t data type holds parameters for a type A pairing.
+
+
+  void a_param_init(a_param_t p)
+      Initialize p. This must be called before p can be used.
+
+  void a_param_clear(a_param_t p)
+      Clear p. This should be called after p is no longer needed.
+
+  void a_param_gen(a_param_t p, int rbits, int qbits)
+      Generate type A pairing parameters and store them in p, where the group
+      order r is rbits long, and the order of the base field q is qbits long.
+      To be secure, generic discrete log algorithms must be infeasible in
+      groups of order r, and finite field discrete log algorithms must be
+      infeasible in finite fields of size roughly 2qbits. Typical values: rbits
+      = 160, qbits = 512.
+
+  void a_param_out_str(FILE *stream, a_param_ptr p)
+      Write the parameters in p in a text format onto stream.
+
+  void a_param_inp_generic (a_param_ptr p, fetch_ops_t *fops, void *ctx)
+      TODO
+
+  void a_param_inp_buf(a_param_ptr p, const char *buf, size_t len)
+      Read type A parameters in the above format into p from the buffer buf
+      that is len bytes long.
+
+  void a_param_inp_str(a_param_ptr p, FILE *stream)
+      Read type A parameters in the above format into p from stream.
+
 
 Chapter 8. Tutorial
 
@@ -760,20 +818,19 @@ start with a finite field and then extend it an arbitrary number of times.
 (Though in practice, currently I only need to extend it twice at most.) I
 wanted to be able to swap the ground field and extension fields, which is
 trivial if they have the same data type.
-I could at least have separate data types to distinguish between groups, rings
-and fields. It is important to clearly label them differently in mathematics,
-but here it makes more sense to lump them together under the same heading, and
-just treat some kinds as handicapped.
-Moreover, even if I did have a distinct data type for every kind of algebraic
-structure, fields of prime order with different moduli would still fall under
-the same data type, again with unpleasant results if elements are mistakenly
-mixed.
-I have found that even my approach appears not to be type-safe, I almost never
-accidently mix elements from different fields. But even if this were a serious
-problem, it would not be difficult to check that the all the arguments belong
-to the same field during a function call, which also addresses the issue in the
-previous paragraph, and similarly check that the current algebraic structure
-supports the requested operation. For example, in its simplest form:
+I could have separate data types to distinguish between groups, rings and
+fields. It is important to label them differently in mathematics, but here I
+feel it makes more sense to lump them together under the same heading, and just
+treat some kinds as handicapped.
+Even if I did have a distinct data type for every kind of algebraic structure,
+fields of prime order with different moduli would still fall under the same
+data type, again with unpleasant results if elements are mistakenly mixed.
+I have found that though my approach appears not to be type-safe, I almost
+never accidently mix elements from different fields. But even if this were a
+serious problem, it would not be difficult to check that the all the arguments
+belong to the same field during a function call, which also addresses the issue
+in the previous paragraph, and similarly check that the current algebraic
+structure supports the requested operation. For example, in its simplest form:
 
   void element_add(element_t n, element_t a, element_t b)
   {
@@ -783,10 +840,53 @@ supports the requested operation. For example, in its simplest form:
 
 This library ought to have such a feature eventually to aid the less
 experienced, but I have other priorities at present.
+Another option is to introduce data types for each of the four pairing-related
+algebraic structures, namely G1, G2, GT and Zr, as these are the only ones
+needed for implementing pairing-based cryptosystems.
 A minor point: The GNU_libc_manual states that data types ending in _t should
 not be used because they are reserved for future additions to C or POSIX. On
 the other hand, I want to stay consistent with GMP, and I hear ending data
 types with _t is common practice.
+
+Internal Randomness
+
+Some algorithms require a quadratic nonresidue in a given field. The first time
+a quadratic nonresidue is requested, one is generated at random, using the same
+source of random bits as other PBC random functions.
+In fieldquadratic.c, a quadratic field extension is constructed with a square
+root of this randomly generated quadratic nonresidue in the base field. Thus
+for a nondeterminstic source of random bits, the same field may be constructed
+differently on different runs.
+To construct the same field the same way every time, one must record the
+quadratic nonresidue generated from one run, and call field_set_nqr() every
+time this particular construction of a quadratic field extension is desired.
+Another use for this function is to save time by setting the quadratic
+nonresidue to some precomputed value.
+Similarly, for higher degree extensions, a random irreducible polynomial may be
+chosen to construct it, but this must be recorded if the same construction is
+later required.
+This happens behind the scenes in PBC.
+
+Type A Internals
+
+Type A pairings are constructed on the curve y^2 = x^3 + x over the field F_q
+for some prime q. Both G1 and G2 are the group of points E(F_q), so this
+pairing is symmetric. It turns out #E(F_q) = q + 1 and #E(F_q^2) = (q+1)^2.
+Thus the embedding degree k is 2, and hence GT is a subgroup of F_q^2. The
+order r is some prime factor of q + 1.
+Write q + 1 = r * h. For efficiency, r is picked to be a Solinas prime, that
+is, r has the form 2^a +- 2^b +- 1 for some integers 0 < b < a.
+Also, q = -1 mod 12 so F_q^2 can be implemented as F_q[i] (where i = sqrt(-1))
+and since q = -1 mod 3, cube roots in F_q are easy to compute. This latter
+feature may be removed because I have not found a use for it yet (in which case
+we only need q = -1 mod 4).
+a_param struct fields:
+
+exp2, exp1, sign1, sign0, r:
+    r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1 (Solinas prime)
+q, h:
+    r * h = q + 1
+    q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
 
 Appendix A. Contributors
 

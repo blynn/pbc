@@ -1,55 +1,4 @@
 <chapter>
-<title>Pairing Types</title>
-<para>
-The PBC library implements the pairing using different types of curves.
-Which curve to use depends on the application. To make it easy to refer to
-them, I have labelled them with letters. See below for the details.
-</para>
-<para>
-The library provides pairing parameters useful in typical pairing-based
-cryptosystems. If you're not interested in what the details are, always
-use Type A when a fast pairing is desired, and Type F when short
-group elements are needed. Type C are not as slow as type F, but cannot
-be quite as short.
-</para>
-<section><title>Type A</title>
-<para>
-We use the curve y^2 = x^3 + x over the field F_q for some prime q.
-It turns out #E(F_q) = q + 1 and #E(F_q^2) = (q+1)^2.
-Thus the embedding degree k is 2.
-</para>
-<para>
-We set things up so that q + 1 = r * h, for a particular r. For speed,
-we pick r to be a Solinas prime, that is, r has the form 2^a +- 2^b +- 1
-for some integers 0 &lt; b &lt; a.
-</para>
-<para>
-We also choose q = -1 mod 12 so we can implement F_q^2 as F_q[i]
-(where i = sqrt(-1)). Also, since q = -1 mod 3, cube roots in F_q
-are easy to compute. This latter feature may be removed because I have
-not found a use for it yet (in which case only q = -1 mod 4 is guaranteed).
-</para>
-<para>
-Pairings on type A curves are the fast and ought to be used where the
-main concern is efficiency. Typically, r should be about 160 bits long
-and q about 512 bits. In this case, elements of groups G1 and G2 take
-512 bits to represent.
-</para>
-<para>
-Additionally, the pairing is symmetric, that is G1 and G2 are in fact
-the same group.
-</para>
-<para>
-<function>a_param</function> struct fields:
-</para>
-<literallayout>
-exp2, exp1, sign1, sign0, r:
-    r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1 (Solinas prime)
-q, h:
-    r * h = q + 1
-    q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
-</literallayout>
-</section>
 <section><title>Type B</title>
 <para>
 This type is reserved for the curve y^2 = x^3 + 1 over F_q with
@@ -178,7 +127,7 @@ field attacks are subexponential.)
 k = 10 curves may also be constructed.
 </para>
 </section>
-<section><title>BGN Curves</title>
+<section><title>Type A1</title>
 <para>
 These are curves containing a subgroup of a specified order. Boneh, Goh and
 Nissim have use for an elliptic curve with subgroup order N = pq for large
@@ -254,7 +203,7 @@ of prime order.
 <term>gencparam</term>
 <term>geneparam</term>
 <term>genfparam</term>
-<term>genbgn</term>
+<term>gena1param</term>
 <listitem><para>
 Prints parameters for a curve suitable for computing pairings of a given
 type. The output can be fed to some of the other test programs.

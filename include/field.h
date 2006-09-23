@@ -401,6 +401,8 @@ static inline void field_clear(field_ptr f)
 }
 
 element_ptr field_get_nqr(field_ptr f);
+void field_set_nqr(field_ptr f, element_t nqr);
+void field_gen_nqr(field_ptr f);
 
 void field_init(field_ptr f);
 

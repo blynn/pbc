@@ -6,6 +6,8 @@
 
 struct fq_field_data_s {
     field_ptr field;
+
+    //TODO: nqr is a copy of field->nqr, why did I bother copying it?
     element_t nqr;
 };
 typedef struct fq_field_data_s *fq_field_data_ptr;

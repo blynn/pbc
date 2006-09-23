@@ -26,7 +26,7 @@ libpbc_srcs := \
 	misc/parse.c misc/darray.c misc/symtab.c misc/get_time.win32.c \
 	ecc/mpc.c ecc/mnt.c ecc/hilbert.c \
 	ecc/curve.c ecc/pairing.c ecc/param.c \
-	ecc/bgn_param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c
+	ecc/a1_param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c
 libsig_srcs := sig/hash.c sig/sig.c		# eventually also bbs.c ...
 test_srcs := test/testbls.c test/testbb.c test/testsig.c test/testbbs.c \
 	test/testibs.c \
@@ -34,7 +34,7 @@ test_srcs := test/testbls.c test/testbb.c test/testsig.c test/testbbs.c \
 	test/testibe.c \
 	test/testhilbert.c test/listmnt.c \
 	test/genaparam.c test/gencparam.c test/geneparam.c test/genfparam.c \
-	test/genbgn.c \
+	test/gena1param.c \
 	test/testpairing.c test/testpoly.c \
 	test/benchmark.c \
 	test/19.c test/sing.c
@@ -74,7 +74,7 @@ test/genaparam: test/genaparam.o libpbc.a
 test/gencparam: test/gencparam.o libpbc.a
 test/geneparam: test/geneparam.o libpbc.a
 test/genfparam: test/genfparam.o libpbc.a
-test/genbgn: test/genbgn.o libpbc.a
+test/gena1param: test/gena1param.o libpbc.a
 test/listmnt: test/listmnt.o libpbc.a
 test/testpoly: test/testpoly.o libpbc.a
 test/19: test/19.o libpbc.a
@@ -118,15 +118,15 @@ ecc/pairing.o: include/pairing.h include/curve.h include/poly.h
 ecc/pairing.o: include/field.h include/random.h include/darray.h
 ecc/pairing.o: include/fops.h include/a_param.h include/fieldquadratic.h
 ecc/pairing.o: include/d_param.h include/mnt.h include/e_param.h
-ecc/pairing.o: include/f_param.h include/bgn_param.h include/parse.h
+ecc/pairing.o: include/f_param.h include/a1_param.h include/parse.h
 ecc/pairing.o: include/tracker.h include/utils.h
 ecc/param.o: include/utils.h include/param.h include/symtab.h
 ecc/param.o: include/darray.h include/fops.h include/parse.h
 ecc/param.o: include/tracker.h
-ecc/bgn_param.o: include/bgn_param.h include/fieldquadratic.h include/field.h
-ecc/bgn_param.o: include/random.h include/pairing.h include/curve.h
-ecc/bgn_param.o: include/poly.h include/darray.h include/fops.h
-ecc/bgn_param.o: include/param.h include/symtab.h include/tracker.h
+ecc/a1_param.o: include/a1_param.h include/fieldquadratic.h include/field.h
+ecc/a1_param.o: include/random.h include/pairing.h include/curve.h
+ecc/a1_param.o: include/poly.h include/darray.h include/fops.h
+ecc/a1_param.o: include/param.h include/symtab.h include/tracker.h
 ecc/a_param.o: include/a_param.h include/fieldquadratic.h include/field.h
 ecc/a_param.o: include/random.h include/pairing.h include/curve.h
 ecc/a_param.o: include/poly.h include/darray.h include/fops.h include/param.h
@@ -190,10 +190,10 @@ test/genfparam.o: include/pbc.h include/pairing.h include/curve.h
 test/genfparam.o: include/poly.h include/field.h include/random.h
 test/genfparam.o: include/darray.h include/fops.h include/mnt.h
 test/genfparam.o: include/f_param.h
-test/genbgn.o: include/pbc.h include/pairing.h include/curve.h include/poly.h
-test/genbgn.o: include/field.h include/random.h include/darray.h
-test/genbgn.o: include/fops.h include/mnt.h include/bgn_param.h
-test/genbgn.o: include/fieldquadratic.h
+test/gena1param.o: include/pbc.h include/pairing.h include/curve.h include/poly.h
+test/gena1param.o: include/field.h include/random.h include/darray.h
+test/gena1param.o: include/fops.h include/mnt.h include/a1_param.h
+test/gena1param.o: include/fieldquadratic.h
 test/testpairing.o: include/pbc.h include/pairing.h include/curve.h
 test/testpairing.o: include/poly.h include/field.h include/random.h
 test/testpairing.o: include/darray.h include/fops.h include/mnt.h

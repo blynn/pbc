@@ -153,7 +153,7 @@ void e_param_out_str(FILE *stream, e_param_ptr p)
     param_out_int(stream, "sign0", p->sign0);
 }
 
-void e_param_inp_generic (e_param_ptr p, fetch_ops_t *fops, void *ctx)
+void e_param_inp_generic (e_param_ptr p, fetch_ops_t fops, void *ctx)
 {
     assert (fops);
     assert (ctx);

@@ -7,7 +7,7 @@ LDADD = ../libpbc.la
 
 noinst_PROGRAMS = benchmark testhilbert testbbs testsig testibe \
 	testpairing genaparam gendparam geneparam genfparam \
-	genbgn listmnt testpoly 19 sing testbls testibs testbb
+	gena1param listmnt testpoly 19 sing testbls testibs testbb
 
 benchmark_SOURCES = benchmark.c
 testhilbert_SOURCES = testhilbert.c
@@ -19,7 +19,7 @@ genaparam_SOURCES = genaparam.c
 gendparam_SOURCES = gendparam.c
 geneparam_SOURCES = geneparam.c
 genfparam_SOURCES = genfparam.c
-genbgn_SOURCES = genbgn.c
+gena1param_SOURCES = gena1param.c
 listmnt_SOURCES = listmnt.c
 testpoly_SOURCES = testpoly.c
 19_SOURCES = 19.c

@@ -1,5 +1,32 @@
 <chapter>
-<title>Pairing Parameter Functions</title>
+<title>Param Functions</title>
+<para>
 These functions are mainly used to generate pairing parameters.
-TODO
+There are several types of pairings, which, like vitamins, are
+labelled with capital letters roughly in the order of discovery.
+Not all known pairing types are implemented in PBC.
+</para>
+<para>
+Type A is best when speed is the main concern,
+and type D is a good choice when elements should be short,
+though type F has even short elements but is unfortunately slower.
+</para>
+<section><title>Type A</title>
+<para>
+Pairings on type A curves are the fast and ought to be used where the
+main concern is efficiency. Typically, r should be about 160 bits long
+and q about 512 bits. In this case, elements of groups G1 and G2 take
+512 bits to represent.
+</para>
+<para>
+The file <filename>param/a.param</filename> contains parameters for a
+type A pairing suitable for cryptographic use.
+</para>
+<para>
+The <type>a_param_t</type> data type holds parameters for a type A pairing.
+</para>
+<variablelist>
+&aparam;
+</variablelist>
+</section>
 </chapter>

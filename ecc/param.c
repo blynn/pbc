@@ -26,7 +26,7 @@ void param_out_int(FILE *stream, char *s, int i)
     mpz_clear(z);
 }
 
-void param_read_generic (symtab_t tab, fetch_ops_t *fops, void *ctx)
+void param_read_generic (symtab_t tab, fetch_ops_t fops, void *ctx)
 {
     assert (fops);
     assert (ctx);

@@ -1,4 +1,5 @@
 #include "field.h"
+#include "utils.h"
 
 /* returns recommended window size.  n is exponent. */
 static int optimal_pow_window_size(mpz_ptr n)
@@ -242,27 +243,43 @@ void element_pow3_mpz(element_ptr x, element_ptr a1, mpz_ptr n1,
         element_clear(lookup[i]);
 }
 
+void field_set_nqr(field_ptr f, element_t nqr)
+{
+    element_set(f->nqr, nqr);
+}
+
+void field_gen_nqr(field_ptr f)
+{
+    //use a deterministic random number generator
+    //so that the quadratic nonresidue is the same every time
+    /* Changed my mind:
+     * it is up to the application to make sure it records the
+     * quadratic nonresidue if necessary
+     */
+    /*
+    gmp_randstate_t rs;
+    void internal_random(mpz_t z, mpz_t limit, void *data)
+    {
+	UNUSED_VAR(data);
+	mpz_urandomm(z, rs, limit);
+    }
+    gmp_randinit_default(rs);
+    random_push(internal_random, NULL);
+    */
+
+    f->nqr = malloc(sizeof(element_t));
+    element_init(f->nqr, f);
+    do {
+	element_random(f->nqr);
+    } while (element_is_sqr(f->nqr));
+    /*
+    random_pop();
+    */
+}
+
 element_ptr field_get_nqr(field_ptr f)
 {
-    if (!f->nqr) {
-	//use a deterministic random number generator
-	//so that the quadratic nonresidue is the same every time
-	gmp_randstate_t rs;
-	void internal_random(mpz_t z, mpz_t limit, void *data)
-	{
-	    (void) data; //to get rid of warning
-	    mpz_urandomm(z, rs, limit);
-	}
-	gmp_randinit_default(rs);
-	random_push(internal_random, NULL);
-
-	f->nqr = malloc(sizeof(element_t));
-	element_init(f->nqr, f);
-	do {
-	    element_random(f->nqr);
-	} while (element_is_sqr(f->nqr));
-	random_pop();
-    }
+    if (!f->nqr) field_gen_nqr(f);
     return f->nqr;
 }
 
