@@ -30,7 +30,8 @@ void a_param_clear(a_param_t p);
 /*@manual aparam
 Generate type A pairing parameters and store them in ''p'',
 where the group order r is ''rbits'' long, and the order of the base field q
-is ''qbits'' long. To be secure, generic discrete log algorithms must
+is ''qbits'' long.
+To be secure, generic discrete log algorithms must
 be infeasible in groups of order r, and finite field discrete log algorithms
 must be infeasible in finite fields of order q^2.
 Typical values: ''rbits'' = 160, ''qbits'' = 512.

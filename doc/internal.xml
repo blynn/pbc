@@ -217,4 +217,78 @@ q, h:
     q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
 </literallayout>
 </section>
+<section><title>Type D Internals</title>
+<para>
+These are ordinary curves of with embedding degree 6, whose orders are prime
+or a prime multiplied by a small constant. These are constructed using the
+method due to MNT.
+</para>
+<para>
+A type D curve is defined over some field F_q and has order h * r where
+r is a prime and h is a small constant. Over the field F_q^6 its order is
+a multiple of r^2.
+</para>
+<para>
+Typically the order of the curve E is around 170 bits, as is F_q, the base
+field, thus q^k is around the 1024-bit mark which is commonly considered
+good enough.
+</para>
+<literallayout>
+c_param struct fields:
+q   F_q is the base field
+n   # of points in E(F_q)
+r   large prime dividing n
+h   n = h * r
+a   E is given by y^2 = x^3 + ax + b
+b
+nk  # of points in E(F_q^k)
+hk  nk = hk * r * r
+</literallayout>
+</section>
+<section><title>Type E Internals</title>
+<para>
+The CM (Complex Multiplication) method of constructing elliptic curves
+starts with the Diophantine equation
+</para>
+<literallayout>
+    DV^2 = 4q - t^2
+</literallayout>
+<para>
+If t = 2 and q = D r^2 h^2 + 1 for some prime r (which we choose to
+be a Solinas prime) and some integer h, we find that this equation is easily
+solved with V = 2rh.
+</para>
+<para>
+Thus it is easy to find a curve (over the field F_q) with order q - 1.
+Note r^2 divides q - 1, thus we have an embedding degree of 1.
+</para>
+<para>
+Hence all computations necessary for the pairing can be done in F_q alone.
+There is never any need to extend F_q.
+</para>
+<para>
+As q is typically 1024 bits, group elements take a lot of space to represent.
+Moreover, many optimizations do not apply to this type, resulting in a slower
+pairing.
+</para>
+<para>
+TODO: describe fields
+</para>
+</section>
+<section><title>Type F Internals</title>
+<para>
+Using carefully crafted polynomials, k = 12 pairings can be constructed.
+Only 160 bits are needed to represent elements of one group, and 320 bits
+for the other.
+</para>
+<para>
+Also, embedding degree k = 12 allows higher security short signatures.
+(k = 6 curves cannot
+be used to scale security from 160-bits to say 256-bits because finite
+field attacks are subexponential.)
+</para>
+<para>
+TODO: describe fields
+</para>
+</section>
 </chapter>

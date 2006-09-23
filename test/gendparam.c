@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 	fprintf(stderr, "No suitable curves for this D\n");
 	exit(1);
     }
-    cm = L->item[0];
+    cm = darray_at(L, 0);
     d_param_init(param);
 
     fprintf(stderr, "gencparam: computing Hilbert polynomial and finding roots...\n");

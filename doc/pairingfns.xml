@@ -41,6 +41,10 @@ will initialize <parameter>pairing</parameter> with
 parameters are fed to the program on standard
 input.
 </para>
+<para>
+The format of the pairing parameters is a text format that
+is output by the param functions.
+</para>
 <variablelist>
 &pairing_init;
 </variablelist>

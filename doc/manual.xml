@@ -9,6 +9,7 @@
     <!ENTITY chapter_randomfns SYSTEM "randomfns.xml">
     <!ENTITY chapter_tutorial SYSTEM "sigex.xml">
     <!ENTITY chapter_internal SYSTEM "internal.xml">
+    <!ENTITY chapter_auxfns SYSTEM "auxfns.xml">
     <!ENTITY appendix_contributors SYSTEM "contributors.xml">
 
     <!ENTITY einit SYSTEM "gen/einit.xml">
@@ -25,8 +26,16 @@
     <!ENTITY pairing_op SYSTEM "gen/pairing_op.xml">
 
     <!ENTITY aparam SYSTEM "gen/aparam.xml">
+    <!ENTITY a1param SYSTEM "gen/a1param.xml">
+    <!ENTITY dparam SYSTEM "gen/dparam.xml">
+    <!ENTITY cminfo SYSTEM "gen/cminfo.xml">
+    <!ENTITY eparam SYSTEM "gen/eparam.xml">
+    <!ENTITY fparam SYSTEM "gen/fparam.xml">
 
     <!ENTITY pbcrandom SYSTEM "gen/pbcrandom.xml">
+
+    <!ENTITY darray SYSTEM "gen/darray.xml">
+    <!ENTITY symtab SYSTEM "gen/symtab.xml">
     ]
 >
 <book>
@@ -39,7 +48,12 @@
 <para>
 This manual describes how to install and use the PBC pairing-based
 cryptography library, version 0.3.3.
-It is modeled on the GMP manual.
+</para>
+<para>
+It is modeled on the GMP manual. GMP is the GNU multiple precision
+arithmetic library, and PBC is built on top of GMP. The PBC API
+is strongly influenced by the GMP API, so it is appropriate that
+this manual imitates the look and feel of the GMP manual.
 </para>
 </preface>
 <chapter><title>Overview</title>
@@ -86,11 +100,12 @@ used in demonstration programs.
 </para>
 </chapter>
 &chapter_basics;
+&chapter_tutorial;
 &chapter_pairingfns;
 &chapter_elementfns;
-&chapter_randomfns;
 &chapter_paramfns;
-&chapter_tutorial;
+&chapter_randomfns;
+&chapter_auxfns;
 &chapter_internal;
 &appendix_contributors;
 </book>

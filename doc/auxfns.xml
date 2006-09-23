@@ -1,0 +1,32 @@
+<chapter>
+<title>Auxiliary Functions</title>
+<para>
+There are a number of abstract data types mostly only used internally by PBC.
+A notable exception is the function <command>find_mnt6_curve()</command>
+which appends its results to a <type>darray_t</type>.
+</para>
+<section><title>Dynamic Arrays</title>
+<para>
+The <type>darray_t</type> data type manages an array of pointers of
+type <type>void *</type>, allocating more memory when necessary.
+</para>
+<variablelist>
+&darray;
+</variablelist>
+</section>
+<section><title>Symbol Tables</title>
+<para>
+The <type>symtab_t</type> data type manages symbol tables where
+the keys are strings of type <type>char *</type> and the values
+are pointers of
+type <type>void *</type>.
+</para>
+<para>
+At present, they are implemented inefficiently using dynamic arrays,
+but this will change if the need arises.
+</para>
+<variablelist>
+&symtab;
+</variablelist>
+</section>
+</chapter>

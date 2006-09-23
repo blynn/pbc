@@ -29,4 +29,86 @@ The <type>a_param_t</type> data type holds parameters for a type A pairing.
 &aparam;
 </variablelist>
 </section>
+<section><title>Type A1</title>
+<para>
+Some pairing-based cryptosystems require the group order to be a particular
+composite number. Fortunately, it is easy to find type A pairings with
+any given order. Such pairings are designated type A1 in the library.
+</para>
+<para>
+The file <filename>param/a1.param</filename> contains sample parameters for a
+type A1 pairing, but it is most likely not useful as it does not provide
+the factorization of <parameter>n</parameter>, the order of the group.
+</para>
+<para>
+The <type>a1_param_t</type> data type holds parameters for a type A1 pairing.
+</para>
+<variablelist>
+&a1param;
+</variablelist>
+</section>
+<section><title>Type D</title>
+<para>
+Using type D pairings allows elements of group G1 to be quite short, typically
+170-bits. Because of a certain trick, elements of group G2 need only be 3 times
+longer, that is, about 510 bits rather than 6 times long. They are not quite
+as short as type F pairings, but much faster.
+</para>
+<para>
+I sometimes refer to a type D curve as a triplet of numbers:
+the discriminant, the number of bits in the prime q, and the number of
+bits in the prime r. The <command>listmnt</command> program prints
+these numbers.
+</para>
+<para>
+Among the bundled type D curve parameters are the curves
+9563-201-181, 62003-159-158 and 496659-224-224 which have shortened names
+<filename>param/d201.param</filename>,
+<filename>param/d159.param</filename> and
+<filename>param/d225.param</filename> respectively.
+</para>
+<para>
+The <type>d_param_t</type> data type holds parameters for a type D pairing.
+</para>
+<variablelist>
+&dparam;
+</variablelist>
+<para>
+The <type>cm_info_t</type> data type holds CM parameters that are used
+to generate curves.
+</para>
+<variablelist>
+&cminfo;
+</variablelist>
+</section>
+<section><title>Type E</title>
+<para>
+This pairing is not very useful at present. It can be implemented entirely
+in a field of prime order, that is, only arithmetic modulo a prime is needed
+and there is never a need to extend a field.
+</para>
+<para>
+If some day a mathematician discovers
+that discrete log in field extensions is substantially
+easier to solve than previously
+thought, this pairing type may become useful.
+</para>
+<variablelist>
+&eparam;
+</variablelist>
+</section>
+<section><title>Type F</title>
+<para>
+Type F should be used when the top priority is to minimize bandwidth (e.g.
+short signatures). The pairing is slower than the other types.
+</para>
+<para>
+If finite field discrete log algorithms improve further,
+type D pairings will have to use larger fields, but type F can still remain
+short, up to a point.
+</para>
+<variablelist>
+&fparam;
+</variablelist>
+</section>
 </chapter>

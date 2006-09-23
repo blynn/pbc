@@ -1,7 +1,7 @@
 # Makefile for generating manual in various formats from DocBook sources
 .PHONY: target genxml
 
-target : manual.html manual.html manual.txt chunked/index.html pretty/index.html
+target : pretty/index.html manual.html manual.txt chunked/index.html
 
 GENFILES:=gen/*.xml
 SRCFILES:=*.xml $(GENFILES)
@@ -25,6 +25,9 @@ manual.html : $(SRCFILES) custom-nochunks.xsl
 
 manual.txt : manual.html
 	html2text -nobs -style pretty manual.html > manual.txt
+
+pdf : $(SRCFILES)
+	docbook2pdf manual.xml
 
 clean :
 	-rm -rf pretty/*.html chunked/*.html manual.html manual.txt

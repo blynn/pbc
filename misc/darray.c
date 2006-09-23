@@ -63,7 +63,7 @@ int darray_index_of(darray_ptr a, void *p)
     for (i=0; i<a->count; i++) {
 	if (a->item[i] == p) return i;
     }
-    return i;
+    return -1;
 }
 
 void darray_clear(darray_t a)
@@ -71,11 +71,6 @@ void darray_clear(darray_t a)
     free(a->item);
     a->max = 0;
     a->count = 0;
-}
-
-void *darray_at(darray_t a, int i)
-{
-    return a->item[i];
 }
 
 void darray_show(darray_ptr a)

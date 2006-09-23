@@ -85,6 +85,13 @@ Miscellaneous functions, such as ones controlling how random bits are
 generated.
 </para>
     </listitem>
+    <listitem>
+<para>
+Auxiliary functions that work on abstract data types such dynamic
+arrays and symbol tables mostly used internally by PBC, but may have some
+use in applications.
+</para>
+    </listitem>
 </orderedlist>
 </section>
 <section>

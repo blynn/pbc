@@ -32,116 +32,12 @@ for security. Because of this, I have no plans to implement them in the
 immediate future.
 </para>
 </section>
-<section><title>Type D</title>
-<para>
-These are ordinary curves of with embedding degree 6, whose orders are prime
-or a prime multiplied by a small constant. These are constructed using the
-method due to MNT.
-</para>
-<para>
-A type C curve is defined over some field F_q and has order h * r where
-r is a prime and h is a small constant. Over the field F_q^6 its order is
-a multiple of r^2.
-</para>
-<para>
-Typically the order of the curve E is around 170 bits, as is F_q, the base
-field, thus q^k is around the 1024-bit mark which is commonly considered
-good enough.
-</para>
-<para>
-Using type C pairings allows elements of group G1 to be quite short, typically
-170-bits. Because of a certain trick, elements of group G2 need only be 3 times
-longer, that is, about 510 bits rather than 6 times long. They are not quite
-as short as type F pairings, but much faster.
-</para>
-<literallayout>
-c_param struct fields:
-q   F_q is the base field
-n   # of points in E(F_q)
-r   large prime dividing n
-h   n = h * r
-a   E is given by y^2 = x^3 + ax + b
-b
-nk  # of points in E(F_q^k)
-hk  nk = hk * r * r
-</literallayout>
-<para>
-I sometimes refer to a type C curve as a triplet of numbers:
-the discriminant, the number of bits in the prime q, and the number of
-bits in the prime r. The <command>listmnt</command> program prints
-these numbers.
-The bundled type C curve parameters are the curves
-9563-201-181, 62003-159-158 and 496659-224-224.
-</para>
-</section>
-<section><title>Type E</title>
-<para>
-The CM (Complex Multiplication) method of constructing elliptic curves
-starts with the Diophantine equation
-</para>
-<literallayout>
-    DV^2 = 4q - t^2
-</literallayout>
-<para>
-If t = 2 and q = D r^2 h^2 + 1 for some prime r (which we choose to
-be a Solinas prime) and some integer h, we find that this equation is easily
-solved with V = 2rh.
-</para>
-<para>
-Thus it is easy to find a curve (over the field F_q) with order q - 1.
-Note r^2 divides q - 1, thus we have an embedding degree of 1.
-</para>
-<para>
-Hence all computations necessary for the pairing can be done in F_q alone.
-There is never any need to extend F_q.
-</para>
-<para>
-As q is typically 1024 bits, group elements take a lot of space to represent.
-Moreover, many optimizations do not apply to this type, resulting in a slower
-pairing.
-</para>
-<para>
-This pairing is kept as a reserve, in case some day it is discovered
-that discrete log in field extensions is easier to solve than previously
-thought.
-</para>
-</section>
-<section><title>Type F</title>
-<para>
-Using carefully crafted polynomials, k = 12 pairings can be constructed.
-Only 160 bits are needed to represent elements of one group, and 320 bits
-for the other.
-</para>
-<para>
-They should be used when the top priority is to minimize bandwidth (e.g.
-short signatures). The pairing is slower than the other types.
-</para>
-<para>
-Also, k = 12 allows higher security short signatures. (k = 6 curves cannot
-be used to scale security from 160-bits to say 256-bits because finite
-field attacks are subexponential.)
-</para>
-</section>
 <section><title>Type G</title>
 <para>
 k = 10 curves may also be constructed.
 </para>
 </section>
-<section><title>Type A1</title>
-<para>
-These are curves containing a subgroup of a specified order. Boneh, Goh and
-Nissim have use for an elliptic curve with subgroup order N = pq for large
-primes p, q.
-</para>
-<para>
-To implement them, Type A curves can be used, only instead of a Solinas
-prime, we generate curves with a given group order. Type B can also
-be used (and that is what is suggested in their paper) but this is less
-desirable.
-</para>
-</section>
 </chapter>
-<!--
 <para>
 Now pairing->G1, pairing->G2,
 pairing->GT and bilinear_map() can be used as follows.
@@ -169,8 +65,6 @@ element_init(r, pairing->Zr);
 element_random(r);
 element_pow_fp(x, x, r);
 </programlisting>
--->
-<!--
 <section>
 <title>Testing the Library</title>
 <para>
@@ -247,4 +141,3 @@ Reads pairing parameters on standard input and benchmarks the pairing.
 </varlistentry>
 </variablelist>
 </section>
--->
