@@ -1,5 +1,12 @@
 #include <assert.h>
+#include <stdio.h>
+#include <gmp.h>
+#include "fops.h"
+#include "symtab.h"
+#include "fieldquadratic.h"
+#include "pairing.h"
 #include "a_param.h"
+#include "curve.h"
 #include "param.h"
 #include "tracker.h"
 

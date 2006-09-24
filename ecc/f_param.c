@@ -1,8 +1,13 @@
 #include <assert.h>
-#include "pbc.h"
-#include "param.h"
-#include "f_param.h"
+#include <stdio.h>
+#include <gmp.h>
+#include "fops.h"
+#include "symtab.h"
 #include "fieldquadratic.h"
+#include "pairing.h"
+#include "f_param.h"
+#include "param.h"
+#include "curve.h"
 #include "tracker.h"
 #include "utils.h"
 

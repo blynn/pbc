@@ -1,9 +1,11 @@
+// requires
+// * stdio.h
+// * gmp.h
+// * fops.h
+// * symtab.h
+// * field.h
 #ifndef PAIRING_H
 #define PAIRING_H
-
-#include <stdio.h>
-#include "curve.h"
-#include "fops.h"
 
 struct pairing_s {
     mpz_t r; //order of G1, G2, GT
@@ -22,6 +24,7 @@ struct pairing_s {
     //char *id;
     void (*clear_func)(struct pairing_s *);
     void *data;
+    symtab_t option;
 };
 
 typedef struct pairing_s pairing_t[1];

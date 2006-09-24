@@ -1,4 +1,6 @@
 //GMP based complex floats
+#include <stdio.h>
+#include <gmp.h>
 #include "darray.h"
 #include "mpc.h"
 

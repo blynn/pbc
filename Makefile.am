@@ -1,5 +1,6 @@
 SUBDIRS = . sig bce test 
 EXTRA_DIST = Makefile.mingw Makefile.orig param/*.param report_times list_hilbert genalldparams setup \
+	bce/bce.h \
 	misc/get_time.win32.c \
 	doc/pretty/pretty.css doc/makeover doc/extract doc/*.x[ms]l doc/default.css doc/Makefile
 
@@ -20,7 +21,7 @@ library_include_HEADERS = include/a_param.h include/d_param.h include/darray.h i
 	include/parse.h include/poly.h include/a1_param.h include/curve.h include/e_param.h \
 	include/field.h include/get_time.h include/hilbert.h include/mnt.h include/noleak.h \
 	include/param.h include/pbc.h include/random.h include/symtab.h include/utils.h \
-	include/fops.h include/tracker.h
+	include/fops.h include/tracker.h include/strclone.h
 
 libpbc_la_CPPFLAGS = -Iinclude
 libpbc_la_SOURCES = arith/field.c arith/naivefp.c arith/fieldquadratic.c arith/poly.c \

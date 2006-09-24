@@ -1,6 +1,8 @@
 #include <assert.h>
-#include <string.h>
-#include <stdlib.h>
+#include <stdio.h> //for EOF
+#include <string.h> //strchr
+#include <stdlib.h> //for malloc, free
+#include "fops.h"
 #include "parse.h"
 #include "tracker.h"
 
@@ -78,22 +80,4 @@ void token_init(token_t tok)
 void token_clear(token_t tok)
 {
     free(tok->s);
-}
-
-void token_get (token_t tok, FILE *stream)
-{
-  assert (stream);
-   token_get_generic (tok, &fops_str, stream);
-}
-
-void token_get_from_buf (token_t tok, const char *buf, char **p, size_t len)
-{    
-  assert (buf);
-  assert (p);
-  assert (*p);
-  tracker_t t;
-  tracker_init (&t, buf, len);
-  t.p = (const char *) *p;
-  token_get_generic (tok, &fops_buf, &t);
-  *p = (char *) t.p;
 }

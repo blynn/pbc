@@ -1,11 +1,10 @@
+// requires
+// * stdio.h
+// * gmp.h
+// * fops.h
+// * symtab.h
 #ifndef PARAM_H
 #define PARAM_H
-
-#include <stdio.h>
-#include <gmp.h>
-
-#include "symtab.h"
-#include "fops.h"
 
 void param_out_type(FILE *stream, char *s);
 void param_out_mpz(FILE *stream, char *s, mpz_t z);

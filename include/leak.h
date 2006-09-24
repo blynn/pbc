@@ -1,4 +1,5 @@
-#include <stdlib.h>
+// requires
+// * stdlib.h
 
 #define malloc(x) mymalloc(x, __FILE__, __LINE__)
 #define realloc(x, y) myrealloc(x, y, __FILE__, __LINE__)

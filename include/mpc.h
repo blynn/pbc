@@ -1,10 +1,11 @@
 //complex number based on GMP's mpf_t floating point
 //named mpc_t
+//requires
+// * stdio.h
+// * gmp.h
+
 #ifndef MPC_H
 #define MPC_H
-
-#include <stdio.h>
-#include <gmp.h>
 
 //GMP based complex floats
 

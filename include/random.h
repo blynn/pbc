@@ -1,7 +1,7 @@
+//requires
+// * gmp.h
 #ifndef RANDOM_H
 #define RANDOM_H
-
-#include <gmp.h>
 
 /*@manual pbcrandom
 Uses ''filename'' as a source of random bytes. For example,

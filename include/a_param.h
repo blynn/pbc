@@ -1,9 +1,10 @@
+// requires
+// * stdio.h
+// * gmp.h
+// * pairing.h
+// * fops.h
 #ifndef A_PARAM_H
 #define A_PARAM_H
-
-#include "fieldquadratic.h"
-#include "pairing.h"
-#include "fops.h"
 
 struct a_param_s {
     int exp2;

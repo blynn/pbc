@@ -1,4 +1,6 @@
-#include "utils.h"
+#include <stdlib.h>
+#include <string.h>
+#include "strclone.h"
 #include "symtab.h"
 
 struct entry_s {

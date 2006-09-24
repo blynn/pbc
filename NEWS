@@ -1,3 +1,13 @@
+Sun Sep 24 03:41:16 PDT 2006
+
+The previous tarballs won't build because bce/bce.h is not included in
+the distribution. I had assumed if the autotools could build it, then
+they'd also know what to put in tarballs automatically.
+
+Code cleanup, minor bugfixes and documentation edits.
+
+[0.3.4]
+
 Sat Sep 23 15:21:39 PDT 2006
 
 BGN curves have been renamed to A1 curves. This makes more sense since

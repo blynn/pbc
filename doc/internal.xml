@@ -363,6 +363,11 @@ I try to do the same with PBC.
 I dislike the C preprocessor. I like to place platform-specific code in
 separate files and let the build system work out which one to use.
 Integer constants can be defined with enum instead.
+I intend to minimize the number of
+<code>#include</code> statements in header files for PBC's internal
+use as much as possible
+(they should be in the <filename>.c</filename> files instead), and later
+perhaps even remove those annoying <code>#ifndef</code> statements too.
 </para>
 </section>
 </chapter>

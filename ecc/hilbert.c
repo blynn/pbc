@@ -1,4 +1,5 @@
 #include <math.h>
+#include <poly.h>
 #include "hilbert.h"
 #include "mpc.h"
 

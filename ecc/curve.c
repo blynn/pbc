@@ -1,5 +1,6 @@
 #include <string.h>
 #include "curve.h"
+#include "fops.h"
 #include "parse.h"
 
 size_t point_out_str(FILE *stream, int base, point_ptr p)

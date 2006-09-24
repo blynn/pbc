@@ -18,10 +18,12 @@
 //and I can directly use %Z for mpz_t
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdarg.h>
 #include <printf.h>
 #include "utils.h"
 #include "field.h"
+#include "strclone.h"
 
 static int print_element(FILE *stream, const struct printf_info *info,
 	const void *const *args)

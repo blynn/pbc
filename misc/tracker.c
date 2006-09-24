@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stddef.h>
 #include "tracker.h"
 
 void tracker_init (tracker_t *t, const char *buf, size_t len)

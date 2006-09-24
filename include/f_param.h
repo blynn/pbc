@@ -1,7 +1,10 @@
+//requires
+// * stdio.h
+// * gmp.h
+// * fops.h
+// * pairing.h
 #ifndef F_PARAM_H
 #define F_PARAM_H
-
-#include "fops.h"
 
 struct f_param_s {
     mpz_t q; //curve defined over F_q

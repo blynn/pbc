@@ -1,3 +1,4 @@
+#include "poly.h"
 #include "hilbert.h"
 
 int main(int argc, char **argv)

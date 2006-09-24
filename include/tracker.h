@@ -1,7 +1,7 @@
+//requires
+// * stddef.h
 #ifndef __TRACKER_H__
 #define __TRACKER_H__
-
-#include <stdlib.h>
 
 typedef struct tracker_t {
     const char *base;

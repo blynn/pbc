@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "field.h"
 #include "utils.h"
 //Naive implementation of F_p

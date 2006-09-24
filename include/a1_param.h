@@ -1,9 +1,10 @@
+// requires
+// * stdio.h
+// * gmp.h
+// * pairing.h
+// * fops.h
 #ifndef A1_PARAM_H
 #define A1_PARAM_H
-
-#include "fieldquadratic.h"
-#include "pairing.h"
-#include "fops.h"
 
 struct a1_param_s {
     mpz_t p;

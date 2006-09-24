@@ -1,14 +1,20 @@
 #include <assert.h>
 #include <stdio.h>
+#include "curve.h"
+#include "fops.h"
+#include "symtab.h"
+#include "parse.h"
+#include "tracker.h"
 #include "pairing.h"
 #include "a_param.h"
+#include "mnt.h"
 #include "d_param.h"
 #include "e_param.h"
 #include "f_param.h"
 #include "a1_param.h"
-#include "parse.h"
-#include "tracker.h"
-#include "utils.h"
+#include <stdlib.h>
+#include <string.h>
+#include "strclone.h"
 
 int generic_is_almost_coddh(element_ptr a, element_ptr b,
 	element_ptr c, element_ptr d, pairing_t pairing)

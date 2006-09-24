@@ -1,8 +1,14 @@
 #include <assert.h>
-#include "utils.h"
-#include "param.h"
+#include <stdio.h>
+#include <gmp.h>
+#include "symtab.h"
+#include "fops.h"
 #include "parse.h"
 #include "tracker.h"
+#include "utils.h"
+#include <stdlib.h>
+#include <string.h>
+#include "strclone.h"
 
 void param_out_type(FILE *stream, char *s)
 {

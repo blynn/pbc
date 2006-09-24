@@ -1,8 +1,10 @@
+// requires
+// * stdio.h
+// * gmp.h
+// * pairing.h
+// * fops.h
 #ifndef E_PARAM_H
 #define E_PARAM_H
-
-#include "pairing.h"
-#include "fops.h"
 
 struct e_param_s {
     mpz_t q; //curve defined over F_q

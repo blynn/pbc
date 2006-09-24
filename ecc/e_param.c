@@ -1,6 +1,13 @@
 #include <assert.h>
+#include <stdio.h>
+#include <gmp.h>
+#include "fops.h"
+#include "symtab.h"
+#include "field.h"
+#include "pairing.h"
 #include "e_param.h"
 #include "param.h"
+#include "curve.h"
 #include "tracker.h"
 
 struct e_pairing_data_s {

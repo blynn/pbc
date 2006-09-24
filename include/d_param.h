@@ -1,9 +1,11 @@
-#ifndef C_PARAM_H
-#define C_PARAM_H
-
-#include "pairing.h"
-#include "mnt.h"
-#include "fops.h"
+// requires
+// * stdio.h
+// * gmp.h
+// * mnt.h
+// * fops.h
+// * pairing.h
+#ifndef D_PARAM_H
+#define D_PARAM_H
 
 struct d_param_s {
     mpz_t q; //curve defined over F_q
@@ -61,4 +63,4 @@ must be infeasible in finite fields of order q^6.
 For usual CM parameters, r is a few bits smaller than q.
 */
 void d_param_from_cm(d_param_t p, cm_info_ptr cm);
-#endif //C_PARAM_H
+#endif //D_PARAM_H
