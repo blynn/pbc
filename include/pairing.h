@@ -30,7 +30,7 @@ typedef struct pairing_s *pairing_ptr;
 /*@manual pairing_init
 TODO
 */
-void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t *fops, void *ctx);
+void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx);
 
 /*@manual pairing_init
 Read in pairing parameters from array of characters ''buf'' of length ''len''

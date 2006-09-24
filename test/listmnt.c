@@ -5,7 +5,6 @@ int main(int argc, char **argv)
     darray_t L;
     unsigned int D = 7;
     cm_info_ptr cm;
-    int i=0;
     darray_init(L);
 
     if (argc > 1) {

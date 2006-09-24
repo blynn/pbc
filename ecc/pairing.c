@@ -39,7 +39,7 @@ static void phi_warning(element_ptr out, element_ptr in, pairing_ptr pairing)
     printf("Phi() not implemented for this pairing type yet!\n");
 }
 
-void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t *fops, void *ctx)
+void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
 {
     assert (fops);
     assert (ctx);

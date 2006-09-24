@@ -139,7 +139,7 @@ On the other end, the signature must be decompressed:
     element_from_bytes_compressed(sig, data);
 </screen>
 <para>
-Eliding the <function>_compressed</function> in the above code
+Eliding <function>_compressed</function> in the above code
 will also work but the buffer ''data'' will be roughly twice as large.
 </para>
 <para>

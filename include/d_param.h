@@ -52,7 +52,13 @@ This function sets ''p'' to
 a type D pairing parameters from CM parameters ''cm''.
 Another part of the library searches for
 appropriate CM parameters (see below)
-and the results can be passed to this function
+and the results can be passed to this function.
+</para>
+<para>
+To be secure, generic discrete log algorithms must
+be infeasible in groups of order r, and finite field discrete log algorithms
+must be infeasible in finite fields of order q^6.
+For usual CM parameters, r is a few bits smaller than q.
 */
 void d_param_from_cm(d_param_t p, cm_info_ptr cm);
 #endif //C_PARAM_H

@@ -55,7 +55,7 @@ to that field is called to complete the initialization. Here, a line of
 code is worth a thousand words:
 </para>
 <programlisting>
-static inline void element_init(element_t e, field_ptr f)
+void element_init(element_t e, field_ptr f)
 {
     e->field = f;
     f->init(e);
@@ -70,7 +70,7 @@ while polynomial addition is performed for elements of a polynomial ring
 and so on.
 </para>
 <programlisting>
-static inline void element_add(element_t n, element_t a, element_t b)
+void element_add(element_t n, element_t a, element_t b)
 {
     n->field->add(n, a, b);
 }
@@ -83,7 +83,7 @@ parameter, e.g. <userinput>element_add(a, b, c, F_13)</userinput>, but
 I decided the added annoyance of having to type this extra variable every
 time negated any benefits, such as obviating the need for
 the <parameter>field</parameter> pointer in
-<type>struct element_s</type>. Besides, one could always write a preprocessor
+<type>struct element_s</type>. Note one could write a preprocessor
 to convert one type of notation to the other. (Speaking of which, as Hovav
 Shacham suggested, it may be nice to eventually have a converter
 that takes human-friendly infix
@@ -289,6 +289,80 @@ field attacks are subexponential.)
 </para>
 <para>
 TODO: describe fields
+</para>
+</section>
+<section><title>Source Code</title>
+<para>
+The source code is organized into several subdirectories.
+</para>
+<para>
+All include files are in the <filename>include</filename> directory.
+</para>
+<para>
+The <filename>arith</filename> directory contains code for implementing
+finite fields of any characteristic greater than 3:
+modular arithmetic, polynomial rings, and finally polynomial
+rings modulo a polynomial. In future, finite fields of
+low characteristic may be implemented.
+</para>
+<para>
+The <filename>ecc</filename> directory contains code for arbitrary
+precision complex numbers, curve generation (which depends on the former),
+curve group operations and pairings. A separate source file is dedicated
+to each type of pairing, containing optimizations tailored for
+its pairing.
+</para>
+<para>
+The <filename>misc</filename> directory contains code for dynamic arrays,
+symbol tables, parsing, benchmarking, debugging and so on.
+</para>
+<para>
+The <filename>test</filename> directory contains test programs. They
+were used to generate the files in the <filename>param</filename> directory.
+</para>
+<para>
+The <filename>sig</filename> directory contains code for the PBC
+signature library.
+</para>
+<para>
+The <filename>bce</filename> directory contains Matt Stein's code for
+the Boneh-Waters broadcast encryption scheme.
+</para>
+</section>
+<section><title>Religious Stances</title>
+<para>
+I chose C for several reasons:
+</para>
+<orderedlist>
+<listitem>
+GMP, which PBC requires and is also modeled on, is also written in C.
+</listitem>
+<listitem>
+PBC is intended to be a low-level portable cryptographic library.
+C is the least common denominator. It should not be difficult
+to wrap PBC for other languages.
+</listitem>
+<listitem>
+Despite its drawbacks (I could really use operator overloading and
+genericity),
+I've found few languages I like better.
+To quote Rob Pike, C is the desert island language. (I also agree
+with his statement that OO languages conceptually provide little
+extra over judicious use of function pointers in C.)
+</listitem>
+</orderedlist>
+<para>
+I use the so-called One True Brace Style.
+</para>
+<para>
+I'm fond of GMP's method for eliminating the need for the <code>&amp;</code>
+and <code>*</code> operators most of the time.
+I try to do the same with PBC.
+</para>
+<para>
+I dislike the C preprocessor. I like to place platform-specific code in
+separate files and let the build system work out which one to use.
+Integer constants can be defined with enum instead.
 </para>
 </section>
 </chapter>
