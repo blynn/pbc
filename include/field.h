@@ -2,14 +2,11 @@
  * Poorly named. Though this data structure can represent a field,
  * it is more general, as it is used to implement rings and groups as well.
  */
+//requires
+// * stdio.h
+// * gmp.h
 #ifndef FIELD_H
 #define FIELD_H
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <gmp.h>
-
-#include "random.h"
 
 struct field_s;
 
@@ -36,6 +33,7 @@ struct field_s {
     void (*mul_mpz)(element_ptr, element_ptr, mpz_ptr);
     void (*mul_si)(element_ptr, element_ptr, signed long int);
     void (*square)(element_ptr, element_ptr);
+    void (*doub)(element_ptr, element_ptr); //can't call it "double"!
     void (*pow_mpz)(element_ptr, element_ptr, mpz_ptr);
     void (*invert)(element_ptr, element_ptr);
     void (*neg)(element_ptr, element_ptr);
@@ -193,6 +191,14 @@ where there are ''z'' ''a'''s.
 static inline void element_mul_si(element_t n, element_t a, signed long int z) 
 {
     n->field->mul_si(n, a, z);
+}
+
+/*@manual earith
+Set ''n'' to ''a'' + ''a''.
+*/
+static inline void element_double(element_t n, element_t a)
+{
+    n->field->doub(n, a);
 }
 
 /*@manual earith
@@ -390,15 +396,7 @@ static inline void element_pow3_zn(element_t x, element_t a1, element_t n1,
     element_pow3_mpz(x, a1, n1->data, a2, n2->data, a3, n3->data);
 }
 
-static inline void field_clear(field_ptr f)
-{
-    if (f->nqr) {
-	element_clear(f->nqr);
-	free(f->nqr);
-    }
-    mpz_init(f->order);
-    f->field_clear(f);
-}
+void field_clear(field_ptr f);
 
 element_ptr field_get_nqr(field_ptr f);
 void field_set_nqr(field_ptr f, element_t nqr);

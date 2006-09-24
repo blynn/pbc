@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <gmp.h>
+#include "field.h"
+#include "darray.h"
 #include "poly.h"
 
 //implements R[x] for a given ring R
@@ -184,6 +189,19 @@ static void poly_neg(element_ptr f, element_ptr g)
     poly_alloc(f, n);
     for (i=0; i<n; i++) {
 	element_neg(pf->coeff->item[i], pg->coeff->item[i]);
+    }
+}
+
+static void poly_double(element_ptr f, element_ptr g)
+{
+    poly_element_ptr pf = f->data;
+    poly_element_ptr pg = g->data;
+    int i, n;
+
+    n = pg->coeff->count;
+    poly_alloc(f, n);
+    for (i=0; i<n; i++) {
+	element_double(pf->coeff->item[i], pg->coeff->item[i]);
     }
 }
 
@@ -559,6 +577,7 @@ void field_init_poly(field_ptr f, field_ptr base_field)
     f->set = poly_set;
     f->sign = poly_sign;
     f->add = poly_add;
+    f->doub = poly_double;
     f->is0 = poly_is0;
     f->is1 = poly_is1;
     f->set0 = poly_set0;
@@ -825,6 +844,16 @@ static void polymod_add(element_t r, element_t e, element_t f)
     int i, n = p->n;
     for (i=0; i<n; i++) {
 	element_add(dst[i], s1[i], s2[i]);
+    }
+}
+
+static void polymod_double(element_t r, element_t f)
+{
+    polymod_field_data_ptr p = r->field->data;
+    element_t *dst = r->data, *s1 = f->data;
+    int i, n = p->n;
+    for (i=0; i<n; i++) {
+	element_double(dst[i], s1[i]);
     }
 }
 
@@ -1330,6 +1359,7 @@ void field_init_polymod(field_ptr f, element_ptr poly)
     f->set = polymod_set;
     f->sign = poly_sign;
     f->add = polymod_add;
+    f->doub = polymod_double;
     f->sub = polymod_sub;
     f->neg = polymod_neg;
     f->is0 = polymod_is0;

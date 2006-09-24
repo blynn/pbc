@@ -39,7 +39,7 @@ Write the parameters in ''p'' in a text format onto ''stream''.
 void d_param_out_str(FILE *stream, d_param_ptr p);
 
 void d_param_inp_generic (d_param_ptr p, fetch_ops_t fops, void *ctx);
-void pairing_init_c_param(pairing_t pairing, d_param_t param);
+void pairing_init_d_param(pairing_t pairing, d_param_t param);
 
 static inline void d_param_init_inp_str(d_param_ptr p, FILE *stream)
 {

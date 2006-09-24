@@ -16,11 +16,13 @@
 //TODO (eventually): write element_printf() explicitly, i.e. without using GNU C
 //features and so that printf() is not affected,
 //and I can directly use %Z for mpz_t
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <printf.h>
+#include <gmp.h>
 #include "utils.h"
 #include "field.h"
 #include "strclone.h"

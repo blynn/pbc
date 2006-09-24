@@ -1,5 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h> //for rand, malloc, free
+#include <string.h> //for strcmp
 #include <gmp.h>
 #include "fops.h"
 #include "symtab.h"
@@ -8,7 +10,9 @@
 #include "e_param.h"
 #include "param.h"
 #include "curve.h"
+#include "random.h"
 #include "tracker.h"
+#include "utils.h"
 
 struct e_pairing_data_s {
     field_t Fq;
@@ -221,29 +225,38 @@ static void e_miller_proj(element_t res, point_t P,
 	const element_ptr y = Z->y;
 	//e0 = 3x^2 + (cc->a) z^4
 	element_square(e0, x);
-	element_mul_si(e0, e0, 3);
+	//element_mul_si(e0, e0, 3);
+	element_double(e1, e0);
+	element_add(e0, e0, e1);
 	element_square(e1, z2);
 	element_mul(e1, e1, cca);
 	element_add(e0, e0, e1);
 
 	//z_out = 2 y z
 	element_mul(z, y, z);
-	element_mul_si(z, z, 2);
+	//element_mul_si(z, z, 2);
+	element_double(z, z);
 	element_square(z2, z);
 
 	//e1 = 4 x y^2
 	element_square(e2, y);
 	element_mul(e1, x, e2);
-	element_mul_si(e1, e1, 4);
+	//element_mul_si(e1, e1, 4);
+	element_double(e1, e1);
+	element_double(e1, e1);
 
 	//x_out = e0^2 - 2 e1
-	element_mul_si(e3, e1, 2);
+	//element_mul_si(e3, e1, 2);
+	element_double(e3, e1);
 	element_square(x, e0);
 	element_sub(x, x, e3);
 
 	//e2 = 8y^4
 	element_square(e2, e2);
-	element_mul_si(e2, e2, 8);
+	//element_mul_si(e2, e2, 8);
+	element_double(e2, e2);
+	element_double(e2, e2);
+	element_double(e2, e2);
 
 	//y_out = e0(e1 - x_out) - e2
 	element_sub(e1, e1, x);
@@ -263,11 +276,14 @@ static void e_miller_proj(element_t res, point_t P,
 	element_square(a, z2);
 	element_mul(a, a, cca);
 	element_square(b, Zx);
-	element_mul_si(b, b, 3);
+	//element_mul_si(b, b, 3);
+	element_double(e0, b);
+	element_add(b, b, e0);
 	element_add(a, a, b);
 	element_neg(a, a);
 
-	element_mul_si(e0, Zy, 2);
+	//element_mul_si(e0, Zy, 2);
+	element_double(e0, Zy);
 	element_mul(b, e0, z2);
 	element_mul(b, b, z);
 
@@ -407,7 +423,7 @@ static void e_miller_proj(element_t res, point_t P,
     element_clear(e1);
 }
 
-static void e_miller(element_t res, point_t P,
+static void e_miller_affine(element_t res, point_t P,
 	element_ptr numx, element_ptr numy,
 	element_ptr denomx, element_ptr denomy,
 	e_pairing_data_ptr p)
@@ -569,6 +585,11 @@ static void e_miller(element_t res, point_t P,
     element_clear(e1);
 }
 
+static void (*e_miller_fn)(element_t res, point_t P,
+	element_ptr numx, element_ptr numy,
+	element_ptr denomx, element_ptr denomy,
+	e_pairing_data_ptr p);
+
 static void e_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	pairing_t pairing)
 {
@@ -579,7 +600,7 @@ static void e_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     point_init(QR, p->Eq);
     point_random(R);
     point_add(QR, Q, R);
-    e_miller(out, in1->data, QR->x, QR->y, R->x, R->y, p);
+    e_miller_fn(out, in1->data, QR->x, QR->y, R->x, R->y, p);
     element_pow_mpz(out, out, p->tateexp);
     point_clear(R);
     point_clear(QR);
@@ -591,6 +612,18 @@ static void phi_identity(element_ptr out, element_ptr in, pairing_ptr pairing)
     element_set(out, in);
 }
 
+static void e_pairing_option_set(pairing_t pairing, char *key, char *value)
+{
+    UNUSED_VAR(pairing);
+    if (!strcmp(key, "coord")) {
+	if (!strcmp(value, "projective")) {
+	    e_miller_fn = e_miller_proj;
+	} else if (!strcmp(value, "affine")) {
+	    e_miller_fn = e_miller_affine;
+	}
+    }
+}
+
 void pairing_init_e_param(pairing_t pairing, e_param_t param)
 {
     e_pairing_data_ptr p;
@@ -600,6 +633,7 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     mpz_set(pairing->r, param->r);
     field_init_fp(pairing->Zr, pairing->r);
     pairing->map = e_pairing;
+    e_miller_fn = e_miller_affine;
 
     p =	pairing->data = malloc(sizeof(e_pairing_data_t));
     p->exp2 = param->exp2;
@@ -623,6 +657,7 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     field_init_curve_group(pairing->G1, p->Eq, param->h);
     pairing->GT = p->Fq;
     pairing->phi = phi_identity;
+    pairing->option_set = e_pairing_option_set;
 
     element_clear(a);
     element_clear(b);
@@ -658,7 +693,9 @@ static void sn_miller(element_t res, mpz_t q, point_t P,
 	element_ptr Zx = Z->x;
 	element_ptr Zy = Z->y;
 
-	element_mul_si(a, Zx, 3);
+	//element_mul_si(a, Zx, 3);
+	element_double(e0, Zx);
+	element_add(a, Zx, e0);
 	element_set_si(e0, 2);
 	element_add(a, a, e0);
 	element_mul(a, a, Zx);

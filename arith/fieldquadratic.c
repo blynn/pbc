@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <gmp.h>
+#include "field.h"
 #include "fieldquadratic.h"
 
 static inline element_ptr fq_nqr(field_ptr f)
@@ -91,6 +95,14 @@ static void fq_add(element_ptr n, element_ptr a, element_ptr b)
     fq_data_ptr r = n->data;
     element_add(r->x, p->x, q->x);
     element_add(r->y, p->y, q->y);
+}
+
+static void fq_double(element_ptr n, element_ptr a)
+{
+    fq_data_ptr p = a->data;
+    fq_data_ptr r = n->data;
+    element_double(r->x, p->x);
+    element_double(r->y, p->y);
 }
 
 static void fq_sub(element_ptr n, element_ptr a, element_ptr b)
@@ -356,6 +368,7 @@ void field_init_quadratic(field_ptr f, field_ptr fbase)
     f->mul_mpz = fq_mul_mpz;
     f->mul_si = fq_mul_si;
     f->square = fq_square;
+    f->doub = fq_double;
     f->neg = fq_neg;
     f->cmp = fq_cmp;
     f->invert = fq_invert;
@@ -553,6 +566,7 @@ void field_init_fi(field_ptr f, field_ptr fbase)
     f->mul_mpz = fq_mul_mpz;
     f->mul_si = fq_mul_si;
     f->square = fi_square;
+    f->doub = fq_double;
     f->neg = fq_neg;
     f->cmp = fq_cmp;
     f->invert = fi_invert;

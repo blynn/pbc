@@ -1,5 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h> //for malloc, free
+#include <gmp.h>
 #include <math.h>
-#include <poly.h>
+#include "field.h"
+#include "darray.h"
+#include "poly.h"
 #include "hilbert.h"
 #include "mpc.h"
 

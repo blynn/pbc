@@ -1,8 +1,11 @@
+/*
+ * quadratic extension of any field
+ */
+
+//requires
+// * field.h
 #ifndef FIELDQUADRATIC_H
 #define FIELDQUADRATIC_H
-//quadratic extension of any field
-
-#include "field.h"
 
 struct fq_field_data_s {
     field_ptr field;

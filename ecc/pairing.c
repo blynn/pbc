@@ -1,20 +1,27 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <gmp.h>
+#include "field.h"
+#include "darray.h"
+#include "poly.h"
 #include "curve.h"
 #include "fops.h"
 #include "symtab.h"
 #include "parse.h"
 #include "tracker.h"
 #include "pairing.h"
+
 #include "a_param.h"
 #include "mnt.h"
 #include "d_param.h"
 #include "e_param.h"
 #include "f_param.h"
 #include "a1_param.h"
-#include <stdlib.h>
-#include <string.h>
+
 #include "strclone.h"
+#include "utils.h"
 
 int generic_is_almost_coddh(element_ptr a, element_ptr b,
 	element_ptr c, element_ptr d, pairing_t pairing)
@@ -39,10 +46,17 @@ int generic_is_almost_coddh(element_ptr a, element_ptr b,
 
 static void phi_warning(element_ptr out, element_ptr in, pairing_ptr pairing)
 {
-    (void) out;
-    (void) in;
-    (void) pairing;
+    UNUSED_VAR(out);
+    UNUSED_VAR(in);
+    UNUSED_VAR(pairing);
     printf("Phi() not implemented for this pairing type yet!\n");
+}
+
+static void default_option_set(struct pairing_s *pairing, char *key, char *value)
+{
+    UNUSED_VAR(pairing);
+    UNUSED_VAR(key);
+    UNUSED_VAR(value);
 }
 
 void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
@@ -52,6 +66,7 @@ void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
     char *s;
     token_t tok;
 
+    pairing->option_set = default_option_set;
     token_init(tok);
     token_get_generic (tok, fops, ctx);
     if (tok->type != token_word) {
@@ -79,7 +94,7 @@ void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
 
 	d_param_init(cp);
 	d_param_inp_generic (cp, fops, ctx);
-	pairing_init_c_param(pairing, cp);
+	pairing_init_d_param(pairing, cp);
 	d_param_clear(cp);
     } else if (!strcmp(s, "e")) {
 	e_param_t ep;

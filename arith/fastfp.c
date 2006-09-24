@@ -1,9 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <alloca.h>
 #include <string.h>
+#include <gmp.h>
 #include "field.h"
+#include "random.h"
 //Naive implementation of F_p
 //using lowlevel GMP routines (mpn_* functions)
 //Montgomery method seems to slow things down
+//TODO: this should be faster than naivefp.c but it isn't (?!?)
+//TODO: implement square, double with something specialized
 
 struct fp_field_data_s {
     size_t limbs;
@@ -43,7 +49,8 @@ static inline void from_mpz(element_ptr e, mpz_ptr z)
     fp_field_data_ptr p = e->field->data;
     size_t count;
     mpz_export(e->data, &count, -1, sizeof(mp_limb_t), 0, 0, z);
-    memset(e->data + count * sizeof(mp_limb_t), 0, (p->limbs - count) * sizeof(mp_limb_t));
+    memset((void *) (((unsigned int) e->data) + count * sizeof(mp_limb_t)),
+	0, (p->limbs - count) * sizeof(mp_limb_t));
 }
 
 static void fp_to_mpz(mpz_ptr z, element_ptr a)
@@ -116,6 +123,11 @@ static void fp_add(element_ptr r, element_ptr a, element_ptr b)
     }
 }
 
+static void fp_double(element_ptr r, element_ptr a)
+{
+    fp_add(r, a, a);
+}
+
 static void fp_sub(element_ptr r, element_ptr a, element_ptr b)
 {
     fp_field_data_ptr p = r->field->data;
@@ -139,6 +151,11 @@ static void fp_mul(element_ptr r, element_ptr a, element_ptr b)
     mpn_mul_n(tmp, a->data, b->data, t);
 
     mpn_tdiv_qr(qp, r->data, 0, tmp, 2 * t, p->primelimbs, t);
+}
+
+static void fp_square(element_ptr r, element_ptr a)
+{
+    fp_mul(r, a, a);
 }
 
 static void fp_mul_mpz(element_ptr e, element_ptr a, mpz_ptr op)
@@ -354,6 +371,8 @@ void field_init_fast_fp(field_ptr f, mpz_t prime)
     f->mul = fp_mul;
     f->mul_mpz = fp_mul_mpz;
     f->mul_si = fp_mul_si;
+    f->square = fp_square;
+    f->doub = fp_double;
     f->pow_mpz = fp_pow_mpz;
     f->neg = fp_neg;
     f->cmp = fp_cmp;

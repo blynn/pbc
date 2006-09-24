@@ -1,7 +1,8 @@
 #Original PBC Makefile
 #Autotools are recommended instead but this should still work
+#(and is much faster)
 #e.g. make -f Makefile.orig
-VERSION := 0.3.3
+VERSION := 0.3.5
 PROJNAME := pbc
 # these (uppercase) variables apply to gmake-builtin rules
 CC:=gcc
@@ -55,7 +56,7 @@ objs := $(srcs:.c=.o)
 libs := libpbc.a libpbc_sig.a
 binaries := $(test_srcs:.c=)
 
-.PHONY: target dist clean spotless depend
+.PHONY: target dist clean spotless depend ChangeLog
 
 target: $(libs) $(binaries)
 
@@ -90,10 +91,12 @@ test/sing: test/sing.o libpbc.a
 
 DISTNAME := $(PROJNAME)-$(VERSION)
 
+ChangeLog :
+	cg-log > ChangeLog
+
 dist: $(ALLFILES) clean depend
 	-rm -rf $(DISTNAME)
 	mkdir $(DISTNAME)
-	cg-log > $(DISTNAME)/ChangeLog
 	cp -rl --parents $(ALLFILES) $(DISTNAME)
 	tar chfz $(DISTNAME).tgz $(DISTNAME)
 	-rm -rf $(DISTNAME)
@@ -109,130 +112,117 @@ depend:
 
 # DO NOT DELETE
 
-arith/field.o: include/field.h include/random.h include/utils.h
+arith/field.o: include/field.h
 arith/naivefp.o: include/field.h include/random.h include/utils.h
-arith/fieldquadratic.o: include/fieldquadratic.h include/field.h
-arith/fieldquadratic.o: include/random.h
-arith/poly.o: include/poly.h include/field.h include/random.h
-arith/poly.o: include/darray.h
+arith/fieldquadratic.o: include/field.h include/fieldquadratic.h
+arith/poly.o: include/field.h include/darray.h include/poly.h
 arith/random.o: include/random.h include/utils.h
 misc/fops.o: include/fops.h include/tracker.h
 misc/tracker.o: include/tracker.h
-misc/extend_printf.o: include/utils.h include/field.h include/random.h
-misc/extend_printf.o: include/strclone.h
+misc/extend_printf.o: include/utils.h include/field.h include/strclone.h
 misc/parse.o: include/fops.h include/parse.h include/tracker.h
 misc/darray.o: include/noleak.h include/darray.h
 misc/symtab.o: include/strclone.h include/symtab.h include/darray.h
 ecc/mpc.o: include/darray.h include/mpc.h
-ecc/mnt.o: include/mnt.h include/darray.h include/curve.h include/poly.h
-ecc/mnt.o: include/field.h include/random.h
-ecc/hilbert.o: include/poly.h include/field.h include/random.h
-ecc/hilbert.o: include/darray.h include/hilbert.h include/mpc.h
-ecc/curve.o: include/curve.h include/poly.h include/field.h include/random.h
-ecc/curve.o: include/darray.h include/fops.h include/parse.h
-ecc/pairing.o: include/curve.h include/poly.h include/field.h
-ecc/pairing.o: include/random.h include/darray.h include/fops.h
-ecc/pairing.o: include/symtab.h include/parse.h include/tracker.h
-ecc/pairing.o: include/pairing.h include/a_param.h include/mnt.h
-ecc/pairing.o: include/d_param.h include/e_param.h include/f_param.h
-ecc/pairing.o: include/a1_param.h include/strclone.h
+ecc/mnt.o: include/darray.h include/mnt.h
+ecc/hilbert.o: include/field.h include/darray.h include/poly.h
+ecc/hilbert.o: include/hilbert.h include/mpc.h
+ecc/curve.o: include/field.h include/darray.h include/poly.h include/curve.h
+ecc/pairing.o: include/field.h include/darray.h include/poly.h
+ecc/pairing.o: include/curve.h include/fops.h include/symtab.h
+ecc/pairing.o: include/parse.h include/tracker.h include/pairing.h
+ecc/pairing.o: include/a_param.h include/mnt.h include/d_param.h
+ecc/pairing.o: include/e_param.h include/f_param.h include/a1_param.h
+ecc/pairing.o: include/strclone.h include/utils.h
 ecc/param.o: include/symtab.h include/darray.h include/fops.h include/parse.h
 ecc/param.o: include/tracker.h include/utils.h include/strclone.h
 ecc/a1_param.o: include/symtab.h include/darray.h include/fops.h
-ecc/a1_param.o: include/fieldquadratic.h include/field.h include/random.h
-ecc/a1_param.o: include/pairing.h include/a1_param.h include/curve.h
-ecc/a1_param.o: include/poly.h include/param.h include/tracker.h
-ecc/a_param.o: include/fops.h include/symtab.h include/darray.h
-ecc/a_param.o: include/fieldquadratic.h include/field.h include/random.h
-ecc/a_param.o: include/pairing.h include/a_param.h include/curve.h
-ecc/a_param.o: include/poly.h include/param.h include/tracker.h
+ecc/a1_param.o: include/field.h include/fieldquadratic.h include/pairing.h
+ecc/a1_param.o: include/a1_param.h include/poly.h include/curve.h
+ecc/a1_param.o: include/param.h include/tracker.h
+ecc/a_param.o: include/symtab.h include/darray.h include/fops.h
+ecc/a_param.o: include/field.h include/fieldquadratic.h include/pairing.h
+ecc/a_param.o: include/a_param.h include/poly.h include/curve.h
+ecc/a_param.o: include/param.h include/random.h include/tracker.h
 ecc/d_param.o: include/fops.h include/symtab.h include/darray.h
-ecc/d_param.o: include/poly.h include/field.h include/random.h
-ecc/d_param.o: include/fieldquadratic.h include/hilbert.h include/mnt.h
-ecc/d_param.o: include/curve.h include/pairing.h include/d_param.h
-ecc/d_param.o: include/param.h include/tracker.h
+ecc/d_param.o: include/field.h include/poly.h include/fieldquadratic.h
+ecc/d_param.o: include/hilbert.h include/mnt.h include/curve.h
+ecc/d_param.o: include/pairing.h include/d_param.h include/param.h
+ecc/d_param.o: include/tracker.h
 ecc/e_param.o: include/fops.h include/symtab.h include/darray.h
-ecc/e_param.o: include/field.h include/random.h include/pairing.h
-ecc/e_param.o: include/e_param.h include/param.h include/curve.h
-ecc/e_param.o: include/poly.h include/tracker.h
+ecc/e_param.o: include/field.h include/pairing.h include/e_param.h
+ecc/e_param.o: include/param.h include/curve.h include/random.h
+ecc/e_param.o: include/tracker.h
 ecc/f_param.o: include/fops.h include/symtab.h include/darray.h
-ecc/f_param.o: include/fieldquadratic.h include/field.h include/random.h
-ecc/f_param.o: include/pairing.h include/f_param.h include/param.h
-ecc/f_param.o: include/curve.h include/poly.h include/tracker.h
-ecc/f_param.o: include/utils.h
+ecc/f_param.o: include/field.h include/fieldquadratic.h include/pairing.h
+ecc/f_param.o: include/f_param.h include/param.h include/poly.h
+ecc/f_param.o: include/curve.h include/tracker.h include/utils.h
 sig/hash.o: include/hash.h
 sig/sig.o: include/pbc_sig.h include/pbc.h include/fops.h include/symtab.h
-sig/sig.o: include/darray.h include/field.h include/random.h
-sig/sig.o: include/pairing.h include/mnt.h include/curve.h include/poly.h
-sig/sig.o: include/hash.h
+sig/sig.o: include/darray.h include/field.h include/pairing.h include/poly.h
+sig/sig.o: include/curve.h include/mnt.h include/hash.h
 test/testbls.o: include/pbc_sig.h include/pbc.h include/fops.h
 test/testbls.o: include/symtab.h include/darray.h include/field.h
-test/testbls.o: include/random.h include/pairing.h include/mnt.h
-test/testbls.o: include/curve.h include/poly.h
+test/testbls.o: include/pairing.h include/poly.h include/curve.h
+test/testbls.o: include/mnt.h
 test/testbb.o: include/pbc_sig.h include/pbc.h include/fops.h
 test/testbb.o: include/symtab.h include/darray.h include/field.h
-test/testbb.o: include/random.h include/pairing.h include/mnt.h
-test/testbb.o: include/curve.h include/poly.h
+test/testbb.o: include/pairing.h include/poly.h include/curve.h include/mnt.h
 test/testsig.o: include/pbc.h include/fops.h include/symtab.h
-test/testsig.o: include/darray.h include/field.h include/random.h
-test/testsig.o: include/pairing.h include/mnt.h include/curve.h
-test/testsig.o: include/poly.h
+test/testsig.o: include/darray.h include/field.h include/pairing.h
+test/testsig.o: include/poly.h include/curve.h include/mnt.h
 test/testbbs.o: include/pbc.h include/fops.h include/symtab.h
-test/testbbs.o: include/darray.h include/field.h include/random.h
-test/testbbs.o: include/pairing.h include/mnt.h include/curve.h
-test/testbbs.o: include/poly.h include/get_time.h include/utils.h
+test/testbbs.o: include/darray.h include/field.h include/pairing.h
+test/testbbs.o: include/poly.h include/curve.h include/mnt.h
+test/testbbs.o: include/get_time.h include/utils.h
 test/testibs.o: include/pbc_sig.h include/pbc.h include/fops.h
 test/testibs.o: include/symtab.h include/darray.h include/field.h
-test/testibs.o: include/random.h include/pairing.h include/mnt.h
-test/testibs.o: include/curve.h include/poly.h
+test/testibs.o: include/pairing.h include/poly.h include/curve.h
+test/testibs.o: include/mnt.h
 bce/testbce.o: include/pbc.h include/fops.h include/symtab.h include/darray.h
-bce/testbce.o: include/field.h include/random.h include/pairing.h
-bce/testbce.o: include/mnt.h include/curve.h include/poly.h bce/bce.h
+bce/testbce.o: include/field.h include/pairing.h include/poly.h
+bce/testbce.o: include/curve.h include/mnt.h bce/bce.h
 test/testibe.o: include/pbc.h include/fops.h include/symtab.h
-test/testibe.o: include/darray.h include/field.h include/random.h
-test/testibe.o: include/pairing.h include/mnt.h include/curve.h
-test/testibe.o: include/poly.h
-test/testhilbert.o: include/poly.h include/field.h include/random.h
-test/testhilbert.o: include/darray.h include/hilbert.h
+test/testibe.o: include/darray.h include/field.h include/pairing.h
+test/testibe.o: include/poly.h include/curve.h include/mnt.h
+test/testhilbert.o: include/field.h include/darray.h include/poly.h
+test/testhilbert.o: include/hilbert.h
 test/listmnt.o: include/pbc.h include/fops.h include/symtab.h
-test/listmnt.o: include/darray.h include/field.h include/random.h
-test/listmnt.o: include/pairing.h include/mnt.h include/curve.h
-test/listmnt.o: include/poly.h
+test/listmnt.o: include/darray.h include/field.h include/pairing.h
+test/listmnt.o: include/poly.h include/curve.h include/mnt.h
 test/genaparam.o: include/pbc.h include/fops.h include/symtab.h
-test/genaparam.o: include/darray.h include/field.h include/random.h
-test/genaparam.o: include/pairing.h include/mnt.h include/curve.h
-test/genaparam.o: include/poly.h include/a_param.h
+test/genaparam.o: include/darray.h include/field.h include/pairing.h
+test/genaparam.o: include/poly.h include/curve.h include/mnt.h
+test/genaparam.o: include/a_param.h
 test/gendparam.o: include/pbc.h include/fops.h include/symtab.h
-test/gendparam.o: include/darray.h include/field.h include/random.h
-test/gendparam.o: include/pairing.h include/mnt.h include/curve.h
-test/gendparam.o: include/poly.h include/d_param.h
+test/gendparam.o: include/darray.h include/field.h include/pairing.h
+test/gendparam.o: include/poly.h include/curve.h include/mnt.h
+test/gendparam.o: include/d_param.h
 test/geneparam.o: include/pbc.h include/fops.h include/symtab.h
-test/geneparam.o: include/darray.h include/field.h include/random.h
-test/geneparam.o: include/pairing.h include/mnt.h include/curve.h
-test/geneparam.o: include/poly.h include/e_param.h
+test/geneparam.o: include/darray.h include/field.h include/pairing.h
+test/geneparam.o: include/poly.h include/curve.h include/mnt.h
+test/geneparam.o: include/e_param.h
 test/genfparam.o: include/pbc.h include/fops.h include/symtab.h
-test/genfparam.o: include/darray.h include/field.h include/random.h
-test/genfparam.o: include/pairing.h include/mnt.h include/curve.h
-test/genfparam.o: include/poly.h include/f_param.h
+test/genfparam.o: include/darray.h include/field.h include/pairing.h
+test/genfparam.o: include/poly.h include/curve.h include/mnt.h
+test/genfparam.o: include/f_param.h
 test/gena1param.o: include/pbc.h include/fops.h include/symtab.h
-test/gena1param.o: include/darray.h include/field.h include/random.h
-test/gena1param.o: include/pairing.h include/mnt.h include/curve.h
-test/gena1param.o: include/poly.h include/a1_param.h
+test/gena1param.o: include/darray.h include/field.h include/pairing.h
+test/gena1param.o: include/poly.h include/curve.h include/mnt.h
+test/gena1param.o: include/a1_param.h
 test/testpairing.o: include/pbc.h include/fops.h include/symtab.h
-test/testpairing.o: include/darray.h include/field.h include/random.h
-test/testpairing.o: include/pairing.h include/mnt.h include/curve.h
-test/testpairing.o: include/poly.h
+test/testpairing.o: include/darray.h include/field.h include/pairing.h
+test/testpairing.o: include/poly.h include/curve.h include/mnt.h
 test/testpoly.o: include/pbc.h include/fops.h include/symtab.h
-test/testpoly.o: include/darray.h include/field.h include/random.h
-test/testpoly.o: include/pairing.h include/mnt.h include/curve.h
-test/testpoly.o: include/poly.h
+test/testpoly.o: include/darray.h include/field.h include/pairing.h
+test/testpoly.o: include/poly.h include/curve.h include/mnt.h
 test/benchmark.o: include/pbc.h include/fops.h include/symtab.h
-test/benchmark.o: include/darray.h include/field.h include/random.h
-test/benchmark.o: include/pairing.h include/mnt.h include/curve.h
-test/benchmark.o: include/poly.h include/get_time.h
+test/benchmark.o: include/darray.h include/field.h include/pairing.h
+test/benchmark.o: include/poly.h include/curve.h include/mnt.h
+test/benchmark.o: include/get_time.h
 test/19.o: include/pbc.h include/fops.h include/symtab.h include/darray.h
-test/19.o: include/field.h include/random.h include/pairing.h include/mnt.h
-test/19.o: include/curve.h include/poly.h include/fieldquadratic.h
+test/19.o: include/field.h include/pairing.h include/poly.h include/curve.h
+test/19.o: include/mnt.h include/fieldquadratic.h
 test/sing.o: include/pbc.h include/fops.h include/symtab.h include/darray.h
-test/sing.o: include/field.h include/random.h include/pairing.h include/mnt.h
-test/sing.o: include/curve.h include/poly.h
+test/sing.o: include/field.h include/pairing.h include/poly.h include/curve.h
+test/sing.o: include/mnt.h

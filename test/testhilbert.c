@@ -1,3 +1,8 @@
+#include <stdio.h>
+#include <stdlib.h> //for atoi, exit
+#include <gmp.h>
+#include "field.h"
+#include "darray.h"
 #include "poly.h"
 #include "hilbert.h"
 

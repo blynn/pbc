@@ -1,6 +1,8 @@
 //Find MNT curves with embedding degree 6
 
 #include <stdlib.h>
+#include <gmp.h>
+#include "darray.h"
 #include "mnt.h"
 
 void cm_info_init(cm_info_t cm)

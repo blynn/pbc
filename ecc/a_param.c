@@ -1,13 +1,19 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h> //for rand, malloc, free
+#include <string.h> //for strcmp
 #include <gmp.h>
-#include "fops.h"
 #include "symtab.h"
+#include "fops.h"
+#include "field.h"
 #include "fieldquadratic.h"
 #include "pairing.h"
 #include "a_param.h"
+#include "darray.h"
+#include "poly.h"
 #include "curve.h"
 #include "param.h"
+#include "random.h"
 #include "tracker.h"
 
 struct a_pairing_data_s {
@@ -163,29 +169,47 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	element_ptr x = V->x;
 	element_ptr y = V->y;
 	//e0 = 3x^2 + (cc->a) z^4
+	//for this case a = 1
 	element_square(e0, x);
-	element_mul_si(e0, e0, 3);
+	////element_mul_si(e0, e0, 3);
+	//element_add(e1, e0, e0);
+	element_double(e1, e0);
+	element_add(e0, e1, e0);
 	element_square(e1, z2);
 	element_add(e0, e0, e1);
 
 	//z_out = 2 y z
 	element_mul(z, y, z);
-	element_mul_si(z, z, 2);
+	////element_mul_si(z, z, 2);
+	//element_add(z, z, z);
+	element_double(z, z);
 	element_square(z2, z);
 
 	//e1 = 4 x y^2
 	element_square(e2, y);
 	element_mul(e1, x, e2);
-	element_mul_si(e1, e1, 4);
+	////element_mul_si(e1, e1, 4);
+	//element_add(e1, e1, e1);
+	//element_add(e1, e1, e1);
+	element_double(e1, e1);
+	element_double(e1, e1);
 
 	//x_out = e0^2 - 2 e1
-	element_mul_si(e3, e1, 2);
+	////element_mul_si(e3, e1, 2);
+	//element_add(e3, e1, e1);
+	element_double(e3, e1);
 	element_square(x, e0);
 	element_sub(x, x, e3);
 
 	//e2 = 8y^4
 	element_square(e2, e2);
-	element_mul_si(e2, e2, 8);
+	////element_mul_si(e2, e2, 8);
+	//element_add(e2, e2, e2);
+	//element_add(e2, e2, e2);
+	//element_add(e2, e2, e2);
+	element_double(e2, e2);
+	element_double(e2, e2);
+	element_double(e2, e2);
 
 	//y_out = e0(e1 - x_out) - e2
 	element_sub(e1, e1, x);
@@ -198,16 +222,22 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	element_ptr Vy = V->y;
 
 	//a = -(3x^2 + cca z^4)
+	//for this case cca = 1
 	//b = 2 y z^3
 	//c = -(2 y^2 + x a)
 	//a = z^2 a
 	element_square(a, z2);
 	element_square(b, Vx);
-	element_mul_si(b, b, 3);
+	////element_mul_si(b, b, 3);
+	//element_add(e0, b, b);
+	element_double(e0, b);
+	element_add(b, e0, b);
 	element_add(a, a, b);
 	element_neg(a, a);
 
-	element_mul_si(e0, Vy, 2);
+	////element_mul_si(e0, Vy, 2);
+	//element_add(e0, Vy, Vy);
+	element_double(e0, Vy);
 	element_mul(b, e0, z2);
 	element_mul(b, b, z);
 
@@ -313,7 +343,7 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
     element_clear(e0);
 }
 
-static void a_pairing(element_ptr out, element_ptr in1, element_ptr in2,
+static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 	pairing_t pairing)
 //in1, in2 are from E(F_q), out from F_q^2
 {
@@ -337,7 +367,9 @@ static void a_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	element_ptr Vx = V->x;
 	element_ptr Vy = V->y;
 	element_square(a, Vx);
-	element_mul_si(a, a, 3);
+	//element_mul_si(a, a, 3);
+	element_add(e0, a, a);
+	element_add(a, e0, a);
 	element_set1(b);
 	element_add(a, a, b);
 	element_neg(a, a);
@@ -453,6 +485,17 @@ static void pairing_clear_a_param(pairing_t pairing)
     free(pairing->G1);
 }
 
+static void a_pairing_option_set(pairing_t pairing, char *key, char *value)
+{
+    if (!strcmp(key, "coord")) {
+	if (!strcmp(value, "projective")) {
+	    pairing->map = a_pairing_proj;
+	} else if (!strcmp(value, "affine")) {
+	    pairing->map = a_pairing_affine;
+	}
+    }
+}
+
 void pairing_init_a_param(pairing_t pairing, a_param_t param)
 {
     element_t a, b;
@@ -487,4 +530,5 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
     pairing->phi = phi_identity;
     pairing->GT = p->Fq2;
     pairing->clear_func = pairing_clear_a_param;
+    pairing->option_set = a_pairing_option_set;
 }

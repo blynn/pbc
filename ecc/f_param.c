@@ -1,12 +1,16 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <gmp.h>
 #include "fops.h"
 #include "symtab.h"
+#include "darray.h"
+#include "field.h"
 #include "fieldquadratic.h"
 #include "pairing.h"
 #include "f_param.h"
 #include "param.h"
+#include "poly.h"
 #include "curve.h"
 #include "tracker.h"
 #include "utils.h"

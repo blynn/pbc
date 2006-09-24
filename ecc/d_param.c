@@ -1,16 +1,23 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <gmp.h>
 #include "fops.h"
 #include "symtab.h"
+#include "darray.h"
+#include "field.h"
 #include "poly.h"
 #include "fieldquadratic.h"
 #include "hilbert.h"
+#include "darray.h"
 #include "mnt.h"
+#include "curve.h"
 #include "pairing.h"
 #include "d_param.h"
 #include "param.h"
 #include "tracker.h"
+#include "utils.h"
 
 struct mnt_pairing_data_s {
     field_t Fq, Fqx, Fqk;
@@ -355,7 +362,7 @@ static void trace(element_ptr out, element_ptr in, pairing_ptr pairing)
     point_clear(q);
 }
 
-static void pairing_init_c_param_odd_k(pairing_t pairing, d_param_t param)
+static void pairing_init_d_param_odd_k(pairing_t pairing, d_param_t param)
 {
     mnt_pairing_data_ptr p;
     element_t a, b;
@@ -402,7 +409,7 @@ static void pairing_init_c_param_odd_k(pairing_t pairing, d_param_t param)
     mpz_clear(z);
     p->k = param->k;
     pairing->GT = p->Fqk;
-    //pairing->phi = trace;
+    pairing->phi = trace;
 
     element_clear(a);
     element_clear(b);
@@ -427,29 +434,38 @@ static void cc_miller_no_denom_proj(element_t res, mpz_t q, point_t P,
 	element_ptr y = Z->y;
 	//t0 = 3x^2 + (cc->a) z^4
 	element_square(t0, x);
-	element_mul_si(t0, t0, 3);
+	//element_mul_si(t0, t0, 3);
+	element_double(t1, t0);
+	element_add(t0, t0, t1);
 	element_square(t1, z2);
 	element_mul(t1, t1, cc->a);
 	element_add(t0, t0, t1);
 
 	//z_out = 2 y z
 	element_mul(z, y, z);
-	element_mul_si(z, z, 2);
+	//element_mul_si(z, z, 2);
+	element_double(z, z);
 	element_square(z2, z);
 
 	//t1 = 4 x y^2
 	element_square(t2, y);
 	element_mul(t1, x, t2);
-	element_mul_si(t1, t1, 4);
+	//element_mul_si(t1, t1, 4);
+	element_double(t1, t1);
+	element_double(t1, t1);
 
 	//x_out = t0^2 - 2 t1
-	element_mul_si(t3, t1, 2);
+	//element_mul_si(t3, t1, 2);
+	element_double(t3, t1);
 	element_square(x, t0);
 	element_sub(x, x, t3);
 
 	//t2 = 8y^4
 	element_square(t2, t2);
-	element_mul_si(t2, t2, 8);
+	//element_mul_si(t2, t2, 8);
+	element_double(t2, t2);
+	element_double(t2, t2);
+	element_double(t2, t2);
 
 	//y_out = t0(t1 - x_out) - t2
 	element_sub(t1, t1, x);
@@ -536,7 +552,9 @@ static void cc_miller_no_denom_proj(element_t res, mpz_t q, point_t P,
 	element_square(a, z2);
 	element_mul(a, a, cc->a);
 	element_square(b, Zx);
-	element_mul_si(b, b, 3);
+	//element_mul_si(b, b, 3);
+	element_double(t0, b);
+	element_add(b, b, t0);
 	element_add(a, a, b);
 	element_neg(a, a);
 
@@ -643,7 +661,7 @@ static void cc_miller_no_denom_proj(element_t res, mpz_t q, point_t P,
     element_clear(z2);
 }
 
-static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
+static void cc_miller_no_denom_affine(element_t res, mpz_t q, point_t P,
 	element_ptr Qx, element_ptr Qy, fieldmap mapbase)
 {
     int m;
@@ -814,6 +832,9 @@ static void cc_tatepower_even_k(element_ptr out, element_ptr in, pairing_t pairi
     }
 }
 
+static void (*cc_miller_no_denom_fn)(element_t res, mpz_t q, point_t P,
+	element_ptr Qx, element_ptr Qy, fieldmap mapbase);
+
 static void cc_pairing_even_k(element_ptr out, element_ptr in1, element_ptr in2,
 	pairing_t pairing)
 {
@@ -828,7 +849,7 @@ static void cc_pairing_even_k(element_ptr out, element_ptr in1, element_ptr in2,
     element_mul(fi_re(x), Qbase->x, p->nqrinv);
     //v^-3/2 = v^-2 * v^1/2
     element_mul(fi_im(y), Qbase->y, p->nqrinv2);
-    cc_miller_no_denom(out, pairing->r, in1->data, x, y, p->mapbase);
+    cc_miller_no_denom_fn(out, pairing->r, in1->data, x, y, p->mapbase);
     cc_tatepower_even_k(out, out, pairing);
     element_clear(x);
     element_clear(y);
@@ -862,8 +883,8 @@ static int cc_is_almost_coddh_even_k(element_ptr a, element_ptr b,
     element_mul(fi_im(cy), Pc->y, p->nqrinv2);
     element_mul(fi_im(dy), Pd->y, p->nqrinv2);
 
-    cc_miller_no_denom(t0, pairing->r, a->data, dx, dy, p->mapbase);
-    cc_miller_no_denom(t1, pairing->r, b->data, cx, cy, p->mapbase);
+    cc_miller_no_denom_fn(t0, pairing->r, a->data, dx, dy, p->mapbase);
+    cc_miller_no_denom_fn(t1, pairing->r, b->data, cx, cy, p->mapbase);
     cc_tatepower_even_k(t0, t0, pairing);
     cc_tatepower_even_k(t1, t1, pairing);
     element_mul(t2, t0, t1);
@@ -937,7 +958,19 @@ static void even_k_trace(element_t out, element_t in, pairing_ptr pairing)
     point_clear(r);
 }
 
-static void pairing_init_c_param_even_k(pairing_t pairing, d_param_t param)
+static void d_pairing_option_set(pairing_t pairing, char *key, char *value)
+{
+    UNUSED_VAR(pairing);
+    if (!strcmp(key, "coord")) {
+	if (!strcmp(value, "projective")) {
+	    cc_miller_no_denom_fn = cc_miller_no_denom_proj;
+	} else if (!strcmp(value, "affine")) {
+	    cc_miller_no_denom_fn = cc_miller_no_denom_affine;
+	}
+    }
+}
+
+static void pairing_init_d_param_even_k(pairing_t pairing, d_param_t param)
 {
     even_mnt_pairing_data_ptr p;
     element_t a, b;
@@ -1025,17 +1058,20 @@ static void pairing_init_c_param_even_k(pairing_t pairing, d_param_t param)
     pairing->GT = p->Fqk;
     pairing->phi = even_k_trace;
 
+    cc_miller_no_denom_fn = cc_miller_no_denom_affine;
+    pairing->option_set = d_pairing_option_set;
+
     element_clear(a);
     element_clear(b);
 }
 
-void pairing_init_c_param(pairing_t pairing, d_param_t param)
+void pairing_init_d_param(pairing_t pairing, d_param_t param)
 {
     if (0) {
-	pairing_init_c_param_odd_k(pairing, param);
+	pairing_init_d_param_odd_k(pairing, param);
     } else {
-	if (param->k % 2) pairing_init_c_param_odd_k(pairing, param);
-	else pairing_init_c_param_even_k(pairing, param);
+	if (param->k % 2) pairing_init_d_param_odd_k(pairing, param);
+	else pairing_init_d_param_even_k(pairing, param);
     }
 }
 

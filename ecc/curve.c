@@ -1,7 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <gmp.h>
+#include "field.h"
+#include "darray.h"
+#include "poly.h"
 #include "curve.h"
-#include "fops.h"
-#include "parse.h"
 
 size_t point_out_str(FILE *stream, int base, point_ptr p)
 {

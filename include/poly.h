@@ -1,8 +1,10 @@
+//requires
+// * gmp.h
+// * field.h
+// * darray.h
 #ifndef POLY_H
 #define POLY_H
 
-#include "field.h"
-#include "darray.h"
 //implements R[x] for a given ring R
 //also R[x]_{f(x)}
 struct poly_field_data_s {

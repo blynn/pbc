@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <gmp.h>
 #include "field.h"
+#include "random.h"
 #include "utils.h"
 //Naive implementation of F_p
 //may be preferable in some situations
@@ -86,6 +89,15 @@ static void zp_square(element_ptr n, element_ptr a)
 {
     mpz_mul(n->data, a->data, a->data);
     mpz_mod(n->data, n->data, n->field->order);
+}
+
+static void zp_double(element_ptr n, element_ptr a)
+{
+    //mpz_add(n->data, a->data, a->data);
+    mpz_mul_2exp(n->data, a->data, 1);
+    if (mpz_cmp(n->data, n->field->order) >= 0) {
+	mpz_sub(n->data, n->data, n->field->order);
+    }
 }
 
 static void zp_mul(element_ptr n, element_ptr a, element_ptr b)
@@ -280,6 +292,7 @@ void field_init_naive_fp(field_ptr f, mpz_t prime)
     f->sub = zp_sub;
     f->set = zp_set;
     f->square = zp_square;
+    f->doub = zp_double;
     f->mul = zp_mul;
     f->mul_mpz = zp_mul_mpz;
     f->mul_si = zp_mul_si;

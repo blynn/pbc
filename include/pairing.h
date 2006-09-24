@@ -2,7 +2,6 @@
 // * stdio.h
 // * gmp.h
 // * fops.h
-// * symtab.h
 // * field.h
 #ifndef PAIRING_H
 #define PAIRING_H
@@ -23,8 +22,8 @@ struct pairing_s {
 	    struct pairing_s *p);
     //char *id;
     void (*clear_func)(struct pairing_s *);
+    void (*option_set)(struct pairing_s *, char *key, char *value);
     void *data;
-    symtab_t option;
 };
 
 typedef struct pairing_s pairing_t[1];
@@ -175,5 +174,10 @@ r is the order of the groups G1, G2 and GT that are involved in the pairing.
 static inline void element_init_Zr(element_t e, pairing_t pairing)
 {
     element_init(e, pairing->Zr);
+}
+
+static inline void pairing_option_set(pairing_t pairing, char *key, char *value)
+{
+    pairing->option_set(pairing, key, value);
 }
 #endif //PAIRING_H

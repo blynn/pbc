@@ -1,8 +1,8 @@
+//requires
+// * gmp.h
+// * darray.h
 #ifndef MNT_H
 #define MNT_H
-
-#include "darray.h"
-#include "curve.h"
 
 struct cm_info_s {
     mpz_t q; //curve defined over F_q

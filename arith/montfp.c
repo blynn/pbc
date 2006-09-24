@@ -1,5 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <gmp.h>
 #include <string.h>
 #include "field.h"
+#include "random.h"
+#include "utils.h"
 //Use Montgomery method for faster multiplication
 //note inversion is slower
 //an element of F_p is represented by xR (mod p)
@@ -159,13 +164,15 @@ static void fp_set1(element_ptr e)
     memcpy(e->data, p->onelimbs, p->bytes);
 }
 
-static void fp_out_str(FILE *stream, int base, element_ptr e)
+static size_t fp_out_str(FILE *stream, int base, element_ptr e)
 {
+    int res;
     mpz_t z;
     mpz_init(z);
     fp_to_mpz(z, e);
-    mpz_out_str(stream, base, z);
+    res = mpz_out_str(stream, base, z);
     mpz_clear(z);
+    return res;
 }
 
 static void fp_add(element_ptr r, element_ptr a, element_ptr b)
@@ -273,6 +280,7 @@ static void fp_neg(element_ptr n, element_ptr a)
 
 static void fp_invert(element_ptr n, element_ptr a)
 {
+    UNUSED_VAR(n); UNUSED_VAR(a);
     /*
     fp_field_data_ptr p = a->field->data;
     mpz_invert(n->data, a->data, n->field->order);
@@ -365,18 +373,18 @@ static void fp_tonelli(element_ptr x, element_ptr a)
     for (i=2; i<=s; i++) {
 	mpz_sub_ui(t0, a->field->order, 1);
 	mpz_tdiv_q_2exp(t0, t0, i);
-	element_pow(e0, ginv, e);
+	element_pow_mpz(e0, ginv, e);
 	element_mul(e0, e0, a);
-	element_pow(e0, e0, t0);
+	element_pow_mpz(e0, e0, t0);
 	if (!element_is1(e0)) mpz_setbit(e, i-1);
     }
-    element_pow(e0, ginv, e);
+    element_pow_mpz(e0, ginv, e);
     element_mul(e0, e0, a);
     mpz_add_ui(t, t, 1);
     mpz_tdiv_q_2exp(t, t, 1);
-    element_pow(e0, e0, t);
+    element_pow_mpz(e0, e0, t);
     mpz_tdiv_q_2exp(e, e, 1);
-    element_pow(x, nqr, e);
+    element_pow_mpz(x, nqr, e);
     /* TODO: this would be a good place to use element_pow2 ... -hs */
     element_mul(x, x, e0);
     mpz_clear(t);

@@ -1,7 +1,11 @@
+//requires
+// * stdio.h
+// * gmp.h
+// * field.h
+// * darray.h
+// * poly.h
 #ifndef CURVE_H
 #define CURVE_H
-
-#include "poly.h"
 
 struct curve_s;
 
