@@ -27,6 +27,7 @@ int main(void)
 	pairing_pp_apply(r, y, pp);
 	t1 = get_time();
 	ttotalpp += t1 - t0;
+	pairing_pp_clear(pp);
 
 	t0 = get_time();
 	pairing_apply(r2, x, y, pairing);

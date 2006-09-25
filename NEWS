@@ -1,3 +1,17 @@
+Sun Sep 24 20:53:44 PDT 2006
+
+Implemented preprocessing for types A and D, also cleaned up type D a little.
+Second column is with preprocessing. (On my laptop, as usual.)
+
+a	0.019666	0.009980
+d159	0.043030	0.038018
+d201	0.066828	0.059379
+d224	0.078379	0.068498
+e	0.100978	0.101003
+f	0.263881	0.264016
+
+[0.3.5]
+
 Sun Sep 24 13:00:40 PDT 2006
 
 I don't know if GCC or GMP improved, but the benchmarks improved without
