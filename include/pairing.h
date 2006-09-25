@@ -6,6 +6,13 @@
 #ifndef PAIRING_H
 #define PAIRING_H
 
+struct pairing_pp_s {
+    struct pairing_s *pairing;
+    void *data;
+};
+typedef struct pairing_pp_s pairing_pp_t[1];
+typedef struct pairing_pp_s *pairing_pp_ptr;
+
 struct pairing_s {
     mpz_t r; //order of G1, G2, GT
     field_t Zr; //the field Z_r
@@ -22,6 +29,9 @@ struct pairing_s {
 	    struct pairing_s *p);
     //char *id;
     void (*clear_func)(struct pairing_s *);
+    void (*pp_init)(pairing_pp_t p, element_t in1, struct pairing_s *);
+    void (*pp_clear)(pairing_pp_t p);
+    void (*pp_apply)(element_t out, element_t in2, pairing_pp_t p);
     void (*option_set)(struct pairing_s *, char *key, char *value);
     void *data;
 };
@@ -29,6 +39,20 @@ struct pairing_s {
 typedef struct pairing_s pairing_t[1];
 typedef struct pairing_s *pairing_ptr;
 
+static inline void pairing_pp_init(pairing_pp_t p, element_t in2, pairing_t pairing) {
+    p->pairing = pairing;
+    pairing->pp_init(p, in2, pairing);
+}
+
+static inline void pairing_pp_clear(pairing_pp_t p)
+{
+    p->pairing->pp_clear(p);
+}
+
+static inline void pairing_pp_apply(element_t out, element_t in2, pairing_pp_t p)
+{
+    p->pairing->pp_apply(out, in2, p);
+}
 /*@manual pairing_init
 TODO
 */

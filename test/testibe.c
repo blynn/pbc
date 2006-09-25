@@ -49,7 +49,7 @@ int main(void)
     element_printf("random r = %B\n", r);
 
     //compute s = f(g^master, h)^r, used to encrypt the message
-    bilinear_map(s, zg, h, pairing);
+    pairing_apply(s, zg, h, pairing);
     element_pow_zn(s, s, r);
     element_printf("f(g^master, h)^r = %B\n", s);
 
@@ -59,7 +59,7 @@ int main(void)
 
     //decryption: compute f(g^r, h^master)
     //should equal s
-    bilinear_map(s, rg, zh, pairing);
+    pairing_apply(s, rg, zh, pairing);
     element_printf("f(g^r, h^master) = %B\n", s);
 
     return 0;

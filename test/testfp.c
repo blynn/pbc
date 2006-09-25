@@ -1,7 +1,7 @@
 #include "pbc.h"
 #include "get_time.h"
 
-int main()
+int main(void)
 {
     field_t fp;
     mpz_t prime;

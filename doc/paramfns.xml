@@ -107,7 +107,8 @@ and there is never a need to extend a field.
 If some day a mathematician discovers
 that discrete log in field extensions is substantially
 easier to solve than previously
-thought, this pairing type may become useful.
+thought, or finds that discrete log can be solved in elliptic curves
+as easily as they can be in finite fields, this pairing type may become useful.
 </para>
 <variablelist>
 &eparam;

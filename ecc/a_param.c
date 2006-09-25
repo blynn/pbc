@@ -15,6 +15,7 @@
 #include "param.h"
 #include "random.h"
 #include "tracker.h"
+#include "utils.h"
 
 struct a_pairing_data_s {
     field_t Fq, Fq2;
@@ -131,8 +132,200 @@ void a_param_inp_generic (a_param_ptr p, fetch_ops_t fops, void *ctx)
 
 static void phi_identity(element_ptr out, element_ptr in, pairing_ptr pairing)
 {
-    (void) pairing;
+    UNUSED_VAR(pairing);
     element_set(out, in);
+}
+
+struct pp_coeff_s {
+    element_t a;
+    element_t b;
+    element_t c;
+};
+typedef struct pp_coeff_s pp_coeff_t[1];
+typedef struct pp_coeff_s *pp_coeff_ptr;
+
+static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing)
+{
+    int i, n;
+    a_pairing_data_ptr ainfo = pairing->data;
+    p->data = malloc(sizeof(pp_coeff_t) * (ainfo->exp2 + 1));
+    pp_coeff_t *coeff = (pp_coeff_t *) p->data;
+    point_t V, V1;
+    element_t a, b, c;
+    element_t e0;
+
+    void do_tangent(void) {
+	//a = -slope_tangent(V.x, V.y);
+	//b = 1;
+	//c = -(V.y + aV.x);
+	//but we multiply by -2*V.y to avoid division so:
+	//a = -(3 Vx^2 + cc->a)
+	//b = 2 * Vy
+	//c = -(2 Vy^2 + a Vx);
+	element_ptr Vx = V->x;
+	element_ptr Vy = V->y;
+	element_square(a, Vx);
+	//element_mul_si(a, a, 3);
+	element_add(e0, a, a);
+	element_add(a, e0, a);
+	element_set1(b);
+	element_add(a, a, b);
+	element_neg(a, a);
+
+	element_add(b, Vy, Vy);
+
+	element_mul(e0, b, Vy);
+	element_mul(c, a, Vx);
+	element_add(c, c, e0);
+	element_neg(c, c);
+
+	element_init(coeff[i]->a, ainfo->Fq);
+	element_set(coeff[i]->a, a);
+	element_init(coeff[i]->b, ainfo->Fq);
+	element_set(coeff[i]->b, b);
+	element_init(coeff[i]->c, ainfo->Fq);
+	element_set(coeff[i]->c, c);
+    }
+
+    void do_line(point_ptr A, point_ptr B) {
+	//a = -(B.y - A.y) / (B.x - A.x);
+	//b = 1;
+	//c = -(A.y + a * A.x);
+	//but we'll multiply by B.x - A.x to avoid division, so
+	//a = -(By - Ay)
+	//b = Bx - Ax
+	//c = -(Ay b + a Ax);
+	element_sub(a, A->y, B->y);
+	element_sub(b, B->x, A->x);
+	element_mul(c, A->x, B->y);
+	element_mul(e0, A->y, B->x);
+	element_sub(c, c, e0);
+
+	element_init(coeff[i]->a, ainfo->Fq);
+	element_set(coeff[i]->a, a);
+	element_init(coeff[i]->b, ainfo->Fq);
+	element_set(coeff[i]->b, b);
+	element_init(coeff[i]->c, ainfo->Fq);
+	element_set(coeff[i]->c, c);
+    }
+
+    point_init(V, ainfo->Eq);
+    point_init(V1, ainfo->Eq);
+    point_set(V, in1->data);
+    element_init(e0, ainfo->Fq);
+    element_init(a, ainfo->Fq);
+    element_init(b, ainfo->Fq);
+    element_init(c, ainfo->Fq);
+
+    n = ainfo->exp1;
+    for (i=0; i<n; i++) {
+	do_tangent();
+	point_double(V, V);
+    }
+
+    if (ainfo->sign1 < 0) {
+	point_neg(V1, V);
+    } else {
+	point_set(V1, V);
+    }
+    n = ainfo->exp2;
+    for (; i<n; i++) {
+	do_tangent();
+	point_double(V, V);
+    }
+
+    do_line(V, V1);
+
+    element_clear(e0);
+    element_clear(a);
+    element_clear(b);
+    element_clear(c);
+    point_clear(V);
+    point_clear(V1);
+}
+
+static void a_pairing_pp_clear(pairing_pp_t p)
+{
+    a_pairing_data_ptr ainfo = p->pairing->data;
+    pp_coeff_t *coeff = (pp_coeff_t *) p->data;
+    int i, n = ainfo->exp2 + 1;
+    for (i=0; i<n; i++) {
+	pp_coeff_ptr pp = coeff[i];
+	element_clear(pp->a);
+	element_clear(pp->b);
+	element_clear(pp->c);
+    }
+    free(p->data);
+}
+
+static inline void a_tateexp(element_ptr out, element_ptr in, element_ptr temp, mpz_t cofactor)
+{
+    //simpler but slower:
+    //element_pow_mpz(out, f, tateexp);
+
+    element_invert(temp, in);
+    element_neg(fi_im(in), fi_im(in));
+    element_mul(in, in, temp);
+    element_pow_mpz(out, in, cofactor);
+}
+
+//computes a Qx + b Qy + c for type A pairing
+static inline void a_miller_evalfn(element_ptr out,
+	element_ptr a, element_ptr b, element_ptr c,
+	element_ptr Qx, element_ptr Qy)
+{
+    //we'll map Q via (x,y) --> (-x, iy)
+    //hence Re(a Qx + b Qy + c) = -a Q'x + c and
+    //Im(a Qx + b Qy + c) = b Q'y
+    element_mul(fi_im(out), a, Qx);
+    element_sub(fi_re(out), c, fi_im(out));
+    element_mul(fi_im(out), b, Qy);
+}
+
+static void a_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
+{
+    //TODO: use proj coords here too to shave off a little time
+    element_ptr Qx = ((point_ptr) in2->data)->x;
+    element_ptr Qy = ((point_ptr) in2->data)->y;
+    element_t f, f0;
+    int i, n;
+    a_pairing_data_ptr ainfo = p->pairing->data;
+    pp_coeff_t *coeff = p->data;
+    element_init(f, ainfo->Fq2);
+    element_init(f0, ainfo->Fq2);
+
+    element_set1(f);
+    n = ainfo->exp1;
+    for (i=0; i<n; i++) {
+	pp_coeff_ptr pp = coeff[i];
+	element_square(f, f);
+	a_miller_evalfn(f0, pp->a, pp->b, pp->c, Qx, Qy);
+	element_mul(f, f, f0);
+    }
+    if (ainfo->sign1 < 0) {
+	element_invert(out, f);
+    } else {
+	element_set(out, f);
+    }
+    n = ainfo->exp2;
+    for (; i<n; i++) {
+	element_square(f, f);
+	pp_coeff_ptr pp = coeff[i];
+	a_miller_evalfn(f0, pp->a, pp->b, pp->c, Qx, Qy);
+	element_mul(f, f, f0);
+    }
+
+    element_mul(f, f, out);
+    {
+	pp_coeff_ptr pp = coeff[i];
+	a_miller_evalfn(f0, pp->a, pp->b, pp->c, Qx, Qy);
+	element_mul(f, f, f0);
+    }
+
+    a_tateexp(out, f, f0, ainfo->h);
+
+    element_clear(f);
+    element_clear(f0);
 }
 
 static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
@@ -247,12 +440,7 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	element_add(c, c, e0);
 	element_neg(c, c);
 
-	//we'll map Q via (x,y) --> (-x, iy)
-	//hence a Qx + c = -a Qx + c is real while
-	//(b Qy) = b Qy i is purely imaginary.
-	element_mul(a, a, Qx);
-	element_sub(fi_re(f0), c, a);
-	element_mul(fi_im(f0), b, Qy);
+	a_miller_evalfn(f0, a, b, c, Qx, Qy);
 	element_mul(f, f, f0);
     }
 
@@ -270,12 +458,7 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	element_mul(e0, A->y, B->x);
 	element_sub(c, c, e0);
 
-	//we'll map Q via (x,y) --> (-x, iy)
-	//hence a Qx + c = -a Qx + c is real while
-	//(b Qy) = b Qy i is purely imaginary.
-	element_mul(a, a, Qx);
-	element_sub(fi_re(f0), c, a);
-	element_mul(fi_im(f0), b, Qy);
+	a_miller_evalfn(f0, a, b, c, Qx, Qy);
 	element_mul(f, f, f0);
     }
 
@@ -321,14 +504,7 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
     point_to_affine();
     do_line(V, V1);
 
-    //Tate exponentiation
-    //simpler but slower:
-    //element_pow_mpz(out, f, p->tateexp);
-    //use this trick instead:
-    element_invert(f0, f);
-    element_neg(fi_im(f), fi_im(f));
-    element_mul(f, f, f0);
-    element_pow_mpz(out, f, p->h);
+    a_tateexp(out, f, f0, p->h);
 
     element_clear(f);
     element_clear(f0);
@@ -381,12 +557,7 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 	element_add(c, c, e0);
 	element_neg(c, c);
 
-	//we'll map Q via (x,y) --> (-x, iy)
-	//hence a Qx + c = -a Qx + c is real while
-	//(b Qy) = b Qy i is purely imaginary.
-	element_mul(a, a, Qx);
-	element_sub(fi_re(f0), c, a);
-	element_mul(fi_im(f0), b, Qy);
+	a_miller_evalfn(f0, a, b, c, Qx, Qy);
 	element_mul(f, f, f0);
     }
 
@@ -404,12 +575,7 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 	element_mul(e0, A->y, B->x);
 	element_sub(c, c, e0);
 
-	//we'll map Q via (x,y) --> (-x, iy)
-	//hence a Qx + c = -a Qx + c is real while
-	//(b Qy) = b Qy i is purely imaginary.
-	element_mul(a, a, Qx);
-	element_sub(fi_re(f0), c, a);
-	element_mul(fi_im(f0), b, Qy);
+	a_miller_evalfn(f0, a, b, c, Qx, Qy);
 	element_mul(f, f, f0);
     }
 
@@ -450,14 +616,7 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
     element_mul(f, f, f1);
     do_line(V, V1);
 
-    //Tate exponentiation
-    //simpler but slower:
-    //element_pow_mpz(out, f, p->tateexp);
-    //use this trick instead:
-    element_invert(f0, f);
-    element_neg(fi_im(f), fi_im(f));
-    element_mul(f, f, f0);
-    element_pow_mpz(out, f, p->h);
+    a_tateexp(out, f, f0, p->h);
 
     element_clear(f);
     element_clear(f0);
@@ -531,4 +690,7 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
     pairing->GT = p->Fq2;
     pairing->clear_func = pairing_clear_a_param;
     pairing->option_set = a_pairing_option_set;
+    pairing->pp_init = a_pairing_pp_init;
+    pairing->pp_clear = a_pairing_pp_clear;
+    pairing->pp_apply = a_pairing_pp_apply;
 }

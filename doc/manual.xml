@@ -58,7 +58,8 @@ this manual imitates the look and feel of the GMP manual.
 </preface>
 <chapter><title>Overview</title>
 <para>
-The PBC library is a C library designed to make it easy to implement
+The PBC library is a free portable C library designed to make it easy
+to implement
 pairing-based cryptosystems. It provides an abstract interface to a
 cyclic group with a bilinear pairing, and the programmer does not need
 to worry about, or even know about elliptic curves.

@@ -1,3 +1,17 @@
+Sun Sep 24 13:00:40 PDT 2006
+
+I don't know if GCC or GMP improved, but the benchmarks improved without
+intervention from me. I tweaked a few lines here and there (e.g. replaced
+mul_si with element_double, used mpz_powm_ui for squaring) to shave a
+tiny bit more time off.
+
+a	0.019855
+d159	0.054426
+d201	0.080596
+d224	0.095677
+e	0.101124
+f	0.265249
+
 Sun Sep 24 03:41:16 PDT 2006
 
 The previous tarballs won't build because bce/bce.h is not included in

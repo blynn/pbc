@@ -59,6 +59,21 @@ static void default_option_set(struct pairing_s *pairing, char *key, char *value
     UNUSED_VAR(value);
 }
 
+static void default_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing) {
+    UNUSED_VAR(pairing);
+    p->data = (void *) in1;
+}
+
+static void default_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
+{
+    pairing_apply(out, p->data, in2, p->pairing);
+}
+
+static void default_pp_clear(pairing_pp_t p)
+{
+    UNUSED_VAR(p);
+}
+
 void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
 {
     assert (fops);
@@ -67,6 +82,9 @@ void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
     token_t tok;
 
     pairing->option_set = default_option_set;
+    pairing->pp_init = default_pp_init;
+    pairing->pp_clear = default_pp_clear;
+    pairing->pp_apply = default_pp_apply;
     token_init(tok);
     token_get_generic (tok, fops, ctx);
     if (tok->type != token_word) {

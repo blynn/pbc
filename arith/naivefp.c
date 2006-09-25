@@ -87,8 +87,11 @@ static void zp_sub(element_ptr n, element_ptr a, element_ptr b)
 
 static void zp_square(element_ptr n, element_ptr a)
 {
+    /*
     mpz_mul(n->data, a->data, a->data);
     mpz_mod(n->data, n->data, n->field->order);
+    */
+    mpz_powm_ui(n->data, a->data, 2, n->field->order);
 }
 
 static void zp_double(element_ptr n, element_ptr a)

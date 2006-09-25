@@ -132,6 +132,20 @@ void d_param_inp_generic (d_param_ptr p, fetch_ops_t fops, void *ctx)
     symtab_clear(tab);
 }
 
+static inline void d_miller_evalfn(element_t e0, element_t e1,
+	element_t a, element_t b, element_t c,
+	element_t Qx, element_t Qy, fieldmap mapbase)
+{
+    //TODO: use poly_mul_constant?
+    mapbase(e0, a);
+    element_mul(e0, e0, Qx);
+    mapbase(e1, b);
+    element_mul(e1, e1, Qy);
+    element_add(e0, e0, e1);
+    mapbase(e1, c);
+    element_add(e0, e0, e1);
+}
+
 //assumes P is in the base field, Q in some field extension
 static void cc_miller(element_t res, mpz_t q, point_t P,
 	element_ptr Qx, element_ptr Qy, fieldmap mapbase)
@@ -192,14 +206,7 @@ static void cc_miller(element_t res, mpz_t q, point_t P,
 	element_add(c, c, t0);
 	element_neg(c, c);
 
-	//TODO: use poly_mul_constant?
-	mapbase(e0, a);
-	element_mul(e0, e0, Qx);
-	mapbase(e1, b);
-	element_mul(e1, e1, Qy);
-	element_add(e0, e0, e1);
-	mapbase(e1, c);
-	element_add(e0, e0, e1);
+	d_miller_evalfn(e0, e1, a, b, c, Qx, Qy, mapbase);
 	element_mul(e, e, e0);
     }
 
@@ -237,13 +244,7 @@ static void cc_miller(element_t res, mpz_t q, point_t P,
 	element_add(c, c, t0);
 	element_neg(c, c);
 
-	mapbase(e0, a);
-	element_mul(e0, e0, Qx);
-	mapbase(e1, b);
-	element_mul(e1, e1, Qy);
-	element_add(e0, e0, e1);
-	mapbase(e1, c);
-	element_add(e0, e0, e1);
+	d_miller_evalfn(e0, e1, a, b, c, Qx, Qy, mapbase);
 	element_mul(e, e, e0);
     }
 
@@ -569,14 +570,7 @@ static void cc_miller_no_denom_proj(element_t res, mpz_t q, point_t P,
 	element_add(c, c, t0);
 	element_neg(c, c);
 
-	//TODO: use poly_mul_constant?
-	mapbase(e0, a);
-	element_mul(e0, e0, Qx);
-	mapbase(e1, b);
-	element_mul(e1, e1, Qy);
-	element_add(e0, e0, e1);
-	mapbase(e1, c);
-	element_add(e0, e0, e1);
+	d_miller_evalfn(e0, e1, a, b, c, Qx, Qy, mapbase);
 	element_mul(v, v, e0);
     }
 
@@ -604,13 +598,7 @@ static void cc_miller_no_denom_proj(element_t res, mpz_t q, point_t P,
 	element_mul(c, Ay, Bx);
 	element_sub(c, t0, c);
 
-	mapbase(e0, a);
-	element_mul(e0, e0, Qx);
-	mapbase(e1, b);
-	element_mul(e1, e1, Qy);
-	element_add(e0, e0, e1);
-	mapbase(e1, c);
-	element_add(e0, e0, e1);
+	d_miller_evalfn(e0, e1, a, b, c, Qx, Qy, mapbase);
 	element_mul(v, v, e0);
     }
 
@@ -673,12 +661,14 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, point_t P,
     element_t t0;
     element_t e0, e1;
 
+    /* TODO: when exactly is this not needed?
     void do_vertical(void)
     {
 	mapbase(e0, Z->x);
 	element_sub(e0, Qx, e0);
 	element_mul(v, v, e0);
     }
+    */
 
     void do_tangent(void)
     {
@@ -700,14 +690,7 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, point_t P,
 	element_add(c, c, t0);
 	element_neg(c, c);
 
-	//TODO: use poly_mul_constant?
-	mapbase(e0, a);
-	element_mul(e0, e0, Qx);
-	mapbase(e1, b);
-	element_mul(e1, e1, Qy);
-	element_add(e0, e0, e1);
-	mapbase(e1, c);
-	element_add(e0, e0, e1);
+	d_miller_evalfn(e0, e1, a, b, c, Qx, Qy, mapbase);
 	element_mul(v, v, e0);
     }
 
@@ -730,13 +713,7 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, point_t P,
 	element_add(c, c, t0);
 	element_neg(c, c);
 
-	mapbase(e0, a);
-	element_mul(e0, e0, Qx);
-	mapbase(e1, b);
-	element_mul(e1, e1, Qy);
-	element_add(e0, e0, e1);
-	mapbase(e1, c);
-	element_add(e0, e0, e1);
+	d_miller_evalfn(e0, e1, a, b, c, Qx, Qy, mapbase);
 	element_mul(v, v, e0);
     }
 
@@ -970,6 +947,177 @@ static void d_pairing_option_set(pairing_t pairing, char *key, char *value)
     }
 }
 
+struct pp_coeff_s {
+    element_t a;
+    element_t b;
+    element_t c;
+};
+typedef struct pp_coeff_s pp_coeff_t[1];
+typedef struct pp_coeff_s *pp_coeff_ptr;
+
+static void d_pairing_pp_init_even_k(pairing_pp_t p, element_ptr in1, pairing_t pairing)
+{
+    point_ptr P = in1->data;
+    const common_curve_ptr cc = P->curve->data;
+    point_t Z;
+    int m;
+    int i=0;
+    even_mnt_pairing_data_ptr info = pairing->data;
+    element_t t0;
+    element_t a, b, c;
+    field_ptr Fq = info->Fq;
+    pp_coeff_t *coeff;
+    mpz_ptr q = pairing->r;
+
+    void store_abc(void)
+    {
+	pp_coeff_ptr pp = coeff[i];
+	element_init(pp->a, Fq);
+	element_init(pp->b, Fq);
+	element_init(pp->c, Fq);
+	element_set(pp->a, a);
+	element_set(pp->b, b);
+	element_set(pp->c, c);
+	i++;
+    }
+
+    void do_tangent(void)
+    {
+	//a = -slope_tangent(Z.x, Z.y);
+	//b = 1;
+	//c = -(Z.y + a * Z.x);
+	//but we multiply by 2*Z.y to avoid division
+
+	//a = -Zx * (3 Zx + twicea_2) - a_4;
+	//Common curves: a2 = 0 (and cc->a is a_4), so
+	//a = -(3 Zx^2 + cc->a)
+	//b = 2 * Zy
+	//c = -(2 Zy^2 + a Zx);
+	const element_ptr Zx = Z->x;
+	const element_ptr Zy = Z->y;
+
+	element_square(a, Zx);
+	element_double(t0, a);
+	element_add(a, a, t0);
+	element_add(a, a, cc->a);
+	element_neg(a, a);
+
+	element_add(b, Zy, Zy);
+
+	element_mul(t0, b, Zy);
+	element_mul(c, a, Zx);
+	element_add(c, c, t0);
+	element_neg(c, c);
+
+	store_abc();
+    }
+
+    void do_line(void)
+    {
+	//a = -(B.y - A.y) / (B.x - A.x);
+	//b = 1;
+	//c = -(A.y + a * A.x);
+	//but we'll multiply by B.x - A.x to avoid division
+
+	const element_ptr Ax = Z->x;
+	const element_ptr Ay = Z->y;
+	const element_ptr Bx = P->x;
+	const element_ptr By = P->y;
+
+	element_sub(b, Bx, Ax);
+	element_sub(a, Ay, By);
+	element_mul(t0, b, Ay);
+	element_mul(c, a, Ax);
+	element_add(c, c, t0);
+	element_neg(c, c);
+
+	store_abc();
+    }
+
+    point_init(Z, P->curve);
+    point_set(Z, P);
+
+    element_init(t0, Fq);
+    element_init(a, Fq);
+    element_init(b, Fq);
+    element_init(c, Fq);
+
+    m = mpz_sizeinbase(q, 2) - 2;
+    p->data = malloc(sizeof(pp_coeff_t) * 2 * m);
+    coeff = (pp_coeff_t *) p->data;
+
+    for(;;) {
+	do_tangent();
+
+	if (!m) break;
+
+	point_double(Z, Z);
+	if (mpz_tstbit(q, m)) {
+	    do_line();
+	    point_add(Z, Z, P);
+	}
+	m--;
+    }
+
+    element_clear(t0);
+    element_clear(a);
+    element_clear(b);
+    element_clear(c);
+    point_clear(Z);
+}
+
+static void d_pairing_pp_clear_even_k(pairing_pp_t p)
+{
+}
+
+static void d_pairing_pp_apply_even_k(element_ptr out, element_ptr in2, pairing_pp_t p)
+{
+    mpz_ptr q = p->pairing->r;
+    even_mnt_pairing_data_ptr info = p->pairing->data;
+    int m = mpz_sizeinbase(q, 2) - 2;
+    pp_coeff_t *coeff = (pp_coeff_t *) p->data;
+    pp_coeff_ptr pp = coeff[0];
+    point_ptr Qbase = in2->data;
+    element_t e0, e1;
+    element_t Qx, Qy;
+    element_t v;
+    element_init_GT(e0, p->pairing);
+    element_init_GT(e1, p->pairing);
+    element_init_GT(Qx, p->pairing);
+    element_init_GT(Qy, p->pairing);
+    element_init_GT(v, p->pairing);
+
+    //map from twist: (x, y) --> (v^-1 x, v^-(3/2) y)
+    //where v is the quadratic nonresidue used to construct the twist
+    element_mul(fi_re(Qx), Qbase->x, info->nqrinv);
+    //v^-3/2 = v^-2 * v^1/2
+    element_mul(fi_im(Qy), Qbase->y, info->nqrinv2);
+
+    element_set1(out);
+    for(;;) {
+	d_miller_evalfn(e0, e1, pp->a, pp->b, pp->c, Qx, Qy, info->mapbase);
+	element_mul(out, out, e0);
+	pp++;
+
+	if (!m) break;
+
+	if (mpz_tstbit(q, m)) {
+	    d_miller_evalfn(e0, e1, pp->a, pp->b, pp->c, Qx, Qy, info->mapbase);
+	    element_mul(out, out, e0);
+	    pp++;
+	}
+	m--;
+	element_square(out, out);
+    }
+    cc_tatepower_even_k(out, out, p->pairing);
+
+    element_clear(e0);
+    element_clear(e1);
+    element_clear(Qx);
+    element_clear(Qy);
+    element_clear(v);
+}
+
 static void pairing_init_d_param_even_k(pairing_t pairing, d_param_t param)
 {
     even_mnt_pairing_data_ptr p;
@@ -1060,6 +1208,9 @@ static void pairing_init_d_param_even_k(pairing_t pairing, d_param_t param)
 
     cc_miller_no_denom_fn = cc_miller_no_denom_affine;
     pairing->option_set = d_pairing_option_set;
+    pairing->pp_init = d_pairing_pp_init_even_k;
+    pairing->pp_clear = d_pairing_pp_clear_even_k;
+    pairing->pp_apply = d_pairing_pp_apply_even_k;
 
     element_clear(a);
     element_clear(b);

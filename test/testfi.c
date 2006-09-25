@@ -1,4 +1,5 @@
 #include "pbc.h"
+#include "fieldquadratic.h"
 
 int main(void)
 {

@@ -19,7 +19,7 @@ int main(void)
     //pairing->phi(g, h, pairing);
     element_printf("g = %B\n", g);
     element_printf("h = %B\n", h);
-    bilinear_map(x, g, h, pairing);
+    pairing_apply(x, g, h, pairing);
     element_printf("f(g, h) = %B\n", x);
 
     element_random(z);
@@ -30,12 +30,12 @@ int main(void)
 
     element_pow_zn(zg, g, z);
     element_printf("g^z = %B\n", zg);
-    bilinear_map(x, zg, h, pairing);
+    pairing_apply(x, zg, h, pairing);
     element_printf("f(g^z, h) = %B\n", x);
 
     element_pow_zn(zh, h, z);
     element_printf("h^z = %B\n", zh);
-    bilinear_map(x, g, zh, pairing);
+    pairing_apply(x, g, zh, pairing);
     element_printf("f(g, h^z) = %B\n", x);
 
     {

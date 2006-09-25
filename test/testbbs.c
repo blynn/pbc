@@ -94,7 +94,7 @@ void bbs_gen(bbs_group_public_key_t gpk, bbs_manager_private_key_t gmsk,
         /* do some precomputation */
         /* TODO: could instead compute from e(g1,g2) ... */
         element_init_GT(gsk[i]->pr_A_g2, pairing);
-        bilinear_map(gsk[i]->pr_A_g2, gsk[i]->A, gpk->g2, pairing);
+        pairing_apply(gsk[i]->pr_A_g2, gsk[i]->A, gpk->g2, pairing);
     }
 
 
@@ -103,10 +103,10 @@ void bbs_gen(bbs_group_public_key_t gpk, bbs_manager_private_key_t gmsk,
     element_init_GT(gpk->pr_g1_g2_inv, pairing);
     element_init_GT(gpk->pr_h_g2, pairing);
     element_init_GT(gpk->pr_h_w, pairing);
-    bilinear_map(gpk->pr_g1_g2, gpk->g1, gpk->g2, pairing);
+    pairing_apply(gpk->pr_g1_g2, gpk->g1, gpk->g2, pairing);
     element_invert(gpk->pr_g1_g2_inv, gpk->pr_g1_g2);
-    bilinear_map(gpk->pr_h_g2, gpk->h, gpk->g2, pairing);
-    bilinear_map(gpk->pr_h_w, gpk->h, gpk->w, pairing);
+    pairing_apply(gpk->pr_h_g2, gpk->h, gpk->g2, pairing);
+    pairing_apply(gpk->pr_h_w, gpk->h, gpk->w, pairing);
 
     element_clear(z0);
     element_clear(gamma);
@@ -172,17 +172,17 @@ void bbs_sign(unsigned char *sig,
      * exponentiations in GT.
      */
 
-    //bilinear_map(et0, T3, gpk->g2, pairing);  /* precomputed */
+    //pairing_apply(et0, T3, gpk->g2, pairing);  /* precomputed */
     element_pow_zn(et0, gpk->pr_h_g2, z0); /* NB. here z0 = alpha+beta */
     element_mul(et0, et0, gsk->pr_A_g2);
     //element_pow_zn(R3, et0, rx);
 
-    // bilinear_map(et0, gpk->h, gpk->w, pairing);  /* precomputed */
+    // pairing_apply(et0, gpk->h, gpk->w, pairing);  /* precomputed */
     element_add(z0, ralpha, rbeta);
     element_neg(z0, z0);
     //element_pow_zn(et0, gpk->pr_h_w, z0);
     //element_mul(R3, R3, et0);
-    // bilinear_map(et0, gpk->h, gpk->g2, pairing);  /* precomputed */
+    // pairing_apply(et0, gpk->h, gpk->g2, pairing);  /* precomputed */
     element_add(z1, rdelta1, rdelta2);
     element_neg(z1, z1);
     //element_pow_zn(et0, gpk->pr_h_g2, z1);
@@ -345,7 +345,7 @@ int bbs_verify(unsigned char *sig,
     //element_pow_zn(e21, gpk->w, c);
     //element_mul(e20, e20, e21);
     element_pow2_zn(e20, gpk->g2, sx, gpk->w, c);
-    bilinear_map(R3, T3, e20, pairing);
+    pairing_apply(R3, T3, e20, pairing);
 
     //element_pow_zn(et0, gpk->pr_g1_g2_inv, c);
     //element_mul(R3, R3, et0);
@@ -455,25 +455,25 @@ int bbs_open(element_t A, bbs_group_public_key_t gpk, bbs_manager_private_key_t 
     element_pow_zn(e10, T2, sx);
     element_mul(R5, R5, e10);
 
-    bilinear_map(R3, T3, gpk->w, pairing);
-    bilinear_map(et0, gpk->g1, gpk->g2, pairing);
+    pairing_apply(R3, T3, gpk->w, pairing);
+    pairing_apply(et0, gpk->g1, gpk->g2, pairing);
     element_invert(et0, et0);
     element_mul(R3, R3, et0);
     element_pow_zn(R3, R3, c);
 
-    bilinear_map(et0, T3, gpk->g2, pairing);
+    pairing_apply(et0, T3, gpk->g2, pairing);
     element_pow_zn(et0, et0, sx);
     element_mul(R3, R3, et0);
 
     element_add(z0, salpha, sbeta);
     element_neg(z0, z0);
-    bilinear_map(et0, gpk->h, gpk->w, pairing);
+    pairing_apply(et0, gpk->h, gpk->w, pairing);
     element_pow_zn(et0, et0, z0);
     element_mul(R3, R3, et0);
 
     element_add(z0, sdelta1, sdelta2);
     element_neg(z0, z0);
-    bilinear_map(et0, gpk->h, gpk->g2, pairing);
+    pairing_apply(et0, gpk->h, gpk->g2, pairing);
     element_pow_zn(et0, et0, z0);
     element_mul(R3, R3, et0);
 
