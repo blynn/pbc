@@ -9,6 +9,7 @@
 //note inversion is slower
 //an element of F_p is represented by xR (mod p)
 //where R is the smallest power of the machine word greater than p
+//TODO: why is this slower than naive implementation?
 
 struct fp_field_data_s {
     size_t limbs;

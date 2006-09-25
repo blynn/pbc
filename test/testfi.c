@@ -9,6 +9,7 @@ int main(void)
 
     mpz_init(prime);
     mpz_set_ui(prime, 82);
+    mpz_setbit(prime, 256);
     mpz_nextprime(prime, prime);
     field_init_fp(fp, prime);
     field_init_fi(fp2, fp);

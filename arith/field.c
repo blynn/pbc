@@ -247,6 +247,10 @@ void element_pow3_mpz(element_ptr x, element_ptr a1, mpz_ptr n1,
 
 void field_set_nqr(field_ptr f, element_t nqr)
 {
+    if (!f->nqr) {
+	f->nqr = malloc(sizeof(element_t));
+	element_init(f->nqr, f);
+    }
     element_set(f->nqr, nqr);
 }
 

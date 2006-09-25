@@ -10,11 +10,12 @@ int main(void)
     double t0, t1;
 
     mpz_init(prime);
-    mpz_setbit(prime, 1024);
+    mpz_setbit(prime, 1023);
     mpz_setbit(prime, 70);
     mpz_nextprime(prime, prime);
-    //field_init_fast_fp(fp, prime);
-    field_init_naive_fp(fp, prime);
+    field_init_fast_fp(fp, prime);
+    //field_init_naive_fp(fp, prime);
+    //field_init_slow_fp(fp, prime);
 
     element_init(x, fp);
     element_init(y, fp);
@@ -22,6 +23,7 @@ int main(void)
 
     element_random(x);
     element_random(y);
+    /*
     element_printf("prime: %Z\n", prime);
     element_printf("x: %B\n", x);
     element_printf("y: %B\n", y);
@@ -33,8 +35,9 @@ int main(void)
     element_printf("x-y: %B\n", z);
     element_invert(z, x);
     element_printf("x^-1: %B\n", z);
+    */
 
-    n = 10000;
+    n = 20000;
     t0 = get_time();
     for (i=0; i<n; i++) {
 	element_mul(z, x, y);

@@ -1,3 +1,5 @@
+//TODO: XXX WARNING XXX this file is very broken
+//I can't get mont_reduce faster than mpz_mod() for some reason
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
@@ -8,14 +10,16 @@
 //an element of F_p is represented by xR (mod p)
 //where R is the smallest power of 2 greater than p
 
-//Unfortunately it's slower than the naive implementation
+//TODO: it's slower than the naive implementation
 
 struct fp_field_data_s {
+    int Rwords;
+    unsigned long int minuspinv;
+
     int Rbits;
     mpz_t R;
     mpz_t Rmodp;
     mpz_t R3modp;
-    mpz_t minuspinv;
 };
 typedef struct fp_field_data_s fp_field_data_t[1];
 typedef struct fp_field_data_s *fp_field_data_ptr;
@@ -33,22 +37,30 @@ static void fp_clear(element_ptr e)
 }
 
 //Montgomery reduction
-static inline void mont_reduce(mpz_ptr z, element_ptr y)
+//TODO: why is this slower than mpz_mod?
+static void mont_reduce(mpz_ptr z, element_ptr y)
 {
     fp_field_data_ptr p = y->field->data;
     mpz_ptr q = y->field->order;
-    mpz_t u;
-    mpz_init(u);
-    mpz_mul(u, y->data, p->minuspinv);
-    mpz_tdiv_r_2exp(u, u, p->Rbits);
+    mpz_t z0, y2;
+    mpz_init(z0);
+    int i;
+    //unsigned long int u;
 
-    mpz_mul(u, u, q);
-    mpz_add(u, y->data, u);
-    mpz_tdiv_q_2exp(z, u, p->Rbits);
+    for (i=0; i<p->Rwords; i++) {
+	//u = mpz_get_ui(y2);
+	mpz_mul_ui(z0, q, 1); //mpz_getlimbn(y->data, i) * p->minuspinv);
+	mpz_mul_2exp(z0, z0, i * sizeof(unsigned long int) * 8);
+	mpz_add(y->data, y->data, z0);
+    }
+
+    mpz_tdiv_q_2exp(z, y->data, p->Rbits);
     if (mpz_cmp(z, q) > 0) {
 	mpz_sub(z, z, q);
     }
-    mpz_clear(u);
+
+    mpz_clear(z0);
+    mpz_clear(y2);
 }
 
 static void fp_to_mpz(mpz_ptr z, element_ptr y)
@@ -120,6 +132,7 @@ static void fp_mul(element_ptr n, element_ptr a, element_ptr b)
 {
     mpz_mul(n->data, a->data, b->data);
     mont_reduce(n->data, n);
+    mpz_set(n->data, b->data);
 }
 
 static void fp_mul_mpz(element_ptr n, element_ptr a, mpz_ptr z)
@@ -159,7 +172,6 @@ static void fp_invert(element_ptr n, element_ptr a)
 static void fp_random(element_ptr n)
 {
     pbc_mpz_random(n->data, n->field->order);
-    to_mont(n);
 }
 
 static void fp_from_hash(element_ptr n, int len, void *data)
@@ -256,7 +268,6 @@ static void fp_field_clear(field_t f)
     fp_field_data_ptr p = f->data;
     mpz_clear(p->R);
     mpz_clear(p->Rmodp);
-    mpz_clear(p->minuspinv);
     free(p);
 }
 
@@ -339,10 +350,23 @@ void field_init_slow_fp(field_ptr f, mpz_t prime)
     mpz_init(p->R);
     mpz_init(p->Rmodp);
     mpz_init(p->R3modp);
-    mpz_init(p->minuspinv);
-    mpz_setbit(p->R, p->Rbits = mpz_sizeinbase(prime, 2));
-    mpz_invert(p->minuspinv, prime, p->R);
-    mpz_sub(p->minuspinv, p->R, p->minuspinv);
+
+    int len = sizeof(unsigned long int) * 8;
+    mpz_t z;
+    mpz_init(z);
+    
+    p->Rwords = (mpz_sizeinbase(prime, 2) + (len - 1)) / len;
+    p->Rbits = p->Rwords * sizeof(unsigned long int) * 8;
+
+    mpz_setbit(z, len);
+    mpz_invert(z, prime, z);
+    p->minuspinv = -mpz_get_ui(z);
+
+printf("limb: %d\n", sizeof(mp_limb_t));
+printf("%d\n",p->Rbits);
+mpz_out_str(stdout, 0, prime);
+printf("= p\n");
+printf("%lu = -p^-1, %lx\n", p->minuspinv, p->minuspinv * mpz_get_ui(prime));
     mpz_mod(p->Rmodp, p->R, prime);
     mpz_mul(p->R3modp, p->Rmodp, p->Rmodp);
     mpz_mod(p->R3modp, p->R3modp, prime);

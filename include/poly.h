@@ -24,7 +24,7 @@ typedef struct poly_element_s *poly_element_ptr;
 struct polymod_field_data_s {
     field_ptr field;
     fieldmap mapbase;
-    int n;
+    int n; //degree of extension
     element_t poly; //polynomial of degree n
     element_t *xpwr; //holds x^n,...,x^{2n-2} mod poly
 };

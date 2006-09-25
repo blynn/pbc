@@ -39,6 +39,13 @@ static void fq_set_mpz(element_ptr e, mpz_t z)
     element_set0(p->y);
 }
 
+//projection: attempts to convert Re(e) to mpz
+static void fq_to_mpz(mpz_t z, element_ptr e)
+{
+    fq_data_ptr p = e->data;
+    element_to_mpz(z, p->x);
+}
+
 static void fq_set0(element_ptr e)
 {
     fq_data_ptr p = e->data;
@@ -191,9 +198,9 @@ static void fq_square(element_ptr n, element_ptr a)
     element_mul(e1, e1, nqr);
     element_add(e0, e0, e1);
     element_mul(e1, p->x, p->y);
-    //TODO: which is faster? worth implementing mul_2exp?
+    //TODO: which is faster?
     //element_add(e1, e1, e1);
-    element_mul_si(e1, e1, 2);
+    element_double(e1, e1);
     element_set(r->x, e0);
     element_set(r->y, e1);
     element_clear(e0);
@@ -286,6 +293,7 @@ static int fq_from_bytes(element_t e, unsigned char *data)
 
 static int fq_is_sqr(element_ptr e)
 {
+    //TODO: this is false:
     //x + y sqrt(nqr) is a square iff x^2 - nqr y^2 is (in the base field)
     fq_data_ptr p = e->data;
     element_t e0, e1;
@@ -359,6 +367,7 @@ void field_init_quadratic(field_ptr f, field_ptr fbase)
     f->clear = fq_clear;
     f->set_si = fq_set_si;
     f->set_mpz = fq_set_mpz;
+    f->to_mpz = fq_to_mpz;
     f->out_str = fq_out_str;
     f->sign = fq_sign;
     f->add = fq_add;
@@ -479,6 +488,7 @@ static void fi_invert(element_ptr n, element_ptr a)
 
 static int fi_is_sqr(element_ptr e)
 {
+    //TODO: this is false:
     //x + yi is a square iff x^2 + y^2 is (in the base field)
     fq_data_ptr p = e->data;
     element_t e0, e1;
@@ -534,8 +544,8 @@ static void fi_sqrt(element_ptr n, element_ptr e)
 
 static void fi_field_clear(field_t f)
 {
-    mpz_clear(f->order);
     free(f->data);
+    //TODO: free f->data->nqr
 }
 
 void element_field_to_fi(element_ptr a, element_ptr b)
@@ -557,6 +567,7 @@ void field_init_fi(field_ptr f, field_ptr fbase)
     f->clear = fq_clear;
     f->set_si = fq_set_si;
     f->set_mpz = fq_set_mpz;
+    f->to_mpz = fq_to_mpz;
     f->out_str = fq_out_str;
     f->sign = fq_sign;
     f->add = fq_add;

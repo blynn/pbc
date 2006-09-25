@@ -559,6 +559,46 @@ static void field_clear_poly(field_ptr f)
     free(p);
 }
 
+//2 bytes hold the number of terms
+//then the terms follow
+//bad for sparse polynomials
+
+static int poly_length_in_bytes(element_t p)
+{
+    int count = poly_coeff_count(p);
+    int result = 2;
+    int i;
+    for (i=0; i<count; i++) {
+	result += element_length_in_bytes(poly_coeff(p, i));
+    }
+    return result;
+}
+
+static int poly_to_bytes(unsigned char *buf, element_t p)
+{
+    int count = poly_coeff_count(p);
+    int result = 2;
+    int i;
+    buf[0] = (unsigned char) count;
+    buf[1] = (unsigned char) (count >> 8);
+    for (i=0; i<count; i++) {
+	result += element_to_bytes(&buf[result], poly_coeff(p, i));
+    }
+    return result;
+}
+
+static int poly_from_bytes(element_t p, unsigned char *buf)
+{
+    int result = 2;
+    int count = buf[0] + buf[1] * 256;
+    int i;
+    poly_alloc(p, count);
+    for (i=0; i<count; i++) {
+	result += element_from_bytes(poly_coeff(p, i), &buf[result]);
+    }
+    return result;
+}
+
 void field_init_poly(field_ptr f, field_ptr base_field)
 {
     poly_field_data_ptr p;
@@ -588,6 +628,11 @@ void field_init_poly(field_ptr f, field_ptr base_field)
     f->mul_mpz = poly_mul_mpz;
     f->mul_si = poly_mul_si;
     f->cmp = poly_cmp;
+
+    f->to_bytes = poly_to_bytes;
+    f->from_bytes = poly_from_bytes;
+    f->fixed_length_in_bytes = -1;
+    f->length_in_bytes = poly_length_in_bytes;
 }
 
 static void field_clear_polymod(field_ptr f)
@@ -1482,7 +1527,8 @@ int poly_is_irred_degfac(element_ptr f, darray_t factor)
     element_init(x, rxmod);
     element_init(g, f->field);
     n = factor->count;
-    element_set1(((element_t *) x->data)[1]);
+    //element_set1(((element_t *) x->data)[1]);
+    element_set1(polymod_coeff(x, 1));
 
     res = 0;
     for (i=0; i<n; i++) {

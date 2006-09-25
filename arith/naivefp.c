@@ -5,7 +5,7 @@
 #include "random.h"
 #include "utils.h"
 //Naive implementation of F_p
-//may be preferable in some situations
+//fastest so far
 
 static void zp_init(element_ptr e)
 {

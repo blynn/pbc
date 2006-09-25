@@ -7,7 +7,6 @@
 #include "random.h"
 //Naive implementation of F_p
 //using lowlevel GMP routines (mpn_* functions)
-//Montgomery method seems to slow things down
 //TODO: this should be faster than naivefp.c but it isn't (?!?)
 //TODO: implement square, double with something specialized
 
@@ -22,26 +21,14 @@ typedef struct fp_field_data_s *fp_field_data_ptr;
 static void fp_init(element_ptr e)
 {
     fp_field_data_ptr p = e->field->data;
-    e->data = malloc(p->bytes);
+    //e->data = malloc(p->bytes);
+    //memset(e->data, 0, p->bytes);
+    e->data = calloc(sizeof(mp_limb_t), p->limbs);
 }
 
 static void fp_clear(element_ptr e)
 {
     free(e->data);
-}
-
-static void fp_set_si(element_ptr e, signed long int op)
-{
-    if (op < 0) {
-	printf("TODO: set_si negative!\n");
-    }
-    fp_field_data_ptr p = e->field->data;
-    size_t t = p->limbs;
-    mp_limb_t *d = e->data;
-    d[0] = op;
-    memset(&d[1], 0, sizeof(mp_limb_t) * (t - 1));
-    //TODO have specialized functions for t = 1 case
-    if (p->limbs == 1) d[0] = op % p->primelimbs[0];
 }
 
 static inline void from_mpz(element_ptr e, mpz_ptr z)
@@ -53,12 +40,6 @@ static inline void from_mpz(element_ptr e, mpz_ptr z)
 	0, (p->limbs - count) * sizeof(mp_limb_t));
 }
 
-static void fp_to_mpz(mpz_ptr z, element_ptr a)
-{
-    fp_field_data_ptr p = a->field->data;
-    mpz_import(z, p->limbs, -1, sizeof(mp_limb_t), 0, 0, a->data);
-}
-
 static void fp_set_mpz(element_ptr e, mpz_ptr z)
 {
     mpz_t tmp;
@@ -66,6 +47,33 @@ static void fp_set_mpz(element_ptr e, mpz_ptr z)
     mpz_mod(tmp, z, e->field->order);
     from_mpz(e, tmp);
     mpz_clear(tmp);
+}
+
+static void fp_set_si(element_ptr e, signed long int op)
+{
+    /* TODO: fix this
+    if (op < 0) {
+	printf("TODO: set_si negative!\n");
+    }
+    fp_field_data_ptr p = e->field->data;
+    size_t t = p->limbs;
+    mp_limb_t *d = e->data;
+    d[0] = op;
+    memset(&d[1], 0, sizeof(mp_limb_t) * (t - 1));
+    //TODO have specialized functions for t = 1 case?
+    if (p->limbs == 1) d[0] = op % p->primelimbs[0];
+    */
+    mpz_t z;
+    mpz_init(z);
+    mpz_set_si(z, op);
+    fp_set_mpz(e, z);
+    mpz_clear(z);
+}
+
+static void fp_to_mpz(mpz_ptr z, element_ptr a)
+{
+    fp_field_data_ptr p = a->field->data;
+    mpz_import(z, p->limbs, -1, sizeof(mp_limb_t), 0, 0, a->data);
 }
 
 static void fp_set0(element_ptr e)
@@ -87,8 +95,9 @@ static int fp_is1(element_ptr e)
     fp_field_data_ptr p = e->field->data;
     size_t i, t = p->limbs;
     mp_limb_t *d = e->data;
+    if (d[0] != 1) return 0;
     for (i=1; i<t; i++) if (d[i]) return 0;
-    return d[0] == 1;
+    return 1;
 }
 
 static int fp_is0(element_ptr e)
@@ -118,7 +127,7 @@ static void fp_add(element_ptr r, element_ptr a, element_ptr b)
     mp_limb_t carry;
     carry = mpn_add_n(r->data, a->data, b->data, t);
 
-    if (carry || mpn_cmp(r->data, p->primelimbs, t) > 0) {
+    if (carry || mpn_cmp(r->data, p->primelimbs, t) >= 0) {
 	mpn_sub_n(r->data, r->data, p->primelimbs, t);
     }
 }
@@ -147,7 +156,6 @@ static void fp_mul(element_ptr r, element_ptr a, element_ptr b)
     mp_limb_t qp[t + 1];
     //mp_limb_t *tmp = alloca(p->bytes * 2);
     //mp_limb_t *qp = alloca(sizeof(mp_limb_t) * (t + 1));
-    //mpn_mul_n(tmp, a->data, b->data, t);
     mpn_mul_n(tmp, a->data, b->data, t);
 
     mpn_tdiv_qr(qp, r->data, 0, tmp, 2 * t, p->primelimbs, t);
@@ -172,6 +180,7 @@ static void fp_mul_mpz(element_ptr e, element_ptr a, mpz_ptr op)
 
 static void fp_mul_si(element_ptr e, element_ptr a, signed long int op)
 {
+    /* TODO: fix this, it should be faster
     if (op < 0) {
 	printf("TODO: mul_si negative!\n");
     }
@@ -182,6 +191,12 @@ static void fp_mul_si(element_ptr e, element_ptr a, signed long int op)
 
     mpn_mul_1(tmp, a->data, t, op);
     mpn_tdiv_qr(qp, e->data, 0, tmp, t + 1, p->primelimbs, t);
+    */
+    mpz_t z;
+    mpz_init(z);
+    mpz_set_si(z, op);
+    fp_mul_mpz(e, a, z);
+    mpz_clear(z);
 }
 
 static void fp_pow_mpz(element_ptr n, element_ptr a, mpz_ptr op)
@@ -190,20 +205,21 @@ static void fp_pow_mpz(element_ptr n, element_ptr a, mpz_ptr op)
     mpz_init(z);
     fp_to_mpz(z, a);
     mpz_powm(z, z, op, n->field->order);
-    from_mpz(n, op);
+    from_mpz(n, z);
     mpz_clear(z);
 }
 
 static void fp_set(element_ptr n, element_ptr a)
 {
     fp_field_data_ptr p = a->field->data;
+    //assert(n->data != a->data);
     memcpy(n->data, a->data, p->bytes);
 }
 
 static void fp_neg(element_ptr n, element_ptr a)
 {
-    if (fp_is0(a->data)) {
-	fp_set0(n->data);
+    if (fp_is0(a)) {
+	fp_set0(n);
     } else {
 	fp_field_data_ptr p = a->field->data;
 	mpn_sub_n(n->data, p->primelimbs, a->data, p->limbs);
@@ -314,7 +330,7 @@ static int fp_to_bytes(unsigned char *data, element_t e)
     unsigned char *ptr;
 
     mpz_init(z);
-    mpz_set(z, e->data);
+    fp_to_mpz(z, e);
     n = e->field->fixed_length_in_bytes;
     ptr = data;
     for (i = 0; i < n; i++) {
@@ -330,9 +346,9 @@ static int fp_from_bytes(element_t e, unsigned char *data)
 {
     unsigned char *ptr;
     int i, n;
-    mpz_ptr z = e->data;
-    mpz_t z1;
+    mpz_t z, z1;
 
+    mpz_init(z);
     mpz_init(z1);
     mpz_set_ui(z, 0);
 
@@ -344,6 +360,8 @@ static int fp_from_bytes(element_t e, unsigned char *data)
 	ptr++;
 	mpz_add(z, z, z1);
     }
+    fp_set_mpz(e, z);
+    mpz_clear(z);
     mpz_clear(z1);
     return n;
 }

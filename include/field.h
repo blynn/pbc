@@ -209,6 +209,24 @@ static inline void element_square(element_t n, element_t a)
     n->field->square(n, a);
 }
 
+/*@manual econvert
+Converts ''e'' to a GMP integer ''z''
+if such an operation makes sense
+*/
+static inline void element_to_mpz(mpz_t z, element_t e)
+{
+    e->field->to_mpz(z, e);
+}
+
+/*@manual econvert
+Generate an element ''e'' deterministically from
+the ''len'' bytes stored in the buffer ''data''.
+*/
+static inline void element_from_hash(element_t a, int len, void *data)
+{
+    a->field->from_hash(a, len, data);
+}
+
 /*@manual epow
 Set ''x'' to ''a'' raised to the power ''n'', that is
 ''a'' times ''a'' times ... times ''a'' where there are ''n'' ''a'''s
@@ -225,7 +243,11 @@ of the algebraic structure ''x'' lies in).
 */
 static inline void element_pow_zn(element_t x, element_t a, element_t n)
 {
-    x->field->pow_mpz(x, a, n->data);
+    mpz_t z;
+    mpz_init(z);
+    element_to_mpz(z, n);
+    x->field->pow_mpz(x, a, z);
+    mpz_clear(z);
 }
 
 /*@manual earith
@@ -310,24 +332,6 @@ static inline void element_sqrt(element_t a, element_t b)
     a->field->sqrt(a, b);
 }
 
-/*@manual econvert
-Converts ''e'' to a GMP integer ''z''
-if such an operation makes sense
-*/
-static inline void element_to_mpz(mpz_t z, element_t e)
-{
-    e->field->to_mpz(z, e);
-}
-
-/*@manual econvert
-Generate an element ''e'' deterministically from
-the ''len'' bytes stored in the buffer ''data''.
-*/
-static inline void element_from_hash(element_t a, int len, void *data)
-{
-    a->field->from_hash(a, len, data);
-}
-
 /*@manual etrade
 Returns the length in bytes the element ''e'' will take to represent
 */
@@ -373,7 +377,14 @@ but ''n1'', ''n2'' must be elements of a ring Z_n for some integer n.
 static inline void element_pow2_zn(element_t x, element_t a1, element_t n1,
                                  element_t a2, element_t n2)
 {
-    element_pow2_mpz(x, a1, n1->data, a2, n2->data);
+    mpz_t z1, z2;
+    mpz_init(z1);
+    mpz_init(z2);
+    element_to_mpz(z1, n1);
+    element_to_mpz(z2, n2);
+    element_pow2_mpz(x, a1, z1, a2, z2);
+    mpz_clear(z1);
+    mpz_clear(z2);
 }
 
 /*@manual epow
@@ -393,7 +404,17 @@ static inline void element_pow3_zn(element_t x, element_t a1, element_t n1,
                                  element_t a2, element_t n2,
                                  element_t a3, element_t n3)
 {
-    element_pow3_mpz(x, a1, n1->data, a2, n2->data, a3, n3->data);
+    mpz_t z1, z2, z3;
+    mpz_init(z1);
+    mpz_init(z2);
+    mpz_init(z3);
+    element_to_mpz(z1, n1);
+    element_to_mpz(z2, n2);
+    element_to_mpz(z3, n3);
+    element_pow3_mpz(x, a1, z1, a2, z2, a3, z3);
+    mpz_clear(z1);
+    mpz_clear(z2);
+    mpz_clear(z3);
 }
 
 void field_clear(field_ptr f);
@@ -414,8 +435,10 @@ void field_init_naive_fp(field_ptr f, mpz_t prime);
 void field_init_slow_fp(field_ptr f, mpz_t prime);
 void field_init_fast_fp(field_ptr f, mpz_t prime);
 
-static inline void field_init_fp(field_ptr f, mpz_t prime) {
-    field_init_naive_fp(f, prime);
+static inline void field_init_fp(field_ptr f, mpz_t prime)
+{
+    //field_init_naive_fp(f, prime);
+    field_init_fast_fp(f, prime);
 }
 
 /*@manual etrade

@@ -11,6 +11,7 @@ int main(void)
     mpz_set_ui(prime, 100000);
     mpz_nextprime(prime, prime);
     element_printf("prime = %Z\n", prime);
+
     field_init_fp(zp, prime);
     field_init_poly(rx, zp);
     element_init(f, rx);
@@ -26,6 +27,23 @@ int main(void)
 	printf(" is irreducible\n");
     } else {
 	printf(" is not irreducible\n");
+    }
+
+    {
+	unsigned char *data;
+	int i;
+	int n = element_length_in_bytes(f);
+	printf("serialized f =");
+	data = (unsigned char *) malloc(n);
+	element_to_bytes(data, f);
+	for (i=0; i<n; i++) {
+	    printf(" %02X", data[i]);
+	}
+	printf("\n");
+	printf("deserialize check = ");
+	element_from_bytes(f, data);
+	element_out_str(stdout, 10, f);
+	printf("\n");
     }
 
     field_init_polymod(fp2, f);

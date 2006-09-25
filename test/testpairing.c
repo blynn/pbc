@@ -2,7 +2,8 @@
 
 int main(void)
 {
-    element_t g, h, x;
+    element_t g, h;
+    element_t x1, x2;
     element_t zg, zh, z;
     pairing_t pairing;
 
@@ -12,31 +13,42 @@ int main(void)
     element_init_G1(zg, pairing);
     element_init_G2(h, pairing);
     element_init_G2(zh, pairing);
-    element_init_GT(x, pairing);
+    element_init_GT(x1, pairing);
+    element_init_GT(x2, pairing);
     element_init_Zr(z, pairing);
     element_random(g);
     element_random(h);
     //pairing->phi(g, h, pairing);
     element_printf("g = %B\n", g);
     element_printf("h = %B\n", h);
-    pairing_apply(x, g, h, pairing);
-    element_printf("f(g, h) = %B\n", x);
+    pairing_apply(x1, g, h, pairing);
+    element_printf("f(g, h) = %B\n", x1);
 
     element_random(z);
     element_printf("z = %B\n", z);
 
-    element_pow_zn(x, x, z);
-    element_printf("f(g, h)^z = %B\n", x);
+    element_pow_zn(x1, x1, z);
+    element_printf("f(g, h)^z = %B\n", x1);
 
     element_pow_zn(zg, g, z);
     element_printf("g^z = %B\n", zg);
-    pairing_apply(x, zg, h, pairing);
-    element_printf("f(g^z, h) = %B\n", x);
+    pairing_apply(x2, zg, h, pairing);
+    element_printf("f(g^z, h) = %B\n", x2);
+
+    if (element_cmp(x1, x2)) {
+	printf("BUG! pairing output mismatch\n");
+	exit(1);
+    }
 
     element_pow_zn(zh, h, z);
     element_printf("h^z = %B\n", zh);
-    pairing_apply(x, g, zh, pairing);
-    element_printf("f(g, h^z) = %B\n", x);
+    pairing_apply(x2, g, zh, pairing);
+    element_printf("f(g, h^z) = %B\n", x2);
+
+    if (element_cmp(x1, x2)) {
+	printf("BUG! pairing output mismatch\n");
+	exit(1);
+    }
 
     {
 	int i;
