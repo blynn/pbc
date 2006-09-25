@@ -39,16 +39,28 @@ struct pairing_s {
 typedef struct pairing_s pairing_t[1];
 typedef struct pairing_s *pairing_ptr;
 
-static inline void pairing_pp_init(pairing_pp_t p, element_t in2, pairing_t pairing) {
+/*@manual pairing_apply
+Get ready to perform a pairing whose first input is ''in1'',
+and store the results of time-saving precomputation in ''p''.
+*/
+static inline void pairing_pp_init(pairing_pp_t p, element_t in1, pairing_t pairing) {
     p->pairing = pairing;
-    pairing->pp_init(p, in2, pairing);
+    pairing->pp_init(p, in1, pairing);
 }
 
+/*@manual pairing_apply
+Clear ''p''. This should be called after ''p'' is no longer needed.
+*/
 static inline void pairing_pp_clear(pairing_pp_t p)
 {
     p->pairing->pp_clear(p);
 }
 
+/*@manual pairing_apply
+Compute a pairing using ''in2'' and the preprocessed information stored in ''p''
+and store the output in ''out''. The inputs to the pairing are the element
+previously used to initialize ''p'' and the element ''in2''.
+*/
 static inline void pairing_pp_apply(element_t out, element_t in2, pairing_pp_t p)
 {
     p->pairing->pp_apply(out, in2, p);
@@ -81,9 +93,10 @@ static inline void bilinear_map(element_t out, element_t in1, element_t in2,
     pairing->map(out, in1, in2, pairing);
 }
 
-/*@manual pairing_op
+/*@manual pairing_apply
 Apply the bilinear map described by ''pairing''. The element ''out''
-will be set to the map applied to ''in1'' and ''in2'' (in that order).
+will be set to the map applied to ''in1'' and ''in2'', that is
+''out'' = e(''in1'', ''in2'').
 ''in1'' must be in the group G1,
 ''in2'' must be in the group G2, and
 ''out'' must be in the group GT.

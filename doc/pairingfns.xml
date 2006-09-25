@@ -51,6 +51,38 @@ is output by the param functions.
 </section>
 
 <section>
+<title>Applying Pairings</title>
+<para>
+The function <command>pairing_apply</command>
+can be called to apply a bilinear map.
+The order of the inputs is important. The first, which holds the output,
+must be from the group GT. The second must be from G1, the third from G2,
+and the fourth must be the <type>pairing_t</type> variable that relates them.
+(One cannot mix and match G1, G2, and GT groups from different pairings.)
+</para>
+<para>
+In some applications, the programmer may know that many pairings with the
+same G1 input will be computed. In this case, preprocessing should be used
+to avoid repeating many calculations saving time in the long run.
+A variable of type <type>pairing_pp_t</type> should be declared,
+initialized with the fixed G1 element, and then used to compute pairings:
+</para>
+<programlisting>
+pairing_pp_t pp;
+
+pairing_pp_init(pp, x, pairing); //x is some element of G1
+
+pairing_pp_apply(r1, y1, pp); //r1 = e(x, y1)
+pairing_pp_apply(r2, y2, pp); //r2 = e(x, y2)
+
+pairing_pp_clear(pp); //don't need pp anymore
+</programlisting>
+<variablelist>
+&pairing_apply;
+</variablelist>
+</section>
+
+<section>
 <title>Other Pairing Functions</title>
 <variablelist>
 &pairing_op;

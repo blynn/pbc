@@ -23,6 +23,7 @@
     <!ENTITY etrade SYSTEM "gen/etrade.xml">
 
     <!ENTITY pairing_init SYSTEM "gen/pairing_init.xml">
+    <!ENTITY pairing_apply SYSTEM "gen/pairing_apply.xml">
     <!ENTITY pairing_op SYSTEM "gen/pairing_op.xml">
 
     <!ENTITY aparam SYSTEM "gen/aparam.xml">
