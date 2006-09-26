@@ -7,7 +7,7 @@ struct symtab_s {
     darray_t list;
 };
 typedef struct symtab_s symtab_t[1];
-typedef struct symtab_s symtab_ptr;
+typedef struct symtab_s *symtab_ptr;
 
 /*@manual symtab
 Initialize symbol table ''t''. Must be called before ''t'' is used.

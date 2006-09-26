@@ -49,25 +49,26 @@ static void fp_set_mpz(element_ptr e, mpz_ptr z)
     mpz_clear(tmp);
 }
 
+/*
+static void tinyfp_set_si(element_ptr e, signed long int op)
+{
+    unsigned long int *d = e->data;
+    *d = op % p->prime;
+    if (*d < 0) *d += p->prime;
+}
+*/
+
 static void fp_set_si(element_ptr e, signed long int op)
 {
-    /* TODO: fix this
-    if (op < 0) {
-	printf("TODO: set_si negative!\n");
-    }
-    fp_field_data_ptr p = e->field->data;
-    size_t t = p->limbs;
+    const fp_field_data_ptr p = e->field->data;
+    const size_t t = p->limbs;
     mp_limb_t *d = e->data;
-    d[0] = op;
-    memset(&d[1], 0, sizeof(mp_limb_t) * (t - 1));
-    //TODO have specialized functions for t = 1 case?
-    if (p->limbs == 1) d[0] = op % p->primelimbs[0];
-    */
-    mpz_t z;
-    mpz_init(z);
-    mpz_set_si(z, op);
-    fp_set_mpz(e, z);
-    mpz_clear(z);
+    if (op < 0) {
+	mpn_sub_1(d, p->primelimbs, t, op);
+    } else {
+	d[0] = op;
+	memset(&d[1], 0, sizeof(mp_limb_t) * (t - 1));
+    }
 }
 
 static void fp_to_mpz(mpz_ptr z, element_ptr a)
@@ -417,3 +418,5 @@ void field_init_fast_fp(field_ptr f, mpz_t prime)
     mpz_set(f->order, prime);
     f->fixed_length_in_bytes = (mpz_sizeinbase(prime, 2) + 7) / 8;
 }
+
+void (*field_init_fp)(field_ptr f, mpz_t prime) = field_init_fast_fp;

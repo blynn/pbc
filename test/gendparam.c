@@ -29,9 +29,9 @@ int main(int argc, char **argv)
     cm = darray_at(L, 0);
     d_param_init(param);
 
-    fprintf(stderr, "gencparam: computing Hilbert polynomial and finding roots...\n");
+    fprintf(stderr, "gendparam: computing Hilbert polynomial and finding roots...\n");
     d_param_from_cm(param, cm);
-    fprintf(stderr, "gencparam: bits in q = %zu\n", mpz_sizeinbase(cm->q, 2));
+    fprintf(stderr, "gendparam: bits in q = %zu\n", mpz_sizeinbase(cm->q, 2));
     d_param_out_str(stdout, param);
 
     // If we weren't exiting now, would cm_info_clear every entry of L

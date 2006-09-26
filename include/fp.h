@@ -12,10 +12,16 @@
 void field_init_naive_fp(field_ptr f, mpz_t prime);
 void field_init_fast_fp(field_ptr f, mpz_t prime);
 
-static inline void field_init_fp(field_ptr f, mpz_t prime)
+extern void (*field_init_fp)(field_ptr f, mpz_t prime);
+
+static inline void pbc_tweak_use_fast_fp(void)
 {
-    //field_init_naive_fp(f, prime);
-    field_init_fast_fp(f, prime);
+    field_init_fp = field_init_fast_fp;
+}
+
+static inline void pbc_tweak_use_naive_fp(void)
+{
+    field_init_fp = field_init_naive_fp;
 }
 
 #endif //FP_H

@@ -77,4 +77,5 @@ void element_poly_to_polymod_truncate(element_ptr f, element_ptr e);
 element_ptr polymod_coeff(element_ptr e, int i);
 
 void polymod_const_mul(element_ptr res, element_ptr a, element_ptr e);
+int polymod_field_degree(field_t f);
 #endif //POLY_H

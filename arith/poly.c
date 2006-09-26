@@ -285,11 +285,16 @@ element_ptr polymod_coeff(element_ptr e, int i)
     return coeff[i];
 }
 
+inline int polymod_field_degree(field_t f)
+{
+    polymod_field_data_ptr p = f->data;
+    return p->n;
+}
+
 static void polymod_random(element_ptr e)
 {
-    polymod_field_data_ptr p = e->field->data;
     element_t *coeff = e->data;
-    int i, n = p->n;
+    int i, n = polymod_field_degree(e->field);
 
     for (i=0; i<n; i++) {
 	element_random(coeff[i]);
@@ -299,9 +304,8 @@ static void polymod_random(element_ptr e)
 static void polymod_from_hash(element_ptr e, int len, void *data)
 {
     //TODO: improve this
-    polymod_field_data_ptr p = e->field->data;
     element_t *coeff = e->data;
-    int i, n = p->n;
+    int i, n = polymod_field_degree(e->field);
     for (i=0; i<n; i++) {
 	element_from_hash(coeff[i], len, data);
     }
@@ -310,9 +314,8 @@ static void polymod_from_hash(element_ptr e, int len, void *data)
 void polymod_const_mul(element_ptr res, element_ptr a, element_ptr e)
     //a lies in R, e in R[x]
 {
-    polymod_field_data_ptr p = e->field->data;
     element_t *coeff = e->data, *dst = res->data;
-    int i, n = p->n;
+    int i, n = polymod_field_degree(e->field);
 
     for (i=0; i<n; i++) {
 	element_mul(dst[i], coeff[i], a);

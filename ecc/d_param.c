@@ -157,7 +157,7 @@ static inline void d_miller_evalfn(element_t e0,
     element_ptr im_out = fi_im(e0);
 
     int i;
-    int d = 3; //TODO: this only valid for k = 6
+    int d = polymod_field_degree(re_out->field);
     for (i=0; i<d; i++) {
 	element_mul(polymod_coeff(re_out, i), polymod_coeff(Qx, i), a);
 	element_mul(polymod_coeff(im_out, i), polymod_coeff(Qy, i), b);
@@ -1311,8 +1311,8 @@ static void compute_cm_curve(d_param_ptr param, cm_info_ptr cm)
     mpz_set(param->n, cm->n);
     mpz_set(param->h, cm->h);
     mpz_set(param->r, cm->r);
-    mpz_set(param->a, ((common_curve_ptr) cc->data)->a->data);
-    mpz_set(param->b, ((common_curve_ptr) cc->data)->b->data);
+    element_to_mpz(param->a, ((common_curve_ptr) cc->data)->a);
+    element_to_mpz(param->b, ((common_curve_ptr) cc->data)->b);
     param->k = cm->k;
     {
 	mpz_t z;
@@ -1361,9 +1361,9 @@ void d_param_from_cm(d_param_t param, cm_info_ptr cm)
 
     for (i=0; i<d; i++) {
 	mpz_init(param->coeff[i]);
-	mpz_set(param->coeff[i], poly_coeff(irred, i)->data);
+	element_to_mpz(param->coeff[i], poly_coeff(irred, i));
     }
-    mpz_set(param->nqr, ((element_t *) nqr->data)[0]->data);
+    element_to_mpz(param->nqr, ((element_t *) nqr->data)[0]);
 
     element_clear(nqr);
     element_clear(irred);
