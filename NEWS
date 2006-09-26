@@ -1,3 +1,21 @@
+Mon Sep 25 18:33:27 PDT 2006
+
+An alternative implementation of fp, fastfp.c, works now. In the process
+I fixed code that assumed the data field of element_t to be an mpz_t.
+
+Some pairing types benefit:
+
+a	0.018461	0.008570
+d159	0.036698	0.032024
+d201	0.060269	0.053314
+d224	0.072389	0.062961
+e	0.100093	0.100459
+f	0.301455	0.301296
+
+Unfortunately type F is slower now, but there is still room to optimize.
+Some parts of fastfp.c are stopgap measures to get it working. Now that it
+seems okay, I'll start cleaning it up.
+
 Sun Sep 24 20:53:44 PDT 2006
 
 Implemented preprocessing for types A and D, also cleaned up type D a little.

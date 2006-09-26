@@ -1345,6 +1345,12 @@ static size_t polymod_out_str(FILE *stream, int base, element_ptr e)
     return result;
 }
 
+//Contrived? This returns to_mpz(constant term)
+static void polymod_to_mpz(mpz_t z, element_ptr e)
+{
+    element_to_mpz(z, polymod_coeff(e, 0));
+}
+
 static void compute_x_powers(field_ptr field, element_ptr poly)
 //compute x^n,...,x^{2n-2} mod poly
 {
@@ -1412,6 +1418,7 @@ void field_init_polymod(field_ptr f, element_ptr poly)
     f->set0 = polymod_set0;
     f->set1 = polymod_set1;
     f->cmp = polymod_cmp;
+    f->to_mpz = polymod_to_mpz;
     switch(n) {
 	case 3:
 	    f->mul = polymod_mul_degree3;

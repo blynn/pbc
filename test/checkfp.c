@@ -100,6 +100,15 @@ static void run_check(field_ptr f1, field_ptr f2)
     element_double(z1, x1);
     element_double(z2, x2);
     check_match(z1, z2, "double");
+    while (!element_is_sqr(x1)) {
+	element_random(x1);
+    }
+    len = element_length_in_bytes(x1);
+    buf = malloc(len);
+    element_to_bytes(buf, x1);
+    element_from_bytes(x2, buf);
+    free(buf);
+    check_match(x1, x2, "conversion");
     element_sqrt(z1, x1);
     element_sqrt(z2, x2);
     check_match(z1, z2, "sqrt");
