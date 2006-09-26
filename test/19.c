@@ -29,6 +29,7 @@
  */
 
 #include "pbc.h"
+#include "fp.h"
 #include "fieldquadratic.h"
 
 static void miller(element_t res, point_t P,

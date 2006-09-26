@@ -5,6 +5,7 @@
 #include "symtab.h"
 #include "fops.h"
 #include "field.h"
+#include "fp.h"
 #include "fieldquadratic.h"
 #include "pairing.h"
 #include "a1_param.h"

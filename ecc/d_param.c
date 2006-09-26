@@ -8,6 +8,7 @@
 #include "darray.h"
 #include "field.h"
 #include "poly.h"
+#include "fp.h"
 #include "fieldquadratic.h"
 #include "hilbert.h"
 #include "darray.h"

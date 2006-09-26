@@ -6,6 +6,7 @@
 #include "fops.h"
 #include "symtab.h"
 #include "field.h"
+#include "fp.h"
 #include "pairing.h"
 #include "e_param.h"
 #include "param.h"

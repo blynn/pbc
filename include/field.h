@@ -431,16 +431,6 @@ static inline int mpz_is0(mpz_t z)
     //return !mpz_cmp_ui(z, 0);
 }
 
-void field_init_naive_fp(field_ptr f, mpz_t prime);
-void field_init_slow_fp(field_ptr f, mpz_t prime);
-void field_init_fast_fp(field_ptr f, mpz_t prime);
-
-static inline void field_init_fp(field_ptr f, mpz_t prime)
-{
-    //field_init_naive_fp(f, prime);
-    field_init_fast_fp(f, prime);
-}
-
 /*@manual etrade
 Assumes ''e'' is a point on an elliptic curve.
 Writes the x-coordinate of ''e'' to the buffer ''data''

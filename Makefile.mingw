@@ -21,7 +21,8 @@ TARGET_DIR:=/usr/local
 # source file list.
 # add a new .c file to exactly one of these ...
 libpbc_srcs := \
-	arith/field.c arith/naivefp.c arith/fieldquadratic.c arith/poly.c \
+	arith/field.c arith/naivefp.c arith/fastfp.c
+	arith/fieldquadratic.c arith/poly.c \
 	arith/random.c \
 	misc/parse.c misc/darray.c misc/symtab.c misc/get_time.win32.c \
 	misc/extend_printf.c \

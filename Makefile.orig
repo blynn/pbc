@@ -2,7 +2,7 @@
 #Autotools are recommended instead but this should still work
 #(and is much faster)
 #e.g. make -f Makefile.orig
-VERSION := 0.3.5
+VERSION := 0.3.6
 PROJNAME := pbc
 # these (uppercase) variables apply to gmake-builtin rules
 CC:=gcc
@@ -30,7 +30,8 @@ ALLFILES := include/*.h \
 # source file list.
 # add a new .c file to exactly one of these ...
 libpbc_srcs := \
-	arith/field.c arith/naivefp.c arith/fieldquadratic.c arith/poly.c \
+	arith/field.c arith/naivefp.c arith/fastfp.c \
+	arith/fieldquadratic.c arith/poly.c \
 	arith/random.c \
 	misc/fops.c misc/tracker.c \
 	misc/extend_printf.c \

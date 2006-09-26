@@ -599,6 +599,16 @@ static int poly_from_bytes(element_t p, unsigned char *buf)
     return result;
 }
 
+//Contrived? This returns to_mpz(constant term)
+static void poly_to_mpz(mpz_t z, element_ptr e)
+{
+    if (!poly_coeff_count(e)) {
+	mpz_set_ui(z, 0);
+    } else {
+	element_to_mpz(z, poly_coeff(e, 0));
+    }
+}
+
 void field_init_poly(field_ptr f, field_ptr base_field)
 {
     poly_field_data_ptr p;
@@ -613,6 +623,7 @@ void field_init_poly(field_ptr f, field_ptr base_field)
     f->clear = poly_clear;
     f->set_si = poly_set_si;
     f->set_mpz = poly_set_mpz;
+    f->to_mpz = poly_to_mpz;
     f->out_str = poly_out_str;
     f->set = poly_set;
     f->sign = poly_sign;

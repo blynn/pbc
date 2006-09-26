@@ -6,6 +6,7 @@
 #include "symtab.h"
 #include "darray.h"
 #include "field.h"
+#include "fp.h"
 #include "fieldquadratic.h"
 #include "pairing.h"
 #include "f_param.h"

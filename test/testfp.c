@@ -1,4 +1,5 @@
 #include "pbc.h"
+#include "fp.h"
 #include "get_time.h"
 
 int main(void)
