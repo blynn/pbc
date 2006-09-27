@@ -2,7 +2,6 @@
 #Autotools are recommended instead but this should still work
 #(and is much faster)
 #e.g. make -f Makefile.orig
-VERSION := 0.3.6
 PROJNAME := pbc
 # these (uppercase) variables apply to gmake-builtin rules
 CC:=gcc
@@ -18,19 +17,11 @@ CFLAGS := -O3 $(warnflags) -pipe -ffast-math -fomit-frame-pointer $(turboflags)
 LDFLAGS := -L.
 LDLIBS := -lgmp -lm
 
-ALLFILES := include/*.h \
-	arith/*.[ch] ecc/*.[ch] misc/*.[ch] \
-	sig/*.[ch] test/*.[ch] bce/*.[ch] \
-	Makefile.orig configure.ac Makefile.am Makefile.mingw setup \
-	sig/Makefile.am test/Makefile.am bce/Makefile.am \
-	AUTHORS NEWS COPYING README INSTALL ChangeLog \
-	doc/pretty/pretty.css doc/makeover doc/extract doc/*.x[ms]l doc/default.css doc/Makefile \
-	param/*.param report_times genalldparams list_hilbert
-
 # source file list.
 # add a new .c file to exactly one of these ...
 libpbc_srcs := \
-	arith/field.c arith/naivefp.c arith/fastfp.c \
+	arith/field.c arith/naivefp.c arith/tinyfp.c \
+	arith/fp.c arith/fastfp.c arith/fasterfp.c \
 	arith/fieldquadratic.c arith/poly.c \
 	arith/random.c \
 	misc/fops.c misc/tracker.c \
@@ -59,7 +50,7 @@ objs := $(srcs:.c=.o)
 libs := libpbc.a libpbc_sig.a
 binaries := $(test_srcs:.c=)
 
-.PHONY: target dist clean spotless depend ChangeLog
+.PHONY: target clean spotless depend
 
 target: $(libs) $(binaries)
 
@@ -91,18 +82,6 @@ test/listmnt: test/listmnt.o libpbc.a
 test/testpoly: test/testpoly.o libpbc.a
 test/19: test/19.o libpbc.a
 test/sing: test/sing.o libpbc.a
-
-DISTNAME := $(PROJNAME)-$(VERSION)
-
-ChangeLog :
-	cg-log > ChangeLog
-
-dist: $(ALLFILES) clean depend
-	-rm -rf $(DISTNAME)
-	mkdir $(DISTNAME)
-	cp -rl --parents $(ALLFILES) $(DISTNAME)
-	tar chfz $(DISTNAME).tgz $(DISTNAME)
-	-rm -rf $(DISTNAME)
 
 clean:
 	-rm -f $(binaries) $(libs) $(objs)

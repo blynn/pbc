@@ -6,9 +6,11 @@ set(unused
 foo
 )
 add_library(pbc
-arith/tinyfp.c
-arith/fastfp.c arith/fasterfp.c
-arith/field.c arith/naivefp.c arith/fieldquadratic.c
+arith/naivefp.c
+arith/tinyfp.c arith/fastfp.c arith/fasterfp.c
+arith/field.c
+arith/fp.c
+arith/fieldquadratic.c
 arith/poly.c arith/random.c
 ecc/curve.c ecc/pairing.c ecc/param.c
 ecc/a1_param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c

@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <alloca.h>
@@ -12,7 +13,8 @@
 // pow_mpz, invert use GMP
 static void fp_init(element_ptr e)
 {
-    e->data = malloc(sizeof(unsigned long));
+    unsigned long *p = e->data = malloc(sizeof(unsigned long));
+    *p = 0;
 }
 
 static void fp_clear(element_ptr e)
@@ -122,7 +124,7 @@ static void fp_sub(element_ptr c, element_ptr a, element_ptr b)
     if (*p >= *q) {
 	*r = *p - *q;
     } else {
-	*r = *prime + *q - *p;
+	*r = *prime - *q + *p;
     }
 }
 
@@ -274,10 +276,8 @@ void field_init_tiny_fp(field_ptr f, mpz_t prime)
 {
     unsigned long *p;
 
-    if (mpz_sizeinbase(prime, 2) > sizeof(long) * 8) {
-	printf("field is too big!\n");
-	exit(1);
-    }
+    assert (mpz_fits_ulong_p(prime));
+
     field_init(f);
     f->init = fp_init;
     f->clear = fp_clear;
@@ -319,4 +319,5 @@ void field_init_tiny_fp(field_ptr f, mpz_t prime)
 	    l += 255;
 	}
     }
+    mpz_set(f->order, prime);
 }

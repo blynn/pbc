@@ -49,7 +49,7 @@ objs := $(srcs:.c=.o)
 libs := libpbc.a libpbc_sig.a
 binaries := $(test_srcs:.c=)
 
-.PHONY: target dist clean spotless depend
+.PHONY: target clean spotless depend
 
 target: $(libs) $(binaries)
 

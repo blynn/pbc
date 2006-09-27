@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <alloca.h>
@@ -349,10 +350,7 @@ static void fp_field_clear(field_t f)
 
 void field_init_fast_fp(field_ptr f, mpz_t prime)
 {
-    if (mpz_sizeinbase(prime, 2) <= sizeof(long) * 8) {
-	printf("prime too small!\n");
-	exit(1);
-    }
+    assert (!mpz_fits_ulong_p(prime));
     fp_field_data_ptr p;
     field_init(f);
     f->init = fp_init;
