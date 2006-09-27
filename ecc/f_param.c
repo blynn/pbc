@@ -16,6 +16,8 @@
 #include "tracker.h"
 #include "utils.h"
 
+#include "get_time.h"
+
 struct f_pairing_data_s {
     field_t Fq, Fq2, Fq2x, Fq12;
     curve_t Eq, Etwist;
@@ -248,6 +250,8 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
     element_t e0, e1;
     UNUSED_VAR (cc);
 
+double time0, time1, ttangent = 0, tline = 0;
+double tslow = 0, tfast = 0;
     void do_vertical(void)
     {
 	mapbase(e0, Z->x);
@@ -263,6 +267,7 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
 	const element_ptr Zx = Z->x;
 	const element_ptr Zy = Z->y;
 
+time0 = get_time();
 	element_square(a, Zx);
 	element_mul_si(a, a, 3);
 	element_neg(a, a);
@@ -273,7 +278,10 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
 	element_mul(c, a, Zx);
 	element_add(c, c, t0);
 	element_neg(c, c);
+time1 = get_time();
+tfast += time1 - time0;
 
+time0 = get_time();
 	//TODO: use poly_mul_constant?
 	mapbase(e0, a);
 	element_mul(e0, e0, Qx);
@@ -283,6 +291,8 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
 	mapbase(e1, c);
 	element_add(e0, e0, e1);
 	element_mul(v, v, e0);
+time1 = get_time();
+tslow += time1 - time0;
     }
 
     void do_line(void)
@@ -297,12 +307,17 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
 	const element_ptr Bx = P->x;
 	const element_ptr By = P->y;
 
+time0 = get_time();
 	element_sub(b, Bx, Ax);
 	element_sub(a, Ay, By);
 	element_mul(t0, b, Ay);
 	element_mul(c, a, Ax);
 	element_add(c, c, t0);
 	element_neg(c, c);
+time1 = get_time();
+tfast += time1 - time0;
+
+time0 = get_time();
 
 	mapbase(e0, a);
 	element_mul(e0, e0, Qx);
@@ -312,6 +327,8 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
 	mapbase(e1, c);
 	element_add(e0, e0, e1);
 	element_mul(v, v, e0);
+time1 = get_time();
+tslow += time1 - time0;
     }
 
     element_init(a, P->curve->field);
@@ -330,18 +347,26 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
     m = mpz_sizeinbase(q, 2) - 2;
 
     for(;;) {
+time0 = get_time();
 	do_tangent();
+time1 = get_time();
+ttangent += time1 - time0;
 
 	if (!m) break;
 
 	point_double(Z, Z);
 	if (mpz_tstbit(q, m)) {
+time0 = get_time();
 	    do_line();
+time1 = get_time();
+tline += time1 - time0;
 	    point_add(Z, Z, P);
 	}
 	m--;
 	element_square(v, v);
     }
+printf("tan %f line %f\n", ttangent, tline);
+printf("fast %f slow %f\n", tfast, tslow);
 
     element_set(res, v);
 

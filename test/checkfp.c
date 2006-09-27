@@ -154,6 +154,7 @@ int main(void)
     mpz_init(z);
     mpz_init(prime);
     mpz_set_ui(prime, 82);
+    mpz_setbit(prime, 32);
     mpz_nextprime(prime, prime);
 
     field_init_naive_fp(f1, prime);
@@ -171,6 +172,7 @@ int main(void)
 
     n = 10;
 
+    element_printf("prime = %Z\n", prime);
     printf("checking base fields\n");
     for (i=0; i<n; i++) run_check(f1, f2);
 

@@ -1,3 +1,11 @@
+Tue Sep 26 23:12:36 PDT 2006
+
+fastfp.c: fp_set() is slower than the version in naivefp.c,
+probably because it uses memset() while GMP uses assembly.
+
+fp_square() is also slower, probably because it does not
+have access to GMP's mpn_mul_n() low-level function.
+
 Mon Sep 25 18:33:27 PDT 2006
 
 An alternative implementation of fp, fastfp.c, works now. In the process

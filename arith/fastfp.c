@@ -5,10 +5,9 @@
 #include <gmp.h>
 #include "field.h"
 #include "random.h"
+#include "fp.h"
 //Naive implementation of F_p
 //using lowlevel GMP routines (mpn_* functions)
-//TODO: this should be faster than naivefp.c but it isn't (?!?)
-//TODO: implement square, double with something specialized
 
 struct fp_field_data_s {
     size_t limbs;
@@ -49,22 +48,13 @@ static void fp_set_mpz(element_ptr e, mpz_ptr z)
     mpz_clear(tmp);
 }
 
-/*
-static void tinyfp_set_si(element_ptr e, signed long int op)
-{
-    unsigned long int *d = e->data;
-    *d = op % p->prime;
-    if (*d < 0) *d += p->prime;
-}
-*/
-
 static void fp_set_si(element_ptr e, signed long int op)
 {
     const fp_field_data_ptr p = e->field->data;
     const size_t t = p->limbs;
     mp_limb_t *d = e->data;
     if (op < 0) {
-	mpn_sub_1(d, p->primelimbs, t, op);
+	mpn_sub_1(d, p->primelimbs, t, -op);
     } else {
 	d[0] = op;
 	memset(&d[1], 0, sizeof(mp_limb_t) * (t - 1));
@@ -124,7 +114,7 @@ static size_t fp_out_str(FILE *stream, int base, element_ptr e)
 static void fp_add(element_ptr r, element_ptr a, element_ptr b)
 {
     fp_field_data_ptr p = r->field->data;
-    size_t t = p->limbs;
+    const size_t t = p->limbs;
     mp_limb_t carry;
     carry = mpn_add_n(r->data, a->data, b->data, t);
 
@@ -135,7 +125,11 @@ static void fp_add(element_ptr r, element_ptr a, element_ptr b)
 
 static void fp_double(element_ptr r, element_ptr a)
 {
-    fp_add(r, a, a);
+    fp_field_data_ptr p = r->field->data;
+    const size_t t = p->limbs;
+    if (mpn_lshift(r->data, a->data, t, 1) || mpn_cmp(r->data, p->primelimbs, t) >= 0) {
+	mpn_sub_n(r->data, r->data, p->primelimbs, t);
+    }
 }
 
 static void fp_sub(element_ptr r, element_ptr a, element_ptr b)
@@ -147,74 +141,40 @@ static void fp_sub(element_ptr r, element_ptr a, element_ptr b)
     }
 }
 
-static void fp_mul(element_ptr r, element_ptr a, element_ptr b)
+static void fp_mul(element_ptr c, element_ptr a, element_ptr b)
 {
-    fp_field_data_ptr p = r->field->data;
+    fp_field_data_ptr p = c->field->data;
     size_t t = p->limbs;
     //mp_limb_t tmp[3 * t + 1];
     //mp_limb_t *qp = &tmp[2 * t];
     mp_limb_t tmp[2 * t];
     mp_limb_t qp[t + 1];
-    //mp_limb_t *tmp = alloca(p->bytes * 2);
-    //mp_limb_t *qp = alloca(sizeof(mp_limb_t) * (t + 1));
+    //static mp_limb_t tmp[2 * 100];
+    //static mp_limb_t qp[100 + 1];
+
     mpn_mul_n(tmp, a->data, b->data, t);
 
-    mpn_tdiv_qr(qp, r->data, 0, tmp, 2 * t, p->primelimbs, t);
+    mpn_tdiv_qr(qp, c->data, 0, tmp, 2 * t, p->primelimbs, t);
 }
 
-static void fp_square(element_ptr r, element_ptr a)
+static void fp_square(element_ptr c, element_ptr a)
 {
-    fp_mul(r, a, a);
-}
+    const fp_field_data_ptr r = c->field->data;
+    const size_t t = r->limbs;
+    mp_limb_t tmp[2 * t];
+    mp_limb_t qp[t + 1];
 
-static void fp_mul_mpz(element_ptr e, element_ptr a, mpz_ptr op)
-{
+    mpn_mul_n(tmp, a->data, a->data, t);
+
+    mpn_tdiv_qr(qp, c->data, 0, tmp, 2 * t, r->primelimbs, t);
+    /*
     mpz_t z;
     mpz_init(z);
     fp_to_mpz(z, a);
-    mpz_mul(z, z, op);
-    mpz_mod(z, z, e->field->order);
-    from_mpz(e, z);
-
+    mpz_powm_ui(z, z, 2, a->field->order);
+    from_mpz(c, z);
     mpz_clear(z);
-}
-
-static void fp_mul_si(element_ptr e, element_ptr a, signed long int op)
-{
-    /* TODO: fix this, it should be faster
-    if (op < 0) {
-	printf("TODO: mul_si negative!\n");
-    }
-    fp_field_data_ptr p = e->field->data;
-    size_t t = p->limbs;
-    mp_limb_t tmp[t + 1];
-    mp_limb_t qp[2];
-
-    mpn_mul_1(tmp, a->data, t, op);
-    mpn_tdiv_qr(qp, e->data, 0, tmp, t + 1, p->primelimbs, t);
     */
-    mpz_t z;
-    mpz_init(z);
-    mpz_set_si(z, op);
-    fp_mul_mpz(e, a, z);
-    mpz_clear(z);
-}
-
-static void fp_pow_mpz(element_ptr n, element_ptr a, mpz_ptr op)
-{
-    mpz_t z;
-    mpz_init(z);
-    fp_to_mpz(z, a);
-    mpz_powm(z, z, op, n->field->order);
-    from_mpz(n, z);
-    mpz_clear(z);
-}
-
-static void fp_set(element_ptr n, element_ptr a)
-{
-    fp_field_data_ptr p = a->field->data;
-    //assert(n->data != a->data);
-    memcpy(n->data, a->data, p->bytes);
 }
 
 static void fp_neg(element_ptr n, element_ptr a)
@@ -227,6 +187,45 @@ static void fp_neg(element_ptr n, element_ptr a)
     }
 }
 
+static void fp_mul_si(element_ptr e, element_ptr a, signed long int op)
+{
+    fp_field_data_ptr p = e->field->data;
+    size_t t = p->limbs;
+    mp_limb_t tmp[t + 1];
+    mp_limb_t qp[2];
+
+    tmp[t] = mpn_mul_1(tmp, a->data, t, labs(op));
+    mpn_tdiv_qr(qp, e->data, 0, tmp, t + 1, p->primelimbs, t);
+    if (op < 0) {
+	fp_neg(e, e);
+    }
+}
+
+static void fp_pow_mpz(element_ptr c, element_ptr a, mpz_ptr op)
+{
+    mpz_t z;
+    mpz_init(z);
+    fp_to_mpz(z, a);
+    mpz_powm(z, z, op, c->field->order);
+    from_mpz(c, z);
+    mpz_clear(z);
+}
+
+static void fp_set(element_ptr c, element_ptr a)
+{
+    fp_field_data_ptr p = a->field->data;
+    //assert(c->data != a->data);
+    //Assembly is faster here, but I don't want to stoop to that level!
+    /*
+    memcpy(c->data, a->data, p->bytes);
+    */
+    mpz_t z1, z2;
+    z1->_mp_d = c->data;
+    z2->_mp_d = a->data;
+    z1->_mp_size = z1->_mp_alloc = z2->_mp_size = z2->_mp_alloc = p->limbs;
+    mpz_set(z1, z2);
+}
+
 static void fp_invert(element_ptr e, element_ptr a)
 {
     mpz_t z;
@@ -237,30 +236,31 @@ static void fp_invert(element_ptr e, element_ptr a)
     mpz_clear(z);
 }
 
-static void fp_random(element_ptr n)
+static void fp_random(element_ptr a)
 {
     mpz_t z;
     mpz_init(z);
-    pbc_mpz_random(z, n->field->order);
-    from_mpz(n, z);
+    pbc_mpz_random(z, a->field->order);
+    from_mpz(a, z);
     mpz_clear(z);
 }
 
-static void fp_from_hash(element_ptr n, int len, void *data)
+static void fp_from_hash(element_ptr a, int len, void *data)
     //TODO: something more sophisticated!
 {
     mpz_t z;
 
     mpz_init(z);
     mpz_import(z, len, 1, 1, 0, 0, data);
-    fp_set_mpz(n, z);
+    fp_set_mpz(a, z);
     mpz_clear(z);
 }
 
 static int fp_cmp(element_ptr a, element_ptr b)
 {
     fp_field_data_ptr p = a->field->data;
-    return mpn_cmp(a->data, b->data, p->limbs);
+    //return mpn_cmp(a->data, b->data, p->limbs);
+    return memcmp(a->data, b->data, p->limbs);
 }
 
 static int fp_is_sqr(element_ptr a)
@@ -376,8 +376,11 @@ static void fp_field_clear(field_t f)
 
 void field_init_fast_fp(field_ptr f, mpz_t prime)
 {
+    if (mpz_sizeinbase(prime, 2) <= sizeof(long) * 8) {
+	printf("prime too small!\n");
+	exit(1);
+    }
     fp_field_data_ptr p;
-
     field_init(f);
     f->init = fp_init;
     f->clear = fp_clear;
@@ -388,7 +391,6 @@ void field_init_fast_fp(field_ptr f, mpz_t prime)
     f->sub = fp_sub;
     f->set = fp_set;
     f->mul = fp_mul;
-    f->mul_mpz = fp_mul_mpz;
     f->mul_si = fp_mul_si;
     f->square = fp_square;
     f->doub = fp_double;

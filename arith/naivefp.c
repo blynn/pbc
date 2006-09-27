@@ -85,13 +85,26 @@ static void zp_sub(element_ptr n, element_ptr a, element_ptr b)
     }
 }
 
-static void zp_square(element_ptr n, element_ptr a)
+static void zp_square(element_ptr c, element_ptr a)
 {
     /*
-    mpz_mul(n->data, a->data, a->data);
-    mpz_mod(n->data, n->data, n->field->order);
+    mpz_mul(c->data, a->data, a->data);
+    mpz_mod(c->data, c->data, c->field->order);
     */
-    mpz_powm_ui(n->data, a->data, 2, n->field->order);
+    mpz_powm_ui(c->data, a->data, 2, c->field->order);
+
+    /*
+    const mpz_ptr prime = c->field->order;
+    const size_t t = prime->_mp_size;
+    const mpz_ptr p = a->data;
+    const mpz_ptr r = c->data;
+    mp_limb_t tmp[2 * t];
+    mp_limb_t qp[t + 1];
+
+    mpn_mul_n(tmp, p->_mp_d, p->_mp_d, t);
+
+    mpn_tdiv_qr(qp, r->_mp_d, 0, tmp, 2 * t, prime->_mp_d, t);
+    */
 }
 
 static void zp_double(element_ptr n, element_ptr a)
