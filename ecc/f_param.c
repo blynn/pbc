@@ -21,6 +21,7 @@
 struct f_pairing_data_s {
     field_t Fq, Fq2, Fq2x, Fq12;
     curve_t Eq, Etwist;
+    element_t negalpha;
     element_t negalphainv;
     mpz_t tateexp;
 
@@ -235,7 +236,7 @@ void f_param_gen(f_param_t fp, int bits)
 }
 
 static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
-	element_ptr Qx, element_ptr Qy)
+	element_ptr Qx, element_ptr Qy, element_t negalpha)
 {
     int m;
     element_t v;
@@ -243,24 +244,17 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
     element_t a, b, c;
     const common_curve_ptr cc = P->curve->data;
     element_t t0;
-    element_t e0;
+    element_t e0, e1;
     UNUSED_VAR (cc);
-
-double time0, time1;
-double tslow = 0, tfast = 0;
 
     void f_miller_evalfn(void)
     {
-time0 = get_time();
-	/*
-	//TODO: further opts: only 3 nonzero coefficients in polynomial
-	*/
 	// a, b, c lie in Fq
 	// Qx, Qy lie in Fq^2
 	// Qx is coefficient of x^4
 	// Qy is coefficient of x^3
 	//
-	// computes v *= (b Qy x^4 + a Qx x^3 + c)
+	// computes v *= (a Qx x^4 + b Qy x^3 + c)
 	//
 	// recall x^6 = -alpha thus
 	// x^4 (u0 + u1 x^1 + ... + u5 x^5) =
@@ -270,6 +264,33 @@ time0 = get_time();
 	// x^4 (u0 + u1 x^1 + ... + u5 x^5) =
 	// u0 x^3 + u1 x^4 + u2 x^5
 	// - alpha u3 - alpha u4 x - alpha u5 x^2
+	element_ptr e2;
+	inline void do_term(int i, int j, int k, int flag)
+	{
+	    e2 = polymod_coeff(e0, i);
+	    element_mul(e1, polymod_coeff(v, j), Qx);
+	    if (flag == 1) element_mul(e1, e1, negalpha);
+	    element_mul(fi_re(e1), fi_re(e1), a);
+	    element_mul(fi_im(e1), fi_im(e1), a);
+	    element_mul(e2, polymod_coeff(v, k), Qy);
+	    element_mul(fi_re(e2), fi_re(e2), b);
+	    element_mul(fi_im(e2), fi_im(e2), b);
+	    element_add(e2, e2, e1);
+	    if (flag == 2) element_mul(e2, e2, negalpha);
+	    element_mul(fi_re(e1), fi_re(polymod_coeff(v, i)), c);
+	    element_mul(fi_im(e1), fi_im(polymod_coeff(v, i)), c);
+	    element_add(e2, e2, e1);
+	}
+	do_term(0, 2, 3, 2);
+	do_term(1, 3, 4, 2);
+	do_term(2, 4, 5, 2);
+	do_term(3, 5, 0, 1);
+	do_term(4, 0, 1, 0);
+	do_term(5, 1, 2, 0);
+
+	element_set(v, e0);
+
+	/*
 	element_ptr e1;
 
 	e1 = polymod_coeff(e0, 4);
@@ -285,8 +306,7 @@ time0 = get_time();
 	element_set(fi_re(polymod_coeff(e0, 0)), c);
 
 	element_mul(v, v, e0);
-time1 = get_time();
-tslow += time1 - time0;
+	*/
     }
 
     void do_tangent(void)
@@ -297,7 +317,6 @@ tslow += time1 - time0;
 	const element_ptr Zx = Z->x;
 	const element_ptr Zy = Z->y;
 
-time0 = get_time();
 	element_square(a, Zx);
 	element_mul_si(a, a, 3);
 	element_neg(a, a);
@@ -308,8 +327,6 @@ time0 = get_time();
 	element_mul(c, a, Zx);
 	element_add(c, c, t0);
 	element_neg(c, c);
-time1 = get_time();
-tfast += time1 - time0;
 
 	f_miller_evalfn();
     }
@@ -326,15 +343,12 @@ tfast += time1 - time0;
 	const element_ptr Bx = P->x;
 	const element_ptr By = P->y;
 
-time0 = get_time();
 	element_sub(b, Bx, Ax);
 	element_sub(a, Ay, By);
 	element_mul(t0, b, Ay);
 	element_mul(c, a, Ax);
 	element_add(c, c, t0);
 	element_neg(c, c);
-time1 = get_time();
-tfast += time1 - time0;
 
 	f_miller_evalfn();
     }
@@ -344,6 +358,7 @@ tfast += time1 - time0;
     element_init(c, P->curve->field);
     element_init(t0, P->curve->field);
     element_init(e0, res->field);
+    element_init(e1, Qx->field);
 
     element_init(v, res->field);
     point_init(Z, P->curve);
@@ -366,7 +381,6 @@ tfast += time1 - time0;
 	m--;
 	element_square(v, v);
     }
-printf("fast %f slow %f\n", tfast, tslow);
 
     element_set(res, v);
 
@@ -377,6 +391,7 @@ printf("fast %f slow %f\n", tfast, tslow);
     element_clear(c);
     element_clear(t0);
     element_clear(e0);
+    element_clear(e1);
 }
 
 static void f_pairing(element_ptr out, element_ptr in1, element_ptr in2,
@@ -398,7 +413,7 @@ static void f_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     element_mul(x, Qbase->x, p->negalphainv);
     element_mul(y, Qbase->y, p->negalphainv);
 
-    cc_miller_no_denom(out, pairing->r, in1->data, x, y);
+    cc_miller_no_denom(out, pairing->r, in1->data, x, y, p->negalpha);
 
     element_clear(x);
     element_clear(y);
@@ -456,14 +471,15 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
     poly_alloc(irred, 7);
     element_set1(poly_coeff(irred, 6));
 
+    element_init(p->negalpha, p->Fq2);
     element_init(p->negalphainv, p->Fq2);
-    element_set_mpz(fi_re(p->negalphainv), param->alpha0);
-    element_set_mpz(fi_im(p->negalphainv), param->alpha1);
+    element_set_mpz(fi_re(p->negalpha), param->alpha0);
+    element_set_mpz(fi_im(p->negalpha), param->alpha1);
 
-    element_set(poly_coeff(irred, 0), p->negalphainv);
+    element_set(poly_coeff(irred, 0), p->negalpha);
     field_init_polymod(p->Fq12, irred);
-    element_neg(p->negalphainv, p->negalphainv);
-    element_invert(p->negalphainv, p->negalphainv);
+    element_neg(p->negalpha, p->negalpha);
+    element_invert(p->negalphainv, p->negalpha);
     element_clear(irred);
 
     element_init(e0, p->Fq);
