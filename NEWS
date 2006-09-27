@@ -1,3 +1,25 @@
+Wed Sep 27 14:09:51 PDT 2006
+
+For the record fastfp.c speeds things up:
+
+a	0.018043	0.008506
+d159	0.036936	0.032183
+d201	0.061202	0.054291
+d224	0.071792	0.062762
+e	0.099502	0.099407
+f	0.191747	0.192391
+
+I wrote fasterfp.c that is the same except for a flag that records when
+the element is zero. This avoids calls to memset and memcmp/mpn_cmp,
+which helps some pairing types:
+
+a	0.018096	0.008508
+d159	0.033794	0.029067
+d201	0.054982	0.047947
+d224	0.064952	0.055632
+e	0.099624	0.099479
+f	0.140706	0.140583
+
 Wed Sep 27 01:55:00 PDT 2006
 
 I've been using cmake for a while now, as it's faster than autotools.

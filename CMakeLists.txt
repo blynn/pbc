@@ -7,7 +7,7 @@ foo
 )
 add_library(pbc
 arith/tinyfp.c
-arith/montfp.c arith/fastfp.c arith/slowfp.c
+arith/fastfp.c arith/fasterfp.c
 arith/field.c arith/naivefp.c arith/fieldquadratic.c
 arith/poly.c arith/random.c
 ecc/curve.c ecc/pairing.c ecc/param.c

@@ -5,8 +5,11 @@
 #include <gmp.h>
 #include "field.h"
 #include "random.h"
-//F_p for small (p at most sizeof(long) bytes long)
+#include "fp.h"
+// F_p for small (p at most sizeof(long) bytes long)
+// assumes long long is at least twice long
 
+// pow_mpz, invert use GMP
 static void fp_init(element_ptr e)
 {
     e->data = malloc(sizeof(unsigned long));
@@ -128,10 +131,11 @@ static void fp_mul(element_ptr c, element_ptr a, element_ptr b)
     unsigned long *prime = a->field->data;
     unsigned long *p = a->data;
     unsigned long *q = b->data;
+    unsigned long long ll;
     unsigned long *r = c->data;
 
-    //TODO: overflow!
-    *r = (*p * *q) % *prime;
+    ll = *p * *q;
+    *r = ll % *prime;
 }
 
 static void fp_square(element_ptr c, element_ptr a)
@@ -151,19 +155,25 @@ static void fp_neg(element_ptr c, element_ptr a)
     }
 }
 
-static void fp_mul_si(element_ptr e, element_ptr a, signed long int op)
+static void fp_mul_si(element_ptr c, element_ptr a, signed long int op)
 {
-    //TODO
+    unsigned long *prime = a->field->data;
+    unsigned long *p = a->data;
+    unsigned long long ll;
+    unsigned long *r = c->data;
+
+    ll = *p * op;
+    *r = ll % *prime;
 }
 
-static void fp_pow_mpz(element_ptr n, element_ptr a, mpz_ptr op)
+static void fp_pow_mpz(element_ptr c, element_ptr a, mpz_ptr op)
 {
-    //TODO
+    unsigned long *r = c->data;
     mpz_t z;
     mpz_init(z);
     fp_to_mpz(z, a);
-    //mpz_powm(z, z, op, n->field->order);
-    //from_mpz(n, z);
+    mpz_powm(z, z, op, a->field->order);
+    *r = mpz_get_ui(z);
     mpz_clear(z);
 }
 
@@ -174,39 +184,35 @@ static void fp_set(element_ptr c, element_ptr a)
     *r = *p;
 }
 
-static void fp_invert(element_ptr e, element_ptr a)
+static void fp_invert(element_ptr c, element_ptr a)
 {
-    /* TODO
+    unsigned long *r = c->data;
     mpz_t z;
     mpz_init(z);
     fp_to_mpz(z, a);
-    mpz_invert(z, z, e->field->order);
-    from_mpz(e, z);
+    mpz_invert(z, z, a->field->order);
+    *r = mpz_get_ui(z);
     mpz_clear(z);
-    */
 }
 
-static void fp_random(element_ptr n)
+static void fp_random(element_ptr c)
 {
-    /* TODO
+    unsigned long *r = c->data;
     mpz_t z;
     mpz_init(z);
-    pbc_mpz_random(z, n->field->order);
-    from_mpz(n, z);
+    pbc_mpz_random(z, c->field->order);
+    *r = mpz_get_ui(z);
     mpz_clear(z);
-    */
 }
 
 static void fp_from_hash(element_ptr n, int len, void *data)
 {
-    /* TODO
     mpz_t z;
 
     mpz_init(z);
     mpz_import(z, len, 1, 1, 0, 0, data);
     fp_set_mpz(n, z);
     mpz_clear(z);
-    */
 }
 
 static int fp_cmp(element_ptr a, element_ptr b)
@@ -218,7 +224,6 @@ static int fp_cmp(element_ptr a, element_ptr b)
 
 static int fp_is_sqr(element_ptr a)
 {
-    /* TODO
     int res;
     mpz_t z;
     mpz_init(z);
@@ -228,59 +233,6 @@ static int fp_is_sqr(element_ptr a)
     res = mpz_legendre(z, a->field->order) == 1;
     mpz_clear(z);
     return res;
-    */
-}
-
-static void fp_tonelli(element_ptr x, element_ptr a)
-{
-    /* TODO
-    int s;
-    int i;
-    mpz_t e;
-    mpz_t t, t0;
-    element_t ginv, e0;
-    element_ptr nqr;
-
-    mpz_init(t);
-    mpz_init(e);
-    mpz_init(t0);
-    element_init(ginv, a->field);
-    element_init(e0, a->field);
-    nqr = field_get_nqr(a->field);
-
-    element_invert(ginv, nqr); 
-
-    //let q be the order of the field
-    //q - 1 = 2^s t, t odd
-    mpz_sub_ui(t, a->field->order, 1);
-    s = mpz_scan1(t, 0);
-    mpz_tdiv_q_2exp(t, t, s);
-    mpz_set_ui(e, 0);
-    for (i=2; i<=s; i++) {
-	mpz_sub_ui(t0, a->field->order, 1);
-	mpz_tdiv_q_2exp(t0, t0, i);
-	element_pow_mpz(e0, ginv, e);
-	element_mul(e0, e0, a);
-	element_pow_mpz(e0, e0, t0);
-	if (!element_is1(e0)) mpz_setbit(e, i-1);
-    }
-    element_pow_mpz(e0, ginv, e);
-    element_mul(e0, e0, a);
-    mpz_add_ui(t, t, 1);
-    mpz_tdiv_q_2exp(t, t, 1);
-    element_pow_mpz(e0, e0, t);
-    mpz_tdiv_q_2exp(e, e, 1);
-    element_pow_mpz(x, nqr, e);
-    */
-    /* TODO: this would be a good place to use element_pow2 ... -hs */
-    /*
-    element_mul(x, x, e0);
-    mpz_clear(t);
-    mpz_clear(e);
-    mpz_clear(t0);
-    element_clear(ginv);
-    element_clear(e0);
-    */
 }
 
 static int fp_to_bytes(unsigned char *data, element_t e)
@@ -288,7 +240,7 @@ static int fp_to_bytes(unsigned char *data, element_t e)
     unsigned char *ptr = data;
     unsigned long *p = e->data;
     unsigned long l = *p;
-    int i, n = sizeof(unsigned long);
+    int i, n = e->field->fixed_length_in_bytes;
     for (i = 0; i < n; i++) {
 	*ptr = (unsigned char) l;
 	ptr++;
@@ -299,15 +251,16 @@ static int fp_to_bytes(unsigned char *data, element_t e)
 
 static int fp_from_bytes(element_t e, unsigned char *data)
 {
-    unsigned char *ptr;
+    unsigned char *ptr = data;
     unsigned long *p = e->data;
     unsigned long l = 0;
-    int i, n = sizeof(unsigned long);
+    int i, n = e->field->fixed_length_in_bytes;
     *p = 0;
     for (i=0; i<n; i++) {
 	l = *ptr;
 	l <<= 8 * i;
 	*p += l;
+	ptr++;
     }
     return n;
 }
@@ -356,6 +309,14 @@ void field_init_tiny_fp(field_ptr f, mpz_t prime)
     f->to_mpz = fp_to_mpz;
 
     p = f->data = malloc(sizeof(long));
-    p = mpz_get_ui(prime);
-    f->fixed_length_in_bytes = sizeof(long);
+    *p = mpz_get_ui(prime);
+    {
+	unsigned long int l = 255;
+	f->fixed_length_in_bytes = 1;
+	while (l < *p) {
+	    f->fixed_length_in_bytes++;
+	    l <<= 8;
+	    l += 255;
+	}
+    }
 }

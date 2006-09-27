@@ -408,8 +408,6 @@ static void f_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     //i.e. v^6 = -alpha
     //thus v^-2 = -alpha^-1 v^4
     //and  v^-3 = -alpha^-1 v^3
-    //polymod_const_mul(x, Qbase->x, p->alphainv2);
-    //polymod_const_mul(y, Qbase->y, p->alphainv3);
     element_mul(x, Qbase->x, p->negalphainv);
     element_mul(y, Qbase->y, p->negalphainv);
 

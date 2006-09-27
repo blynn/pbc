@@ -6,8 +6,13 @@
 #include "field.h"
 #include "random.h"
 #include "fp.h"
-//Naive implementation of F_p
-//using lowlevel GMP routines (mpn_* functions)
+// naive implementation of F_p
+// uses lowlevel GMP routines (mpn_* functions)
+// ''data'' field of element holds pointer to array of mp_limb_t
+// ''data'' is allocated on init and freed on clear
+// its size is fixed and determined by the number of limbs in the modulus,
+// which simplifies many routines
+// but very inefficient for storing values like 0 and 1
 
 struct fp_field_data_s {
     size_t limbs;
@@ -227,7 +232,7 @@ static void fp_pow_mpz(element_ptr c, element_ptr a, mpz_ptr op)
 static void fp_set(element_ptr c, element_ptr a)
 {
     fp_field_data_ptr p = a->field->data;
-    //assert(c->data != a->data);
+    if (c == a) return;
 
     //Assembly is faster here, but I don't want to stoop to that level.
     //Instead of calling slower memcpy, wrap stuff so that GMP assembly
@@ -290,54 +295,6 @@ static int fp_is_sqr(element_ptr a)
     res = mpz_legendre(z, a->field->order) == 1;
     mpz_clear(z);
     return res;
-}
-
-static void fp_tonelli(element_ptr x, element_ptr a)
-{
-    int s;
-    int i;
-    mpz_t e;
-    mpz_t t, t0;
-    element_t ginv, e0;
-    element_ptr nqr;
-
-    mpz_init(t);
-    mpz_init(e);
-    mpz_init(t0);
-    element_init(ginv, a->field);
-    element_init(e0, a->field);
-    nqr = field_get_nqr(a->field);
-
-    element_invert(ginv, nqr); 
-
-    //let q be the order of the field
-    //q - 1 = 2^s t, t odd
-    mpz_sub_ui(t, a->field->order, 1);
-    s = mpz_scan1(t, 0);
-    mpz_tdiv_q_2exp(t, t, s);
-    mpz_set_ui(e, 0);
-    for (i=2; i<=s; i++) {
-	mpz_sub_ui(t0, a->field->order, 1);
-	mpz_tdiv_q_2exp(t0, t0, i);
-	element_pow_mpz(e0, ginv, e);
-	element_mul(e0, e0, a);
-	element_pow_mpz(e0, e0, t0);
-	if (!element_is1(e0)) mpz_setbit(e, i-1);
-    }
-    element_pow_mpz(e0, ginv, e);
-    element_mul(e0, e0, a);
-    mpz_add_ui(t, t, 1);
-    mpz_tdiv_q_2exp(t, t, 1);
-    element_pow_mpz(e0, e0, t);
-    mpz_tdiv_q_2exp(e, e, 1);
-    element_pow_mpz(x, nqr, e);
-    /* TODO: this would be a good place to use element_pow2 ... -hs */
-    element_mul(x, x, e0);
-    mpz_clear(t);
-    mpz_clear(e);
-    mpz_clear(t0);
-    element_clear(ginv);
-    element_clear(e0);
 }
 
 static int fp_to_bytes(unsigned char *data, element_t e)
@@ -436,5 +393,3 @@ void field_init_fast_fp(field_ptr f, mpz_t prime)
     mpz_set(f->order, prime);
     f->fixed_length_in_bytes = (mpz_sizeinbase(prime, 2) + 7) / 8;
 }
-
-void (*field_init_fp)(field_ptr f, mpz_t prime) = field_init_fast_fp;

@@ -18,6 +18,7 @@ static void check_match(element_t e1, element_t e2, char *s)
 	exit(1);
     }
 
+    //printf("checking %s\n", s);
     len = element_length_in_bytes(e1);
     if (len != element_length_in_bytes(e2)) {
 	bug();
@@ -124,6 +125,10 @@ static void run_check(field_ptr f1, field_ptr f2)
     check_match(x1, x2, "conversion");
     element_sqrt(z1, x1);
     element_sqrt(z2, x2);
+    //can't compare these because sqrt is nondeterministic
+    //and there's no way easy way to preserve random state yet
+    element_square(z1, z1);
+    element_square(z2, z2);
     check_match(z1, z2, "sqrt");
     element_to_mpz(t1, y1);
     element_to_mpz(t2, y2);
@@ -166,11 +171,11 @@ int main(void)
     mpz_init(z);
     mpz_init(prime);
     mpz_set_ui(prime, 82);
-    mpz_setbit(prime, 63);
+    mpz_setbit(prime, 15);
     mpz_nextprime(prime, prime);
 
     field_init_naive_fp(f1, prime);
-    field_init_fast_fp(f2, prime);
+    field_init_tiny_fp(f2, prime);
 
     element_init(n2, f2);
 
@@ -218,7 +223,7 @@ int main(void)
     }
     field_init_polymod(f2p, irred2);
 
-    run_check(f1p, f2p);
+    for (i=0; i<n; i++) run_check(f1p, f2p);
 
     return 0;
 }
