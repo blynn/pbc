@@ -1,3 +1,14 @@
+Wed Sep 27 01:55:00 PDT 2006
+
+I've been using cmake for a while now, as it's faster than autotools.
+I've finally added the CMakeLists.txt file to the git repository,
+and will include it in the next release.
+
+I only just tested a cg-export tree for the first time.
+It turns out my old CMakeLists.txt was broken for a while.
+I did not realize NAMES and PATHS in find_library() command
+were case-sensitive. I'll have to test cg-exported trees more often.
+
 Tue Sep 26 23:12:36 PDT 2006
 
 fastfp.c: fp_set() is slower than the version in naivefp.c,

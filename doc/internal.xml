@@ -359,6 +359,7 @@ I'm fond of GMP's method for eliminating the need for the <code>&amp;</code>
 and <code>*</code> operators most of the time by declaring a typedef on
 arrays of size 1.  I try to do the same with PBC for consistency,
 though this trick does have drawbacks.
+</para>
 <para>
 I dislike the C preprocessor. I like to place platform-specific code in
 separate files and let the build system work out which one to use.
