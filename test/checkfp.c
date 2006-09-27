@@ -68,6 +68,15 @@ static void run_check(field_ptr f1, field_ptr f2)
     element_from_bytes(y2, buf);
     free(buf);
     check_match(y1, y2, "conversion");
+    element_set0(z1);
+    element_set0(z2);
+    check_match(z1, z2, "set0");
+    element_set1(z1);
+    element_set1(z2);
+    check_match(z1, z2, "set1");
+    element_set(z1, x1);
+    element_set(z2, x2);
+    check_match(z1, z2, "set");
     element_add(z1, x1, y1);
     element_add(z2, x2, y2);
     check_match(z1, z2, "add");
@@ -98,6 +107,9 @@ static void run_check(field_ptr f1, field_ptr f2)
     element_square(z1, x1);
     element_square(z2, x2);
     check_match(z1, z2, "square");
+    element_square(z1, z1);
+    element_square(z2, z2);
+    check_match(z1, z2, "square (in place)");
     element_double(z1, x1);
     element_double(z2, x2);
     check_match(z1, z2, "double");
@@ -154,7 +166,7 @@ int main(void)
     mpz_init(z);
     mpz_init(prime);
     mpz_set_ui(prime, 82);
-    mpz_setbit(prime, 32);
+    mpz_setbit(prime, 63);
     mpz_nextprime(prime, prime);
 
     field_init_naive_fp(f1, prime);

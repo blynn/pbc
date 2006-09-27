@@ -1,10 +1,8 @@
 #include "pbc.h"
 #include "get_time.h"
 
-#include "fp.h"
 int main(void)
 {
-//pbc_tweak_use_naive_fp();
     pairing_t pairing;
     element_t x, y, r, r2;
     int i, n;

@@ -6,6 +6,12 @@ probably because it uses memset() while GMP uses assembly.
 fp_square() is also slower, probably because it does not
 have access to GMP's mpn_mul_n() low-level function.
 
+fp_set0(), fp_set1() are also much slower, but most applications
+shouldn't need them inner loops.
+
+Can use GMP internals to use GMP assembly routines, but not for fp_set0
+and fp_set1.
+
 Mon Sep 25 18:33:27 PDT 2006
 
 An alternative implementation of fp, fastfp.c, works now. In the process

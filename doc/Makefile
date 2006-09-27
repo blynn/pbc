@@ -8,6 +8,7 @@ SRCFILES:=*.xml $(GENFILES)
 
 genxml $(GENFILES) : ../include/*.h
 	-rm $(GENFILES)
+	-mkdir gen
 	cat ../include/*.h | ./extract
 	for a in gen/*.*.xml; do b=$${a%.*.xml}.xml; cat $$a $$b > tmp; mv tmp $$b ; rm $$a; done
 

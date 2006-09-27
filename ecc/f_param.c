@@ -252,11 +252,21 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
 
 double time0, time1, ttangent = 0, tline = 0;
 double tslow = 0, tfast = 0;
-    void do_vertical(void)
+
+    void f_miller_evalfn(void)
     {
-	mapbase(e0, Z->x);
-	element_sub(e0, Qx, e0);
+time0 = get_time();
+	//TODO: use poly_mul_constant?
+	mapbase(e0, a);
+	element_mul(e0, e0, Qx);
+	mapbase(e1, b);
+	element_mul(e1, e1, Qy);
+	element_add(e0, e0, e1);
+	mapbase(e1, c);
+	element_add(e0, e0, e1);
 	element_mul(v, v, e0);
+time1 = get_time();
+tslow += time1 - time0;
     }
 
     void do_tangent(void)
@@ -281,18 +291,7 @@ time0 = get_time();
 time1 = get_time();
 tfast += time1 - time0;
 
-time0 = get_time();
-	//TODO: use poly_mul_constant?
-	mapbase(e0, a);
-	element_mul(e0, e0, Qx);
-	mapbase(e1, b);
-	element_mul(e1, e1, Qy);
-	element_add(e0, e0, e1);
-	mapbase(e1, c);
-	element_add(e0, e0, e1);
-	element_mul(v, v, e0);
-time1 = get_time();
-tslow += time1 - time0;
+	f_miller_evalfn();
     }
 
     void do_line(void)
@@ -317,18 +316,7 @@ time0 = get_time();
 time1 = get_time();
 tfast += time1 - time0;
 
-time0 = get_time();
-
-	mapbase(e0, a);
-	element_mul(e0, e0, Qx);
-	mapbase(e1, b);
-	element_mul(e1, e1, Qy);
-	element_add(e0, e0, e1);
-	mapbase(e1, c);
-	element_add(e0, e0, e1);
-	element_mul(v, v, e0);
-time1 = get_time();
-tslow += time1 - time0;
+	f_miller_evalfn();
     }
 
     element_init(a, P->curve->field);

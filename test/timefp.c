@@ -33,8 +33,7 @@ void timefield(field_t fp)
     t1 = get_time();
     printf("square %fs\n", t1 - t0);
 
-    /*
-    n = 10000;
+    n = 1000;
     t0 = get_time();
     for (i=0; i<n; i++) {
 	element_invert(z, x);
@@ -42,7 +41,14 @@ void timefield(field_t fp)
     }
     t1 = get_time();
     printf("invert %fs\n", t1 - t0);
-    */
+
+    n = 40000;
+    t0 = get_time();
+    for (i=0; i<n; i++) {
+	element_set0(z);
+    }
+    t1 = get_time();
+    printf("set0 %fs\n", t1 - t0);
 
     n = 40000;
     t0 = get_time();
@@ -58,13 +64,17 @@ void timefield(field_t fp)
     element_clear(z);
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
     field_t f1, f2;
     mpz_t prime;
 
     mpz_init(prime);
-    mpz_setbit(prime, 1023);
+    if (argc > 1) {
+	mpz_setbit(prime, atoi(argv[1]));
+    } else {
+	mpz_setbit(prime, 201);
+    }
     mpz_setbit(prime, 70);
     mpz_nextprime(prime, prime);
     field_init_fast_fp(f1, prime);

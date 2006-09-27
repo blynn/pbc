@@ -10,6 +10,7 @@ int main(void)
 
     mpz_init(prime);
     mpz_set_ui(prime, 100000);
+    mpz_setbit(prime, 33);
     mpz_nextprime(prime, prime);
     element_printf("prime = %Z\n", prime);
 

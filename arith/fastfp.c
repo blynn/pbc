@@ -77,7 +77,7 @@ static void fp_set1(element_ptr e)
 {
     fp_field_data_ptr p = e->field->data;
     mp_limb_t *d = e->data;
-    memset(d, 0, p->bytes);
+    memset(&d[1], 0, p->bytes - sizeof(mp_limb_t));
     d[0] = 1;
 }
 
@@ -160,6 +160,26 @@ static void fp_mul(element_ptr c, element_ptr a, element_ptr b)
 static void fp_square(element_ptr c, element_ptr a)
 {
     const fp_field_data_ptr r = c->field->data;
+    mpz_t z1, z2;
+    size_t diff;
+
+    z1->_mp_d = c->data;
+    z1->_mp_size = z1->_mp_alloc = r->limbs;
+    if (c == a) {
+	mpz_powm_ui(z1, z1, 2, c->field->order);
+    } else {
+	z2->_mp_d = a->data;
+	z2->_mp_size = z2->_mp_alloc = r->limbs;
+	mpz_powm_ui(z1, z2, 2, c->field->order);
+    }
+
+    diff = r->limbs - z1->_mp_size;
+    if (diff) memset(&z1->_mp_d[z1->_mp_size], 0, diff * sizeof(mp_limb_t));
+
+    //mpn_sqr_n() might make the code below faster than the code above
+    //but GMP doesn't expose this function
+    /*
+    const fp_field_data_ptr r = c->field->data;
     const size_t t = r->limbs;
     mp_limb_t tmp[2 * t];
     mp_limb_t qp[t + 1];
@@ -167,13 +187,6 @@ static void fp_square(element_ptr c, element_ptr a)
     mpn_mul_n(tmp, a->data, a->data, t);
 
     mpn_tdiv_qr(qp, c->data, 0, tmp, 2 * t, r->primelimbs, t);
-    /*
-    mpz_t z;
-    mpz_init(z);
-    fp_to_mpz(z, a);
-    mpz_powm_ui(z, z, 2, a->field->order);
-    from_mpz(c, z);
-    mpz_clear(z);
     */
 }
 
@@ -215,7 +228,10 @@ static void fp_set(element_ptr c, element_ptr a)
 {
     fp_field_data_ptr p = a->field->data;
     //assert(c->data != a->data);
-    //Assembly is faster here, but I don't want to stoop to that level!
+
+    //Assembly is faster here, but I don't want to stoop to that level.
+    //Instead of calling slower memcpy, wrap stuff so that GMP assembly
+    //gets called.
     /*
     memcpy(c->data, a->data, p->bytes);
     */
@@ -259,8 +275,8 @@ static void fp_from_hash(element_ptr a, int len, void *data)
 static int fp_cmp(element_ptr a, element_ptr b)
 {
     fp_field_data_ptr p = a->field->data;
-    //return mpn_cmp(a->data, b->data, p->limbs);
-    return memcmp(a->data, b->data, p->limbs);
+    return mpn_cmp(a->data, b->data, p->limbs);
+    //return memcmp(a->data, b->data, p->limbs);
 }
 
 static int fp_is_sqr(element_ptr a)

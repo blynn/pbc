@@ -1,6 +1,6 @@
 project(pbc)
 include_directories(./include)
-find_library(GMP_LIBRARY names gmp paths /usr/lib /usr/local/lib)
+find_library(GMP_LIBRARY NAMES gmp PATHS /usr/lib /usr/local/lib)
 set(leaksrc misc/leak.c)
 set(unused
 foo
@@ -26,7 +26,7 @@ foreach(bin
 test/19          test/geneparam  test/testbbs      test/testibe
 test/benchmark   test/genfparam  test/testbls      test/testibs
 test/gena1param  test/listmnt    test/testfi       test/testpairing
-test/genaparam   test/sing       test/testfp       test/testpoly
+test/genaparam   test/sing       test/timefp       test/testpoly
 test/gendparam   test/testbb     test/testhilbert  test/testsig
 test/checkfp
 )
