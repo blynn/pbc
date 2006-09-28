@@ -273,7 +273,7 @@ static void fp_from_hash(element_ptr a, int len, void *data)
     mpz_t z;
 
     mpz_init(z);
-    mpz_import(z, len, 1, 1, 0, 0, data);
+    mpz_import(z, len, -1, 1, -1, 0, data);
     fp_set_mpz(a, z);
     mpz_clear(z);
 }

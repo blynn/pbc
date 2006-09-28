@@ -140,6 +140,11 @@ PBC uses some GNU C extensions, notably nested functions and
 printf extensions. The latter may be safely commented out as it is only
 used in demonstration programs.
 </para>
+<para>
+For efficiency, some of the lower-level PBC code relies on some GMP internals,
+which may change in future releases. In that case, the PBC code will also
+have to be updated.
+</para>
 </chapter>
 &chapter_basics;
 &chapter_tutorial;

@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 2.4)
 project(pbc)
 include_directories(./include)
 find_library(GMP_LIBRARY NAMES gmp PATHS /usr/lib /usr/local/lib)
@@ -6,6 +7,7 @@ set(unused
 foo
 )
 add_library(pbc
+arith/montfp.c
 arith/naivefp.c
 arith/tinyfp.c arith/fastfp.c arith/fasterfp.c
 arith/field.c

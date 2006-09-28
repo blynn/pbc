@@ -98,7 +98,7 @@ void bb_sign(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
     element_init(m, pairing->Zr);
 
     element_random(r);
-    mpz_import(m->data, hashlen, 1, 1, 1, 0, hash);
+    mpz_import(m->data, hashlen, -1, 1, -1, 0, hash);
     mpz_mod(m->data, m->data, pairing->r);
     element_mul(z, sk->y, r);
     element_add(z, z, sk->x);
@@ -127,7 +127,7 @@ int bb_verify(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
     pairing_ptr pairing = pk->param->pairing;
 
     element_init(m, pairing->Zr);
-    mpz_import(m->data, hashlen, 1, 1, 1, 0, hash);
+    mpz_import(m->data, hashlen, -1, 1, -1, 0, hash);
     mpz_mod(m->data, m->data, pairing->r);
 
     element_init(sigma, pairing->G1);

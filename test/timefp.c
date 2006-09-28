@@ -77,12 +77,12 @@ int main(int argc, char **argv)
     }
     mpz_setbit(prime, 70);
     mpz_nextprime(prime, prime);
-    field_init_fast_fp(f1, prime);
-    field_init_naive_fp(f2, prime);
+    field_init_mont_fp(f1, prime);
+    field_init_faster_fp(f2, prime);
 
-    printf("fastfp.c\n");
+    printf("montfp.c\n");
     timefield(f1);
-    printf("naivefp.c\n");
+    printf("fasterfp.c\n");
     timefield(f2);
     //mem_report();
     return 0;

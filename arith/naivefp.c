@@ -170,7 +170,7 @@ static void zp_from_hash(element_ptr n, int len, void *data)
     mpz_t z;
 
     mpz_init(z);
-    mpz_import(z, len, 1, 1, 0, 0, data);
+    mpz_import(z, len, -1, 1, -1, 0, data);
     zp_set_mpz(n, z);
     mpz_clear(z);
 }

@@ -1,3 +1,11 @@
+Thu Sep 28 02:22:59 PDT 2006
+
+I thought I was previously using mpz_import and mpz_export incorrectly for
+fp_from_hash functions because I selected host-specific endianness, but
+in fact it was okay because I had also chosen to output byte-by-byte.
+
+I decided to change any use of mpz_import to little-endian.
+
 Wed Sep 27 17:14:24 PDT 2006
 
 No major changes besides optimizations.

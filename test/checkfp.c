@@ -19,6 +19,8 @@ static void check_match(element_t e1, element_t e2, char *s)
     }
 
     //printf("checking %s\n", s);
+    //element_printf("e1: %B\n", e1);
+    //element_printf("e2: %B\n", e2);
     len = element_length_in_bytes(e1);
     if (len != element_length_in_bytes(e2)) {
 	bug();
@@ -168,14 +170,21 @@ int main(void)
     element_t irred1, irred2;
     mpz_t z;
 
+    n = 10;
+
     mpz_init(z);
     mpz_init(prime);
     mpz_set_ui(prime, 82);
-    mpz_setbit(prime, 15);
+    mpz_setbit(prime, 32);
     mpz_nextprime(prime, prime);
 
+    element_printf("prime = %Z\n", prime);
+
     field_init_naive_fp(f1, prime);
-    field_init_tiny_fp(f2, prime);
+    field_init_mont_fp(f2, prime);
+
+    printf("checking base fields\n");
+    for (i=0; i<n; i++) run_check(f1, f2);
 
     element_init(n2, f2);
 
@@ -186,12 +195,6 @@ int main(void)
 
     field_init_fi(f1i, f1);
     field_init_fi(f2i, f2);
-
-    n = 10;
-
-    element_printf("prime = %Z\n", prime);
-    printf("checking base fields\n");
-    for (i=0; i<n; i++) run_check(f1, f2);
 
     printf("checking quadratic field extensions\n");
     for (i=0; i<n; i++) run_check(f1i, f2i);

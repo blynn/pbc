@@ -13,6 +13,7 @@ void field_init_naive_fp(field_ptr f, mpz_t prime);
 void field_init_tiny_fp(field_ptr f, mpz_t prime);
 void field_init_fast_fp(field_ptr f, mpz_t prime);
 void field_init_faster_fp(field_ptr f, mpz_t prime);
+void field_init_mont_fp(field_ptr f, mpz_t prime);
 
 void pbc_tweak_use_fp(char *s);
 
