@@ -14,6 +14,9 @@
 // Additive operations are identical
 // Multipicative ones use Montgomery reduction
 // only works with odd modulus
+//
+// TODO: mul_2exp(x, p->bytes * 8) could be replaced with
+// faster code that messes with GMP internals
 
 struct fp_field_data_s {
     size_t limbs;
@@ -21,6 +24,7 @@ struct fp_field_data_s {
     mp_limb_t *primelimbs;
     mp_limb_t negpinv;  //-p^-1 mod b
     mp_limb_t *R; //R mod p
+    mp_limb_t *R3; //R^3 mod p
 };
 typedef struct fp_field_data_s fp_field_data_t[1];
 typedef struct fp_field_data_s *fp_field_data_ptr;
@@ -52,22 +56,16 @@ static void mont_reduce(mp_limb_t *x, mp_limb_t *y, fp_field_data_ptr p)
     }
 }
 
-//store x as xR mod prime
-//assumes z != 0
-static void from_mpz(element_t e, mpz_t z)
+//assumes z != 0 and is already given in xR form
+static inline void from_mpz(element_t e, mpz_t z)
 {
     fp_field_data_ptr p = e->field->data;
     dataptr ed = e->data;
     size_t count;
-    mpz_t z1;
-    mpz_init(z1);
-    mpz_mul_2exp(z1, z, p->bytes * 8);
-    mpz_mod(z1, z1, e->field->order);
 
-    mpz_export(ed->d, &count, -1, sizeof(mp_limb_t), 0, 0, z1);
-    memset((void *) (((unsigned int) ed->d) + count * sizeof(mp_limb_t)),
+    mpz_export(ed->d, &count, -1, sizeof(mp_limb_t), 0, 0, z);
+    memset((void *) (((int) ed->d) + count * sizeof(mp_limb_t)),
 	0, (p->limbs - count) * sizeof(mp_limb_t));
-    mpz_clear(z1);
 }
 
 static void fp_init(element_ptr e)
@@ -87,13 +85,15 @@ static void fp_clear(element_ptr e)
 
 static void fp_set_mpz(element_ptr e, mpz_ptr z)
 {
+    fp_field_data_ptr p = e->field->data;
     dataptr dp = e->data;
     if (!mpz_sgn(z)) {
 	dp->flag = 0;
     } else {
 	mpz_t tmp;
 	mpz_init(tmp);
-	mpz_mod(tmp, z, e->field->order);
+	mpz_mul_2exp(tmp, z, p->bytes * 8);
+	mpz_mod(tmp, tmp, e->field->order);
 	from_mpz(e, tmp);
 	mpz_clear(tmp);
 	dp->flag = 2;
@@ -102,18 +102,19 @@ static void fp_set_mpz(element_ptr e, mpz_ptr z)
 
 static void fp_set_si(element_ptr e, signed long int op)
 {
+    fp_field_data_ptr p = e->field->data;
     dataptr dp = e->data;
     if (!op) {
 	dp->flag = 0;
     } else {
-	const fp_field_data_ptr p = e->field->data;
-	const size_t t = p->limbs;
-	if (op < 0) {
-	    mpn_sub_1(dp->d, p->primelimbs, t, -op);
-	} else {
-	    dp->d[0] = op;
-	    memset(&dp->d[1], 0, sizeof(mp_limb_t) * (t - 1));
-	}
+	mpz_t tmp;
+	mpz_init(tmp);
+	//TODO: could be optimized
+	mpz_set_si(tmp, op);
+	mpz_mul_2exp(tmp, tmp, p->bytes * 8);
+	mpz_mod(tmp, tmp, e->field->order);
+	from_mpz(e, tmp);
+	mpz_clear(tmp);
 	dp->flag = 2;
     }
 }
@@ -136,7 +137,6 @@ static void fp_to_mpz(mpz_ptr z, element_ptr e)
 	while(!z->_mp_d[z->_mp_size - 1]) {
 	    z->_mp_size--;
 	}
-	//mpz_import(z, p->limbs, -1, sizeof(mp_limb_t), 0, 0, dp->d);
     }
 }
 
@@ -307,6 +307,32 @@ static void fp_sub(element_ptr c, element_ptr a, element_ptr b)
     }
 }
 
+static inline void mont_mul(mp_limb_t *c, mp_limb_t *a, mp_limb_t *b,
+	fp_field_data_ptr p)
+{
+    //instead of right shifting every iteration
+    //I allocate more room for the z array
+    size_t i, t = p->limbs;
+    mp_limb_t z[2*t+1];
+    mp_limb_t u = (a[0] * b[0]) * p->negpinv;
+    mp_limb_t v = z[t] = mpn_mul_1(z, b, t, a[0]);
+    z[t] += mpn_addmul_1(z, p->primelimbs, t, u);
+    if (z[t] < v) v = z[t + 1] = 1; else v = z[t + 1] = 0;
+    for (i=1; i<t; i++) {
+	u = (z[i] + a[i] * b[0]) * p->negpinv;
+	v = z[t + i] += mpn_addmul_1(z + i, b, t, a[i]);
+	z[t + i] += mpn_addmul_1(z + i, p->primelimbs, t, u);
+	if (z[t + i] < v) z[t + i + 1] = 1; else z[t + i + 1] = 0;
+    }
+    if (z[t * 2] || mpn_cmp(z + t, p->primelimbs, t) >= 0) {
+	mpn_sub_n(c, z + t, p->primelimbs, t);
+    } else {
+	//TODO: GMP set
+	memcpy(c, z + t, t * sizeof(mp_limb_t));
+    }
+
+}
+
 static void fp_mul(element_ptr c, element_ptr a, element_ptr b)
 {
     dataptr ad = a->data, bd = b->data;
@@ -315,84 +341,16 @@ static void fp_mul(element_ptr c, element_ptr a, element_ptr b)
     if (!ad->flag || !bd->flag) {
 	cd->flag = 0;
     } else {
-	if (0) {
-	//TODO: z[t] could overflow?
 	fp_field_data_ptr p = c->field->data;
-	size_t i, t = p->limbs;
-	mp_limb_t z[t+1];
-	mp_limb_t u = (ad->d[0] * bd->d[0]) * p->negpinv;
-	z[t] = mpn_mul_1(z, bd->d, t, ad->d[0]);
-//printf("d0: %lu\n", z[t]);
-	z[t] += mpn_addmul_1(z, p->primelimbs, t, u);
-//printf("d0: %lu\n", z[t]);
-	memmove(z, &z[1], t * sizeof(mp_limb_t));
-	for (i=1; i<t; i++) {
-	    u = (z[0] + ad->d[i] * bd->d[0]) * p->negpinv;
-	    z[t] = mpn_addmul_1(z, bd->d, t, ad->d[i]);
-//printf("d0: %lu\n", z[t]);
-	    z[t] += mpn_addmul_1(z, p->primelimbs, t, u);
-//printf("d0: %lu\n", z[t]);
-	    memmove(z, &z[1], t * sizeof(mp_limb_t));
-	}
-	if (mpn_cmp(z, p->primelimbs, t) >= 0) {
-	    mpn_sub_n(cd->d, z, p->primelimbs, t);
-	} else {
-	    //TODO: GMP set
-	    memcpy(cd->d, z, t * sizeof(mp_limb_t));
-	}
-	}
-
-	//TODO: z[t] could overflow?
-	fp_field_data_ptr p = c->field->data;
-	size_t i, t = p->limbs;
-	mp_limb_t z[2 * t+1];
-	mp_limb_t u = (ad->d[0] * bd->d[0]) * p->negpinv;
-	z[t] = mpn_mul_1(z, bd->d, t, ad->d[0]);
-//printf("d0: %lu\n", z[t]);
-	z[t] += mpn_addmul_1(z, p->primelimbs, t, u);
-//printf("d0: %lu\n", z[t]);
-	for (i=1; i<t; i++) {
-	    u = (z[i] + ad->d[i] * bd->d[0]) * p->negpinv;
-	    z[t + i] = mpn_addmul_1(z + i, bd->d, t, ad->d[i]);
-//printf("d0: %lu\n", z[t]);
-	    z[t + i] += mpn_addmul_1(z + i, p->primelimbs, t, u);
-//printf("d0: %lu\n", z[t]);
-	}
-	if (mpn_cmp(z + t, p->primelimbs, t) >= 0) {
-	    mpn_sub_n(cd->d, z + t, p->primelimbs, t);
-	} else {
-	    //TODO: GMP set
-	    memcpy(cd->d, z + t, t * sizeof(mp_limb_t));
-	}
-
+	mont_mul(cd->d, ad->d, bd->d, p);
 	cd->flag = 2;
-    }
-}
-
-static void fp_mul_si(element_ptr c, element_ptr a, signed long int op)
-{
-    dataptr ad = a->data;
-    dataptr cd = c->data;
-
-    if (!ad->flag || !op) {
-	cd->flag = 0;
-    } else {
-	cd->flag = 2;
-	fp_field_data_ptr p = a->field->data;
-	size_t t = p->limbs;
-	mp_limb_t tmp[t + 1];
-	mp_limb_t qp[2];
-
-	tmp[t] = mpn_mul_1(tmp, ad->d, t, labs(op));
-	mpn_tdiv_qr(qp, cd->d, 0, tmp, t + 1, p->primelimbs, t);
-	if (op < 0) { //TODO: don't need to check c != 0 this time
-	    fp_neg(c, c);
-	}
     }
 }
 
 static void fp_pow_mpz(element_ptr c, element_ptr a, mpz_ptr op)
 {
+    //alternative: rewrite GMP mpz_powm()
+    fp_field_data_ptr p = a->field->data;
     dataptr ad = a->data;
     dataptr cd = c->data;
     if (!ad->flag) cd->flag = 0;
@@ -401,32 +359,46 @@ static void fp_pow_mpz(element_ptr c, element_ptr a, mpz_ptr op)
 	mpz_init(z);
 	fp_to_mpz(z, a);
 	mpz_powm(z, z, op, a->field->order);
+	mpz_mul_2exp(z, z, p->bytes * 8);
+	mpz_mod(z, z, a->field->order);
 	from_mpz(c, z);
 	mpz_clear(z);
 	cd->flag = 2;
     }
 }
 
+//invert is slower because of extra multiplication
 static void fp_invert(element_ptr c, element_ptr a)
 {
-    //assumes a is invertible
+    dataptr ad = a->data;
     dataptr cd = c->data;
+    fp_field_data_ptr p = a->field->data;
+    mp_limb_t tmp[p->limbs];
+    size_t count;
     mpz_t z;
+
     mpz_init(z);
-    fp_to_mpz(z, a);
+
+    mpz_import(z, p->limbs, -1, sizeof(mp_limb_t), 0, 0, ad->d);
     mpz_invert(z, z, a->field->order);
-    from_mpz(c, z);
-    mpz_clear(z);
+    mpz_export(tmp, &count, -1, sizeof(mp_limb_t), 0, 0, z);
+    memset((void *) (((int) tmp) + count * sizeof(mp_limb_t)),
+	0, (p->limbs - count) * sizeof(mp_limb_t));
+
+    mont_mul(cd->d, tmp, p->R3, p);
     cd->flag = 2;
 }
 
 static void fp_random(element_ptr a)
 {
+    fp_field_data_ptr p = a->field->data;
     dataptr ad = a->data;
     mpz_t z;
     mpz_init(z);
     pbc_mpz_random(z, a->field->order);
     if (mpz_sgn(z)) {
+	mpz_mul_2exp(z, z, p->bytes * 8);
+	mpz_mod(z, z, a->field->order);
 	from_mpz(a, z);
 	ad->flag = 2;
     } else {
@@ -494,6 +466,7 @@ static int fp_to_bytes(unsigned char *data, element_t a)
 
 static int fp_from_bytes(element_t a, unsigned char *data)
 {
+    fp_field_data_ptr p = a->field->data;
     dataptr ad = a->data;
     unsigned char *ptr;
     int i, n;
@@ -512,7 +485,11 @@ static int fp_from_bytes(element_t a, unsigned char *data)
 	ptr++;
 	mpz_add(z, z, z1);
     }
-    if (ad->flag) from_mpz(a, z);
+    if (ad->flag) {
+	mpz_mul_2exp(z, z, p->bytes * 8);
+	mpz_mod(z, z, a->field->order);
+	from_mpz(a, z);
+    }
     mpz_clear(z);
     mpz_clear(z1);
     return n;
@@ -522,6 +499,8 @@ static void fp_field_clear(field_t f)
 {
     fp_field_data_ptr p = f->data;
     free(p->primelimbs);
+    free(p->R);
+    free(p->R3);
     free(p);
 }
 
@@ -539,7 +518,6 @@ void field_init_mont_fp(field_ptr f, mpz_t prime)
     f->sub = fp_sub;
     f->set = fp_set;
     f->mul = fp_mul;
-    f->mul_si = fp_mul_si;
     f->doub = fp_double;
     f->pow_mpz = fp_pow_mpz;
     f->neg = fp_neg;
@@ -572,11 +550,19 @@ void field_init_mont_fp(field_ptr f, mpz_t prime)
 	size_t count;
 
 	p->R = malloc(p->bytes);
+	p->R3 = malloc(p->bytes);
 	mpz_setbit(z, p->bytes * 8);
 	mpz_mod(z, z, prime);
+
 	mpz_export(p->R, &count, -1, sizeof(mp_limb_t), 0, 0, z);
-	memset((void *) (((unsigned int) p->R) + count * sizeof(mp_limb_t)),
+	memset((void *) (((int) p->R) + count * sizeof(mp_limb_t)),
 		0, (p->limbs - count) * sizeof(mp_limb_t));
+
+	mpz_powm_ui(z, z, 3, prime);
+	mpz_export(p->R3, &count, -1, sizeof(mp_limb_t), 0, 0, z);
+	memset((void *) (((int) p->R3) + count * sizeof(mp_limb_t)),
+		0, (p->limbs - count) * sizeof(mp_limb_t));
+
 	mpz_set_ui(z, 0);
 
 	//TODO: Algorithm II.5 in Blake, Seroussi and Smart is better

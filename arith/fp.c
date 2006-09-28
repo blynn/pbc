@@ -52,7 +52,7 @@ void fp_tonelli(element_ptr x, element_ptr a)
     element_clear(e0);
 }
 
-static void (*option_fpinit)(field_ptr f, mpz_t prime) = field_init_faster_fp;
+static void (*option_fpinit)(field_ptr f, mpz_t prime) = field_init_mont_fp;
 
 void field_init_fp(field_ptr f, mpz_t prime)
 {
@@ -71,5 +71,7 @@ void pbc_tweak_use_fp(char *s)
 	option_fpinit = field_init_fast_fp;
     } else if (!strcmp(s, "faster")) {
 	option_fpinit = field_init_faster_fp;
+    } else if (!strcmp(s, "mont")) {
+	option_fpinit = field_init_mont_fp;
     }
 }

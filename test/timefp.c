@@ -59,6 +59,14 @@ void timefield(field_t fp)
     t1 = get_time();
     printf("set %fs\n", t1 - t0);
 
+    n = 400;
+    t0 = get_time();
+    for (i=0; i<n; i++) {
+	element_pow_zn(x, y, z);
+    }
+    t1 = get_time();
+    printf("pow_zn %fs\n", t1 - t0);
+
     element_clear(x);
     element_clear(y);
     element_clear(z);

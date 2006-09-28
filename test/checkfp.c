@@ -6,6 +6,8 @@
 
 static mpz_t prime;
 
+enum { VERBOSE = 0 };
+
 static void check_match(element_t e1, element_t e2, char *s)
 {
     unsigned char *buf1, *buf2;
@@ -18,9 +20,11 @@ static void check_match(element_t e1, element_t e2, char *s)
 	exit(1);
     }
 
-    //printf("checking %s\n", s);
-    //element_printf("e1: %B\n", e1);
-    //element_printf("e2: %B\n", e2);
+    if (VERBOSE) {
+	printf("checking %s\n", s);
+	element_printf("e1: %B\n", e1);
+	element_printf("e2: %B\n", e2);
+    }
     len = element_length_in_bytes(e1);
     if (len != element_length_in_bytes(e2)) {
 	bug();
@@ -134,6 +138,9 @@ static void run_check(field_ptr f1, field_ptr f2)
     check_match(z1, z2, "sqrt");
     element_to_mpz(t1, y1);
     element_to_mpz(t2, y2);
+    element_set_mpz(y1, t1);
+    element_set_mpz(y2, t2);
+    check_match(y1, y2, "set_mpz");
     element_mul_mpz(z1, x1, t1);
     element_mul_mpz(z2, x2, t2);
     check_match(z1, z2, "mul_mpz");
@@ -175,7 +182,10 @@ int main(void)
     mpz_init(z);
     mpz_init(prime);
     mpz_set_ui(prime, 82);
-    mpz_setbit(prime, 32);
+    mpz_setbit(prime, 63);
+    mpz_setbit(prime, 62);
+    mpz_setbit(prime, 61);
+    mpz_setbit(prime, 60);
     mpz_nextprime(prime, prime);
 
     element_printf("prime = %Z\n", prime);
