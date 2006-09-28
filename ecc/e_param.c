@@ -634,7 +634,7 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     mpz_set(pairing->r, param->r);
     field_init_fp(pairing->Zr, pairing->r);
     pairing->map = e_pairing;
-    e_miller_fn = e_miller_affine;
+    e_miller_fn = e_miller_proj;
 
     p =	pairing->data = malloc(sizeof(e_pairing_data_t));
     p->exp2 = param->exp2;

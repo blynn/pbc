@@ -47,11 +47,10 @@ static void mont_reduce(mp_limb_t *x, mp_limb_t *y, fp_field_data_ptr p)
 	//mpn_add_1(&y[i+t], &y[i+t], t - i + 1, carry);
 	flag += mpn_add_1(&y[i+t], &y[i+t], t - i, carry);
     }
-    //TODO: do I need to check flag?
     if (flag || mpn_cmp(&y[t], p->primelimbs, t) >= 0) {
 	mpn_sub_n(x, &y[t], p->primelimbs, t);
     } else {
-	//TODO: GMP set
+	//TODO: GMP set?
 	memcpy(x, &y[t], t * sizeof(mp_limb_t));
     }
 }
@@ -324,8 +323,15 @@ static inline void mont_mul(mp_limb_t *c, mp_limb_t *a, mp_limb_t *b,
     if (z[t * 2] || mpn_cmp(z + t, p->primelimbs, t) >= 0) {
 	mpn_sub_n(c, z + t, p->primelimbs, t);
     } else {
-	//TODO: GMP set
 	memcpy(c, z + t, t * sizeof(mp_limb_t));
+	//doesn't seem to make a difference:
+	/*
+	mpz_t z1, z2;
+	z1->_mp_d = c;
+	z2->_mp_d = z + t;
+	z1->_mp_size = z1->_mp_alloc = z2->_mp_size = z2->_mp_alloc = t;
+	mpz_set(z1, z2);
+	*/
     }
 
 }
