@@ -113,13 +113,13 @@ static void poly_set(element_ptr dst, element_ptr src)
     }
 }
 
-static int poly_sign(element_ptr f)
+static int poly_sgn(element_ptr f)
 {
     int res = 0;
     int i;
     int n = poly_coeff_count(f);
     for (i=0; i<n; i++) {
-	res = element_sign(poly_coeff(f, i));
+	res = element_sgn(poly_coeff(f, i));
 	if (res) break;
     }
     return res;
@@ -629,7 +629,7 @@ void field_init_poly(field_ptr f, field_ptr base_field)
     f->to_mpz = poly_to_mpz;
     f->out_str = poly_out_str;
     f->set = poly_set;
-    f->sign = poly_sign;
+    f->sign = poly_sgn;
     f->add = poly_add;
     f->doub = poly_double;
     f->is0 = poly_is0;
@@ -1338,6 +1338,20 @@ static void polymod_set1(element_ptr e)
     }
 }
 
+static int polymod_sgn(element_ptr e)
+{
+    polymod_field_data_ptr p = e->field->data;
+    element_t *coeff = e->data;
+    int res = 0;
+    int i, n = p->n;
+    for (i=0; i<n; i++) {
+	res = element_sgn(coeff[i]);
+	if (res) break;
+    }
+    return res;
+}
+
+
 static size_t polymod_out_str(FILE *stream, int base, element_ptr e)
 {
     size_t result = 2, status;
@@ -1422,7 +1436,7 @@ void field_init_polymod(field_ptr f, element_ptr poly)
     f->set_mpz = polymod_set_mpz;
     f->out_str = polymod_out_str;
     f->set = polymod_set;
-    f->sign = poly_sign;
+    f->sign = polymod_sgn;
     f->add = polymod_add;
     f->doub = polymod_double;
     f->sub = polymod_sub;

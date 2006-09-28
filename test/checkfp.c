@@ -20,6 +20,25 @@ static void check_p(int value, char *s)
     }
 }
 
+static void check_match_int(int i1, int i2, char *s)
+{
+    void bug(void)
+    {
+	printf("BUG: %s mismatch\n", s);
+	element_printf("i1: %d\n", i1);
+	element_printf("i2: %d\n", i2);
+	exit(1);
+    }
+
+    if (VERBOSE) {
+	printf("checking %s\n", s);
+	element_printf("i1: %d\n", i1);
+	element_printf("i2: %d\n", i2);
+    }
+
+    if (i1 != i2) bug();
+}
+
 static void check_match(element_t e1, element_t e2, char *s)
 {
     unsigned char *buf1, *buf2;
@@ -119,6 +138,7 @@ static void run_check(field_ptr f1, field_ptr f2)
     check_match(z1, z2, "add (to zero)");
     check_p(element_is0(z1), "is0");
     check_p(element_is0(z2), "is0");
+    check_match_int(element_sgn(z1), element_sgn(z2), "sgn");
     element_invert(y1, x1);
     element_invert(y2, x2);
     check_match(y1, y2, "invert");

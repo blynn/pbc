@@ -285,6 +285,25 @@ static int fp_cmp(element_ptr a, element_ptr b)
     //return memcmp(a->data, b->data, p->limbs);
 }
 
+static int fp_sgn_odd(element_ptr a)
+{
+    fp_field_data_ptr p = a->field->data;
+    if (fp_is0(a)) return 0;
+    mp_limb_t *lp = a->data;
+    return lp[p->limbs - 1] & 1 ? 1 : -1;
+}
+
+static int fp_sgn_even(element_ptr a)
+{
+    fp_field_data_ptr p = a->field->data;
+    if (fp_is0(a)) return 0;
+    mp_limb_t sum[p->limbs];
+
+    int carry = mpn_add_n(sum, a->data, a->data, p->limbs);
+    if (carry) return 1;
+    return mpn_cmp(sum, p->primelimbs, p->limbs);
+}
+
 static int fp_is_sqr(element_ptr a)
 {
     int res;
@@ -368,6 +387,7 @@ void field_init_fast_fp(field_ptr f, mpz_t prime)
     f->pow_mpz = fp_pow_mpz;
     f->neg = fp_neg;
     f->cmp = fp_cmp;
+    f->sign = mpz_odd_p(prime) ? fp_sgn_odd : fp_sgn_even;
     f->invert = fp_invert;
     f->random = fp_random;
     f->from_hash = fp_from_hash;

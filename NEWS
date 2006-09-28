@@ -1,3 +1,24 @@
+Thu Sep 28 12:53:29 PDT 2006
+
+I had forgotten to test/implement sgn() functions for fastfp.c, faster.c,
+montfp.c. It was also wrong in poly.c. Now I've fixed it, and also
+changed the behaviour slightly. If p is odd, it checks if the underlying mpz
+is even or odd, otherwise it uses the old method.
+
+This does mean the output of older versions of the library will be
+incompatible (compressed output will be different).
+
+Thu Sep 28 05:22:31 PDT 2006
+
+montfp.c works:
+
+a	0.015992	0.007474
+d159	0.028168	0.023247
+d201	0.045338	0.038576
+d224	0.054687	0.044857
+e	0.105076	0.105282
+f	0.116214	0.118412
+
 Thu Sep 28 02:22:59 PDT 2006
 
 I thought I was previously using mpz_import and mpz_export incorrectly for

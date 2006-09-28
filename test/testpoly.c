@@ -7,7 +7,6 @@ int main(void)
     mpz_t prime;
     element_t a;
     element_t f, g;
-pbc_tweak_use_fp("mont");
 
     mpz_init(prime);
     mpz_set_ui(prime, 100000);

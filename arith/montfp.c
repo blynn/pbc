@@ -427,6 +427,37 @@ static int fp_cmp(element_ptr a, element_ptr b)
     }
 }
 
+static int fp_sgn_odd(element_ptr a)
+{
+    dataptr ad = a->data;
+    if (!ad->flag) return 0;
+    else {
+	mpz_t z;
+	mpz_init(z);
+	int res;
+	fp_to_mpz(z, a);
+	res = mpz_odd_p(z) ? 1 : -1;
+	mpz_clear(z);
+	return res;
+    }
+}
+
+static int fp_sgn_even(element_ptr a)
+{
+    dataptr ad = a->data;
+    if (!ad->flag) return 0;
+    else {
+	mpz_t z;
+	mpz_init(z);
+	int res;
+	fp_to_mpz(z, a);
+	mpz_add(z, z, z);
+	res = mpz_cmp(z, a->field->order);
+	mpz_clear(z);
+	return res;
+    }
+}
+
 static int fp_is_sqr(element_ptr a)
 {
     dataptr ad = a->data;
@@ -518,6 +549,7 @@ void field_init_mont_fp(field_ptr f, mpz_t prime)
     f->doub = fp_double;
     f->pow_mpz = fp_pow_mpz;
     f->neg = fp_neg;
+    f->sign = mpz_odd_p(prime) ? fp_sgn_odd : fp_sgn_even;
     f->cmp = fp_cmp;
     f->invert = fp_invert;
     f->random = fp_random;

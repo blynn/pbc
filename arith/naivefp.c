@@ -47,16 +47,30 @@ static size_t zp_out_str(FILE *stream, int base, element_ptr e)
     return mpz_out_str(stream, base, e->data);
 }
 
-static int zp_sign(element_ptr a)
+static int zp_sgn_odd(element_ptr a)
+{
+    int res;
+    mpz_ptr z = a->data;
+
+    if (mpz_is0(z)) {
+	res = 0;
+    } else {
+	if (mpz_odd_p(z)) res = 1;
+	else res = -1;
+    }
+    return res;
+}
+
+static int zp_sgn_even(element_ptr a)
 {
     mpz_t z;
     mpz_init(z);
     int res;
 
-    mpz_add(z, a->data, a->data);
-    if (mpz_is0(z)) {
+    if (mpz_is0(a->data)) {
 	res = 0;
     } else {
+	mpz_add(z, a->data, a->data);
 	res = mpz_cmp(z, a->field->order);
     }
     mpz_clear(z);
@@ -256,7 +270,7 @@ void field_init_naive_fp(field_ptr f, mpz_t prime)
     f->set_si = zp_set_si;
     f->set_mpz = zp_set_mpz;
     f->out_str = zp_out_str;
-    f->sign = zp_sign;
+    f->sign = mpz_odd_p(prime) ? zp_sgn_odd : zp_sgn_even;
     f->add = zp_add;
     f->sub = zp_sub;
     f->set = zp_set;

@@ -316,10 +316,8 @@ static inline int element_sgn(element_t a)
 
 /*@manual ecmp
 If ''a'' is zero, returns 0. For nozero ''a'' the behaviour depends on
-the algebraic structure.
-For ''a'' in Z_p, returns -1 if ''a'' &lt; p, 1 otherwise.
-For ''a'' in a polynomial ring, returns <function>element_sgn</function>
-called on the coefficient of the lowest degree term.
+the algebraic structure, but has the property that
+element_sgn(''a'') = -element_sgn(-''a'').
 Not implemented on elliptic curve groups yet.
 */
 static inline int element_sign(element_t a)
