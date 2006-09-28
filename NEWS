@@ -8,6 +8,8 @@ is even or odd, otherwise it uses the old method.
 This does mean the output of older versions of the library will be
 incompatible (compressed output will be different).
 
+[0.3.7]
+
 Thu Sep 28 05:22:31 PDT 2006
 
 montfp.c works:

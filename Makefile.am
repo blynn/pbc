@@ -27,7 +27,8 @@ library_include_HEADERS = include/a_param.h include/d_param.h include/darray.h i
 libpbc_la_CPPFLAGS = -Iinclude
 libpbc_la_SOURCES = arith/field.c arith/tinyfp.c \
 	arith/naivefp.c arith/fastfp.c \
-	arith/fp.c arith/fasterfp.c arith/fieldquadratic.c arith/poly.c \
+	arith/fp.c arith/fasterfp.c arith/montfp.c \
+	arith/fieldquadratic.c arith/poly.c \
 	arith/random.c misc/parse.c misc/darray.c misc/symtab.c misc/get_time.c \
 	misc/fops.c ecc/mpc.c ecc/mnt.c ecc/hilbert.c ecc/curve.c ecc/pairing.c \
 	ecc/param.c ecc/a1_param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
