@@ -83,20 +83,60 @@ http://www.swox.com/gmp/</ulink>
 <para>
 The PBC library needs the GMP library, which can be found at
 <ulink url="http://www.swox.com/gmp/">http://www.swox.com/gmp/</ulink>
+Alternative ways to install PBC are provided.
 </para>
-<para>
+<variablelist>
+<varlistentry><term>
+GNU Build System (autotools)
+</term>
+<listitem><para>
 This build system has been tested and works on Linux and Mac OS X with a
-fink installation.  You may need to specify paths via LDFLAGS and
-CPPFLAGS if libraries are located in places other than the default
-assumed in configure.ac.  See ./configure --help for more information.
+fink installation.
 </para>
 <screen>
 ./configure
 make
 make install
 </screen>
+</listitem>
+</varlistentry>
+
+<varlistentry><term>
+CMake
+</term>
+<listitem><para>
+A <filename>CMakeLists.txt</filename> is also provided.
+CMake is a newer tool that I prefer to use.
+</para>
+<screen>
+cmake .
+make
+</screen>
+</listitem>
+</varlistentry>
+
+<varlistentry><term>
+Make
+</term>
+<listitem><para>
+If the above methods do not work, one can always resort to the editing
+the file
+<filename>Makefile.orig</filename>
+and running Make:
+</para>
+<screen>
+make -f Makefile.orig
+</screen>
 <para>
-PBC uses some GNU C extensions, notably nested functions, and also
+Another file named <filename>Makefile.mingw</filename> is written
+for the MinGW compiler, but is not often tested.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+<para>
+PBC uses some GNU C extensions, notably nested functions and
 printf extensions. The latter may be safely commented out as it is only
 used in demonstration programs.
 </para>

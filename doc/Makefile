@@ -27,11 +27,14 @@ manual.html : $(SRCFILES) custom-nochunks.xsl
 manual.txt : manual.html
 	html2text -nobs -style pretty manual.html > manual.txt
 
+manual.pdf : $(SRCFILES)
+	docbook2pdf manual.xml
+
 pdf : $(SRCFILES)
 	docbook2pdf manual.xml
 
 clean :
-	-rm -rf pretty/*.html chunked/*.html manual.html manual.txt
+	-rm -rf pretty/*.html chunked manual.html manual.txt gen forsite.tar.bz2 manual.pdf
 
 forsite:
 	tar cvfj forsite.tar.bz2 manual.txt manual.html default.css pretty chunked

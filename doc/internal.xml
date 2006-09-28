@@ -335,20 +335,26 @@ I chose C for several reasons:
 </para>
 <orderedlist>
 <listitem>
+<para>
 GMP, which PBC requires and is also modeled on, is also written in C.
+</para>
 </listitem>
 <listitem>
+<para>
 PBC is intended to be a low-level portable cryptographic library.
 C is the least common denominator. It should not be difficult
 to wrap PBC for other languages.
+</para>
 </listitem>
 <listitem>
+<para>
 Despite its drawbacks (I could really use operator overloading and
 genericity),
 I've found few languages I like better.
 To quote Rob Pike, C is the desert island language. (I also agree
 with his statement that OO languages conceptually provide little
 extra over judicious use of function pointers in C.)
+</para>
 </listitem>
 </orderedlist>
 <para>

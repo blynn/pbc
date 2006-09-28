@@ -96,6 +96,11 @@ depend:
 
 arith/field.o: include/field.h
 arith/naivefp.o: include/field.h include/random.h include/utils.h
+arith/naivefp.o: include/fp.h
+arith/tinyfp.o: include/field.h include/random.h include/fp.h
+arith/fp.o: include/field.h include/fp.h
+arith/fastfp.o: include/field.h include/random.h include/fp.h
+arith/fasterfp.o: include/field.h include/random.h include/fp.h
 arith/fieldquadratic.o: include/field.h include/fieldquadratic.h
 arith/poly.o: include/field.h include/darray.h include/poly.h
 arith/random.o: include/random.h include/utils.h
@@ -119,26 +124,28 @@ ecc/pairing.o: include/strclone.h include/utils.h
 ecc/param.o: include/symtab.h include/darray.h include/fops.h include/parse.h
 ecc/param.o: include/tracker.h include/utils.h include/strclone.h
 ecc/a1_param.o: include/symtab.h include/darray.h include/fops.h
-ecc/a1_param.o: include/field.h include/fieldquadratic.h include/pairing.h
-ecc/a1_param.o: include/a1_param.h include/poly.h include/curve.h
-ecc/a1_param.o: include/param.h include/tracker.h
+ecc/a1_param.o: include/field.h include/fp.h include/fieldquadratic.h
+ecc/a1_param.o: include/pairing.h include/a1_param.h include/poly.h
+ecc/a1_param.o: include/curve.h include/param.h include/tracker.h
 ecc/a_param.o: include/symtab.h include/darray.h include/fops.h
-ecc/a_param.o: include/field.h include/fieldquadratic.h include/pairing.h
-ecc/a_param.o: include/a_param.h include/poly.h include/curve.h
-ecc/a_param.o: include/param.h include/random.h include/tracker.h
+ecc/a_param.o: include/field.h include/fp.h include/fieldquadratic.h
+ecc/a_param.o: include/pairing.h include/a_param.h include/poly.h
+ecc/a_param.o: include/curve.h include/param.h include/random.h
+ecc/a_param.o: include/tracker.h include/utils.h
 ecc/d_param.o: include/fops.h include/symtab.h include/darray.h
-ecc/d_param.o: include/field.h include/poly.h include/fieldquadratic.h
-ecc/d_param.o: include/hilbert.h include/mnt.h include/curve.h
-ecc/d_param.o: include/pairing.h include/d_param.h include/param.h
-ecc/d_param.o: include/tracker.h
+ecc/d_param.o: include/field.h include/poly.h include/fp.h
+ecc/d_param.o: include/fieldquadratic.h include/hilbert.h include/mnt.h
+ecc/d_param.o: include/curve.h include/pairing.h include/d_param.h
+ecc/d_param.o: include/param.h include/tracker.h include/utils.h
 ecc/e_param.o: include/fops.h include/symtab.h include/darray.h
-ecc/e_param.o: include/field.h include/pairing.h include/e_param.h
-ecc/e_param.o: include/param.h include/curve.h include/random.h
-ecc/e_param.o: include/tracker.h
+ecc/e_param.o: include/field.h include/fp.h include/pairing.h
+ecc/e_param.o: include/e_param.h include/param.h include/curve.h
+ecc/e_param.o: include/random.h include/tracker.h include/utils.h
 ecc/f_param.o: include/fops.h include/symtab.h include/darray.h
-ecc/f_param.o: include/field.h include/fieldquadratic.h include/pairing.h
-ecc/f_param.o: include/f_param.h include/param.h include/poly.h
-ecc/f_param.o: include/curve.h include/tracker.h include/utils.h
+ecc/f_param.o: include/field.h include/fp.h include/fieldquadratic.h
+ecc/f_param.o: include/pairing.h include/f_param.h include/param.h
+ecc/f_param.o: include/poly.h include/curve.h include/tracker.h
+ecc/f_param.o: include/utils.h include/get_time.h
 sig/hash.o: include/hash.h
 sig/sig.o: include/pbc_sig.h include/pbc.h include/fops.h include/symtab.h
 sig/sig.o: include/darray.h include/field.h include/pairing.h include/poly.h
@@ -197,14 +204,14 @@ test/testpairing.o: include/darray.h include/field.h include/pairing.h
 test/testpairing.o: include/poly.h include/curve.h include/mnt.h
 test/testpoly.o: include/pbc.h include/fops.h include/symtab.h
 test/testpoly.o: include/darray.h include/field.h include/pairing.h
-test/testpoly.o: include/poly.h include/curve.h include/mnt.h
+test/testpoly.o: include/poly.h include/curve.h include/mnt.h include/fp.h
 test/benchmark.o: include/pbc.h include/fops.h include/symtab.h
 test/benchmark.o: include/darray.h include/field.h include/pairing.h
 test/benchmark.o: include/poly.h include/curve.h include/mnt.h
 test/benchmark.o: include/get_time.h
 test/19.o: include/pbc.h include/fops.h include/symtab.h include/darray.h
 test/19.o: include/field.h include/pairing.h include/poly.h include/curve.h
-test/19.o: include/mnt.h include/fieldquadratic.h
+test/19.o: include/mnt.h include/fp.h include/fieldquadratic.h
 test/sing.o: include/pbc.h include/fops.h include/symtab.h include/darray.h
 test/sing.o: include/field.h include/pairing.h include/poly.h include/curve.h
-test/sing.o: include/mnt.h
+test/sing.o: include/mnt.h include/fp.h
