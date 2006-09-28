@@ -160,10 +160,7 @@ static int fp_is1(element_ptr e)
     if (!dp->flag) return 0;
     else {
 	fp_field_data_ptr p = e->field->data;
-	size_t i, t = p->limbs;
-	if (dp->d[0] != 1) return 0;
-	for (i=1; i<t; i++) if (dp->d[i]) return 0;
-	return 1;
+	return !mpn_cmp(dp->d, p->R, p->limbs);
     }
 }
 

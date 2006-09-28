@@ -8,6 +8,18 @@ static mpz_t prime;
 
 enum { VERBOSE = 0 };
 
+static void check_p(int value, char *s)
+{
+    if (!value) {
+	printf("BUG: %s predicate wrong\n", s);
+	exit(1);
+    }
+
+    if (VERBOSE) {
+	printf("checking %s\n", s);
+    }
+}
+
 static void check_match(element_t e1, element_t e2, char *s)
 {
     unsigned char *buf1, *buf2;
@@ -105,12 +117,16 @@ static void run_check(field_ptr f1, field_ptr f2)
     element_add(z1, x1, y1);
     element_add(z2, x2, y2);
     check_match(z1, z2, "add (to zero)");
+    check_p(element_is0(z1), "is0");
+    check_p(element_is0(z2), "is0");
     element_invert(y1, x1);
     element_invert(y2, x2);
     check_match(y1, y2, "invert");
     element_mul(z1, x1, y1);
     element_mul(z2, x2, y2);
     check_match(z1, z2, "mul (to one)");
+    check_p(element_is1(z1), "is1");
+    check_p(element_is1(z2), "is1");
     element_square(z1, x1);
     element_square(z2, x2);
     check_match(z1, z2, "square");
