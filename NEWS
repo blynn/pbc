@@ -1,3 +1,9 @@
+Thu Sep 28 15:06:44 PDT 2006
+
+I rewrote element_vfprintf() to avoid GNU C extensions.
+
+[0.3.8]
+
 Thu Sep 28 12:53:29 PDT 2006
 
 I had forgotten to test/implement sgn() functions for fastfp.c, faster.c,

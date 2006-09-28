@@ -48,7 +48,7 @@
 <preface><title>Preface</title>
 <para>
 This manual describes how to install and use the PBC pairing-based
-cryptography library, version 0.3.7.
+cryptography library, version 0.3.8.
 </para>
 <para>
 It is modeled on the GMP manual. GMP is the GNU multiple precision
@@ -136,11 +136,7 @@ for the MinGW compiler, but is not often tested.
 
 </variablelist>
 <para>
-PBC uses some GNU C extensions, notably nested functions and
-printf extensions. The latter may be safely commented out as it is only
-used in demonstration programs.
-</para>
-<para>
+PBC uses some GNU C extensions, notably nested functions.
 For efficiency, some of the lower-level PBC code relies on some GMP internals,
 which may change in future releases. In that case, the PBC code will also
 have to be updated.
