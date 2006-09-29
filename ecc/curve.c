@@ -427,6 +427,17 @@ static void curve_group_mul(element_ptr x, element_ptr a, element_ptr b)
     point_add(x->data, a->data, b->data);
 }
 
+static void curve_group_div(element_ptr x, element_ptr a, element_ptr b)
+{
+    if (a == b) {
+	point_set_inf(x->data);
+    } else {
+	point_neg(b->data, b->data);
+	point_add(x->data, a->data, b->data);
+	point_neg(b->data, b->data);
+    }
+}
+
 static void curve_group_set1(element_ptr x)
 {
     point_set_inf(x->data);
@@ -503,6 +514,7 @@ void field_init_curve_group(field_t f, curve_t c, mpz_t cofac)
     f->clear = curve_group_clear;
     f->neg = f->invert = curve_group_invert;
     f->add = f->mul = curve_group_mul;
+    f->sub = curve_group_div;
     f->set0 = f->set1 = curve_group_set1;
     f->set = curve_group_set;
     f->random = curve_group_random;

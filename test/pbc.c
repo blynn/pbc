@@ -1,6 +1,6 @@
 // Pairing-Based Calculator
 // meant for demos only
-// long-term plan: write wrappers for scripting language like Lua
+// for real scripting: write wrappers for scripting language like Lua
 //
 // It's times like these I wish C had garbage collection
 
@@ -203,7 +203,8 @@ static tree_ptr parseterm(void)
 	switch(tok_type) {
 	    case t_mul:
 		lex();
-		t1 = tree_new(t_mul, NULL);
+		//t1 = tree_new(t_mul, NULL);
+		t1 = tree_new(t_function, id_new("element_mul"));
 		t2 = parsefactor();
 		darray_append(t1->child, res);
 		darray_append(t1->child, t2);
@@ -211,7 +212,8 @@ static tree_ptr parseterm(void)
 		break;
 	    case t_div:
 		lex();
-		t1 = tree_new(t_div, NULL);
+		//t1 = tree_new(t_div, NULL);
+		t1 = tree_new(t_function, id_new("element_div"));
 		t2 = parsefactor();
 		darray_append(t1->child, res);
 		darray_append(t1->child, t2);
@@ -231,7 +233,8 @@ static tree_ptr parseexpr(void)
 	switch(tok_type) {
 	    case t_add:
 		lex();
-		t1 = tree_new(t_add, NULL);
+		//t1 = tree_new(t_add, NULL);
+		t1 = tree_new(t_function, id_new("element_add"));
 		t2 = parseterm();
 		darray_append(t1->child, res);
 		darray_append(t1->child, t2);
@@ -239,7 +242,8 @@ static tree_ptr parseexpr(void)
 		break;
 	    case t_sub:
 		lex();
-		t1 = tree_new(t_sub, NULL);
+		//t1 = tree_new(t_sub, NULL);
+		t1 = tree_new(t_function, id_new("element_sub"));
 		t2 = parseterm();
 		darray_append(t1->child, res);
 		darray_append(t1->child, t2);
@@ -271,7 +275,7 @@ static void print_tree(tree_ptr t)
     id_ptr id;
     int i;
     if (!t) {
-	printf("NULL\n");
+	printf("NULL");
 	return;
     }
     switch (t->type) {
@@ -279,7 +283,6 @@ static void print_tree(tree_ptr t)
 	    print_tree(t->child->item[0]);
 	    printf(" = ");
 	    print_tree(t->child->item[1]);
-	    printf("\n");
 	    break;
 	case t_id:
 	    id = t->data;
@@ -290,11 +293,12 @@ static void print_tree(tree_ptr t)
 	    printf("%s(", id->data);
 	    for (i=0; i<t->child->count; i++) {
 		print_tree(t->child->item[i]);
+		if (i < t->child->count - 1) printf(", ");
 	    }
-	    printf(")\n");
+	    printf(")");
 	    break;
 	default:
-	    printf("?!?\n");
+	    printf("?!?");
 	    break;
     }
 }
@@ -349,6 +353,8 @@ val_ptr val_copy(val_ptr v)
     val_ptr res = malloc(sizeof(struct val_s));
     res->type = v->type;
     if (v->type == t_element) {
+	//current policy: always clear elements, always copy elements
+	res->data = malloc(sizeof(element_t));
 	element_ptr e = v->data;
 	element_init(res->data, e->field);
 	element_set(res->data, e);
@@ -387,10 +393,8 @@ struct fun_s {
 };
 
 typedef val_ptr (*fun)(darray_ptr);
-static val_ptr f_pairing_new_a_default(darray_ptr arg)
-{
-    UNUSED_VAR(arg);
-    static char *param =
+
+static char *aparam =
 "type a\n\
 q 8780710799663312522437781984754049815806883199414208211028653399266475630880222957078625179422662221423155858769582317459277713367317481324925129998224791\n\
 h 12016012264891146079388821366740534204802954401251311822919615131047207289359704531102844802183906537786776\n\
@@ -399,8 +403,11 @@ exp2 159\n\
 exp1 107\n\
 sign1 1\n\
 sign0 1\n";
+static val_ptr f_pairing_new_a_default(darray_ptr arg)
+{
+    UNUSED_VAR(arg);
     pairing_ptr p = malloc(sizeof(pairing_t));
-    pairing_init_inp_buf(p, param, strlen(param));
+    pairing_init_inp_buf(p, aparam, strlen(aparam));
     return val_new(t_pairing, p);
 }
 
@@ -443,6 +450,86 @@ static val_ptr f_random(darray_ptr arg)
     return res;
 }
 
+static val_ptr f_unary(
+	void (*unary)(element_ptr, element_ptr), darray_ptr arg)
+{
+    val_ptr res;
+    val_ptr a0 = arg->item[0];
+    if (a0->type != t_element) {
+	printf("arg not element!\n");
+	return NULL;
+    }
+    element_ptr e0 = a0->data;
+    element_ptr e = malloc(sizeof(element_t));
+    element_init(e, e0->field);
+    unary(e, e0);
+    res = val_new(t_element, e);
+    return res;
+}
+
+static val_ptr f_bin_op(
+	void (*binop)(element_ptr, element_ptr, element_ptr),
+	darray_ptr arg)
+{
+    val_ptr res;
+    val_ptr a0 = arg->item[0];
+    val_ptr a1 = arg->item[1];
+    if (a0->type != t_element) {
+	printf("left arg not element!\n");
+	return NULL;
+    }
+    if (a1->type != t_element) {
+	printf("right arg not element!\n");
+	return NULL;
+    }
+    element_ptr e0 = a0->data;
+    element_ptr e1 = a1->data;
+    if (e0->field != e1->field) {
+	printf("field mismatch!\n");
+	return NULL;
+    }
+    element_ptr e = malloc(sizeof(element_t));
+    element_init(e, e0->field);
+    binop(e, e0, e1);
+    res = val_new(t_element, e);
+    return res;
+}
+
+
+static val_ptr f_add(darray_ptr arg)
+{
+    return f_bin_op(element_add, arg);
+}
+
+static val_ptr f_mul(darray_ptr arg)
+{
+    return f_bin_op(element_mul, arg);
+}
+
+static val_ptr f_sub(darray_ptr arg)
+{
+    return f_bin_op(element_sub, arg);
+}
+
+static void invertandmul(element_ptr c, element_ptr a, element_ptr b)
+{
+    element_t tmp;
+    element_init(tmp, b->field);
+    element_invert(tmp, b);
+    element_mul(c, a, tmp);
+    element_clear(tmp);
+}
+
+static val_ptr f_div(darray_ptr arg)
+{
+    return f_bin_op(invertandmul, arg);
+}
+
+static val_ptr f_inv(darray_ptr arg)
+{
+    return f_unary(element_invert, arg);
+}
+
 static val_ptr execute_tree(tree_ptr t)
 {
     darray_t arg;
@@ -455,19 +542,15 @@ static val_ptr execute_tree(tree_ptr t)
     switch (t->type) {
 	case t_id:
 	    id = t->data;
-	    printf("var lookup %s\n", id->data);
 	    v = symtab_at(var, id->data);
-	    printf("var type %d\n", v->type);
 	    if (!v) {
 		printf("no such variable\n");
 		res = NULL;
 		break;
 	    }
 	    res = val_copy(v);
-	    printf("var lookup done\n");
 	    break;
 	case t_set:
-	    printf("set begin\n");
 	    t1 = t->child->item[0];
 	    if (t1->type != t_id) {
 		printf("invalid lvalue\n");
@@ -475,18 +558,17 @@ static val_ptr execute_tree(tree_ptr t)
 		break;
 	    }
 	    t2 = t->child->item[1];
-printf("set exec\n");
 	    v = execute_tree(t2);
-printf("set symput\n");
 	    id = t1->data;
+	    // clear what's there first
+	    if ((res = symtab_at(var, id->data))) {
+		val_delete(res);
+	    }
 	    symtab_put(var, v, id->data);
-printf("set copy\n");
 	    res = val_copy(v);
-printf("set done\n");
 	    break;
 	case t_function:
 	    id = t->data;
-printf("function %s\n", id->data);
 	    fn = symtab_at(builtin, id->data);
 	    if (!fn) {
 		printf("no such function %s\n", id->data);
@@ -496,9 +578,7 @@ printf("function %s\n", id->data);
 	    for (i=0; i<t->child->count; i++) {
 		darray_append(arg, execute_tree(t->child->item[i]));
 	    }
-printf("fun call\n");
 	    res = fn(arg);
-printf("fun ret\n");
 	    for (i=0; i<arg->count; i++) {
 		val_delete(arg->item[i]);
 	    }
@@ -519,13 +599,18 @@ static void parseline(char *line)
     lexcp = line;
     lex();
     t = parsesetexpr();
-    if (1) print_tree(t);
-    v = execute_tree(t);
-    if (!v) {
-	printf("error\n");
-    } else {
-	val_print(v);
-	val_delete(v);
+    if (0) {
+	print_tree(t);
+	printf("\n");
+    }
+    if (t) {
+	v = execute_tree(t);
+	if (!v) {
+	    printf("error\n");
+	} else {
+	    if (t->type != t_set) val_print(v);
+	    val_delete(v);
+	}
     }
 }
 
@@ -535,12 +620,23 @@ int main(void)
     symtab_init(var);
     symtab_init(builtin);
 
+    pairing_ptr p = malloc(sizeof(pairing_t));
+    pairing_init_inp_buf(p, aparam, strlen(aparam));
+    symtab_put(var, val_new(t_pairing, p), "pbcA");
+
     symtab_put(builtin, f_pairing_new_a_default, "pairing_new_a_default");
-    symtab_put(builtin, f_pairing_G1, "pairing_G1");
-    symtab_put(builtin, f_pairing_G2, "pairing_G2");
-    symtab_put(builtin, f_pairing_GT, "pairing_GT");
+    symtab_put(builtin, f_pairing_G1, "getG1");
+    symtab_put(builtin, f_pairing_G2, "getG2");
+    symtab_put(builtin, f_pairing_GT, "getGT");
     symtab_put(builtin, f_random, "random");
-    printf("Pairing-Based Calculator\n");
+    symtab_put(builtin, f_random, "rand");
+    symtab_put(builtin, f_random, "rnd");
+    symtab_put(builtin, f_sub, "element_sub");
+    symtab_put(builtin, f_add, "element_add");
+    symtab_put(builtin, f_mul, "element_mul");
+    symtab_put(builtin, f_inv, "element_inv");
+    symtab_put(builtin, f_div, "element_div");
+    fprintf(stderr, "pbc\n");
 
     for (;;) {
 	gets(s); //TODO: the dreaded gets(), useful for rapid development though

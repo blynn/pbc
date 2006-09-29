@@ -57,6 +57,7 @@ set(optflags "-O3 -ffast-math -fomit-frame-pointer \\
 )
 set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${optflags}")
 
+#set(CMAKE_EXECUTABLE_SUFFIX ".exe")
 #set(CMAKE_COMPILER_IS_GNUCXX 1)
 #set(CMAKE_CXX_COMPILER "i586-mingw32msvc-c++")
 #set(CMAKE_C_COMPILER "i586-mingw32msvc-gcc")
