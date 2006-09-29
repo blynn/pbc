@@ -542,7 +542,7 @@ static val_ptr f_pairing_get_group(
 {
     val_ptr res;
     if (arg->count != 1) {
-	//printf("expect one argument\n");
+	printf("expect one argument\n");
 	return NULL;
     }
     val_ptr a0 = arg->item[0];

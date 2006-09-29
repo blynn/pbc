@@ -1,7 +1,7 @@
 # Makefile for generating manual in various formats from DocBook sources
 .PHONY: target genxml
 
-target : pretty/index.html manual.html manual.txt chunked/index.html
+target : pretty/index.html
 
 GENFILES:=gen/*.xml
 SRCFILES:=*.xml $(GENFILES)
@@ -34,7 +34,7 @@ pdf : $(SRCFILES)
 	docbook2pdf manual.xml
 
 clean :
-	-rm -rf pretty/*.html chunked manual.html manual.txt gen forsite.tar.bz2 manual.pdf
+	-rm -rf pretty/*.html chunked manual.html manual.txt gen forsite.tar.bz2 manual.pdf manual.tex
 
-forsite:
-	tar cvfj forsite.tar.bz2 manual.txt manual.html default.css pretty chunked
+forsite: pretty/index.html manual.html manual.txt chunked/index.html manual.pdf
+	tar cvfj forsite.tar.bz2 $^

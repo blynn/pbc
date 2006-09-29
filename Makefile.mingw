@@ -22,7 +22,7 @@ TARGET_DIR:=/usr/local
 # add a new .c file to exactly one of these ...
 libpbc_srcs := \
 	arith/field.c arith/fp.c arith/tinyfp.c arith/naivefp.c \
-	arith/fastfp.c arith/fasterfp.c \
+	arith/fastfp.c arith/fasterfp.c arith/montfp.c \
 	arith/fieldquadratic.c arith/poly.c \
 	arith/random.c \
 	misc/parse.c misc/darray.c misc/symtab.c misc/get_time.win32.c \
@@ -40,7 +40,7 @@ test_srcs := test/testbls.c test/testbb.c test/testsig.c test/testbbs.c \
 	test/gena1param.c \
 	test/testpairing.c test/testpoly.c \
 	test/benchmark.c \
-	test/19.c test/sing.c
+	test/19.c test/sing.c test/pbc.c
 
 srcs := $(libpbc_srcs) $(libsig_srcs) $(test_srcs)
 libpbc_objs := $(libpbc_srcs:.c=.o)
@@ -82,6 +82,7 @@ test/listmnt: test/listmnt.o libpbc.a
 test/testpoly: test/testpoly.o libpbc.a
 test/19: test/19.o libpbc.a
 test/sing: test/sing.o libpbc.a
+test/pbc: test/pbc.o libpbc.a
 
 install: libpbc.a libpbc_sig.a
 	install -m 644 libpbc.a $(TARGET_DIR)/lib
@@ -107,12 +108,14 @@ arith/naivefp.o: include/field.h include/random.h include/utils.h
 arith/naivefp.o: include/fp.h
 arith/fastfp.o: include/field.h include/random.h include/fp.h
 arith/fasterfp.o: include/field.h include/random.h include/fp.h
+arith/montfp.o: include/field.h include/random.h include/fp.h
 arith/fieldquadratic.o: include/field.h include/fieldquadratic.h
 arith/poly.o: include/field.h include/darray.h include/poly.h
 arith/random.o: include/random.h include/utils.h
 misc/parse.o: include/fops.h include/parse.h include/tracker.h
 misc/darray.o: include/noleak.h include/darray.h
 misc/symtab.o: include/strclone.h include/symtab.h include/darray.h
+misc/get_time.win32.o: include/utils.h
 misc/extend_printf.o: include/utils.h include/field.h include/strclone.h
 ecc/mpc.o: include/darray.h include/mpc.h
 ecc/mnt.o: include/darray.h include/mnt.h
@@ -215,3 +218,6 @@ test/19.o: include/mnt.h include/fp.h include/fieldquadratic.h
 test/sing.o: include/pbc.h include/fops.h include/symtab.h include/darray.h
 test/sing.o: include/field.h include/pairing.h include/poly.h include/curve.h
 test/sing.o: include/mnt.h include/fp.h
+test/pbc.o: include/pbc.h include/fops.h include/symtab.h include/darray.h
+test/pbc.o: include/field.h include/pairing.h include/poly.h include/curve.h
+test/pbc.o: include/mnt.h include/utils.h

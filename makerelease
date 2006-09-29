@@ -1,0 +1,64 @@
+#!/bin/bash
+# perform sanity checks, make packages
+VER=`grep AC_INIT configure.ac | sed 's/.*\[\([0-9]*\.[0-9]*\.[0-9]*\)\].*/\1/'`
+echo making pbc-$VER
+GREPVER=${VER//\./\\.}
+cg-log > ChangeLog
+cat ChangeLog | head -20 | grep pbc-$GREPVER > /dev/null || {
+    echo cg-log does not mention release 
+    exit 1
+}
+grep $GREPVER NEWS > /dev/null || {
+    echo NEWS does not mention release 
+    exit 1
+}
+grep $GREPVER doc/manual.xml > /dev/null || {
+    echo Error: doc/manual.xml version number mismatch
+    exit 1
+}
+TMPDIR=`mktemp -d` || {
+    echo Error creating temp directory
+    exit 1
+}
+PBCDIR=$TMPDIR/pbc-$VER
+echo Creating tarball
+cg-export $PBCDIR
+HERE=`pwd`
+cp ChangeLog $PBCDIR
+cd $PBCDIR
+./setup || {
+    echo ./setup error
+    rm -rf $TMPDIR
+    exit 1
+}
+./configure || {
+    echo ./configure error
+    rm -rf $TMPDIR
+    exit 1
+}
+make dist || {
+    echo make dist error
+    rm -rf $TMPDIR
+    exit 1
+}
+mv $PBCDIR/pbc-$VER.tar.gz $HERE || {
+    echo Failed: mv $PBCDIR/pbc-$VER.tar.gz
+    rm -rf $TMPDIR
+    exit 1
+}
+echo Testing make
+make || {
+    echo make error
+    rm -rf $TMPDIR
+    exit 1
+}
+make clean
+echo cmake with cross compile
+cmake -Dcrossmingw:BOOL=1 . || {
+    echo mingw cross compile error
+    rm -rf $TMPDIR
+    exit 1
+}
+make
+zip $HERE/pbc-$VER-win32-bin.zip test/*.exe param/*
+rm -rf $TMPDIR

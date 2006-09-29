@@ -1,10 +1,5 @@
 /*
- * Behaves as printf with new conversion specifiers:
- * * 'B' for element_t,
- * * 'Z' for mpz_t, calls gmp_printf for this
- *
- * element_printf, element_fprintf call printf after changing
- *
+ * Behaves as gmp_printf with new conversion specifier %B for element_t types
  */
 
 #include <stdio.h>
