@@ -10,9 +10,7 @@ CPPFLAGS := -Iinclude
 warnflags := -Wall -W -Wfloat-equal -Wendif-labels -Wshadow \
 	     -Wpointer-arith -Wcast-align -Wstrict-prototypes \
              -Wredundant-decls #-std=c99 -pedantic
-#my laptop:
-turboflags := -march=pentium-m -mmmx -msse -msse2 -mfpmath=sse -malign-double -maccumulate-outgoing-args
-CFLAGS := -O3 $(warnflags) -pipe -ffast-math -fomit-frame-pointer $(turboflags)
+CFLAGS := -O3 $(warnflags) -pipe -ffast-math -fomit-frame-pointer
 #LDFLAGS := -L/usr/local/lib
 LDFLAGS := -L.
 LDLIBS := -lgmp -lm

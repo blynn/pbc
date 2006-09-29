@@ -1,7 +1,29 @@
 cmake_minimum_required(VERSION 2.4)
 project(pbc)
 include_directories(./include)
-find_library(GMP_LIBRARY NAMES gmp PATHS /usr/lib /usr/local/lib)
+
+# cross compiling for Windows using Debian's mingw package
+#   cmake -D crossmingw:BOOL=1
+# I keep my cross-compiled GMP in /home/ben/cross/gmp/
+if(crossmingw)
+    include_directories(/home/ben/cross/gmp/include)
+    set(GMP_LIBRARY "/home/ben/cross/gmp/lib/libgmp.a" )
+    set(CMAKE_EXECUTABLE_SUFFIX ".exe")
+    set(CMAKE_COMPILER_IS_GNUCXX 1)
+    set(CMAKE_CXX_COMPILER "i586-mingw32msvc-c++")
+    set(CMAKE_C_COMPILER "i586-mingw32msvc-gcc")
+    set(CMAKE_AR "i586-mingw32msvc-ar")
+    set(CMAKE_RANLIB "i586-mingw32msvc-ranlib")
+    set(cppflags "${cppflags} -I/tmp/cross/include")
+    set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${optflags}")
+    set(CMAKE_SKIP_RPATH ON)
+    set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
+    set(get_time_src "misc/get_time.win32.c")
+else(crossmingw)
+    find_library(GMP_LIBRARY NAMES gmp PATHS /usr/lib /usr/local/lib)
+    set(get_time_src "misc/get_time.c")
+endif(crossmingw)
+
 set(leaksrc misc/leak.c)
 set(unused
 foo
@@ -21,7 +43,7 @@ misc/darray.c misc/symtab.c
 misc/parse.c
 misc/fops.c misc/tracker.c
 misc/extend_printf.c
-misc/get_time.c
+${get_time_src}
 )
 add_library(pbc_sig
 sig/sig.c sig/hash.c
@@ -43,6 +65,7 @@ foreach(bin
 )
     target_link_libraries(${bin} pbc_sig)
 endforeach(bin)
+target_link_libraries(test/pbc)
 
 set(cppflags "-Iinclude")
 set(warnflags "-Wall -W -Wfloat-equal -Wendif-labels -Wshadow  \\
@@ -55,13 +78,14 @@ set(optflags "-O3 -ffast-math -fomit-frame-pointer \\
     -Wpointer-arith -Wcast-align -Wstrict-prototypes  \\
     -Wredundant-decls"
 )
+
+# my laptop (IBM Thinkpad X31)
+#   cmake -D x31:BOOL=1 .
+# doesn't help much
+set(x31flags "-march=pentium-m -mmmx -msse -msse2 -mfpmath=sse -malign-double -maccumulate-outgoing-args")
+
 set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${optflags}")
 
-#set(CMAKE_EXECUTABLE_SUFFIX ".exe")
-#set(CMAKE_COMPILER_IS_GNUCXX 1)
-#set(CMAKE_CXX_COMPILER "i586-mingw32msvc-c++")
-#set(CMAKE_C_COMPILER "i586-mingw32msvc-gcc")
-#set(CMAKE_AR "i586-mingw32msvc-ar")
-#set(CMAKE_RANLIB "i586-mingw32msvc-ranlib")
-#set(cppflags "${cppflags} -I/tmp/cross/include")
-#set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${optflags}")
+if(x31)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${x31flags}")
+endif(x31)

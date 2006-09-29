@@ -30,7 +30,14 @@ void symtab_clear(symtab_t t)
 
 void symtab_put(symtab_t t, void *data, char *key)
 {
-    entry_ptr e = malloc(sizeof(entry_t));
+    int i, n = t->list->count;
+    entry_ptr e;
+    for (i=0; i<n; i++) {
+	e = t->list->item[i];
+	if (!strcmp(e->key, key)) goto doit;
+    }
+    e = malloc(sizeof(entry_t));
+doit:
     e->key = strclone(key);
     e->data = data;
     darray_append(t->list, e);

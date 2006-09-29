@@ -494,6 +494,16 @@ static int curve_group_from_bytes(element_t e, unsigned char *data)
     return len;
 }
 
+static void curve_group_print_info(FILE *out, field_t f)
+{
+    int len;
+    fprintf(out, "Group of points on elliptic curve");
+    if ((len = f->fixed_length_in_bytes)) {
+	fprintf(out, ", bits per coord = %d", len * 8 / 2);
+    }
+    fprintf(out, "\n");
+}
+
 void field_clear_curve_group(field_t f)
 {
     curve_group_data_ptr p;
@@ -528,6 +538,7 @@ void field_init_curve_group(field_t f, curve_t c, mpz_t cofac)
     }
     f->to_bytes = curve_group_to_bytes;
     f->from_bytes = curve_group_from_bytes;
+    f->print_info = curve_group_print_info;
 }
 
 //singular with node: y^2 = x^3 + x^2

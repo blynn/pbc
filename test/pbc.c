@@ -1,6 +1,5 @@
 // Pairing-Based Calculator
-// meant for demos only
-// for real scripting: write wrappers for scripting language like Lua
+// mainly for demonstration purposes
 //
 // It's times like these I wish C had garbage collection
 
@@ -9,9 +8,15 @@
 #include "pbc.h"
 #include "utils.h"
 
+/* It's much nicer with readline
+#include <readline/readline.h>
+#include <readline/history.h>
+*/
+
 enum {
     t_none = 0,
     t_id,
+    t_int,
     t_comma,
     t_lparen,
     t_rparen,
@@ -20,11 +25,21 @@ enum {
     t_mul,
     t_div,
     t_set,
+    t_pow,
     t_unk,
     t_function,
     t_pairing,
     t_element,
     t_field,
+};
+
+enum {
+    pe_expect_factor = 100,
+    pe_expect_rparen,
+    pe_arglist,
+    re_varnotfound = 200,
+    re_badlvalue,
+    re_funnotfound,
 };
 
 static int tok_type;
@@ -67,6 +82,21 @@ tree_ptr tree_new(int type, void *data)
     return res;
 }
 
+void tree_delete(tree_ptr t)
+{
+    void delete_child(void *p) { tree_delete(p); }
+    darray_forall(t->child, delete_child);
+    darray_clear(t->child);
+    switch(t->type) {
+	case t_id:
+	case t_int:
+	case t_function:
+	    id_delete(t->data);
+	    break;
+    }
+    free(t);
+}
+
 static char *lexcp;
 
 static void lex(void)
@@ -99,6 +129,24 @@ static void lex(void)
 	goto skipwhitespace;
     }
 
+    if (isdigit(c)) {
+	tok_type = t_int;
+	word[0] = c;
+
+	int i = 1;
+	for (;;) {
+	    c = *lexcp++;
+	    if (isdigit(c)) {
+		word[i++] = c;
+	    } else {
+		word[i] = '\0';
+		lexcp--;
+		break;
+	    }
+	}
+	return;
+    }
+
     if (isalpha(c) || c == '_') {
 	tok_type = t_id;
 	word[0] = c;
@@ -118,11 +166,14 @@ static void lex(void)
     }
 
     switch(c) {
-	case '.':
+	case ',':
 	    tok_type = t_comma;
 	    break;
 	case '=':
 	    tok_type = t_set;
+	    break;
+	case '^':
+	    tok_type = t_pow;
 	    break;
 	case '*':
 	    tok_type = t_mul;
@@ -148,6 +199,18 @@ static void lex(void)
     }
 }
 
+static int lastparseerror;
+static void setparseerror(int i)
+{
+    lastparseerror = i;
+}
+
+static int lastruntimeerror;
+static void setruntimeerror(int i)
+{
+    lastruntimeerror = i;
+}
+
 static tree_ptr parsesetexpr(void);
 
 static tree_ptr parseexprlist(tree_ptr t)
@@ -159,19 +222,25 @@ static tree_ptr parseexprlist(tree_ptr t)
 	return t;
     }
     c = parsesetexpr();
+    if (!c) return NULL;
     darray_append(t->child, c);
     for (;;) {
 	if (tok_type == t_rparen) {
 	    lex();
 	    return t;
 	}
+	if (tok_type != t_comma) {
+	    setparseerror(pe_arglist);
+	    return NULL;
+	}
 	lex(); //expect comma
 	c = parsesetexpr();
+	if (!c) return NULL;
 	darray_append(t->child, c);
     }
 }
 
-static tree_ptr parsefactor(void)
+static tree_ptr parsesubfactor(void)
 {
     tree_ptr t;
     switch(tok_type) {
@@ -180,41 +249,82 @@ static tree_ptr parsefactor(void)
 	    lex();
 	    id = id_new(word);
 	    if (tok_type == t_lparen) {
-		parseexprlist(t = tree_new(t_function, id));
-		return t;
+		if (parseexprlist(t = tree_new(t_function, id))) {
+		    return t;
+		}
+		tree_delete(t);
+		return NULL;
 	    } else {
 		return tree_new(t_id, id);
 	    }
 	case t_lparen:
 	    lex();
 	    t = parsesetexpr();
-	    lex(); //expect rparen
+	    if (!t) return NULL;
+	    if (tok_type != t_rparen) {
+		tree_delete(t);
+		setparseerror(pe_expect_rparen);
+		return NULL;
+	    }
+	    lex();
 	    return t;
 	default:
+	    setparseerror(pe_expect_factor);
 	    return NULL;
     }
+}
+
+static tree_ptr parsefactor(void)
+{
+    tree_ptr t1;
+    t1 = parsesubfactor();
+    if (!t1) return NULL;
+    
+    if (tok_type == t_pow) {
+	tree_ptr t2, res;
+	lex();
+	t2 = parsefactor();
+	if (!t2) {
+	    tree_delete(t1);
+	    return NULL;
+	}
+	res = tree_new(t_function, id_new("pow"));
+	darray_append(res->child, t1);
+	darray_append(res->child, t2);
+	return res;
+    }
+    return t1;
 }
 
 static tree_ptr parseterm(void)
 {
     tree_ptr t1, t2, res;
     res = parsefactor();
+    if (!res) return NULL;
     for (;;) {
 	switch(tok_type) {
 	    case t_mul:
 		lex();
-		//t1 = tree_new(t_mul, NULL);
-		t1 = tree_new(t_function, id_new("element_mul"));
 		t2 = parsefactor();
+		if (!t2) {
+		    tree_delete(res);
+		    return NULL;
+		}
+		//t1 = tree_new(t_mul, NULL);
+		t1 = tree_new(t_function, id_new("mul"));
 		darray_append(t1->child, res);
 		darray_append(t1->child, t2);
 		res = t1;
 		break;
 	    case t_div:
 		lex();
-		//t1 = tree_new(t_div, NULL);
-		t1 = tree_new(t_function, id_new("element_div"));
 		t2 = parsefactor();
+		if (!t2) {
+		    tree_delete(res);
+		    return NULL;
+		}
+		//t1 = tree_new(t_div, NULL);
+		t1 = tree_new(t_function, id_new("div"));
 		darray_append(t1->child, res);
 		darray_append(t1->child, t2);
 		res = t1;
@@ -229,22 +339,33 @@ static tree_ptr parseexpr(void)
 {
     tree_ptr t1, t2, res;
     res = parseterm();
+    if (!res) {
+	return NULL;
+    }
     for (;;) {
 	switch(tok_type) {
 	    case t_add:
 		lex();
-		//t1 = tree_new(t_add, NULL);
-		t1 = tree_new(t_function, id_new("element_add"));
 		t2 = parseterm();
+		if (!t2) {
+		    tree_delete(res);
+		    return NULL;
+		}
+		//t1 = tree_new(t_add, NULL);
+		t1 = tree_new(t_function, id_new("add"));
 		darray_append(t1->child, res);
 		darray_append(t1->child, t2);
 		res = t1;
 		break;
 	    case t_sub:
 		lex();
-		//t1 = tree_new(t_sub, NULL);
-		t1 = tree_new(t_function, id_new("element_sub"));
 		t2 = parseterm();
+		if (!t2) {
+		    tree_delete(res);
+		    return NULL;
+		}
+		//t1 = tree_new(t_sub, NULL);
+		t1 = tree_new(t_function, id_new("sub"));
 		darray_append(t1->child, res);
 		darray_append(t1->child, t2);
 		res = t1;
@@ -259,10 +380,15 @@ static tree_ptr parsesetexpr(void)
 {
     tree_ptr t1, t2, res;
     t1 = parseexpr();
+    if (!t1) return NULL;
     if (tok_type == t_set) {
 	lex();
-	res = tree_new(t_set, NULL);
 	t2 = parsesetexpr();
+	if (!t2) {
+	    tree_delete(t1);
+	    return NULL;
+	}
+	res = tree_new(t_set, NULL);
 	darray_append(res->child, t1);
 	darray_append(res->child, t2);
 	return res;
@@ -411,37 +537,59 @@ static val_ptr f_pairing_new_a_default(darray_ptr arg)
     return val_new(t_pairing, p);
 }
 
-static val_ptr f_pairing_G1(darray_ptr arg)
+static val_ptr f_pairing_get_group(
+	field_ptr (*get_group)(pairing_ptr p), darray_ptr arg)
 {
     val_ptr res;
+    if (arg->count != 1) {
+	//printf("expect one argument\n");
+	return NULL;
+    }
     val_ptr a0 = arg->item[0];
+    if (a0->type != t_pairing) {
+	return NULL;
+    }
     pairing_ptr pairing = a0->data;
-    res = val_new(t_field, pairing->G1);
+    res = val_new(t_field, get_group(pairing));
     return res;
+}
+
+static val_ptr f_pairing_G1(darray_ptr arg)
+{
+    field_ptr getG1(pairing_ptr p) { return p->G1; }
+    return f_pairing_get_group(getG1, arg);
 }
 
 static val_ptr f_pairing_G2(darray_ptr arg)
 {
-    val_ptr res;
-    val_ptr a0 = arg->item[0];
-    pairing_ptr pairing = a0->data;
-    res = val_new(t_field, pairing->G2);
-    return res;
+    field_ptr getG2(pairing_ptr p) { return p->G2; }
+    return f_pairing_get_group(getG2, arg);
 }
 
 static val_ptr f_pairing_GT(darray_ptr arg)
 {
-    val_ptr res;
-    val_ptr a0 = arg->item[0];
-    pairing_ptr pairing = a0->data;
-    res = val_new(t_field, pairing->GT);
-    return res;
+    field_ptr getGT(pairing_ptr p) { return p->GT; }
+    return f_pairing_get_group(getGT, arg);
+}
+
+static val_ptr f_pairing_Zr(darray_ptr arg)
+{
+    field_ptr getZr(pairing_ptr p) { return p->Zr; }
+    return f_pairing_get_group(getZr, arg);
 }
 
 static val_ptr f_random(darray_ptr arg)
 {
     val_ptr res;
+    if (arg->count != 1) {
+	printf("expect one argument\n");
+	return NULL;
+    }
     val_ptr a0 = arg->item[0];
+    if (a0->type != t_field) {
+	printf("arg not field!\n");
+	return NULL;
+    }
     field_ptr f = a0->data;
     element_ptr e = malloc(sizeof(element_t));
     element_init(e, f);
@@ -454,6 +602,10 @@ static val_ptr f_unary(
 	void (*unary)(element_ptr, element_ptr), darray_ptr arg)
 {
     val_ptr res;
+    if (arg->count != 1) {
+	printf("expect one argument\n");
+	return NULL;
+    }
     val_ptr a0 = arg->item[0];
     if (a0->type != t_element) {
 	printf("arg not element!\n");
@@ -472,6 +624,10 @@ static val_ptr f_bin_op(
 	darray_ptr arg)
 {
     val_ptr res;
+    if (arg->count != 2) {
+	printf("expect two arguments\n");
+	return NULL;
+    }
     val_ptr a0 = arg->item[0];
     val_ptr a1 = arg->item[1];
     if (a0->type != t_element) {
@@ -511,23 +667,92 @@ static val_ptr f_sub(darray_ptr arg)
     return f_bin_op(element_sub, arg);
 }
 
-static void invertandmul(element_ptr c, element_ptr a, element_ptr b)
-{
-    element_t tmp;
-    element_init(tmp, b->field);
-    element_invert(tmp, b);
-    element_mul(c, a, tmp);
-    element_clear(tmp);
-}
-
 static val_ptr f_div(darray_ptr arg)
 {
+    void invertandmul(element_ptr c, element_ptr a, element_ptr b)
+    {
+	element_t tmp;
+	element_init(tmp, b->field);
+	element_invert(tmp, b);
+	element_mul(c, a, tmp);
+	element_clear(tmp);
+    }
+
     return f_bin_op(invertandmul, arg);
 }
 
 static val_ptr f_inv(darray_ptr arg)
 {
     return f_unary(element_invert, arg);
+}
+
+static val_ptr f_pow(darray_ptr arg)
+{
+    val_ptr res;
+    if (arg->count != 2) {
+	printf("expect two arguments\n");
+	return NULL;
+    }
+    val_ptr a0 = arg->item[0];
+    val_ptr a1 = arg->item[1];
+    if (a0->type != t_element) {
+	printf("left arg not element!\n");
+	return NULL;
+    }
+    if (a1->type != t_element) {
+	printf("right arg not element!\n");
+	return NULL;
+    }
+    element_ptr e0 = a0->data;
+    element_ptr e1 = a1->data;
+    element_ptr e = malloc(sizeof(element_t));
+    mpz_t z;
+    mpz_init(z);
+    element_to_mpz(z, e1);
+    element_init(e, e0->field);
+    element_pow_mpz(e, e0, z);
+    res = val_new(t_element, e);
+    mpz_clear(z);
+    return res;
+}
+static val_ptr f_pairing(darray_ptr arg)
+{
+    val_ptr res;
+    if (arg->count != 3) {
+	printf("expect three arguments\n");
+	return NULL;
+    }
+    val_ptr a0 = arg->item[0];
+    val_ptr a1 = arg->item[1];
+    val_ptr a2 = arg->item[2];
+    if (a0->type != t_element) {
+	printf("arg 1 not element!\n");
+	return NULL;
+    }
+    if (a1->type != t_element) {
+	printf("arg 2 not element!\n");
+	return NULL;
+    }
+    if (a2->type != t_pairing) {
+	printf("arg 3 not pairing!\n");
+	return NULL;
+    }
+    element_ptr e0 = a0->data;
+    element_ptr e1 = a1->data;
+    pairing_ptr p = a2->data;
+    if (e0->field != p->G1) {
+	printf("arg 1 not from G1!\n");
+	return NULL;
+    }
+    if (e1->field != p->G2) {
+	printf("arg 2 not from G2!\n");
+	return NULL;
+    }
+    element_ptr e = malloc(sizeof(element_t));
+    element_init(e, p->GT);
+    pairing_apply(e, e0, e1, p);
+    res = val_new(t_element, e);
+    return res;
 }
 
 static val_ptr execute_tree(tree_ptr t)
@@ -544,51 +769,52 @@ static val_ptr execute_tree(tree_ptr t)
 	    id = t->data;
 	    v = symtab_at(var, id->data);
 	    if (!v) {
-		printf("no such variable\n");
-		res = NULL;
-		break;
+		setruntimeerror(re_varnotfound);
+		return NULL;
 	    }
-	    res = val_copy(v);
-	    break;
+	    return val_copy(v);
 	case t_set:
 	    t1 = t->child->item[0];
 	    if (t1->type != t_id) {
-		printf("invalid lvalue\n");
-		res = NULL;
-		break;
+		setruntimeerror(re_badlvalue);
+		return NULL;
 	    }
 	    t2 = t->child->item[1];
 	    v = execute_tree(t2);
+	    if (!v) return NULL;
 	    id = t1->data;
 	    // clear what's there first
 	    if ((res = symtab_at(var, id->data))) {
 		val_delete(res);
 	    }
 	    symtab_put(var, v, id->data);
-	    res = val_copy(v);
-	    break;
+	    v = symtab_at(var, id->data);
+	    return val_copy(v);
 	case t_function:
 	    id = t->data;
 	    fn = symtab_at(builtin, id->data);
 	    if (!fn) {
-		printf("no such function %s\n", id->data);
+		setruntimeerror(re_funnotfound);
 		return NULL;
 	    }
 	    darray_init(arg);
 	    for (i=0; i<t->child->count; i++) {
-		darray_append(arg, execute_tree(t->child->item[i]));
+		v = execute_tree(t->child->item[i]);
+		if (!v) {
+		    darray_forall(arg, (void (*)(void *)) val_delete);
+		    return NULL;
+		}
+		darray_append(arg, v);
 	    }
 	    res = fn(arg);
 	    for (i=0; i<arg->count; i++) {
 		val_delete(arg->item[i]);
 	    }
 	    darray_clear(arg);
-	    break;
+	    return res;
 	default:
-	    res = NULL;
-	    break;
+	    return NULL;
     }
-    return res;
 }
 
 static void parseline(char *line)
@@ -606,42 +832,60 @@ static void parseline(char *line)
     if (t) {
 	v = execute_tree(t);
 	if (!v) {
-	    printf("error\n");
+	    printf("runtime error (error code = %d)\n", lastruntimeerror);
 	} else {
 	    if (t->type != t_set) val_print(v);
 	    val_delete(v);
 	}
+	tree_delete(t);
+    } else {
+	printf("parse error (error code = %d)\n", lastparseerror);
     }
 }
 
 int main(void)
 {
-    char s[1024];
     symtab_init(var);
     symtab_init(builtin);
 
     pairing_ptr p = malloc(sizeof(pairing_t));
     pairing_init_inp_buf(p, aparam, strlen(aparam));
-    symtab_put(var, val_new(t_pairing, p), "pbcA");
+    symtab_put(var, val_new(t_pairing, p), "A");
+    symtab_put(var, val_new(t_field, p->G1), "G1");
+    symtab_put(var, val_new(t_field, p->G2), "G2");
+    symtab_put(var, val_new(t_field, p->GT), "GT");
+    symtab_put(var, val_new(t_field, p->Zr), "Zr");
 
     symtab_put(builtin, f_pairing_new_a_default, "pairing_new_a_default");
-    symtab_put(builtin, f_pairing_G1, "getG1");
-    symtab_put(builtin, f_pairing_G2, "getG2");
-    symtab_put(builtin, f_pairing_GT, "getGT");
+    symtab_put(builtin, f_pairing_G1, "get_G1");
+    symtab_put(builtin, f_pairing_G2, "get_G2");
+    symtab_put(builtin, f_pairing_GT, "get_GT");
+    symtab_put(builtin, f_pairing_Zr, "get_Zr");
     symtab_put(builtin, f_random, "random");
     symtab_put(builtin, f_random, "rand");
     symtab_put(builtin, f_random, "rnd");
-    symtab_put(builtin, f_sub, "element_sub");
-    symtab_put(builtin, f_add, "element_add");
-    symtab_put(builtin, f_mul, "element_mul");
-    symtab_put(builtin, f_inv, "element_inv");
-    symtab_put(builtin, f_div, "element_div");
-    fprintf(stderr, "pbc\n");
+    symtab_put(builtin, f_sub, "sub");
+    symtab_put(builtin, f_add, "add");
+    symtab_put(builtin, f_pow, "pow");
+    symtab_put(builtin, f_mul, "mul");
+    symtab_put(builtin, f_inv, "inv");
+    symtab_put(builtin, f_inv, "invert");
+    symtab_put(builtin, f_div, "div");
+    symtab_put(builtin, f_pairing, "pairing");
+    fprintf(stderr, "Pairing-Based Calculator\n");
 
     for (;;) {
-	gets(s); //TODO: the dreaded gets(), useful for rapid development though
+	char s[1024];
+	fgets(s, 1024, stdin);
 	if (feof(stdin)) break;
 	parseline(s);
+	/* readline version:
+	char *line = readline(NULL);
+	if (!line) break;
+	parseline(line);
+	if (*line) add_history(line);
+	free(line);
+	*/
     }
     return 0;
 }

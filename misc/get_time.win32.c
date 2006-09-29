@@ -1,4 +1,5 @@
 #include <sys/time.h>
+#include "utils.h"
 
 typedef struct _FILETIME {
   unsigned long dwLowDateTime;
@@ -13,10 +14,11 @@ int __cdecl gettimeofday(struct timeval* p, void* tz /* IGNORED */){
     FILETIME ft;
   } _now;
   
+  UNUSED_VAR(tz);
   GetSystemTimeAsFileTime( &(_now.ft) );
   p->tv_usec=(long)((_now.ns100 / 10LL) % 1000000LL );
   p->tv_sec= (long)((_now.ns100-(116444736000000000LL))/10000000LL);
-  return;
+  return 0; //assume success?
 }
 
 double get_time(void)
