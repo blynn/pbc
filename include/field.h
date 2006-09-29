@@ -52,6 +52,7 @@ struct field_s {
     mpz_t order; //-1 for infinite order
     element_ptr nqr; //nonquadratic residue
     void (*to_mpz)(mpz_ptr, element_ptr);
+    void (*print_info)(FILE *, struct field_s *);
     void *data;
 };
 typedef struct field_s *field_ptr;
@@ -467,5 +468,7 @@ Returns the number of bytes needed to hold ''e'' in compressed form.
 Currently only implemented for points on an elliptic curve.
 */
 int element_length_in_bytes_compressed(element_t e);
+
+void field_print_info(FILE *out, field_ptr f);
 
 #endif //FIELD_H

@@ -1,7 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <alloca.h>
 #include <string.h>
 #include <gmp.h>
 #include "field.h"
@@ -538,6 +537,12 @@ static void fp_field_clear(field_t f)
     free(p);
 }
 
+void fp_print_info(FILE *out, field_ptr f)
+{
+    element_fprintf(out, "F_p: Montgomery representation,\nmodulus = %Zd\n",
+	    f->order);
+}
+
 void field_init_mont_fp(field_ptr f, mpz_t prime)
 {
     assert (!mpz_fits_ulong_p(prime));
@@ -570,6 +575,7 @@ void field_init_mont_fp(field_ptr f, mpz_t prime)
     f->to_bytes = fp_to_bytes;
     f->from_bytes = fp_from_bytes;
     f->to_mpz = fp_to_mpz;
+    f->print_info = fp_print_info;
 
     p = f->data = malloc(sizeof(fp_field_data_t));
     p->limbs = mpz_size(prime);

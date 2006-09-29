@@ -1,7 +1,7 @@
 <chapter>
 <title>PBC Internals</title>
 <para>
-Information on particular algebraic structures are stored in the
+Algebraic structures are represented in the
 <type>field_t</type> data type, which mostly contains pointers to functions
 written to perform operations such as addition and multiplication
 on elements of that particular group, ring or field:
@@ -38,7 +38,7 @@ reference and dereference variables.
 </para>
 <para>
 Each <type>element_t</type> contains a field named <parameter>field</parameter>
-to such a <type>field_t</type> variable. In fact, the only other field
+to such a <type>field_t</type> variable. The only other field
 is <parameter>data</parameter>, which stores any data needed for the
 implementation of the particular algebraic structure the element resides in.
 </para>
@@ -50,7 +50,8 @@ struct element_s {
 </programlisting>
 <para>
 When an <type>element_t</type> variable is initialized,
-its <parameter>field</parameter> is set, and then the initialization specific
+<parameter>field</parameter> is set appropriately, and then the
+initialization specific
 to that field is called to complete the initialization. Here, a line of
 code is worth a thousand words:
 </para>

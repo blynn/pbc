@@ -33,6 +33,7 @@ test/gena1param  test/listmnt    test/testfi       test/testpairing
 test/genaparam   test/sing       test/timefp       test/testpoly
 test/gendparam   test/testbb     test/testhilbert  test/testsig
 test/checkfp
+test/pbc
 )
     add_executable(${bin} ${bin}.c)
     target_link_libraries(${bin} pbc ${GMP_LIBRARY} m)

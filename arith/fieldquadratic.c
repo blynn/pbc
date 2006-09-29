@@ -556,6 +556,13 @@ void element_field_to_fi(element_ptr a, element_ptr b)
     element_set0(p->y);
 }
 
+static void fi_print_info(FILE *out, field_ptr f)
+{
+    fi_field_data_ptr p = f->data;
+    fprintf(out, "quadratic extension field using sqrt(-1), base field:\n");
+    field_print_info(out, p->field);
+}
+
 void field_init_fi(field_ptr f, field_ptr fbase)
 {
     fi_field_data_ptr p;
@@ -592,6 +599,7 @@ void field_init_fi(field_ptr f, field_ptr fbase)
     f->field_clear = fi_field_clear;
     f->to_bytes = fq_to_bytes;
     f->from_bytes = fq_from_bytes;
+    f->print_info = fi_print_info;
 
     mpz_init(f->order);
     mpz_mul(f->order, fbase->order, fbase->order);

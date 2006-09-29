@@ -23,7 +23,6 @@ int element_vfprintf(FILE *stream, const char *format, va_list ap)
     char ch;
     char *copy, *c, *start, *next;
     element_ptr e;
-    mpz_ptr z;
     int found;
 
     copy = strclone(format);
@@ -66,10 +65,12 @@ int element_vfprintf(FILE *stream, const char *format, va_list ap)
 		    } else count += status;
 		    found = 1;
 		    break;
+		/*
 		case 'Z':
 		    z = va_arg(ap, mpz_ptr);
 		    ch = *(c+1);
 		    *(c+1) = '\0';
+		    printf("format string '%s'\n",start);
 		    status = gmp_fprintf(stream, start, z);
 		    if (status < 0) {
 			count = -1;
@@ -78,12 +79,13 @@ int element_vfprintf(FILE *stream, const char *format, va_list ap)
 		    *(c+1) = ch;
 		    found = 1;
 		    break;
+		    */
 		default:
 		    if (strchr("diouxXeEfFgGaAcspnm", *c)) {
 			void *ptr = va_arg(ap, void *);
 			ch = *(c+1);
 			*(c+1) = '\0';
-			status = fprintf(stream, start, ptr);
+			status = gmp_fprintf(stream, start, ptr);
 			if (status < 0) {
 			    count = -1;
 			    goto done;

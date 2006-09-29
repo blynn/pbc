@@ -290,6 +290,16 @@ static void generic_mul_si(element_ptr r, element_ptr a, signed long int n)
     element_clear(e0);
 }
 
+static void generic_print_info(FILE *out, field_ptr f)
+{
+    element_fprintf(out, "field %X unknown\n", f);
+}
+
+void field_print_info(FILE *out, field_ptr f)
+{
+    f->print_info(out, f);
+}
+
 void field_init(field_ptr f)
 {
     f->nqr = NULL;
@@ -298,6 +308,7 @@ void field_init(field_ptr f)
     f->mul_mpz = generic_mul_mpz;
     f->pow_mpz = generic_pow_mpz;
     f->mul_si = generic_mul_si;
+    f->print_info = generic_print_info;
 }
 
 void field_clear(field_ptr f)
