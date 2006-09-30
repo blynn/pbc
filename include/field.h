@@ -223,9 +223,9 @@ static inline void element_to_mpz(mpz_t z, element_t e)
 Generate an element ''e'' deterministically from
 the ''len'' bytes stored in the buffer ''data''.
 */
-static inline void element_from_hash(element_t a, int len, void *data)
+static inline void element_from_hash(element_t e, int len, void *data)
 {
-    a->field->from_hash(a, len, data);
+    e->field->from_hash(e, len, data);
 }
 
 /*@manual epow
@@ -349,18 +349,18 @@ The number of bytes it will write can be determined from calling
 <function>element_length_in_bytes()</function>.
 Returns number of bytes written.
 */
-static inline int element_to_bytes(unsigned char *data, element_t a)
+static inline int element_to_bytes(unsigned char *data, element_t e)
 {
-    return a->field->to_bytes(data, a);
+    return e->field->to_bytes(data, e);
 }
 
 /*@manual etrade
 Reads ''e'' from the buffer ''data'', and returns
 the number of bytes read.
 */
-static inline int element_from_bytes(element_t a, unsigned char *data)
+static inline int element_from_bytes(element_t e, unsigned char *data)
 {
-    return a->field->from_bytes(a, data);
+    return e->field->from_bytes(e, data);
 }
 
 /*@manual epow

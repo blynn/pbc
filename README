@@ -10,7 +10,8 @@ the library.
 The PBC library also contains routines to generate curves suitable for use
 in a bilinear pairing.
 
-See the manual (doc/manual.txt or doc/html/manual.html) for more information.
+See the online manual for more information. The DocBook source files that
+are used to create the manual are in the doc/ subdirectory.
 
 The PBC library is released under the GNU General Public License. See the
 file COPYING for details.

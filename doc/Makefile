@@ -36,5 +36,5 @@ pdf : $(SRCFILES)
 clean :
 	-rm -rf pretty/*.html chunked manual.html manual.txt gen forsite.tar.bz2 manual.pdf manual.tex
 
-forsite: pretty/index.html manual.html manual.txt chunked/index.html manual.pdf
+forsite: pretty/* manual.html manual.txt chunked/* manual.pdf
 	tar cvfj forsite.tar.bz2 $^
