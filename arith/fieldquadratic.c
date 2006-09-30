@@ -6,15 +6,15 @@
 
 static inline element_ptr fq_nqr(field_ptr f)
 {
-    return ((fq_field_data_ptr) f->data)->nqr;
+    return ((field_ptr) f->data)->nqr;
 }
 
 static void fq_init(element_ptr e)
 {
     fq_data_ptr p = e->data = malloc(sizeof(fq_data_t));
-    fq_field_data_ptr fdp = e->field->data;
-    element_init(p->x, fdp->field);
-    element_init(p->y, fdp->field);
+    field_ptr f = e->field->data;
+    element_init(p->x, f);
+    element_init(p->y, f);
 }
 
 static void fq_clear(element_ptr e)
@@ -265,14 +265,6 @@ static int fq_length_in_bytes(element_ptr e)
     return element_length_in_bytes(p->x) + element_length_in_bytes(p->y);
 }
 
-static void fq_field_clear(field_t f)
-{
-    fq_field_data_ptr p = f->data;
-    mpz_clear(f->order);
-    element_clear(p->nqr);
-    free(p);
-}
-
 static int fq_to_bytes(unsigned char *data, element_t e)
 {
     fq_data_ptr p = e->data;
@@ -352,16 +344,9 @@ static void fq_sqrt(element_ptr n, element_ptr e)
 
 void field_init_quadratic(field_ptr f, field_ptr fbase)
 {
-    fq_field_data_ptr p;
-
     field_init(f);
-    p = f->data = malloc(sizeof(fq_field_data_t));
 
-    element_init(p->nqr, fbase);
-    //TODO: why bother with p->nqr? even if it's needed,
-    //TODO: why not use element_ptr instead?
-    element_set(p->nqr, field_get_nqr(fbase));
-    p->field = fbase;
+    f->data = fbase;
 
     f->init = fq_init;
     f->clear = fq_clear;
@@ -389,7 +374,6 @@ void field_init_quadratic(field_ptr f, field_ptr fbase)
     f->set1 = fq_set1;
     f->is_sqr = fq_is_sqr;
     f->sqrt = fq_sqrt;
-    f->field_clear = fq_field_clear;
     f->to_bytes = fq_to_bytes;
     f->from_bytes = fq_from_bytes;
 
@@ -542,12 +526,6 @@ static void fi_sqrt(element_ptr n, element_ptr e)
     element_clear(e2);
 }
 
-static void fi_field_clear(field_t f)
-{
-    free(f->data);
-    //TODO: free f->data->nqr
-}
-
 void element_field_to_fi(element_ptr a, element_ptr b)
 {
     fq_data_ptr p = a->data;
@@ -558,18 +536,15 @@ void element_field_to_fi(element_ptr a, element_ptr b)
 
 static void fi_print_info(FILE *out, field_ptr f)
 {
-    fi_field_data_ptr p = f->data;
+    field_ptr fbase = f->data;
     fprintf(out, "quadratic extension field using sqrt(-1), base field:\n");
-    field_print_info(out, p->field);
+    field_print_info(out, fbase);
 }
 
 void field_init_fi(field_ptr f, field_ptr fbase)
 {
-    fi_field_data_ptr p;
-
     field_init(f);
-    p = f->data = malloc(sizeof(fq_field_data_t));
-    p->field = fbase;
+    f->data = fbase;
     f->init = fq_init;
     f->clear = fq_clear;
     f->set_si = fq_set_si;
@@ -596,7 +571,6 @@ void field_init_fi(field_ptr f, field_ptr fbase)
     f->set1 = fq_set1;
     f->is_sqr = fi_is_sqr;
     f->sqrt = fi_sqrt;
-    f->field_clear = fi_field_clear;
     f->to_bytes = fq_to_bytes;
     f->from_bytes = fq_from_bytes;
     f->print_info = fi_print_info;

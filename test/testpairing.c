@@ -64,5 +64,14 @@ int main(void)
 	element_from_bytes(h, data);
 	element_printf("from_bytes h = %B\n", h);
     }
+
+    element_clear(g);
+    element_clear(h);
+    element_clear(x1);
+    element_clear(x2);
+    element_clear(zg);
+    element_clear(zh);
+    element_clear(z);
+    pairing_clear(pairing);
     return 0;
 }

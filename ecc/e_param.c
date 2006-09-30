@@ -625,6 +625,20 @@ static void e_pairing_option_set(pairing_t pairing, char *key, char *value)
     }
 }
 
+void e_pairing_clear(pairing_t pairing)
+{
+    e_pairing_data_ptr p = pairing->data;
+    field_clear(p->Fq);
+    curve_clear(p->Eq);
+    mpz_clear(p->tateexp);
+    free(p);
+
+    mpz_clear(pairing->r);
+    field_clear(pairing->Zr);
+    field_clear(pairing->G1);
+    free(pairing->G1);
+}
+
 void pairing_init_e_param(pairing_t pairing, e_param_t param)
 {
     e_pairing_data_ptr p;
@@ -659,6 +673,7 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     pairing->GT = p->Fq;
     pairing->phi = phi_identity;
     pairing->option_set = e_pairing_option_set;
+    pairing->clear_func = e_pairing_clear;
 
     element_clear(a);
     element_clear(b);

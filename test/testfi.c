@@ -46,5 +46,11 @@ int main(void)
     element_mul(c, c, a);
     element_printf("1/a * a = %B\n", c);
 
+    element_clear(a);
+    element_clear(b);
+    element_clear(c);
+    field_clear(fp);
+    field_clear(fp2);
+    mpz_clear(prime);
     return 0;
 }

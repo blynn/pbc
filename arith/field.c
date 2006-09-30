@@ -309,6 +309,7 @@ void field_init(field_ptr f)
     f->pow_mpz = generic_pow_mpz;
     f->mul_si = generic_mul_si;
     f->print_info = generic_print_info;
+    f->field_clear = NULL;
 }
 
 void field_clear(field_ptr f)
@@ -318,5 +319,5 @@ void field_clear(field_ptr f)
 	free(f->nqr);
     }
     mpz_clear(f->order);
-    f->field_clear(f);
+    if (f->field_clear) f->field_clear(f);
 }

@@ -202,6 +202,21 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     element_clear(e0);
 }
 
+void a1_pairing_clear(pairing_t pairing)
+{
+    a1_pairing_data_ptr p = pairing->data;
+    mpz_clear(p->h);
+    curve_clear(p->Ep);
+    field_clear(p->Fp2);
+    field_clear(p->Fp);
+    free(p);
+
+    mpz_clear(pairing->r);
+    field_clear(pairing->Zr);
+    field_clear(pairing->G1);
+    free(pairing->G1);
+}
+
 void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
 {
     element_t a, b;
@@ -233,4 +248,6 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
 
     pairing->map = a1_pairing;
     pairing->phi = phi_identity;
+
+    pairing->clear_func = a1_pairing_clear;
 }

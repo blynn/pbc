@@ -630,14 +630,14 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
     element_clear(e0);
 }
 
-static void pairing_clear_a_param(pairing_t pairing)
+static void a_pairing_clear(pairing_t pairing)
 {
     a_pairing_data_ptr p = pairing->data;
     curve_clear(p->Eq);
     field_clear(p->Fq);
     field_clear(p->Fq2);
     mpz_clear(p->h);
-    free(pairing->data);
+    free(p);
 
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
@@ -689,7 +689,7 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
     pairing->G2 = pairing->G1;
     pairing->phi = phi_identity;
     pairing->GT = p->Fq2;
-    pairing->clear_func = pairing_clear_a_param;
+    pairing->clear_func = a_pairing_clear;
     pairing->option_set = a_pairing_option_set;
     pairing->pp_init = a_pairing_pp_init;
     pairing->pp_clear = a_pairing_pp_clear;

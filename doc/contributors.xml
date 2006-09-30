@@ -19,8 +19,11 @@ pairings can be read from memory buffer and
 most compile-time warnings were removed.
 </para>
 <para>
-Rob Figueiredo, Roger Khazan wrote changes which allow the PBC library
-to be compiled on Windows (via mingw)
+Rob Figueiredo and Roger Khazan wrote changes which allow the PBC library
+to be compiled on Windows (via mingw).
+</para>
+<para>
+Dmitry Kosolapov sent in corrections to this manual.
 </para>
 <para>
 If you're not mentioned here but should be, please let me know!

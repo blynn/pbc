@@ -449,6 +449,32 @@ static void f_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     element_pow_mpz(out, out, p->tateexp);
 }
 
+void f_pairing_clear(pairing_t pairing)
+{
+    f_pairing_data_ptr p = pairing->data;
+    element_clear(p->negalpha);
+    element_clear(p->negalphainv);
+    mpz_clear(p->tateexp);
+    element_clear(p->xpowq2);
+    element_clear(p->xpowq6);
+    element_clear(p->xpowq8);
+    curve_clear(p->Etwist);
+    curve_clear(p->Eq);
+
+    field_clear(p->Fq12);
+    field_clear(p->Fq2x);
+    field_clear(p->Fq2);
+    field_clear(p->Fq);
+    free(p);
+
+    mpz_clear(pairing->r);
+    field_clear(pairing->Zr);
+    field_clear(pairing->G1);
+    field_clear(pairing->G2);
+    free(pairing->G1);
+    free(pairing->G2);
+}
+
 void pairing_init_f_param(pairing_t pairing, f_param_t param)
 {
     f_pairing_data_ptr p;
@@ -463,6 +489,10 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
     p->Fq->nqr = malloc(sizeof(element_t));
     element_init(p->Fq->nqr, p->Fq);
     element_set_mpz(p->Fq->nqr, param->beta);
+    field_init_quadratic(p->Fq2, p->Fq);
+    printf("hmm\n");
+    field_clear(p->Fq2);
+    printf("hmm\n");
     field_init_quadratic(p->Fq2, p->Fq);
     field_init_poly(p->Fq2x, p->Fq2);
     element_init(irred, p->Fq2x);
@@ -509,6 +539,7 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
     mpz_clear(one);
     pairing->GT = p->Fq12;
     pairing->map = f_pairing;
+    pairing->clear_func = f_pairing_clear;
     
     mpz_init(p->tateexp);
     /* unoptimized tate exponent

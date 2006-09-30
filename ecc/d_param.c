@@ -21,17 +21,6 @@
 #include "utils.h"
 
 struct mnt_pairing_data_s {
-    field_t Fq, Fqx, Fqk;
-    curve_t Eq, Eqk;
-    mpz_t tateexp;
-    int k;
-    fieldmap mapbase;
-    element_ptr *xpowq;
-};
-typedef struct mnt_pairing_data_s mnt_pairing_data_t[1];
-typedef struct mnt_pairing_data_s *mnt_pairing_data_ptr;
-
-struct even_mnt_pairing_data_s {
     field_t Fq, Fqx, Fqd, Fqk;
     curve_t Eq, Etwist, Eqk;
     element_t nqrinv, nqrinv2;
@@ -39,8 +28,8 @@ struct even_mnt_pairing_data_s {
     int k;
     element_ptr *xpowq;
 };
-typedef struct even_mnt_pairing_data_s even_mnt_pairing_data_t[1];
-typedef struct even_mnt_pairing_data_s *even_mnt_pairing_data_ptr;
+typedef struct mnt_pairing_data_s mnt_pairing_data_t[1];
+typedef struct mnt_pairing_data_s *mnt_pairing_data_ptr;
 
 void d_param_init(d_param_ptr param)
 {
@@ -132,20 +121,6 @@ void d_param_inp_generic (d_param_ptr p, fetch_ops_t fops, void *ctx)
     symtab_clear(tab);
 }
 
-static inline void d_miller_evalfn_odd_k(element_t e0, element_t e1,
-	element_t a, element_t b, element_t c,
-	element_t Qx, element_t Qy, fieldmap mapbase)
-{
-    //TODO: use poly_mul_constant?
-    mapbase(e0, a);
-    element_mul(e0, e0, Qx);
-    mapbase(e1, b);
-    element_mul(e1, e1, Qy);
-    element_add(e0, e0, e1);
-    mapbase(e1, c);
-    element_add(e0, e0, e1);
-}
-
 static inline void d_miller_evalfn(element_t e0,
 	element_t a, element_t b, element_t c,
 	element_t Qx, element_t Qy)
@@ -163,275 +138,6 @@ static inline void d_miller_evalfn(element_t e0,
 	element_mul(polymod_coeff(im_out, i), polymod_coeff(Qy, i), b);
     }
     element_add(polymod_coeff(re_out, 0), polymod_coeff(re_out, 0), c);
-}
-
-//assumes P is in the base field, Q in some field extension
-static void cc_miller(element_t res, mpz_t q, point_t P,
-	element_ptr Qx, element_ptr Qy, fieldmap mapbase)
-{
-    //collate divisions
-    int m;
-    element_t v, vd;
-    point_t Z;
-    element_t a, b, c;
-    common_curve_ptr cc = P->curve->data;
-    element_t t0;
-    element_t e0, e1;
-
-    void do_vertical(element_t e)
-    {
-	if (point_is_inf(Z)) {
-	    return;
-	}
-	mapbase(e0, Z->x);
-	element_sub(e0, Qx, e0);
-	element_mul(e, e, e0);
-    }
-
-    void do_tangent(element_t e)
-    {
-	//a = -slope_tangent(Z.x, Z.y);
-	//b = 1;
-	//c = -(Z.y + a * Z.x);
-	//but we multiply by 2*Z.y to avoid division
-
-	//a = -Zx * (3 Zx + twicea_2) - a_4;
-	//Common curves: a2 = 0 (and cc->a is a_4), so
-	//a = -(3 Zx^2 + cc->a)
-	//b = 2 * Zy
-	//c = -(2 Zy^2 + a Zx);
-	element_ptr Zx = Z->x;
-	element_ptr Zy = Z->y;
-
-	if (point_is_inf(Z)) {
-	    return;
-	}
-
-	if (element_is0(Zy)) {
-	    //order 2
-	    do_vertical(e);
-	    return;
-	}
-
-	element_square(a, Zx);
-	element_mul_si(a, a, 3);
-	element_add(a, a, cc->a);
-	element_neg(a, a);
-
-	element_add(b, Zy, Zy);
-
-	element_mul(t0, b, Zy);
-	element_mul(c, a, Zx);
-	element_add(c, c, t0);
-	element_neg(c, c);
-
-	d_miller_evalfn_odd_k(e0, e1, a, b, c, Qx, Qy, mapbase);
-	element_mul(e, e, e0);
-    }
-
-    void do_line(element_ptr e)
-    {
-	//a = -(B.y - A.y) / (B.x - A.x);
-	//b = 1;
-	//c = -(A.y + a * A.x);
-	//but we'll multiply by B.x - A.x to avoid division
-
-	element_ptr Ax = Z->x;
-	element_ptr Ay = Z->y;
-	element_ptr Bx = P->x;
-	element_ptr By = P->y;
-
-	//we assume B is never O
-	if (point_is_inf(Z)) {
-	    do_vertical(e);
-	    return;
-	}
-
-	if (!element_cmp(Ax, Bx)) {
-	    if (!element_cmp(Ay, By)) {
-		do_tangent(e);
-		return;
-	    }
-	    do_vertical(e);
-	    return;
-	}
-
-	element_sub(b, Bx, Ax);
-	element_sub(a, Ay, By);
-	element_mul(t0, b, Ay);
-	element_mul(c, a, Ax);
-	element_add(c, c, t0);
-	element_neg(c, c);
-
-	d_miller_evalfn_odd_k(e0, e1, a, b, c, Qx, Qy, mapbase);
-	element_mul(e, e, e0);
-    }
-
-    element_init(a, P->curve->field);
-    element_init(b, P->curve->field);
-    element_init(c, P->curve->field);
-    element_init(t0, P->curve->field);
-    element_init(e0, res->field);
-    element_init(e1, res->field);
-
-    element_init(v, res->field);
-    element_init(vd, res->field);
-    point_init(Z, P->curve);
-
-    point_set(Z, P);
-
-    element_set1(v);
-    element_set1(vd);
-    m = mpz_sizeinbase(q, 2) - 2;
-
-    while(m >= 0) {
-	element_square(v, v);
-	element_square(vd, vd);
-	do_tangent(v);
-	point_double(Z, Z);
-	do_vertical(vd);
-	if (mpz_tstbit(q, m)) {
-	    do_line(v);
-	    point_add(Z, Z, P);
-	    do_vertical(vd);
-	}
-	m--;
-    }
-
-    element_invert(vd, vd);
-    element_mul(res, v, vd);
-
-    element_clear(v);
-    element_clear(vd);
-    point_clear(Z);
-    element_clear(a);
-    element_clear(b);
-    element_clear(c);
-    element_clear(t0);
-    element_clear(e0);
-}
-
-static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing)
-{
-    mnt_pairing_data_ptr p = pairing->data;
-    element_pow_mpz(out, in, p->tateexp);
-}
-
-static void cc_pairing(element_ptr out, element_ptr in1, element_ptr in2,
-	pairing_t pairing)
-{
-    mnt_pairing_data_ptr p = pairing->data;
-    point_ptr Q = in2->data;
-    cc_miller(out, pairing->r, in1->data, Q->x, Q->y, p->mapbase);
-    cc_tatepower(out, out, pairing);
-}
-
-static int cc_is_almost_coddh_odd_k(element_ptr a, element_ptr b,
-	element_ptr c, element_ptr d,
-	pairing_t pairing)
-{
-    int res = 0;
-    element_t t0, t1, t2;
-
-    element_init(t0, pairing->GT);
-    element_init(t1, pairing->GT);
-    element_init(t2, pairing->GT);
-    mnt_pairing_data_ptr p = pairing->data;
-    point_ptr Pc = c->data;
-    point_ptr Pd = d->data;
-    cc_miller(t0, pairing->r, a->data, Pd->x, Pd->y, p->mapbase);
-    cc_miller(t1, pairing->r, b->data, Pc->x, Pc->y, p->mapbase);
-    cc_tatepower(t1, t1, pairing);
-    cc_tatepower(t0, t0, pairing);
-    element_mul(t2, t0, t1);
-    if (element_is1(t2)) {
-	//g, g^x, h, h^-x case
-	res = 1;
-    } else {
-	element_invert(t1, t1);
-	element_mul(t2, t0, t1);
-	if (element_is1(t2)) {
-	    //g, g^x, h, h^x case
-	    res = 1;
-	}
-    }
-    element_clear(t0);
-    element_clear(t1);
-    element_clear(t2);
-    return res;
-}
-
-static void trace(element_ptr out, element_ptr in, pairing_ptr pairing)
-{
-    int i;
-    point_ptr p = in->data;
-    point_ptr r = out->data;
-    point_t q;
-    mnt_pairing_data_ptr mpdp = pairing->data;
-
-    point_init(q, p->curve);
-
-    point_set(q, p);
-    point_set(r, p);
-
-    for (i=1; i<mpdp->k; i++) {
-	cc_frobenius(q, q, mpdp->Fq->order);
-	point_add(r, r, q);
-    }
-    point_clear(q);
-}
-
-static void pairing_init_d_param_odd_k(pairing_t pairing, d_param_t param)
-{
-    mnt_pairing_data_ptr p;
-    element_t a, b;
-    element_t irred;
-    mpz_t z;
-
-    mpz_init(pairing->r);
-    mpz_set(pairing->r, param->r);
-    field_init_fp(pairing->Zr, pairing->r);
-    pairing->map = cc_pairing;
-    pairing->is_almost_coddh = cc_is_almost_coddh_odd_k;
-
-    p =	pairing->data = malloc(sizeof(mnt_pairing_data_t));
-    field_init_fp(p->Fq, param->q);
-    element_init(a, p->Fq);
-    element_init(b, p->Fq);
-    element_set_mpz(a, param->a);
-    element_set_mpz(b, param->b);
-    curve_init_cc_ab(p->Eq, a, b);
-
-    field_init_poly(p->Fqx, p->Fq);
-    element_init(irred, p->Fqx);
-    do {
-	poly_random_monic(irred, param->k);
-    } while (!poly_is_irred(irred));
-    field_init_polymod(p->Fqk, irred);
-    element_clear(irred);
-
-    mpz_init(p->tateexp);
-    mpz_sub_ui(p->tateexp, p->Fqk->order, 1);
-    mpz_divexact(p->tateexp, p->tateexp, pairing->r);
-
-    p->mapbase = ((polymod_field_data_ptr) p->Fqk->data)->mapbase;
-
-    cc_init_map_curve(p->Eqk, p->Eq, p->Fqk, p->mapbase);
-
-    pairing->G1 = malloc(sizeof(field_t));
-    pairing->G2 = malloc(sizeof(field_t));
-
-    field_init_curve_group(pairing->G1, p->Eq, param->h);
-    mpz_init(z);
-    mpz_set_si(z, 1);
-    field_init_curve_group(pairing->G2, p->Eqk, z);
-    mpz_clear(z);
-    p->k = param->k;
-    pairing->GT = p->Fqk;
-    pairing->phi = trace;
-
-    element_clear(a);
-    element_clear(b);
 }
 
 static void cc_miller_no_denom_proj(element_t res, mpz_t q, point_t P,
@@ -762,9 +468,9 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, point_t P,
     element_clear(e0);
 }
 
-static void cc_tatepower_even_k(element_ptr out, element_ptr in, pairing_t pairing)
+static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing)
 {
-    even_mnt_pairing_data_ptr p = pairing->data;
+    mnt_pairing_data_ptr p = pairing->data;
     if (p->k == 6) {
 	element_t e0, e1, e2, e3;
 	element_init(e0, p->Fqk);
@@ -816,12 +522,12 @@ static void cc_tatepower_even_k(element_ptr out, element_ptr in, pairing_t pairi
 static void (*cc_miller_no_denom_fn)(element_t res, mpz_t q, point_t P,
 	element_ptr Qx, element_ptr Qy);
 
-static void cc_pairing_even_k(element_ptr out, element_ptr in1, element_ptr in2,
+static void cc_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	pairing_t pairing)
 {
     point_ptr Qbase = in2->data;
     element_t Qx, Qy;
-    even_mnt_pairing_data_ptr p = pairing->data;
+    mnt_pairing_data_ptr p = pairing->data;
 
     element_init(Qx, p->Fqd);
     element_init(Qy, p->Fqd);
@@ -831,12 +537,12 @@ static void cc_pairing_even_k(element_ptr out, element_ptr in1, element_ptr in2,
     //v^-3/2 = v^-2 * v^1/2
     element_mul(Qy, Qbase->y, p->nqrinv2);
     cc_miller_no_denom_fn(out, pairing->r, in1->data, Qx, Qy);
-    cc_tatepower_even_k(out, out, pairing);
+    cc_tatepower(out, out, pairing);
     element_clear(Qx);
     element_clear(Qy);
 }
 
-static int cc_is_almost_coddh_even_k(element_ptr a, element_ptr b,
+static int cc_is_almost_coddh(element_ptr a, element_ptr b,
 	element_ptr c, element_ptr d,
 	pairing_t pairing)
 {
@@ -844,7 +550,7 @@ static int cc_is_almost_coddh_even_k(element_ptr a, element_ptr b,
     element_t t0, t1, t2;
     element_t cx, cy;
     element_t dx, dy;
-    even_mnt_pairing_data_ptr p = pairing->data;
+    mnt_pairing_data_ptr p = pairing->data;
 
     element_init(cx, p->Fqd);
     element_init(cy, p->Fqd);
@@ -866,8 +572,8 @@ static int cc_is_almost_coddh_even_k(element_ptr a, element_ptr b,
 
     cc_miller_no_denom_fn(t0, pairing->r, a->data, dx, dy);
     cc_miller_no_denom_fn(t1, pairing->r, b->data, cx, cy);
-    cc_tatepower_even_k(t0, t0, pairing);
-    cc_tatepower_even_k(t1, t1, pairing);
+    cc_tatepower(t0, t0, pairing);
+    cc_tatepower(t1, t1, pairing);
     element_mul(t2, t0, t1);
     if (element_is1(t2)) {
 	//g, g^x, h, h^-x case
@@ -896,14 +602,14 @@ static void Fq_to_Fqd_to_Fqk(element_t out, element_t in)
     element_set0(fi_im(out));
 }
 
-static void even_k_trace(element_t out, element_t in, pairing_ptr pairing)
+static void trace(element_t out, element_t in, pairing_ptr pairing)
 {
     int i;
     point_ptr p = in->data;
     point_t r;
     point_t q;
     point_ptr outp = out->data;
-    even_mnt_pairing_data_ptr pdp = pairing->data;
+    mnt_pairing_data_ptr pdp = pairing->data;
 
     point_init(q, pdp->Eqk);
     point_init(r, pdp->Eqk);
@@ -963,13 +669,13 @@ struct pp_coeff_s {
 typedef struct pp_coeff_s pp_coeff_t[1];
 typedef struct pp_coeff_s *pp_coeff_ptr;
 
-static void d_pairing_pp_init_even_k(pairing_pp_t p, element_ptr in1, pairing_t pairing)
+static void d_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing)
 {
     point_ptr P = in1->data;
     const common_curve_ptr cc = P->curve->data;
     point_t Z;
     int m;
-    even_mnt_pairing_data_ptr info = pairing->data;
+    mnt_pairing_data_ptr info = pairing->data;
     element_t t0;
     element_t a, b, c;
     field_ptr Fq = info->Fq;
@@ -1074,7 +780,7 @@ static void d_pairing_pp_init_even_k(pairing_pp_t p, element_ptr in1, pairing_t 
     point_clear(Z);
 }
 
-static void d_pairing_pp_clear_even_k(pairing_pp_t p)
+static void d_pairing_pp_clear(pairing_pp_t p)
 {
     //TODO: better to store a sentinel value in p->data?
     mpz_ptr q = p->pairing->r;
@@ -1091,10 +797,10 @@ static void d_pairing_pp_clear_even_k(pairing_pp_t p)
     free(p->data);
 }
 
-static void d_pairing_pp_apply_even_k(element_ptr out, element_ptr in2, pairing_pp_t p)
+static void d_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
 {
     mpz_ptr q = p->pairing->r;
-    even_mnt_pairing_data_ptr info = p->pairing->data;
+    mnt_pairing_data_ptr info = p->pairing->data;
     int m = mpz_sizeinbase(q, 2) - 2;
     pp_coeff_t *coeff = (pp_coeff_t *) p->data;
     pp_coeff_ptr pp = coeff[0];
@@ -1129,7 +835,7 @@ static void d_pairing_pp_apply_even_k(element_ptr out, element_ptr in2, pairing_
 	m--;
 	element_square(out, out);
     }
-    cc_tatepower_even_k(out, out, p->pairing);
+    cc_tatepower(out, out, p->pairing);
 
     element_clear(e0);
     element_clear(Qx);
@@ -1137,22 +843,49 @@ static void d_pairing_pp_apply_even_k(element_ptr out, element_ptr in2, pairing_
     element_clear(v);
 }
 
-static void pairing_init_d_param_even_k(pairing_t pairing, d_param_t param)
+void d_pairing_clear(pairing_t pairing)
 {
-    even_mnt_pairing_data_ptr p;
+    mnt_pairing_data_ptr p = pairing->data;
+
+    mpz_clear(p->tateexp);
+    if (p->k == 6) {
+	int i;
+	for (i=1; i<=4; i++) element_clear(p->xpowq[i]);
+	free(p->xpowq);
+    }
+
+    curve_clear(p->Eqk);
+    curve_clear(p->Etwist);
+    curve_clear(p->Eq);
+    element_clear(p->nqrinv);
+    element_clear(p->nqrinv2);
+    field_clear(p->Fqk);
+    field_clear(p->Fqd);
+    field_clear(p->Fqx);
+    field_clear(p->Fq);
+}
+
+void pairing_init_d_param(pairing_t pairing, d_param_t param)
+{
+    mnt_pairing_data_ptr p;
     element_t a, b;
     element_t irred;
     mpz_t one;
     int d = param->k / 2;
     int i;
 
+    if (param->k % 2) {
+	fprintf(stderr, "odd k not implemented anymore\n");
+	exit(2);
+    }
+
     mpz_init(pairing->r);
     mpz_set(pairing->r, param->r);
     field_init_fp(pairing->Zr, pairing->r);
-    pairing->map = cc_pairing_even_k;
-    pairing->is_almost_coddh = cc_is_almost_coddh_even_k;
+    pairing->map = cc_pairing;
+    pairing->is_almost_coddh = cc_is_almost_coddh;
 
-    p =	pairing->data = malloc(sizeof(even_mnt_pairing_data_t));
+    p =	pairing->data = malloc(sizeof(mnt_pairing_data_t));
     field_init_fp(p->Fq, param->q);
     element_init(a, p->Fq);
     element_init(b, p->Fq);
@@ -1221,26 +954,18 @@ static void pairing_init_d_param_even_k(pairing_t pairing, d_param_t param)
     mpz_clear(one);
     p->k = param->k;
     pairing->GT = p->Fqk;
-    pairing->phi = even_k_trace;
+    pairing->phi = trace;
 
     cc_miller_no_denom_fn = cc_miller_no_denom_affine;
     pairing->option_set = d_pairing_option_set;
-    pairing->pp_init = d_pairing_pp_init_even_k;
-    pairing->pp_clear = d_pairing_pp_clear_even_k;
-    pairing->pp_apply = d_pairing_pp_apply_even_k;
+    pairing->pp_init = d_pairing_pp_init;
+    pairing->pp_clear = d_pairing_pp_clear;
+    pairing->pp_apply = d_pairing_pp_apply;
+
+    pairing->clear_func = d_pairing_clear;
 
     element_clear(a);
     element_clear(b);
-}
-
-void pairing_init_d_param(pairing_t pairing, d_param_t param)
-{
-    if (0) {
-	pairing_init_d_param_odd_k(pairing, param);
-    } else {
-	if (param->k % 2) pairing_init_d_param_odd_k(pairing, param);
-	else pairing_init_d_param_even_k(pairing, param);
-    }
 }
 
 static void compute_cm_curve(d_param_ptr param, cm_info_ptr cm)
@@ -1335,7 +1060,6 @@ static void compute_cm_curve(d_param_ptr param, cm_info_ptr cm)
 
 void d_param_from_cm(d_param_t param, cm_info_ptr cm)
 {
-    //TODO: handle odd case as well?
     field_t Fq, Fqx, Fqd;
     element_t irred, nqr;
     int d = cm->k / 2;
