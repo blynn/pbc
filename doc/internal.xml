@@ -77,45 +77,47 @@ void element_add(element_t n, element_t a, element_t b)
 }
 </programlisting>
 <section>
-<title>Justifying Design Decisions</title>
+<title>Justifying the Design</title>
 <para>
-An alternative was to require the programmer to pass the field as a
-parameter, e.g. <userinput>element_add(a, b, c, F_13)</userinput>, but
-I decided the added annoyance of having to type this extra variable every
-time negated any benefits, such as obviating the need for
-the <parameter>field</parameter> pointer in
-<type>struct element_s</type>. Note one could write a preprocessor
-to convert one type of notation to the other. (Speaking of which, as Hovav
-Shacham suggested, it may be nice to eventually have a converter
-that takes human-friendly infix
-operator expressions like <userinput>a = (b + c) * d</userinput> and
-outputs the assembly-like <command>element_</command> equivalents.)
-</para>
-<para>
-This design may seem dangerous because if a programmer inadverdantly attempts
+My design may seem dangerous because if a programmer inadverdantly attempts
 to add a polynomial and a point on an elliptic curve, say, the code
 will compile without warnings since they have the same data type,
 but the results are undefined and the library will mostly cause a crash.
 </para>
 <para>
-However, I needed
-to set things up in this way because I wanted to be able to start with
-a finite field and then extend it an arbitrary number of times. (Though
-in practice, currently I only need to extend it twice at most.) I wanted
-to be able to swap the ground field and extension fields,
-which is trivial if they have the same data type.
+However I settled on having a catch-all
+<quote>glorified <type>void *</type></quote> <type>element_t</type>
+because I wanted to
 </para>
+<itemizedlist>
+  <listitem>
+<para>
+extend a field an arbitrary number of times
+(though in practice, currently I only need to extend a field twice at most),
+</para>
+  </listitem>
+  <listitem>
+<para>
+switch fields easily, so for example a program that benchmarks addition in
+polynomial rings can be modified trivially to bencmark addition
+in a group, and
+</para>
+  </listitem>
+  <listitem>
+<para>
+interchange different implementations of the same algebraic structure.
+</para>
+  </listitem>
+</itemizedlist>
 <para>
 I could have separate data types to distinguish between
 groups, rings and fields. It is important to
-label them differently in mathematics, but here I feel it makes more sense
+label them differently in mathematics, but here it makes more sense
 to lump them together under the same heading, and just treat some kinds
 as handicapped.
-</para>
-<para>
-Even if I did have a distinct data type for every kind of
-algebraic structure, fields of prime order with different moduli would still
-fall under the same data type, again with unpleasant results if elements
+Distinct data types may lead to a false sense of security.
+For example fields of prime order with different moduli would still
+fall under the same data type, with unpleasant results if their elements
 are mistakenly mixed.
 </para>
 <para>
@@ -139,9 +141,40 @@ This library ought to have such a feature eventually
 to aid the less experienced, but I have other priorities at present.
 </para>
 <para>
+I also have vague plans to add flags to
+<type>field_t</type>
+describing the capabilities of a particular <type>field_t</type>.
+These flags would be set during initialization, and would indicate 
+for example whether one can invert every nonzero element,
+whether there are one or two operations (that is, group versus ring),
+whether the field is an integer mod ring, polynomial ring, or polynomial
+mod ring, and so on. Once in place, more runtime checks can be performed
+to avoid illegal inversion and similar problems.
+</para>
+<para>
 Another option is to introduce data types for each of the four pairing-related
 algebraic structures, namely G1, G2, GT and Zr, as these are the only ones
 needed for implementing pairing-based cryptosystems.
+</para>
+<para>
+An alternative was to simply use <type>void *</type> instead of <type>element_t</type>
+and require the programmer to pass the field as a parameter,
+e.g. <userinput>element_add(a, b, c, F_13)</userinput>, but
+I decided the added annoyance of having to type this extra variable every
+time negated any benefits, such as obviating the need for
+the <parameter>field</parameter> pointer in
+<type>struct element_s</type>, even if one ignores the
+more serious problem that runtime type checking is considerably harder,
+if not impossible.
+</para>
+<para>
+I suppose one could write a preprocessor to convert one type of notation
+to the other, but I would like the code to be standard C.
+(On the other hand, as Hovav
+Shacham suggested, it may be nice to eventually have a converter
+that takes human-friendly infix
+operator expressions like <userinput>a = (b + c) * d</userinput> and
+outputs the assembly-like <command>element_</command> equivalents.)
 </para>
 <para>
 A minor point: The

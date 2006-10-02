@@ -137,6 +137,39 @@ static void fp_double(element_ptr r, element_ptr a)
     }
 }
 
+static void fp_set(element_ptr c, element_ptr a)
+{
+    fp_field_data_ptr p = a->field->data;
+    if (c == a) return;
+
+    //Assembly is faster here, but I don't want to stoop to that level.
+    //Instead of calling slower memcpy, wrap stuff so that GMP assembly
+    //gets called.
+    /*
+    memcpy(c->data, a->data, p->bytes);
+    */
+    mpz_t z1, z2;
+    z1->_mp_d = c->data;
+    z2->_mp_d = a->data;
+    z1->_mp_size = z1->_mp_alloc = z2->_mp_size = z2->_mp_alloc = p->limbs;
+    mpz_set(z1, z2);
+}
+
+static void fp_halve(element_ptr r, element_ptr a)
+{
+    fp_field_data_ptr p = r->field->data;
+    const size_t t = p->limbs;
+    int carry = 0;
+    mp_limb_t *alimb = a->data;
+    mp_limb_t *rlimb = r->data;
+    if (alimb[0] & 1) {
+	carry = mpn_add_n(rlimb, alimb, p->primelimbs, t);
+    } else fp_set(r, a);
+
+    mpn_rshift(rlimb, rlimb, t, 1);
+    if (carry) rlimb[t-1] |= ((mp_limb_t) 1) << (sizeof(mp_limb_t) * 8 - 1);
+}
+
 static void fp_sub(element_ptr r, element_ptr a, element_ptr b)
 {
     fp_field_data_ptr p = r->field->data;
@@ -229,24 +262,6 @@ static void fp_pow_mpz(element_ptr c, element_ptr a, mpz_ptr op)
     mpz_clear(z);
 }
 
-static void fp_set(element_ptr c, element_ptr a)
-{
-    fp_field_data_ptr p = a->field->data;
-    if (c == a) return;
-
-    //Assembly is faster here, but I don't want to stoop to that level.
-    //Instead of calling slower memcpy, wrap stuff so that GMP assembly
-    //gets called.
-    /*
-    memcpy(c->data, a->data, p->bytes);
-    */
-    mpz_t z1, z2;
-    z1->_mp_d = c->data;
-    z2->_mp_d = a->data;
-    z1->_mp_size = z1->_mp_alloc = z2->_mp_size = z2->_mp_alloc = p->limbs;
-    mpz_set(z1, z2);
-}
-
 static void fp_invert(element_ptr e, element_ptr a)
 {
     mpz_t z;
@@ -286,10 +301,9 @@ static int fp_cmp(element_ptr a, element_ptr b)
 
 static int fp_sgn_odd(element_ptr a)
 {
-    fp_field_data_ptr p = a->field->data;
     if (fp_is0(a)) return 0;
     mp_limb_t *lp = a->data;
-    return lp[p->limbs - 1] & 1 ? 1 : -1;
+    return lp[0] & 1 ? 1 : -1;
 }
 
 static int fp_sgn_even(element_ptr a)
@@ -383,6 +397,7 @@ void field_init_fast_fp(field_ptr f, mpz_t prime)
     f->mul_si = fp_mul_si;
     f->square = fp_square;
     f->doub = fp_double;
+    f->halve = fp_halve;
     f->pow_mpz = fp_pow_mpz;
     f->neg = fp_neg;
     f->cmp = fp_cmp;

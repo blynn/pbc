@@ -3,6 +3,7 @@
 #include "pbc.h"
 #include "fp.h"
 #include "fieldquadratic.h"
+#include "random.h"
 
 static mpz_t prime;
 
@@ -79,8 +80,82 @@ static void run_check(field_ptr f1, field_ptr f2)
     mpz_t t1, t2;
     element_t x1, y1, z1;
     element_t x2, y2, z2;
-    unsigned char *buf;
-    int len;
+    char s2[80];
+
+    void convertset(element_t out, element_t in)
+    {
+	unsigned char *buf;
+	int len;
+
+	len = element_length_in_bytes(in);
+	buf = malloc(len);
+	element_to_bytes(buf, in);
+	element_from_bytes(out, buf);
+	free(buf);
+	check_match(in, out, "conversion");
+    }
+
+    void randxy(void)
+    {
+
+	element_random(x1);
+	element_random(y1);
+	convertset(x2, x1);
+	convertset(y2, y1);
+    }
+
+    void check_onearg(void (*fn)(element_ptr), char *s)
+    {
+	fn(x1);
+	fn(x2);
+	check_match(x1, x2, s);
+    }
+
+    void check_twoarg(void (*fn)(element_ptr, element_ptr), char *s)
+    {
+	randxy();
+	fn(z1, x1);
+	fn(z2, x2);
+	check_match(z1, z2, s);
+
+	strncpy(s2, s, 32);
+	strcat(s2, " (in place)");
+	fn(y1, y1);
+	fn(y2, y2);
+	check_match(y1, y2, s2);
+    }
+
+    void check_threearg(void (*fn)(element_ptr, element_ptr, element_ptr), char *s)
+    {
+	randxy();
+	fn(z1, x1, y1);
+	fn(z2, x2, y2);
+	check_match(z1, z2, s);
+
+	strncpy(s2, s, 32);
+	strcat(s2, " (first arg in place)");
+	element_set(z1, x1);
+	element_set(z2, x2);
+	fn(z1, z1, y1);
+	fn(z2, z2, y2);
+	check_match(z1, z2, s2);
+
+	strncpy(s2, s, 32);
+	strcat(s2, " (second arg in place)");
+	element_set(z1, y1);
+	element_set(z2, y2);
+	fn(z1, x1, z1);
+	fn(z2, x2, z2);
+	check_match(z1, z2, s2);
+
+	strncpy(s2, s, 32);
+	strcat(s2, " (both args in place)");
+	element_set(z1, y1);
+	element_set(z2, y2);
+	fn(x1, x1, x1);
+	fn(x2, x2, x2);
+	check_match(x1, x2, s2);
+    }
 
     mpz_init(t1);
     mpz_init(t2);
@@ -92,79 +167,49 @@ static void run_check(field_ptr f1, field_ptr f2)
     element_init(z2, f2);
 
     check_match(z1, z2, "init");
-    element_random(x1);
-    len = element_length_in_bytes(x1);
-    buf = malloc(len);
-    element_to_bytes(buf, x1);
-    element_from_bytes(x2, buf);
-    free(buf);
-    check_match(x1, x2, "conversion");
-    element_random(y1);
-    len = element_length_in_bytes(y1);
-    buf = malloc(len);
-    element_to_bytes(buf, y1);
-    element_from_bytes(y2, buf);
-    free(buf);
-    check_match(y1, y2, "conversion");
-    element_set0(z1);
-    element_set0(z2);
-    check_match(z1, z2, "set0");
-    element_set1(z1);
-    element_set1(z2);
-    check_match(z1, z2, "set1");
-    element_set(z1, x1);
-    element_set(z2, x2);
-    check_match(z1, z2, "set");
-    element_add(z1, x1, y1);
-    element_add(z2, x2, y2);
-    check_match(z1, z2, "add");
-    element_add(z1, z1, z1);
-    element_add(z2, z2, z2);
-    check_match(z1, z2, "add (in place)");
-    element_sub(z1, x1, y1);
-    element_sub(z2, x2, y2);
-    check_match(z1, z2, "sub");
-    element_mul(z1, x1, y1);
-    element_mul(z2, x2, y2);
-    check_match(z1, z2, "mul");
-    element_mul(z1, z1, z1);
-    element_mul(z2, z2, z2);
-    check_match(z1, z2, "mul (in place)");
+    check_onearg(element_set0, "set0");
+    check_onearg(element_set1, "set1");
+    check_twoarg(element_set, "set");
+    check_match_int(element_sgn(z1), element_sgn(z2), "sgn");
+
+    check_threearg(element_add, "add");
+    check_twoarg(element_neg, "neg");
+    check_threearg(element_sub, "sub");
+    check_twoarg(element_double, "double");
+    check_twoarg(element_halve, "halve");
+
+    check_twoarg(element_invert, "invert");
+    check_twoarg(element_square, "square");
+    check_threearg(element_mul, "mul");
+
+    randxy();
     element_neg(y1, x1);
     element_neg(y2, x2);
-    check_match(y1, y2, "neg");
     element_add(z1, x1, y1);
     element_add(z2, x2, y2);
     check_match(z1, z2, "add (to zero)");
-    check_p(element_is0(z1), "is0");
+    check_p(!element_sgn(z1), "sgn");
+    check_p(!element_sgn(z1), "sgn");
     check_p(element_is0(z2), "is0");
-    check_match_int(element_sgn(z1), element_sgn(z2), "sgn");
+    check_p(element_is0(z2), "is0");
+
+    randxy();
     element_invert(y1, x1);
     element_invert(y2, x2);
-    check_match(y1, y2, "invert");
     element_mul(z1, x1, y1);
     element_mul(z2, x2, y2);
     check_match(z1, z2, "mul (to one)");
     check_p(element_is1(z1), "is1");
     check_p(element_is1(z2), "is1");
-    element_square(z1, x1);
-    element_square(z2, x2);
-    check_match(z1, z2, "square");
-    element_square(z1, z1);
-    element_square(z2, z2);
-    check_match(z1, z2, "square (in place)");
-    element_double(z1, x1);
-    element_double(z2, x2);
-    check_match(z1, z2, "double");
-    while (!element_is_sqr(x1)) {
-	element_random(x1);
+
+    for (;;) {
+	int flag;
+	randxy();
+	flag = element_is_sqr(x1);
+	check_match_int(flag, element_is_sqr(x2), "is_sqr");
+	if (flag) break;
     }
-    len = element_length_in_bytes(x1);
-    buf = malloc(len);
-    element_to_bytes(buf, x1);
-    element_from_bytes(x2, buf);
-    free(buf);
-    check_match(x1, x2, "conversion");
+    convertset(x2, x1);
     element_sqrt(z1, x1);
     element_sqrt(z2, x2);
     //can't compare these because sqrt is nondeterministic
@@ -172,6 +217,9 @@ static void run_check(field_ptr f1, field_ptr f2)
     element_square(z1, z1);
     element_square(z2, z2);
     check_match(z1, z2, "sqrt");
+
+    pbc_mpz_random(t1, f1->order);
+    pbc_mpz_random(t2, f2->order);
     element_to_mpz(t1, y1);
     element_to_mpz(t2, y2);
     element_set_mpz(y1, t1);
@@ -224,10 +272,15 @@ int main(void)
     mpz_setbit(prime, 60);
     mpz_nextprime(prime, prime);
 
-    element_printf("prime = %Z\n", prime);
+    element_printf("prime = %Zd\n", prime);
 
     field_init_naive_fp(f1, prime);
     field_init_mont_fp(f2, prime);
+
+    printf("Field 1:\n");
+    field_print_info(stdout, f1);
+    printf("Field 2:\n");
+    field_print_info(stdout, f2);
 
     printf("checking base fields\n");
     for (i=0; i<n; i++) run_check(f1, f2);

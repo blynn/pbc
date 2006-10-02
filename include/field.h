@@ -34,6 +34,7 @@ struct field_s {
     void (*mul_si)(element_ptr, element_ptr, signed long int);
     void (*square)(element_ptr, element_ptr);
     void (*doub)(element_ptr, element_ptr); //can't call it "double"!
+    void (*halve)(element_ptr, element_ptr);
     void (*pow_mpz)(element_ptr, element_ptr, mpz_ptr);
     void (*invert)(element_ptr, element_ptr);
     void (*neg)(element_ptr, element_ptr);
@@ -200,6 +201,14 @@ Set ''n'' to ''a'' + ''a''.
 static inline void element_double(element_t n, element_t a)
 {
     n->field->doub(n, a);
+}
+
+/*@manual earith
+Set ''n'' to ''a/2''
+*/
+static inline void element_halve(element_t n, element_t a)
+{
+    n->field->halve(n, a);
 }
 
 /*@manual earith

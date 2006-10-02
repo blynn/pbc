@@ -236,6 +236,26 @@ static void fp_double(element_ptr c, element_ptr a)
     }
 }
 
+static void fp_halve(element_ptr c, element_ptr a)
+{
+    dataptr ad = a->data, cd = c->data;
+    if (!ad->flag) {
+	cd->flag = 0;
+    } else {
+	fp_field_data_ptr p = c->field->data;
+	const size_t t = p->limbs;
+	int carry = 0;
+	mp_limb_t *alimb = ad->d;
+	mp_limb_t *climb = cd->d;
+	if (alimb[0] & 1) {
+	    carry = mpn_add_n(climb, alimb, p->primelimbs, t);
+	} else fp_set(c, a);
+
+	mpn_rshift(climb, climb, t, 1);
+	if (carry) climb[t-1] |= ((mp_limb_t) 1) << (sizeof(mp_limb_t) * 8 - 1);
+    }
+}
+
 static void fp_neg(element_ptr c, element_ptr a)
 {
     dataptr ad = a->data, cd = c->data;
@@ -428,10 +448,9 @@ static int fp_cmp(element_ptr a, element_ptr b)
 
 static int fp_sgn_odd(element_ptr a)
 {
-    fp_field_data_ptr p = a->field->data;
     dataptr ad = a->data;
     if (!ad->flag) return 0;
-    return ad->d[p->limbs - 1] & 1 ? 1 : -1;
+    return ad->d[0] & 1 ? 1 : -1;
 }
 
 static int fp_sgn_even(element_ptr a)
@@ -511,6 +530,12 @@ static int fp_from_bytes(element_t a, unsigned char *data)
     return n;
 }
 
+static void fp_print_info(FILE *str, field_ptr f)
+{
+    fprintf(str, "F_p: zero flag + mpn,\n");
+    element_fprintf(str, "modulus = %Zd\n", f->order);
+}
+
 static void fp_field_clear(field_t f)
 {
     fp_field_data_ptr p = f->data;
@@ -535,6 +560,7 @@ void field_init_faster_fp(field_ptr f, mpz_t prime)
     f->mul_si = fp_mul_si;
     f->square = fp_square;
     f->doub = fp_double;
+    f->halve = fp_halve;
     f->pow_mpz = fp_pow_mpz;
     f->neg = fp_neg;
     f->cmp = fp_cmp;
@@ -552,6 +578,8 @@ void field_init_faster_fp(field_ptr f, mpz_t prime)
     f->to_bytes = fp_to_bytes;
     f->from_bytes = fp_from_bytes;
     f->to_mpz = fp_to_mpz;
+
+    f->print_info = fp_print_info;
 
     p = f->data = malloc(sizeof(fp_field_data_t));
     p->limbs = mpz_size(prime);

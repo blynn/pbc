@@ -145,12 +145,18 @@ PBC functions are mostly reentrant.
     </listitem>
 </orderedlist>
 <para>
-On the other hand, <type>element_t</type> is more complex than
-GMP types in that the same data type is used for elements of different
+Recall GMP has the <tt>mpz_t</tt> type for integers, <tt>mpq_t</tt> for
+rationals and so on.
+In contrast, PBC uses the <type>element_t</type>
+data type for elements of different
 algebraic structures, such as elliptic curve groups, polynomial rings
 and finite fields. Many functions assume the inputs come from the
 same algebraic structure and trouble can arise if for example one
 attempts to add a polynomial to a point on an elliptic curve.
+</para>
+<para>
+The algebraic structure that an <type>element_t</type> variable belongs
+to is specified in an initialization call.
 </para>
 </section>
 </chapter>

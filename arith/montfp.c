@@ -265,6 +265,26 @@ static void fp_double(element_ptr c, element_ptr a)
     }
 }
 
+static void fp_halve(element_ptr c, element_ptr a)
+{
+    dataptr ad = a->data, cd = c->data;
+    if (!ad->flag) {
+	cd->flag = 0;
+    } else {
+	fp_field_data_ptr p = c->field->data;
+	const size_t t = p->limbs;
+	int carry = 0;
+	mp_limb_t *alimb = ad->d;
+	mp_limb_t *climb = cd->d;
+	if (alimb[0] & 1) {
+	    carry = mpn_add_n(climb, alimb, p->primelimbs, t);
+	} else fp_set(c, a);
+
+	mpn_rshift(climb, climb, t, 1);
+	if (carry) climb[t-1] |= ((mp_limb_t) 1) << (sizeof(mp_limb_t) * 8 - 1);
+    }
+}
+
 static void fp_neg(element_ptr c, element_ptr a)
 {
     dataptr ad = a->data, cd = c->data;
@@ -558,6 +578,7 @@ void field_init_mont_fp(field_ptr f, mpz_t prime)
     f->set = fp_set;
     f->mul = fp_mul;
     f->doub = fp_double;
+    f->halve = fp_halve;
     f->pow_mpz = fp_pow_mpz;
     f->neg = fp_neg;
     f->sign = mpz_odd_p(prime) ? fp_sgn_odd : fp_sgn_even;

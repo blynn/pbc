@@ -281,11 +281,22 @@ static void generic_mul_mpz(element_ptr r, element_ptr a, mpz_ptr z)
     element_mul(r, a, e0);
     element_clear(e0);
 }
+
 static void generic_mul_si(element_ptr r, element_ptr a, signed long int n)
 {
     element_t e0;
     element_init(e0, r->field);
     element_set_si(e0, n);
+    element_mul(r, a, e0);
+    element_clear(e0);
+}
+
+static void generic_halve(element_ptr r, element_ptr a)
+{
+    element_t e0;
+    element_init(e0, r->field);
+    element_set_si(e0, 2);
+    element_invert(e0, e0);
     element_mul(r, a, e0);
     element_clear(e0);
 }
@@ -304,6 +315,7 @@ void field_init(field_ptr f)
 {
     f->nqr = NULL;
     mpz_init(f->order);
+    f->halve = generic_halve;
     f->square = generic_square;
     f->mul_mpz = generic_mul_mpz;
     f->pow_mpz = generic_pow_mpz;

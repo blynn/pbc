@@ -472,8 +472,9 @@ static void fi_invert(element_ptr n, element_ptr a)
 
 static int fi_is_sqr(element_ptr e)
 {
-    //TODO: this is false:
-    //x + yi is a square iff x^2 + y^2 is (in the base field)
+    //x + yi is a square
+    //if x^2 + y^2 is (in the base field)
+    //and at least one of (x +- sqrt(x^2 + y^2)/2 is
     fq_data_ptr p = e->data;
     element_t e0, e1;
     int result;
@@ -483,6 +484,15 @@ static int fi_is_sqr(element_ptr e)
     element_square(e1, p->y);
     element_add(e0, e0, e1);
     result = element_is_sqr(e0);
+    if (result) {
+	element_sqrt(e0, e0);
+	element_add(e1, p->x, e0);
+	element_halve(e1, e1);
+	if (!element_is_sqr(e1)) {
+	    element_sub(e1, e1, e0);
+	    result = element_is_sqr(e1);
+	}
+    }
     element_clear(e0);
     element_clear(e1);
     return result;
@@ -496,7 +506,6 @@ static void fi_sqrt(element_ptr n, element_ptr e)
 
     //if (a+bi)^2 = x+yi then
     //2a^2 = x +- sqrt(x^2 + y^2)
-    //(take the sign which allows a to exist)
     //and 2ab = y
     //[thus 2b^2 = - (x -+ sqrt(x^2 + y^2))]
     element_init(e0, p->x->field);

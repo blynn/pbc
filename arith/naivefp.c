@@ -49,16 +49,9 @@ static size_t zp_out_str(FILE *stream, int base, element_ptr e)
 
 static int zp_sgn_odd(element_ptr a)
 {
-    int res;
     mpz_ptr z = a->data;
 
-    if (mpz_is0(z)) {
-	res = 0;
-    } else {
-	if (mpz_odd_p(z)) res = 1;
-	else res = -1;
-    }
-    return res;
+    return mpz_is0(z) ? 0 : (mpz_odd_p(z) ? 1 : -1);
 }
 
 static int zp_sgn_even(element_ptr a)
@@ -128,6 +121,17 @@ static void zp_double(element_ptr n, element_ptr a)
     mpz_mul_2exp(n->data, a->data, 1);
     if (mpz_cmp(n->data, n->field->order) >= 0) {
 	mpz_sub(n->data, n->data, n->field->order);
+    }
+}
+
+static void zp_halve(element_ptr n, element_ptr a)
+{
+    mpz_ptr z = a->data;
+    if (mpz_odd_p(z)) {
+	mpz_add(n->data, z, a->field->order);
+	mpz_tdiv_q_2exp(n->data, n->data, 1);
+    } else {
+	mpz_tdiv_q_2exp(n->data, a->data, 1);
     }
 }
 
@@ -262,6 +266,12 @@ static void zp_to_mpz(mpz_ptr z, element_ptr a)
     mpz_set(z, a->data);
 }
 
+static void zp_print_info(FILE *out, field_ptr f)
+{
+    fprintf(out, "F_p: GMP wrapped version,\n");
+    element_fprintf(out, "modulus = %Zd\n", f->order);
+}
+
 void field_init_naive_fp(field_ptr f, mpz_t prime)
 {
     field_init(f);
@@ -276,6 +286,7 @@ void field_init_naive_fp(field_ptr f, mpz_t prime)
     f->set = zp_set;
     f->square = zp_square;
     f->doub = zp_double;
+    f->halve = zp_halve;
     f->mul = zp_mul;
     f->mul_mpz = zp_mul_mpz;
     f->mul_si = zp_mul_si;
@@ -295,6 +306,8 @@ void field_init_naive_fp(field_ptr f, mpz_t prime)
     f->to_bytes = zp_to_bytes;
     f->from_bytes = zp_from_bytes;
     f->to_mpz = zp_to_mpz;
+
+    f->print_info = zp_print_info;
 
     mpz_set(f->order, prime);
     f->data = NULL;

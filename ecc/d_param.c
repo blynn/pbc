@@ -245,14 +245,7 @@ static void cc_miller_no_denom_proj(element_t res, mpz_t q, point_t P,
 	element_mul(t4, t4, t1);
 	element_mul(t0, t0, t3);
 	element_sub(t4, t4, t0);
-	//TODO: rewrite so it doesn't access internal structure
-	{
-	    mpz_ptr z0 = t4->data;
-	    if (mpz_odd_p(z0)) {
-		mpz_add(z0, z0, t4->field->order);
-	    }
-	    mpz_tdiv_q_2exp(Py->data, z0, 1);
-	}
+	element_halve(Py, t4);
     }
 
     void do_tangent(void)
