@@ -9,9 +9,13 @@ int main(void)
     element_t a, b, c;
 
     mpz_init(prime);
-    mpz_set_ui(prime, 82);
+    mpz_set_ui(prime, 83); // 83 is 3 mod 4
+
     mpz_setbit(prime, 256);
-    mpz_nextprime(prime, prime);
+    do {
+	mpz_nextprime(prime, prime);
+    } while (mpz_fdiv_ui(prime, 4) != 3);
+
     field_init_fp(fp, prime);
     field_init_fi(fp2, fp);
     element_init(a, fp2);

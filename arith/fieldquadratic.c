@@ -285,7 +285,6 @@ static int fq_from_bytes(element_t e, unsigned char *data)
 
 static int fq_is_sqr(element_ptr e)
 {
-    //TODO: this is false:
     //x + y sqrt(nqr) is a square iff x^2 - nqr y^2 is (in the base field)
     fq_data_ptr p = e->data;
     element_t e0, e1;
@@ -472,9 +471,21 @@ static void fi_invert(element_ptr n, element_ptr a)
 
 static int fi_is_sqr(element_ptr e)
 {
-    //x + yi is a square
-    //if x^2 + y^2 is (in the base field)
-    //and at least one of (x +- sqrt(x^2 + y^2)/2 is
+    //x + yi is a square <=> x^2 + y^2 is (in the base field)
+
+    // Proof: (=>) if x+yi = (a+bi)^2,
+    // then a^2 - b^2 = x, 2ab = y,
+    // thus (a^2 + b^2)^2 = (a^2 - b^2)^2 + (2ab)^2 =  x^2 + y^2
+    // (<=) Suppose A^2 = x^2 + y^2
+    // then if there exist a, b satisfying:
+    //   a^2 = (+-A + x)/2, b^2 = (+-A - x)/2
+    // then (a + bi)^2 = x + yi.
+    // We show that exactly one of (A + x)/2, (-A + x)/2
+    // is a quadratic residue (thus a, b do exist).
+    // Suppose not. Then the product
+    // (x^2 - A^2) / 4 is some quadratic residue, a contradiction
+    // since this would imply x^2 - A^2 = -y^2 is also a quadratic residue,
+    // but we know -1 is not a quadratic residue.
     fq_data_ptr p = e->data;
     element_t e0, e1;
     int result;
@@ -484,15 +495,6 @@ static int fi_is_sqr(element_ptr e)
     element_square(e1, p->y);
     element_add(e0, e0, e1);
     result = element_is_sqr(e0);
-    if (result) {
-	element_sqrt(e0, e0);
-	element_add(e1, p->x, e0);
-	element_halve(e1, e1);
-	if (!element_is_sqr(e1)) {
-	    element_sub(e1, e1, e0);
-	    result = element_is_sqr(e1);
-	}
-    }
     element_clear(e0);
     element_clear(e1);
     return result;
@@ -506,7 +508,7 @@ static void fi_sqrt(element_ptr n, element_ptr e)
 
     //if (a+bi)^2 = x+yi then
     //2a^2 = x +- sqrt(x^2 + y^2)
-    //and 2ab = y
+    //(take the sign such that a exists) and 2ab = y
     //[thus 2b^2 = - (x -+ sqrt(x^2 + y^2))]
     element_init(e0, p->x->field);
     element_init(e1, e0->field);
