@@ -82,9 +82,9 @@ first calling the preprocessing function:
 
     element_pp_init(g_pp, g);
 
-    element_pp_pow(h, pow1, g1_pp);
-    element_pp_pow(h, pow2, g1_pp);
-    element_pp_pow(h, pow3, g1_pp);
+    element_pp_pow(h, pow1, g_pp); // h = g^pow1
+    element_pp_pow(h, pow2, g_pp); // h = g^pow2
+    element_pp_pow(h, pow3, g_pp); // h = g^pow3
 
     element_pp_clear(g_pp);
 </screen>

@@ -6,7 +6,7 @@ maintaining and developing it.
 <para>
 Hovav Shacham wrote the multiexponentiation, sliding windows and preprocessed
 exponentiation routines, Makefile improvements, and many
-BBS signature scheme optimizations.
+BBS signature scheme optimizations. He also helps administer the mailing list.
 </para>
 <para>
 Matt Steiner implemented the Boneh-Waters broadcast encryption.

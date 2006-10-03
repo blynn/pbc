@@ -145,7 +145,7 @@ PBC functions are mostly reentrant.
     </listitem>
 </orderedlist>
 <para>
-Recall GMP has the <tt>mpz_t</tt> type for integers, <tt>mpq_t</tt> for
+Recall GMP has the <type>mpz_t</type> type for integers, <type>mpq_t</type> for
 rationals and so on.
 In contrast, PBC uses the <type>element_t</type>
 data type for elements of different

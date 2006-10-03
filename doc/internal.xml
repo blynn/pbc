@@ -79,7 +79,7 @@ void element_add(element_t n, element_t a, element_t b)
 <section>
 <title>Justifying the Design</title>
 <para>
-My design may seem dangerous because if a programmer inadverdantly attempts
+My design may seem dangerous because if a programmer inadvertently attempts
 to add a polynomial and a point on an elliptic curve, say, the code
 will compile without warnings since they have the same data type,
 but the results are undefined and the library will mostly cause a crash.
