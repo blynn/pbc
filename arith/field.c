@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <gmp.h>
 #include "field.h"
+#include "utils.h"
 
 /* returns recommended window size.  n is exponent. */
 static int optimal_pow_window_size(mpz_ptr n)
@@ -291,6 +292,11 @@ static void generic_mul_si(element_ptr r, element_ptr a, signed long int n)
     element_clear(e0);
 }
 
+static void generic_double(element_ptr r, element_ptr a)
+{
+    element_add(r, a, a);
+}
+
 static void generic_halve(element_ptr r, element_ptr a)
 {
     element_t e0;
@@ -301,9 +307,26 @@ static void generic_halve(element_ptr r, element_ptr a)
     element_clear(e0);
 }
 
+static void generic_to_mpz(mpz_t z, element_ptr a)
+{
+    UNUSED_VAR(a);
+    mpz_set_ui(z, 0);
+}
+
+static void generic_set_mpz(element_ptr a, mpz_t z)
+{
+    UNUSED_VAR(z);
+    element_set0(a);
+}
+
 static void generic_print_info(FILE *out, field_ptr f)
 {
-    element_fprintf(out, "field %X unknown\n", f);
+    element_fprintf(out, "field %X unknown\n", (unsigned int) f);
+}
+
+static void warn_field_clear(field_ptr f)
+{
+    fprintf(stderr, "field %X has no clear function\n", (unsigned int) f);
 }
 
 void field_print_info(FILE *out, field_ptr f)
@@ -316,12 +339,15 @@ void field_init(field_ptr f)
     f->nqr = NULL;
     mpz_init(f->order);
     f->halve = generic_halve;
+    f->doub = generic_double;
     f->square = generic_square;
     f->mul_mpz = generic_mul_mpz;
     f->pow_mpz = generic_pow_mpz;
     f->mul_si = generic_mul_si;
     f->print_info = generic_print_info;
-    f->field_clear = NULL;
+    f->to_mpz = generic_to_mpz;
+    f->set_mpz = generic_set_mpz;
+    f->field_clear = warn_field_clear;
 }
 
 void field_clear(field_ptr f)
@@ -331,5 +357,5 @@ void field_clear(field_ptr f)
 	free(f->nqr);
     }
     mpz_clear(f->order);
-    if (f->field_clear) f->field_clear(f);
+    f->field_clear(f);
 }

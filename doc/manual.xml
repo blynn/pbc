@@ -98,6 +98,12 @@ fink installation.
 make
 make install
 </screen>
+<para>
+By default the library is installed in <filename>/usr/local/lib</filename>.
+On some systems, this may not be in the library
+path. One way to fix this is to edit <filename>/etc/ld.so.conf</filename> and
+run <filename>ldconfig</filename>.
+</para>
 </listitem>
 </varlistentry>
 
@@ -106,7 +112,7 @@ CMake
 </term>
 <listitem><para>
 A <filename>CMakeLists.txt</filename> is also provided.
-CMake is a newer tool that I prefer to use.
+CMake is a newer tool that I prefer to use during development.
 </para>
 <screen>
 cmake .

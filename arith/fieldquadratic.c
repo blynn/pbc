@@ -3,6 +3,7 @@
 #include <gmp.h>
 #include "field.h"
 #include "fieldquadratic.h"
+#include "utils.h"
 
 static inline element_ptr fq_nqr(field_ptr f)
 {
@@ -341,10 +342,17 @@ static void fq_sqrt(element_ptr n, element_ptr e)
     element_clear(e2);
 }
 
+static void field_clear_fq(field_ptr f)
+{
+    UNUSED_VAR(f);
+    //f->order gets cleared automatically
+}
+
 void field_init_quadratic(field_ptr f, field_ptr fbase)
 {
     field_init(f);
 
+    f->clear_field = field_clear_fq;
     f->data = fbase;
 
     f->init = fq_init;
@@ -552,9 +560,16 @@ static void fi_print_info(FILE *out, field_ptr f)
     field_print_info(out, fbase);
 }
 
+static void field_clear_fi(field_ptr f)
+{
+    UNUSED_VAR(f);
+    //f->order gets cleared automatically
+}
+
 void field_init_fi(field_ptr f, field_ptr fbase)
 {
     field_init(f);
+    f->field_clear = field_clear_fi;
     f->data = fbase;
     f->init = fq_init;
     f->clear = fq_clear;
