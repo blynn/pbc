@@ -17,6 +17,13 @@ struct element_s {
 typedef struct element_s *element_ptr;
 typedef struct element_s element_t[1];
 
+struct element_pp_s {
+    struct field_s *field;
+    void *data;
+};
+typedef struct element_pp_s element_pp_t[1];
+typedef struct element_pp_s *element_pp_ptr;
+
 struct field_s {
     void (*field_clear)(struct field_s *f);
     void (*init)(element_ptr);
@@ -50,10 +57,13 @@ struct field_s {
     int (*from_bytes)(element_ptr, unsigned char *data);
     int (*length_in_bytes)(element_ptr);
     int fixed_length_in_bytes; //length of an element in bytes; -1 for variable
-    mpz_t order; //-1 for infinite order
+    mpz_t order; //0 for infinite order
     element_ptr nqr; //nonquadratic residue
     void (*to_mpz)(mpz_ptr, element_ptr);
     void (*print_info)(FILE *, struct field_s *);
+    void (*pp_init)(element_pp_t p, element_t in);
+    void (*pp_clear)(element_pp_t p);
+    void (*pp_pow)(element_t out, mpz_ptr power, element_pp_t p);
     void *data;
 };
 typedef struct field_s *field_ptr;
@@ -479,5 +489,37 @@ Currently only implemented for points on an elliptic curve.
 int element_length_in_bytes_compressed(element_t e);
 
 void field_print_info(FILE *out, field_ptr f);
+
+void default_element_pp_init(element_pp_t p, element_t in);
+void default_element_pp_pow(element_t out, mpz_ptr power,
+                              element_pp_t p);
+void default_element_pp_clear(element_pp_t p);
+
+/*@manual epow
+Prepare to exponentiate an element ''in'', and store preprocessing information
+in ''p''.
+*/
+static inline void element_pp_init(element_pp_t p, element_t in) {
+    p->field = in->field;
+    in->field->pp_init(p, in);
+}
+
+/*@manual epow
+Clear ''p''. Should be called after ''p'' is no longer needed.
+*/
+static inline void element_pp_clear(element_pp_t p)
+{
+    p->field->pp_clear(p);
+}
+
+/*@manual epow
+Raise ''in'' to ''power'' and store the result in ''out'', where ''in''
+is a previously preprocessed element, that is, the second argument
+passed to a previous <function>element_pp_init</function> call.
+*/
+static inline void element_pp_pow(element_t out, mpz_ptr power, element_pp_t p)
+{
+    p->field->pp_pow(out, power, p);
+}
 
 #endif //FIELD_H

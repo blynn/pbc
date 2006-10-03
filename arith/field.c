@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> //for memcmp()
 #include <gmp.h>
 #include "field.h"
 #include "utils.h"
@@ -319,6 +320,24 @@ static void generic_set_mpz(element_ptr a, mpz_t z)
     element_set0(a);
 }
 
+static int generic_cmp(element_ptr a, element_ptr b)
+{
+    int result;
+    unsigned char *buf1, *buf2;
+    int len;
+    if (a == b) return 0;
+    len = element_length_in_bytes(a);
+    if (len != element_length_in_bytes(b)) return 1;
+    buf1 = malloc(len);
+    buf2 = malloc(len);
+    element_to_bytes(buf1, a);
+    element_to_bytes(buf2, b);
+    result = memcmp(buf1, buf2, len);
+    free(buf1);
+    free(buf2);
+    return result;
+}
+
 static void generic_print_info(FILE *out, field_ptr f)
 {
     element_fprintf(out, "field %X unknown\n", (unsigned int) f);
@@ -336,18 +355,35 @@ void field_print_info(FILE *out, field_ptr f)
 
 void field_init(field_ptr f)
 {
+    //should be called by each field_init_*
     f->nqr = NULL;
     mpz_init(f->order);
+
+    //this should later be set
+    f->field_clear = warn_field_clear;
+
+    //and this to something more helpful
+    f->print_info = generic_print_info;
+
+    //many of these can usually be optimized for particular fields
     f->halve = generic_halve;
     f->doub = generic_double;
     f->square = generic_square;
     f->mul_mpz = generic_mul_mpz;
-    f->pow_mpz = generic_pow_mpz;
     f->mul_si = generic_mul_si;
-    f->print_info = generic_print_info;
+    f->cmp = generic_cmp;
+
+    //default: converts all elements to integer 0
+    //reads all integers as 0
     f->to_mpz = generic_to_mpz;
     f->set_mpz = generic_set_mpz;
-    f->field_clear = warn_field_clear;
+
+    //these are fast, thanks to Hovav
+    f->pow_mpz = generic_pow_mpz;
+
+    f->pp_init = default_element_pp_init;
+    f->pp_clear = default_element_pp_clear;
+    f->pp_pow = default_element_pp_pow;
 }
 
 void field_clear(field_ptr f)
@@ -358,4 +394,105 @@ void field_clear(field_ptr f)
     }
     mpz_clear(f->order);
     f->field_clear(f);
+}
+
+
+struct element_base_table {
+    int k;
+    int bits;
+    element_t **table;
+};
+
+/* build k-bit base table for n-bit exponentiation w/ base a */
+static void *element_build_base_table(element_ptr a, int bits, int k)
+{
+    struct element_base_table *base_table;
+    element_t multiplier;
+    int i, j;
+    int lookup_size;
+    int num_lookups;
+
+    element_t *lookup;
+
+    fprintf(stderr, "building %d bits %d k\n", bits, k);
+
+    lookup_size = 1 << k;
+    num_lookups = bits/k + 1;
+
+    base_table = malloc(sizeof(struct element_base_table));
+    base_table->k = k;
+    base_table->bits = bits;
+    base_table->table = malloc(num_lookups * sizeof(element_t *));
+
+    element_init(multiplier, a->field);
+    element_set(multiplier, a);
+
+    for (i = 0; i < num_lookups; i++) {
+        lookup = malloc(lookup_size * sizeof(element_t));
+        element_init(lookup[0], a->field);
+        element_set1(lookup[0]);
+        for (j = 1; j < lookup_size; j++) {
+            element_init(lookup[j], a->field);
+            element_mul(lookup[j], multiplier, lookup[j-1]);
+        }
+        element_mul(multiplier, multiplier, lookup[lookup_size-1]);
+        base_table->table[i] = lookup;
+    }
+
+    element_clear(multiplier);
+    return base_table;
+}
+
+/*
+ * exponentiation using aggressive base lookup table
+ * must have k >= 1.
+ */
+static void element_pow_base_table(element_ptr x, mpz_ptr n,
+                       struct element_base_table *base_table)
+{
+    int word;                   /* the word to look up. 0<word<base */
+    int row, s;                 /* row and col in base table */
+    int num_lookups;
+
+    element_t result;
+
+    /* early abort if raising to power 0 */
+    if (!mpz_sgn(n)) {
+        element_set1(x);
+        return;
+    }
+
+    element_init(result, x->field);
+    element_set1(result);
+
+    num_lookups = mpz_sizeinbase(n, 2)/base_table->k + 1;
+
+    for (row = 0; row < num_lookups; row++) {
+        word = 0;
+        for (s = 0; s < base_table->k; s++) {
+          word |= mpz_tstbit(n, base_table->k * row + s) << s;
+        }
+        if (word > 0) {
+            element_mul(result, result, base_table->table[row][word]);
+        }
+    }
+
+    element_set(x, result);
+    element_clear(result);
+}
+
+void default_element_pp_init(element_pp_t p, element_t in) {
+    p->data =
+       element_build_base_table(in, mpz_sizeinbase(in->field->order, 2), 5);
+}
+
+void default_element_pp_pow(element_t out, mpz_ptr power, element_pp_t p)
+{
+    element_pow_base_table(out, power, p->data);
+}
+
+void default_element_pp_clear(element_pp_t p)
+{
+    //TODO: free space taken by p->data
+    UNUSED_VAR(p);
 }

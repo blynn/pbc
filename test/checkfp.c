@@ -202,6 +202,15 @@ static void run_check(field_ptr f1, field_ptr f2)
     check_p(element_is1(z1), "is1");
     check_p(element_is1(z2), "is1");
 
+    randxy();
+    check_p(!(!!element_cmp(x1, y1) ^ !!element_cmp(x2, y2)), "cmp");
+    element_set(x1, y1);
+    element_set(x2, y2);
+    check_p(!element_cmp(x1, y1), "cmp");
+    check_p(!element_cmp(x2, y2), "cmp");
+    check_p(!element_cmp(x1, x1), "cmp (in place)");
+    check_p(!element_cmp(x2, x2), "cmp (in place)");
+
     for (;;) {
 	int flag;
 	randxy();

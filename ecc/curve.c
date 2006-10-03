@@ -237,6 +237,14 @@ static void cc_add(point_ptr r, point_ptr p, point_ptr q)
     }
 }
 
+static int cc_cmp(point_ptr p, point_ptr q)
+{
+    if (p->inf_flag) {
+	return q->inf_flag;
+    }
+    return element_cmp(p->x, q->x) || element_cmp(p->y, q->y);
+}
+
 static void cc_mul(point_ptr r, mpz_ptr n, point_ptr p)
 {
     int s;
@@ -289,6 +297,7 @@ void curve_init_cc_ab(curve_ptr c, element_ptr a, element_ptr b)
     c->doublefn = cc_double;
     c->add = cc_add;
     c->mul = cc_mul;
+    c->cmp = cc_cmp;
     c->data = malloc(sizeof(common_curve_t));
     c->curve_clear = cc_clear;
     cc = c->data;
@@ -438,6 +447,15 @@ static void curve_group_div(element_ptr x, element_ptr a, element_ptr b)
     }
 }
 
+static int curve_group_cmp(element_ptr a, element_ptr b)
+{
+    if (a == b) {
+	return 0;
+    } else {
+	return point_cmp(a->data, b->data);
+    }
+}
+
 static void curve_group_set1(element_ptr x)
 {
     point_set_inf(x->data);
@@ -512,10 +530,11 @@ void field_clear_curve_group(field_t f)
     free(p);
 }
 
-void field_init_curve_group(field_t f, curve_t c, mpz_t cofac)
+void field_init_curve_group(field_t f, curve_t c, mpz_t order, mpz_t cofac)
 {
     curve_group_data_ptr p;
     field_init(f);
+    mpz_set(f->order, order);
     p = f->data = malloc(sizeof(curve_group_data_t));
     p->curve = c;
     mpz_init(p->cofac);
@@ -525,6 +544,7 @@ void field_init_curve_group(field_t f, curve_t c, mpz_t cofac)
     f->neg = f->invert = curve_group_invert;
     f->add = f->mul = curve_group_mul;
     f->sub = curve_group_div;
+    f->cmp = curve_group_cmp;
     f->set0 = f->set1 = curve_group_set1;
     f->set = curve_group_set;
     f->random = curve_group_random;

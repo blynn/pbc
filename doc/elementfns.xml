@@ -73,7 +73,21 @@ should be used for GT.
 <title>Exponentiating Elements</title>
 <para>
 Exponentiation and multiexponentiation functions.
+If it is known in advance that a particular element will be exponentiated
+several times in the future, time can be saved in the long run by
+first calling the preprocessing function:
 </para>
+<screen>
+    element_pp_t g_pp;
+
+    element_pp_init(g_pp, g);
+
+    element_pp_pow(h, pow1, g1_pp);
+    element_pp_pow(h, pow2, g1_pp);
+    element_pp_pow(h, pow3, g1_pp);
+
+    element_pp_clear(g_pp);
+</screen>
 <variablelist>
 &epow;
 </variablelist>

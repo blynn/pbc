@@ -669,7 +669,7 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     pairing->G1 = malloc(sizeof(field_t));
     pairing->G2 = pairing->G1;
 
-    field_init_curve_group(pairing->G1, p->Eq, param->h);
+    field_init_curve_group(pairing->G1, p->Eq, pairing->r, param->h);
     pairing->GT = p->Fq;
     pairing->phi = phi_identity;
     pairing->option_set = e_pairing_option_set;
@@ -844,7 +844,7 @@ void pairing_init_singular_with_node(pairing_t pairing, mpz_t q)
 
     mpz_init(one);
     mpz_set_ui(one, 1);
-    field_init_curve_group(pairing->G1, p->Eq, one);
+    field_init_curve_group(pairing->G1, p->Eq, pairing->r, one);
     mpz_clear(one);
     pairing->GT = p->Fq;
     //pairing->phi = trace;

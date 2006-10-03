@@ -534,8 +534,8 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
 
     mpz_init(one);
     mpz_set_si(one, 1);
-    field_init_curve_group(pairing->G1, p->Eq, one);
-    field_init_curve_group(pairing->G2, p->Etwist, one);
+    field_init_curve_group(pairing->G1, p->Eq, pairing->r, one);
+    field_init_curve_group(pairing->G2, p->Etwist, pairing->r, one);
     mpz_clear(one);
     pairing->GT = p->Fq12;
     pairing->map = f_pairing;

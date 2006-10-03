@@ -8,7 +8,7 @@ LDADD = ../libpbc.la
 noinst_PROGRAMS = benchmark testhilbert testbbs testsig testibe \
 	testpairing genaparam gendparam geneparam genfparam \
 	gena1param listmnt testpoly 19 sing testbls testibs testbb \
-	checkfp timefp pbc
+	checkfp timefp testexp pbc
 
 pbc_SOURCES = pbc.c
 checkfp_SOURCES = checkfp.c
@@ -28,6 +28,7 @@ listmnt_SOURCES = listmnt.c
 testpoly_SOURCES = testpoly.c
 19_SOURCES = 19.c
 sing_SOURCES = sing.c
+testexp_SOURCES = testexp.c
 
 testbls_SOURCES = testbls.c
 testbls_LDADD = ../libpbc.la ../sig/libpbc_sig.la

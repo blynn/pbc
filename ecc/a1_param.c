@@ -241,7 +241,7 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
     field_init_fi(p->Fp2, p->Fp);
 
     pairing->G1 = malloc(sizeof(field_t));
-    field_init_curve_group(pairing->G1, p->Ep, p->h);
+    field_init_curve_group(pairing->G1, p->Ep, pairing->r, p->h);
     pairing->G2 = pairing->G1;
     //pairing->phi = phi_identity;
     pairing->GT = p->Fp2;

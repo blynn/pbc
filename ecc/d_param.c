@@ -940,10 +940,10 @@ void pairing_init_d_param(pairing_t pairing, d_param_t param)
     pairing->G1 = malloc(sizeof(field_t));
     pairing->G2 = malloc(sizeof(field_t));
 
-    field_init_curve_group(pairing->G1, p->Eq, param->h);
+    field_init_curve_group(pairing->G1, p->Eq, pairing->r, param->h);
     mpz_init(one);
     mpz_set_si(one, 1);
-    field_init_curve_group(pairing->G2, p->Etwist, one);
+    field_init_curve_group(pairing->G2, p->Etwist, pairing->r, one);
     mpz_clear(one);
     p->k = param->k;
     pairing->GT = p->Fqk;

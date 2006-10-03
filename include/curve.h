@@ -28,6 +28,7 @@ struct curve_s {
     void (*double_nocheck)(point_ptr, point_ptr);
     void (*doublefn)(point_ptr, point_ptr);
     void (*mul)(point_ptr, mpz_ptr, point_ptr);
+    int (*cmp)(point_ptr, point_ptr);
     void (*curve_clear)(struct curve_s *curve);
     void *data;
 };
@@ -78,6 +79,11 @@ static inline void point_neg(point_ptr r, point_ptr p)
 static inline void point_add(point_ptr r, point_ptr p, point_ptr q)
 {
     r->curve->add(r, p, q);
+}
+
+static inline int point_cmp(point_ptr p, point_ptr q)
+{
+    return p->curve->cmp(p, q);
 }
 
 static inline void point_double(point_ptr r, point_ptr p)
@@ -151,7 +157,7 @@ void cc_frobenius(point_ptr r, point_ptr p, mpz_ptr q);
 void curve_init_cc_ab(curve_ptr c, element_ptr a, element_ptr b);
 void cc_init_map_curve(curve_ptr cnew, curve_ptr c,
                        field_ptr dstfield, fieldmap map);
-void field_init_curve_group(field_t f, curve_t c, mpz_t cofac);
+void field_init_curve_group(field_t f, curve_t c, mpz_t order, mpz_t cofac);
 void curve_init_singular_with_node(curve_ptr c, field_t field);
 
 #endif //CURVE_H

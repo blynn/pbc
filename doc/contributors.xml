@@ -4,7 +4,7 @@ Ben Lynn wrote the original PBC library and documentation and is still
 maintaining and developing it.
 </para>
 <para>
-Hovav Shacham wrote multiexponentiation and sliding windows
+Hovav Shacham wrote the multiexponentiation, sliding windows and preprocessed
 exponentiation routines, Makefile improvements, and many
 BBS signature scheme optimizations.
 </para>

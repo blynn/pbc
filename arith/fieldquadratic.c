@@ -352,7 +352,7 @@ void field_init_quadratic(field_ptr f, field_ptr fbase)
 {
     field_init(f);
 
-    f->clear_field = field_clear_fq;
+    f->field_clear = field_clear_fq;
     f->data = fbase;
 
     f->init = fq_init;
@@ -384,7 +384,6 @@ void field_init_quadratic(field_ptr f, field_ptr fbase)
     f->to_bytes = fq_to_bytes;
     f->from_bytes = fq_from_bytes;
 
-    mpz_init(f->order);
     mpz_mul(f->order, fbase->order, fbase->order);
     if (fbase->fixed_length_in_bytes < 0) {
 	f->length_in_bytes = fq_length_in_bytes;
@@ -601,7 +600,6 @@ void field_init_fi(field_ptr f, field_ptr fbase)
     f->from_bytes = fq_from_bytes;
     f->print_info = fi_print_info;
 
-    mpz_init(f->order);
     mpz_mul(f->order, fbase->order, fbase->order);
     if (fbase->fixed_length_in_bytes < 0) {
 	f->length_in_bytes = fq_length_in_bytes;

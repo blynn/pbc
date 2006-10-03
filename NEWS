@@ -1,3 +1,11 @@
+Tue Oct  3 00:06:41 PDT 2006
+
+Hovav Shacham contributed code to preprocess exponentiations, which saves
+a lot of time in the long run if it is known in advance that a particular
+element will be exponentiated several times. See the manual for details.
+
+[0.3.10]
+
 Fri Sep 29 12:16:20 PDT 2006
 
 [0.3.9]

@@ -685,7 +685,7 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
     mpz_set(p->h, param->h);
 
     pairing->G1 = malloc(sizeof(field_t));
-    field_init_curve_group(pairing->G1, p->Eq, param->h);
+    field_init_curve_group(pairing->G1, p->Eq, pairing->r, param->h);
     pairing->G2 = pairing->G1;
     pairing->phi = phi_identity;
     pairing->GT = p->Fq2;
