@@ -247,156 +247,6 @@ void element_pow3_mpz(element_ptr x, element_ptr a1, mpz_ptr n1,
         element_clear(lookup[i]);
 }
 
-void field_set_nqr(field_ptr f, element_t nqr)
-{
-    if (!f->nqr) {
-	f->nqr = malloc(sizeof(element_t));
-	element_init(f->nqr, f);
-    }
-    element_set(f->nqr, nqr);
-}
-
-void field_gen_nqr(field_ptr f)
-{
-    f->nqr = malloc(sizeof(element_t));
-    element_init(f->nqr, f);
-    do {
-	element_random(f->nqr);
-    } while (element_is_sqr(f->nqr));
-}
-
-element_ptr field_get_nqr(field_ptr f)
-{
-    if (!f->nqr) field_gen_nqr(f);
-    return f->nqr;
-}
-
-static void generic_square(element_ptr r, element_ptr a)
-{
-    element_mul(r, a, a);
-}
-static void generic_mul_mpz(element_ptr r, element_ptr a, mpz_ptr z)
-{
-    element_t e0;
-    element_init(e0, r->field);
-    element_set_mpz(e0, z);
-    element_mul(r, a, e0);
-    element_clear(e0);
-}
-
-static void generic_mul_si(element_ptr r, element_ptr a, signed long int n)
-{
-    element_t e0;
-    element_init(e0, r->field);
-    element_set_si(e0, n);
-    element_mul(r, a, e0);
-    element_clear(e0);
-}
-
-static void generic_double(element_ptr r, element_ptr a)
-{
-    element_add(r, a, a);
-}
-
-static void generic_halve(element_ptr r, element_ptr a)
-{
-    element_t e0;
-    element_init(e0, r->field);
-    element_set_si(e0, 2);
-    element_invert(e0, e0);
-    element_mul(r, a, e0);
-    element_clear(e0);
-}
-
-static void generic_to_mpz(mpz_t z, element_ptr a)
-{
-    UNUSED_VAR(a);
-    mpz_set_ui(z, 0);
-}
-
-static void generic_set_mpz(element_ptr a, mpz_t z)
-{
-    UNUSED_VAR(z);
-    element_set0(a);
-}
-
-static int generic_cmp(element_ptr a, element_ptr b)
-{
-    int result;
-    unsigned char *buf1, *buf2;
-    int len;
-    if (a == b) return 0;
-    len = element_length_in_bytes(a);
-    if (len != element_length_in_bytes(b)) return 1;
-    buf1 = malloc(len);
-    buf2 = malloc(len);
-    element_to_bytes(buf1, a);
-    element_to_bytes(buf2, b);
-    result = memcmp(buf1, buf2, len);
-    free(buf1);
-    free(buf2);
-    return result;
-}
-
-static void generic_print_info(FILE *out, field_ptr f)
-{
-    element_fprintf(out, "field %X unknown\n", (unsigned int) f);
-}
-
-static void warn_field_clear(field_ptr f)
-{
-    fprintf(stderr, "field %X has no clear function\n", (unsigned int) f);
-}
-
-void field_print_info(FILE *out, field_ptr f)
-{
-    f->print_info(out, f);
-}
-
-void field_init(field_ptr f)
-{
-    //should be called by each field_init_*
-    f->nqr = NULL;
-    mpz_init(f->order);
-
-    //this should later be set
-    f->field_clear = warn_field_clear;
-
-    //and this to something more helpful
-    f->print_info = generic_print_info;
-
-    //many of these can usually be optimized for particular fields
-    f->halve = generic_halve;
-    f->doub = generic_double;
-    f->square = generic_square;
-    f->mul_mpz = generic_mul_mpz;
-    f->mul_si = generic_mul_si;
-    f->cmp = generic_cmp;
-
-    //default: converts all elements to integer 0
-    //reads all integers as 0
-    f->to_mpz = generic_to_mpz;
-    f->set_mpz = generic_set_mpz;
-
-    //these are fast, thanks to Hovav
-    f->pow_mpz = generic_pow_mpz;
-
-    f->pp_init = default_element_pp_init;
-    f->pp_clear = default_element_pp_clear;
-    f->pp_pow = default_element_pp_pow;
-}
-
-void field_clear(field_ptr f)
-{
-    if (f->nqr) {
-	element_clear(f->nqr);
-	free(f->nqr);
-    }
-    mpz_clear(f->order);
-    f->field_clear(f);
-}
-
-
 struct element_base_table {
     int k;
     int bits;
@@ -495,4 +345,209 @@ void default_element_pp_clear(element_pp_t p)
 {
     //TODO: free space taken by p->data
     UNUSED_VAR(p);
+}
+
+void field_set_nqr(field_ptr f, element_t nqr)
+{
+    if (!f->nqr) {
+	f->nqr = malloc(sizeof(element_t));
+	element_init(f->nqr, f);
+    }
+    element_set(f->nqr, nqr);
+}
+
+void field_gen_nqr(field_ptr f)
+{
+    f->nqr = malloc(sizeof(element_t));
+    element_init(f->nqr, f);
+    do {
+	element_random(f->nqr);
+    } while (element_is_sqr(f->nqr));
+}
+
+element_ptr field_get_nqr(field_ptr f)
+{
+    if (!f->nqr) field_gen_nqr(f);
+    return f->nqr;
+}
+
+static void generic_square(element_ptr r, element_ptr a)
+{
+    element_mul(r, a, a);
+}
+static void generic_mul_mpz(element_ptr r, element_ptr a, mpz_ptr z)
+{
+    element_t e0;
+    element_init(e0, r->field);
+    element_set_mpz(e0, z);
+    element_mul(r, a, e0);
+    element_clear(e0);
+}
+
+static void generic_mul_si(element_ptr r, element_ptr a, signed long int n)
+{
+    element_t e0;
+    element_init(e0, r->field);
+    element_set_si(e0, n);
+    element_mul(r, a, e0);
+    element_clear(e0);
+}
+
+static void generic_double(element_ptr r, element_ptr a)
+{
+    element_add(r, a, a);
+}
+
+static void generic_halve(element_ptr r, element_ptr a)
+{
+    element_t e0;
+    element_init(e0, r->field);
+    element_set_si(e0, 2);
+    element_invert(e0, e0);
+    element_mul(r, a, e0);
+    element_clear(e0);
+}
+
+static void zero_to_mpz(mpz_t z, element_ptr a)
+{
+    UNUSED_VAR(a);
+    mpz_set_ui(z, 0);
+}
+
+static void zero_set_mpz(element_ptr a, mpz_t z)
+{
+    UNUSED_VAR(z);
+    element_set0(a);
+}
+
+static void zero_random(element_ptr a)
+{
+    element_set0(a);
+}
+
+static void generic_set_si(element_ptr a, long int si)
+{
+    mpz_t z;
+    mpz_init(z);
+    mpz_set_si(z, si);
+    element_set_mpz(a, z);
+    mpz_clear(z);
+}
+
+static void generic_sub(element_ptr c, element_ptr a, element_ptr b)
+{
+    if (c != a) {
+	element_neg(c, b);
+	element_add(c, c, a);
+    } else {
+	element_t tmp;
+	element_init(tmp, a->field);
+	element_neg(tmp, b);
+	element_add(c, tmp, a);
+	element_clear(tmp);
+    }
+}
+
+static int generic_cmp(element_ptr a, element_ptr b)
+{
+    int result;
+    unsigned char *buf1, *buf2;
+    int len;
+    if (a == b) return 0;
+    len = element_length_in_bytes(a);
+    if (len != element_length_in_bytes(b)) return 1;
+    buf1 = malloc(len);
+    buf2 = malloc(len);
+    element_to_bytes(buf1, a);
+    element_to_bytes(buf2, b);
+    result = memcmp(buf1, buf2, len);
+    free(buf1);
+    free(buf2);
+    return result;
+}
+
+static int generic_is0(element_ptr a)
+{
+    int result;
+    element_t b;
+    element_init(b, a->field);
+    result = element_cmp(a, b);
+    element_clear(b);
+    return result;
+}
+
+static int generic_is1(element_ptr a)
+{
+    int result;
+    element_t b;
+    element_init(b, a->field);
+    element_set1(b);
+    result = element_cmp(a, b);
+    element_clear(b);
+    return result;
+}
+
+static void generic_print_info(FILE *out, field_ptr f)
+{
+    element_fprintf(out, "field %X unknown\n", (unsigned int) f);
+    element_fprintf(out, "order = %Zd\n", f->order);
+}
+
+static void warn_field_clear(field_ptr f)
+{
+    fprintf(stderr, "field %X has no clear function\n", (unsigned int) f);
+}
+
+void field_print_info(FILE *out, field_ptr f)
+{
+    f->print_info(out, f);
+}
+
+void field_init(field_ptr f)
+{
+    //should be called by each field_init_*
+    f->nqr = NULL;
+    mpz_init(f->order);
+
+    //this should later be set
+    f->field_clear = warn_field_clear;
+
+    //and this to something more helpful
+    f->print_info = generic_print_info;
+
+    //many of these can usually be optimized for particular fields
+    f->halve = generic_halve;
+    f->doub = generic_double;
+    f->square = generic_square;
+    f->mul_mpz = generic_mul_mpz;
+    f->mul_si = generic_mul_si;
+    f->cmp = generic_cmp;
+    f->sub = generic_sub;
+
+    //default: converts all elements to integer 0
+    //reads all integers as 0
+    //random always outputs 0
+    f->to_mpz = zero_to_mpz;
+    f->set_mpz = zero_set_mpz;
+    f->random = zero_random;
+    f->set_si = generic_set_si;
+    f->is1 = generic_is1;
+    f->is0 = generic_is0;
+
+    //these are fast, thanks to Hovav
+    f->pow_mpz = generic_pow_mpz;
+
+    f->pp_init = default_element_pp_init;
+    f->pp_clear = default_element_pp_clear;
+    f->pp_pow = default_element_pp_pow;
+}
+
+void field_clear(field_ptr f)
+{
+    if (f->nqr) {
+	element_clear(f->nqr);
+	free(f->nqr);
+    }
+    mpz_clear(f->order);
+    f->field_clear(f);
 }

@@ -20,7 +20,6 @@
 #include "f_param.h"
 #include "a1_param.h"
 
-#include "strclone.h"
 #include "utils.h"
 
 int generic_is_almost_coddh(element_ptr a, element_ptr b,
@@ -95,8 +94,7 @@ void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
     if (tok->type != token_word) {
 	return;
     }
-    //s = pairing->id = strclone(tok->s);
-    s = strclone(tok->s);
+    s = strdup(tok->s);
 
     pairing->is_almost_coddh = generic_is_almost_coddh;
     pairing->phi = phi_warning;

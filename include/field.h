@@ -40,19 +40,19 @@ struct field_s {
     void (*mul_mpz)(element_ptr, element_ptr, mpz_ptr);
     void (*mul_si)(element_ptr, element_ptr, signed long int);
     void (*square)(element_ptr, element_ptr);
+    int (*is_sqr)(element_ptr);
+    void (*sqrt)(element_ptr, element_ptr);
     void (*doub)(element_ptr, element_ptr); //can't call it "double"!
     void (*halve)(element_ptr, element_ptr);
     void (*pow_mpz)(element_ptr, element_ptr, mpz_ptr);
     void (*invert)(element_ptr, element_ptr);
     void (*neg)(element_ptr, element_ptr);
-    int (*cmp)(element_ptr, element_ptr);
     void (*random)(element_ptr);
     void (*from_hash)(element_ptr, int len, void *data);
     int (*is1)(element_ptr);
     int (*is0)(element_ptr);
     int (*sign)(element_ptr); //satisfies sign(x) = -sign(-x)
-    int (*is_sqr)(element_ptr);
-    void (*sqrt)(element_ptr, element_ptr);
+    int (*cmp)(element_ptr, element_ptr);
     int (*to_bytes)(unsigned char *data, element_ptr);
     int (*from_bytes)(element_ptr, unsigned char *data);
     int (*length_in_bytes)(element_ptr);
@@ -489,11 +489,6 @@ Currently only implemented for points on an elliptic curve.
 int element_length_in_bytes_compressed(element_t e);
 
 void field_print_info(FILE *out, field_ptr f);
-
-void default_element_pp_init(element_pp_t p, element_t in);
-void default_element_pp_pow(element_t out, mpz_ptr power,
-                              element_pp_t p);
-void default_element_pp_clear(element_pp_t p);
 
 /*@manual epow
 Prepare to exponentiate an element ''in'', and store preprocessing information

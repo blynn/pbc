@@ -9,7 +9,6 @@
 #include <gmp.h>
 #include "utils.h"
 #include "field.h"
-#include "strclone.h"
 
 //TODO: remove repeated code for error handling 
 int element_vfprintf(FILE *stream, const char *format, va_list ap)
@@ -20,7 +19,7 @@ int element_vfprintf(FILE *stream, const char *format, va_list ap)
     element_ptr e;
     int found;
 
-    copy = strclone(format);
+    copy = strdup(format);
     start = next = copy;
 
     for(;;) {

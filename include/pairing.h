@@ -27,7 +27,6 @@ struct pairing_s {
     int (*is_almost_coddh)(element_ptr a, element_ptr b,
 	    element_ptr c, element_ptr d,
 	    struct pairing_s *p);
-    //char *id;
     void (*clear_func)(struct pairing_s *);
     void (*pp_init)(pairing_pp_t p, element_t in1, struct pairing_s *);
     void (*pp_clear)(pairing_pp_t p);

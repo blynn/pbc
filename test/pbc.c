@@ -89,9 +89,9 @@ void tree_delete(tree_ptr t)
     darray_clear(t->child);
     switch(t->type) {
 	case t_id:
-	case t_int:
 	case t_function:
 	    id_delete(t->data);
+	case t_int:
 	    break;
     }
     free(t);
@@ -824,6 +824,7 @@ static void parseline(char *line)
     tree_ptr t;
     lexcp = line;
     lex();
+    if (tok_type == t_none) return;
     t = parsesetexpr();
     if (0) {
 	print_tree(t);

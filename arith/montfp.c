@@ -497,23 +497,17 @@ static int fp_is_sqr(element_ptr a)
     return res;
 }
 
-//x is stored as xR, hence apply reduction before output
 static int fp_to_bytes(unsigned char *data, element_t a)
 {
-    dataptr ad = a->data;
+    mpz_t z;
+    unsigned int count;
     int n = a->field->fixed_length_in_bytes;
-    if (!ad->flag) {
-	memset(data, 0, n);
-    } else {
-	fp_field_data_ptr p = a->field->data;
-	mp_limb_t tmp[2 * p->limbs];
-	mp_limb_t out[p->limbs];
 
-	memcpy(tmp, ad->d, p->limbs * sizeof(mp_limb_t));
-	memset(&tmp[p->limbs], 0, p->limbs * sizeof(mp_limb_t));
-	mont_reduce(out, tmp, p);
-	memcpy(data, out, n);
-    }
+    mpz_init(z);
+    fp_to_mpz(z, a);
+    mpz_export(data, &count, -1, 1, -1, 0, z);
+    memset(&data[count], 0, n - count);
+    mpz_clear(z);
     return n;
 }
 
@@ -521,30 +515,21 @@ static int fp_from_bytes(element_t a, unsigned char *data)
 {
     fp_field_data_ptr p = a->field->data;
     dataptr ad = a->data;
-    unsigned char *ptr;
-    int i, n;
-    mpz_t z, z1;
+    int n;
+    mpz_t z;
 
     mpz_init(z);
-    mpz_init(z1);
-    mpz_set_ui(z, 0);
 
-    ptr = data;
     n = a->field->fixed_length_in_bytes;
-    for (i=0; i<n; i++) {
-	if (*ptr) ad->flag = 2;
-	mpz_set_ui(z1, *ptr);
-	mpz_mul_2exp(z1, z1, i * 8);
-	ptr++;
-	mpz_add(z, z, z1);
-    }
-    if (ad->flag) {
+    mpz_import(z, n, -1, 1, -1, 0, data);
+    if (!mpz_sgn(z)) ad->flag = 0;
+    else {
+	ad->flag = 2;
 	mpz_mul_2exp(z, z, p->bytes * 8);
 	mpz_mod(z, z, a->field->order);
 	from_mpz(a, z);
     }
     mpz_clear(z);
-    mpz_clear(z1);
     return n;
 }
 

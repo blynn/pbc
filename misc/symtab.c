@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <string.h>
-#include "strclone.h"
 #include "symtab.h"
 
 struct entry_s {
@@ -37,10 +36,10 @@ void symtab_put(symtab_t t, void *data, char *key)
 	if (!strcmp(e->key, key)) goto doit;
     }
     e = malloc(sizeof(entry_t));
-doit:
-    e->key = strclone(key);
-    e->data = data;
+    e->key = strdup(key);
     darray_append(t->list, e);
+doit:
+    e->data = data;
 }
 
 int symtab_has(symtab_t t, char *key)

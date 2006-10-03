@@ -8,7 +8,6 @@
 #include "utils.h"
 #include <stdlib.h>
 #include <string.h>
-#include "strclone.h"
 
 void param_out_type(FILE *stream, char *s)
 {
@@ -45,12 +44,12 @@ void param_read_generic (symtab_t tab, fetch_ops_t fops, void *ctx)
 	if (tok->type != token_word) {
 	    break;
 	}
-	s = strclone(tok->s);
+	s = strdup(tok->s);
 	token_get_generic (tok, fops, ctx);
 	if (tok->type != token_word) {
 	    break;
 	}
-	s1 = strclone(tok->s);
+	s1 = strdup(tok->s);
 	symtab_put(tab, s1, s);
 	free(s);
     }

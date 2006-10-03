@@ -57,6 +57,7 @@ test/gendparam   test/testbb     test/testhilbert  test/testsig
 test/checkfp
 test/pbc
 test/testexp
+test/timersa
 )
     add_executable(${bin} ${bin}.c)
     target_link_libraries(${bin} pbc ${GMP_LIBRARY} m)

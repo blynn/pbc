@@ -480,24 +480,21 @@ static int fp_is_sqr(element_ptr a)
     return res;
 }
 
+//TODO: could avoid converting to and from mpz
 static int fp_to_bytes(unsigned char *data, element_t a)
 {
     dataptr ad = a->data;
-    int i, n = a->field->fixed_length_in_bytes;
+    int n = a->field->fixed_length_in_bytes;
     if (!ad->flag) {
 	memset(data, 0, n);
     } else {
 	mpz_t z;
-	unsigned char *ptr;
+	unsigned int count;
 
 	mpz_init(z);
 	fp_to_mpz(z, a);
-	ptr = data;
-	for (i = 0; i < n; i++) {
-	    *ptr = (unsigned char) mpz_get_ui(z);
-	    ptr++;
-	    mpz_tdiv_q_2exp(z, z, 8);
-	}
+	mpz_export(data, &count, -1, 1, -1, 0, z);
+	memset(&data[count], 0, n - count);
 	mpz_clear(z);
     }
     return n;
@@ -506,27 +503,19 @@ static int fp_to_bytes(unsigned char *data, element_t a)
 static int fp_from_bytes(element_t a, unsigned char *data)
 {
     dataptr ad = a->data;
-    unsigned char *ptr;
-    int i, n;
-    mpz_t z, z1;
+    int n;
+    mpz_t z;
 
     mpz_init(z);
-    mpz_init(z1);
-    mpz_set_ui(z, 0);
 
-    ptr = data;
-    //TODO: could be improved if needed
     n = a->field->fixed_length_in_bytes;
-    for (i=0; i<n; i++) {
-	if (*ptr) ad->flag = 2;
-	mpz_set_ui(z1, *ptr);
-	mpz_mul_2exp(z1, z1, i * 8);
-	ptr++;
-	mpz_add(z, z, z1);
+    mpz_import(z, n, -1, 1, -1, 0, data);
+    if (!mpz_sgn(z)) ad->flag = 0;
+    else {
+	ad->flag = 2;
+	from_mpz(a, z);
     }
-    if (ad->flag) from_mpz(a, z);
     mpz_clear(z);
-    mpz_clear(z1);
     return n;
 }
 

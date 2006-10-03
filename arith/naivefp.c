@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <gmp.h>
 #include "field.h"
 #include "random.h"
@@ -222,42 +223,22 @@ static void zp_field_clear(field_t f)
 
 static int zp_to_bytes(unsigned char *data, element_t e)
 {
-    mpz_t z;
-    int i, n;
-    unsigned char *ptr;
+    mpz_ptr z = e->data;
+    int n;
+    unsigned int count;
 
-    mpz_init(z);
-    mpz_set(z, e->data);
     n = e->field->fixed_length_in_bytes;
-    ptr = data;
-    for (i = 0; i < n; i++) {
-	*ptr = (unsigned char) mpz_get_ui(z);
-	ptr++;
-	mpz_tdiv_q_2exp(z, z, 8);
-    }
-    mpz_clear(z);
+    mpz_export(data, &count, -1, 1, -1, 0, z);
+    memset(&data[count], 0, n - count);
     return n;
 }
 
 static int zp_from_bytes(element_t e, unsigned char *data)
 {
-    unsigned char *ptr;
-    int i, n;
     mpz_ptr z = e->data;
-    mpz_t z1;
-
-    mpz_init(z1);
-    mpz_set_ui(z, 0);
-
-    ptr = data;
+    int n;
     n = e->field->fixed_length_in_bytes;
-    for (i=0; i<n; i++) {
-	mpz_set_ui(z1, *ptr);
-	mpz_mul_2exp(z1, z1, i * 8);
-	ptr++;
-	mpz_add(z, z, z1);
-    }
-    mpz_clear(z1);
+    mpz_import(z, n, -1, 1, -1, 0, data);
     return n;
 }
 

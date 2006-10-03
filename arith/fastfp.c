@@ -330,46 +330,33 @@ static int fp_is_sqr(element_ptr a)
     return res;
 }
 
+//TODO: could avoid converting to and from mpz
 static int fp_to_bytes(unsigned char *data, element_t e)
 {
     mpz_t z;
-    int i, n;
-    unsigned char *ptr;
+    int n;
+    unsigned int count;
 
     mpz_init(z);
     fp_to_mpz(z, e);
     n = e->field->fixed_length_in_bytes;
-    ptr = data;
-    for (i = 0; i < n; i++) {
-	*ptr = (unsigned char) mpz_get_ui(z);
-	ptr++;
-	mpz_tdiv_q_2exp(z, z, 8);
-    }
+    mpz_export(data, &count, -1, 1, -1, 0, z);
+    memset(&data[count], 0, n - count);
     mpz_clear(z);
     return n;
 }
 
 static int fp_from_bytes(element_t e, unsigned char *data)
 {
-    unsigned char *ptr;
-    int i, n;
-    mpz_t z, z1;
+    int n;
+    mpz_t z;
 
     mpz_init(z);
-    mpz_init(z1);
-    mpz_set_ui(z, 0);
 
-    ptr = data;
     n = e->field->fixed_length_in_bytes;
-    for (i=0; i<n; i++) {
-	mpz_set_ui(z1, *ptr);
-	mpz_mul_2exp(z1, z1, i * 8);
-	ptr++;
-	mpz_add(z, z, z1);
-    }
+    mpz_import(z, n, -1, 1, -1, 0, data);
     fp_set_mpz(e, z);
     mpz_clear(z);
-    mpz_clear(z1);
     return n;
 }
 
