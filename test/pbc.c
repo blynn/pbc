@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "pbc.h"
+#include "fieldmpz.h"
 #include "utils.h"
 
 /* It's much nicer with readline
@@ -41,6 +42,8 @@ enum {
     re_badlvalue,
     re_funnotfound,
 };
+
+static field_t Z;
 
 static int tok_type;
 static char word[128];
@@ -90,8 +93,8 @@ void tree_delete(tree_ptr t)
     switch(t->type) {
 	case t_id:
 	case t_function:
-	    id_delete(t->data);
 	case t_int:
+	    id_delete(t->data);
 	    break;
     }
     free(t);
@@ -246,8 +249,8 @@ static tree_ptr parsesubfactor(void)
     switch(tok_type) {
 	id_ptr id;
 	case t_id:
-	    lex();
 	    id = id_new(word);
+	    lex();
 	    if (tok_type == t_lparen) {
 		if (parseexprlist(t = tree_new(t_function, id))) {
 		    return t;
@@ -257,6 +260,13 @@ static tree_ptr parsesubfactor(void)
 	    } else {
 		return tree_new(t_id, id);
 	    }
+	case t_sub:
+	    lex();
+	    t = parsesubfactor();
+	    if (!t) return NULL;
+	    tree_ptr t1 = tree_new(t_function, id_new("neg"));
+	    darray_append(t1->child, t);
+	    return t1;
 	case t_lparen:
 	    lex();
 	    t = parsesetexpr();
@@ -268,6 +278,10 @@ static tree_ptr parsesubfactor(void)
 	    }
 	    lex();
 	    return t;
+	case t_int:
+	    id = id_new(word);
+	    lex();
+	    return tree_new(t_int, id);
 	default:
 	    setparseerror(pe_expect_factor);
 	    return NULL;
@@ -686,6 +700,11 @@ static val_ptr f_inv(darray_ptr arg)
     return f_unary(element_invert, arg);
 }
 
+static val_ptr f_neg(darray_ptr arg)
+{
+    return f_unary(element_neg, arg);
+}
+
 static val_ptr f_pow(darray_ptr arg)
 {
     val_ptr res;
@@ -812,6 +831,20 @@ static val_ptr execute_tree(tree_ptr t)
 	    }
 	    darray_clear(arg);
 	    return res;
+	case t_int:
+	    id = t->data;
+	    char *cp;
+	    mpz_t z;
+	    mpz_init(z);
+	    for (cp = id->data; *cp; cp++) {
+		mpz_mul_ui(z, z, 10);
+		mpz_add_ui(z, z, *cp - '0');
+	    }
+	    element_ptr e = malloc(sizeof(element_t));
+	    element_init(e, Z);
+	    element_set_mpz(e, z);
+	    mpz_clear(z);
+	    return val_new(t_element, e);
 	default:
 	    return NULL;
     }
@@ -865,6 +898,7 @@ int main(void)
     symtab_put(builtin, f_random, "random");
     symtab_put(builtin, f_random, "rand");
     symtab_put(builtin, f_random, "rnd");
+    symtab_put(builtin, f_neg, "neg");
     symtab_put(builtin, f_sub, "sub");
     symtab_put(builtin, f_add, "add");
     symtab_put(builtin, f_pow, "pow");
@@ -873,6 +907,9 @@ int main(void)
     symtab_put(builtin, f_inv, "invert");
     symtab_put(builtin, f_div, "div");
     symtab_put(builtin, f_pairing, "pairing");
+
+    field_init_z(Z);
+
     fprintf(stderr, "Pairing-Based Calculator\n");
 
     for (;;) {

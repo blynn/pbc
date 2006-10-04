@@ -25,7 +25,8 @@ library_include_HEADERS = include/a_param.h include/d_param.h include/darray.h i
 	include/fops.h include/tracker.h include/strclone.h
 
 libpbc_la_CPPFLAGS = -Iinclude
-libpbc_la_SOURCES = arith/field.c arith/tinyfp.c \
+libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
+	arith/tinyfp.c \
 	arith/naivefp.c arith/fastfp.c \
 	arith/fp.c arith/fasterfp.c arith/montfp.c \
 	arith/fieldquadratic.c arith/poly.c \

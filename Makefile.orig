@@ -18,7 +18,8 @@ LDLIBS := -lgmp -lm
 # source file list.
 # add a new .c file to exactly one of these ...
 libpbc_srcs := \
-	arith/field.c arith/naivefp.c arith/tinyfp.c \
+	arith/field.c arith/fieldmpz.c \
+	arith/naivefp.c arith/tinyfp.c \
 	arith/montfp.c arith/fp.c arith/fastfp.c arith/fasterfp.c \
 	arith/fieldquadratic.c arith/poly.c \
 	arith/random.c \

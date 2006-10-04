@@ -29,6 +29,7 @@ set(unused
 foo
 )
 add_library(pbc
+arith/fieldmpz.c
 arith/montfp.c
 arith/naivefp.c
 arith/tinyfp.c arith/fastfp.c arith/fasterfp.c
