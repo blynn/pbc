@@ -16,8 +16,7 @@
 #include "utils.h"
 
 struct e_pairing_data_s {
-    field_t Fq;
-    curve_t Eq;
+    field_t Fq, Eq;
     mpz_t tateexp;
     int exp2, exp1;
     int sign1, sign0;
@@ -52,7 +51,7 @@ void e_param_gen(e_param_t p, int rbits, int qbits)
     mpz_ptr h = p->h;
     mpz_t n;
     field_t Fq;
-    curve_t cc;
+    field_t cc;
     element_t j;
     int found = 0;
 
@@ -120,33 +119,27 @@ void e_param_gen(e_param_t p, int rbits, int qbits)
     */
 
     field_init_fp(Fq, q);
-    /*
-    element_init(j, Fq);
-    element_set_si(j, -3375);
-    curve_init_cc_j(cc, j);
-    element_clear(j);
-    */
     element_init(j, Fq);
     element_set_si(j, 1);
-    curve_init_b(cc, j);
+    field_init_curve_b(cc, j, n, NULL);
     element_clear(j);
 
     //we may need to twist it however
     {
-	point_t P;
+	element_t P;
 
 	//pick a random point P and see if it has the right order
-	point_init(P, cc);
-	point_random(P);
-	point_mul(P, n, P);
+	element_init(P, cc);
+	element_random(P);
+	element_mul_mpz(P, P, n);
 	//if not, we twist the curve
-	if (!point_is_inf(P)) {
+	if (!element_is0(P)) {
 	    twist_curve(cc);
 	}
-	point_clear(P);
+	element_clear(P);
     }
-    mpz_set(p->a, ((common_curve_ptr) cc->data)->a->data);
-    mpz_set(p->b, ((common_curve_ptr) cc->data)->b->data);
+    element_to_mpz(p->a, curve_field_a_coeff(cc));
+    element_to_mpz(p->b, curve_field_b_coeff(cc));
 
     mpz_clear(n);
 }
@@ -188,23 +181,27 @@ void e_param_inp_generic (e_param_ptr p, fetch_ops_t fops, void *ctx)
     symtab_clear(tab);
 }
 
-static void e_miller_proj(element_t res, point_t P,
-	element_ptr numx, element_ptr numy,
-	element_ptr denomx, element_ptr denomy,
+static void e_miller_proj(element_t res, element_t P,
+	element_ptr QR, element_ptr R,
 	e_pairing_data_ptr p)
 {
     //collate divisions
     int n;
     element_t v, vd;
     element_t v1, vd1;
-    point_t Z, Z1;
+    element_t Z, Z1;
     element_t a, b, c;
-    const common_curve_ptr cc = P->curve->data;
-    const element_ptr cca = cc->a;
+    const element_ptr cca = curve_a_coeff(P);
     element_t e0, e1;
     const element_ptr e2 = a, e3 = b;
     element_t z, z2;
     int i;
+    element_ptr Zx, Zy;
+    const element_ptr Px = curve_x_coord(P);
+    const element_ptr numx = curve_x_coord(QR);
+    const element_ptr numy = curve_y_coord(QR);
+    const element_ptr denomx = curve_x_coord(R);
+    const element_ptr denomy = curve_y_coord(R);
 
     //convert Z from weighted projective (Jacobian) to affine
     //i.e. (X, Y, Z) --> (X/Z^2, Y/Z^3)
@@ -213,17 +210,17 @@ static void e_miller_proj(element_t res, point_t P,
     {
 	element_invert(z, z);
 	element_square(e0, z);
-	element_mul(Z->x, Z->x, e0);
+	element_mul(Zx, Zx, e0);
 	element_mul(e0, e0, z);
-	element_mul(Z->y, Z->y, e0);
+	element_mul(Zy, Zy, e0);
 	element_set1(z);
 	element_set1(z2);
     }
 
     void proj_double(void)
     {
-	const element_ptr x = Z->x;
-	const element_ptr y = Z->y;
+	const element_ptr x = Zx;
+	const element_ptr y = Zy;
 	//e0 = 3x^2 + (cc->a) z^4
 	element_square(e0, x);
 	//element_mul_si(e0, e0, 3);
@@ -265,11 +262,8 @@ static void e_miller_proj(element_t res, point_t P,
 	element_sub(y, e0, e2);
     }
 
-    void do_tangent(element_t e, element_t edenom, point_ptr A)
+    void do_tangent(element_t e, element_t edenom)
     {
-	const element_ptr Zx = A->x;
-	const element_ptr Zy = A->y;
-
 	//a = -(3x^2 + cca z^4)
 	//b = 2 y z^3
 	//c = -(2 y^2 + x a)
@@ -307,23 +301,23 @@ static void e_miller_proj(element_t res, point_t P,
 	element_mul(edenom, edenom, e0);
     }
 
-    void do_vertical(element_t e, element_t edenom, point_ptr A)
+    void do_vertical(element_t e, element_t edenom, element_ptr Ax)
     {
 	element_mul(e0, numx, z2);
-	element_sub(e0, e0, A->x);
+	element_sub(e0, e0, Ax);
 	element_mul(e, e, e0);
 
 	element_mul(e0, denomx, z2);
-	element_sub(e0, e0, A->x);
+	element_sub(e0, e0, Ax);
 	element_mul(edenom, edenom, e0);
     }
 
-    void do_line(element_ptr e, element_ptr edenom, point_ptr A, point_ptr B)
+    void do_line(element_ptr e, element_ptr edenom, element_ptr A, element_ptr B)
     {
-	const element_ptr Ax = A->x;
-	const element_ptr Ay = A->y;
-	const element_ptr Bx = B->x;
-	const element_ptr By = B->y;
+	element_ptr Ax = curve_x_coord(A);
+	element_ptr Ay = curve_y_coord(A);
+	element_ptr Bx = curve_x_coord(B);
+	element_ptr By = curve_y_coord(B);
 
 	element_sub(b, Bx, Ax);
 	element_sub(a, Ay, By);
@@ -358,10 +352,12 @@ static void e_miller_proj(element_t res, point_t P,
     element_init(vd, res->field);
     element_init(v1, res->field);
     element_init(vd1, res->field);
-    point_init(Z, P->curve);
-    point_init(Z1, P->curve);
+    element_init(Z, P->field);
+    element_init(Z1, P->field);
 
-    point_set(Z, P);
+    element_set(Z, P);
+    Zx = curve_x_coord(Z);
+    Zy = curve_y_coord(Z);
 
     element_set1(v);
     element_set1(vd);
@@ -372,38 +368,38 @@ static void e_miller_proj(element_t res, point_t P,
     for (i=0; i<n; i++) {
 	element_square(v, v);
 	element_square(vd, vd);
-	do_tangent(v, vd, Z);
+	do_tangent(v, vd);
 	proj_double();
-	do_vertical(vd, v, Z);
+	do_vertical(vd, v, Zx);
     }
     to_affine();
     if (p->sign1 < 0) {
 	element_set(v1, vd);
 	element_set(vd1, v);
-	do_vertical(vd1, v1, Z);
-	point_neg(Z1, Z);
+	do_vertical(vd1, v1, Zx);
+	element_neg(Z1, Z);
     } else {
 	element_set(v1, v);
 	element_set(vd1, vd);
-	point_set(Z1, Z);
+	element_set(Z1, Z);
     }
     n = p->exp2;
     for (; i<n; i++) {
 	element_square(v, v);
 	element_square(vd, vd);
-	do_tangent(v, vd, Z);
+	do_tangent(v, vd);
 	proj_double();
-	do_vertical(vd, v, Z);
+	do_vertical(vd, v, Zx);
     }
     to_affine();
     element_mul(v, v, v1);
     element_mul(vd, vd, vd1);
     do_line(v, vd, Z, Z1);
-    point_add(Z, Z, Z1);
-    do_vertical(vd, v, Z);
+    element_add(Z, Z, Z1);
+    do_vertical(vd, v, Zx);
 
     if (p->sign0 > 0) {
-	do_vertical(v, vd, P);
+	do_vertical(v, vd, Px);
     }
 
     element_invert(vd, vd);
@@ -415,8 +411,8 @@ static void e_miller_proj(element_t res, point_t P,
     element_clear(vd1);
     element_clear(z);
     element_clear(z2);
-    point_clear(Z);
-    point_clear(Z1);
+    element_clear(Z);
+    element_clear(Z1);
     element_clear(a);
     element_clear(b);
     element_clear(c);
@@ -424,31 +420,36 @@ static void e_miller_proj(element_t res, point_t P,
     element_clear(e1);
 }
 
-static void e_miller_affine(element_t res, point_t P,
-	element_ptr numx, element_ptr numy,
-	element_ptr denomx, element_ptr denomy,
+static void e_miller_affine(element_t res, element_t P,
+	element_ptr QR, element_ptr R,
 	e_pairing_data_ptr p)
 {
     //collate divisions
     int n;
     element_t v, vd;
     element_t v1, vd1;
-    point_t Z, Z1;
+    element_t Z, Z1;
     element_t a, b, c;
-    const common_curve_ptr cc = P->curve->data;
     element_t e0, e1;
+    const element_ptr Px = curve_x_coord(P);
+    const element_ptr cca = curve_a_coeff(P);
+    element_ptr Zx, Zy;
     int i;
+    const element_ptr numx = curve_x_coord(QR);
+    const element_ptr numy = curve_y_coord(QR);
+    const element_ptr denomx = curve_x_coord(R);
+    const element_ptr denomy = curve_y_coord(R);
 
-    void do_vertical(element_t e, element_t edenom, point_ptr A)
+    void do_vertical(element_t e, element_t edenom, element_ptr Ax)
     {
-	element_sub(e0, numx, A->x);
+	element_sub(e0, numx, Ax);
 	element_mul(e, e, e0);
 
-	element_sub(e0, denomx, A->x);
+	element_sub(e0, denomx, Ax);
 	element_mul(edenom, edenom, e0);
     }
 
-    void do_tangent(element_t e, element_t edenom, point_ptr A)
+    void do_tangent(element_t e, element_t edenom)
     {
 	//a = -slope_tangent(A.x, A.y);
 	//b = 1;
@@ -460,18 +461,16 @@ static void e_miller_affine(element_t res, point_t P,
 	//a = -(3 Ax^2 + cc->a)
 	//b = 2 * Ay
 	//c = -(2 Ay^2 + a Ax);
-	const element_ptr Ax = A->x;
-	const element_ptr Ay = A->y;
 
-	element_square(a, Ax);
+	element_square(a, Zx);
 	element_mul_si(a, a, 3);
-	element_add(a, a, cc->a);
+	element_add(a, a, cca);
 	element_neg(a, a);
 
-	element_add(b, Ay, Ay);
+	element_add(b, Zy, Zy);
 
-	element_mul(e0, b, Ay);
-	element_mul(c, a, Ax);
+	element_mul(e0, b, Zy);
+	element_mul(c, a, Zx);
 	element_add(c, c, e0);
 	element_neg(c, c);
 
@@ -488,12 +487,12 @@ static void e_miller_affine(element_t res, point_t P,
 	element_mul(edenom, edenom, e0);
     }
 
-    void do_line(element_ptr e, element_ptr edenom, point_ptr A, point_ptr B)
+    void do_line(element_ptr e, element_ptr edenom, element_ptr A, element_ptr B)
     {
-	const element_ptr Ax = A->x;
-	const element_ptr Ay = A->y;
-	const element_ptr Bx = B->x;
-	const element_ptr By = B->y;
+	element_ptr Ax = curve_x_coord(A);
+	element_ptr Ay = curve_y_coord(A);
+	element_ptr Bx = curve_x_coord(B);
+	element_ptr By = curve_y_coord(B);
 
 	element_sub(b, Bx, Ax);
 	element_sub(a, Ay, By);
@@ -524,10 +523,12 @@ static void e_miller_affine(element_t res, point_t P,
     element_init(vd, res->field);
     element_init(v1, res->field);
     element_init(vd1, res->field);
-    point_init(Z, P->curve);
-    point_init(Z1, P->curve);
+    element_init(Z, P->field);
+    element_init(Z1, P->field);
 
-    point_set(Z, P);
+    element_set(Z, P);
+    Zx = curve_x_coord(Z);
+    Zy = curve_y_coord(Z);
 
     element_set1(v);
     element_set1(vd);
@@ -538,36 +539,36 @@ static void e_miller_affine(element_t res, point_t P,
     for (i=0; i<n; i++) {
 	element_square(v, v);
 	element_square(vd, vd);
-	do_tangent(v, vd, Z);
-	point_double(Z, Z);
-	do_vertical(vd, v, Z);
+	do_tangent(v, vd);
+	element_double(Z, Z);
+	do_vertical(vd, v, Zx);
     }
     if (p->sign1 < 0) {
 	element_set(v1, vd);
 	element_set(vd1, v);
-	do_vertical(vd1, v1, Z);
-	point_neg(Z1, Z);
+	do_vertical(vd1, v1, Zx);
+	element_neg(Z1, Z);
     } else {
 	element_set(v1, v);
 	element_set(vd1, vd);
-	point_set(Z1, Z);
+	element_set(Z1, Z);
     }
     n = p->exp2;
     for (; i<n; i++) {
 	element_square(v, v);
 	element_square(vd, vd);
-	do_tangent(v, vd, Z);
-	point_double(Z, Z);
-	do_vertical(vd, v, Z);
+	do_tangent(v, vd);
+	element_double(Z, Z);
+	do_vertical(vd, v, Zx);
     }
     element_mul(v, v, v1);
     element_mul(vd, vd, vd1);
     do_line(v, vd, Z, Z1);
-    point_add(Z, Z, Z1);
-    do_vertical(vd, v, Z);
+    element_add(Z, Z, Z1);
+    do_vertical(vd, v, Zx);
 
     if (p->sign0 > 0) {
-	do_vertical(v, vd, P);
+	do_vertical(v, vd, Px);
     }
 
     element_invert(vd, vd);
@@ -577,8 +578,8 @@ static void e_miller_affine(element_t res, point_t P,
     element_clear(vd);
     element_clear(v1);
     element_clear(vd1);
-    point_clear(Z);
-    point_clear(Z1);
+    element_clear(Z);
+    element_clear(Z1);
     element_clear(a);
     element_clear(b);
     element_clear(c);
@@ -586,25 +587,24 @@ static void e_miller_affine(element_t res, point_t P,
     element_clear(e1);
 }
 
-static void (*e_miller_fn)(element_t res, point_t P,
-	element_ptr numx, element_ptr numy,
-	element_ptr denomx, element_ptr denomy,
+static void (*e_miller_fn)(element_t res, element_t P,
+	element_ptr QR, element_ptr R,
 	e_pairing_data_ptr p);
 
 static void e_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	pairing_t pairing)
 {
     e_pairing_data_ptr p = pairing->data;
-    point_ptr Q = in2->data;
-    point_t R, QR;
-    point_init(R, p->Eq);
-    point_init(QR, p->Eq);
-    point_random(R);
-    point_add(QR, Q, R);
-    e_miller_fn(out, in1->data, QR->x, QR->y, R->x, R->y, p);
+    element_ptr Q = in2;
+    element_t R, QR;
+    element_init(R, p->Eq);
+    element_init(QR, p->Eq);
+    curve_random_no_cofac(R);
+    element_add(QR, Q, R);
+    e_miller_fn(out, in1, QR, R, p);
     element_pow_mpz(out, out, p->tateexp);
-    point_clear(R);
-    point_clear(QR);
+    element_clear(R);
+    element_clear(QR);
 }
 
 static void phi_identity(element_ptr out, element_ptr in, pairing_ptr pairing)
@@ -629,14 +629,12 @@ void e_pairing_clear(pairing_t pairing)
 {
     e_pairing_data_ptr p = pairing->data;
     field_clear(p->Fq);
-    curve_clear(p->Eq);
+    field_clear(p->Eq);
     mpz_clear(p->tateexp);
     free(p);
 
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
-    field_clear(pairing->G1);
-    free(pairing->G1);
 }
 
 void pairing_init_e_param(pairing_t pairing, e_param_t param)
@@ -660,16 +658,14 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     element_init(b, p->Fq);
     element_set_mpz(a, param->a);
     element_set_mpz(b, param->b);
-    curve_init_cc_ab(p->Eq, a, b);
+    field_init_curve_ab(p->Eq, a, b, pairing->r, param->h);
 
     mpz_init(p->tateexp);
     mpz_sub_ui(p->tateexp, p->Fq->order, 1);
     mpz_divexact(p->tateexp, p->tateexp, pairing->r);
 
-    pairing->G1 = malloc(sizeof(field_t));
-    pairing->G2 = pairing->G1;
+    pairing->G2 = pairing->G1 = p->Eq;
 
-    field_init_curve_group(pairing->G1, p->Eq, pairing->r, param->h);
     pairing->GT = p->Fq;
     pairing->phi = phi_identity;
     pairing->option_set = e_pairing_option_set;
@@ -677,175 +673,4 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
 
     element_clear(a);
     element_clear(b);
-}
-
-//TODO: the following code is useless as the Tate pairing is degenerate on singular curves
-static void sn_miller(element_t res, mpz_t q, point_t P,
-	element_ptr Qx, element_ptr Qy)
-{
-    //collate divisions
-    int m;
-    element_t v, vd;
-    point_t Z;
-    element_t a, b, c;
-    element_t e0, e1;
-
-    void do_vertical(element_t e)
-    {
-	element_sub(e0, Qx, Z->x);
-	element_mul(e, e, e0);
-    }
-
-    void do_tangent(element_t e)
-    {
-	//a = -slope_tangent(Z.x, Z.y);
-	//b = 1;
-	//c = -(Z.y + a * Z.x);
-	//but we multiply by 2*Z.y to avoid division
-
-	//a = -Zx * (Zx + Zx + Zx + 2)
-	//b = 2 * Zy
-	//c = -(2 Zy^2 + a Zx);
-	element_ptr Zx = Z->x;
-	element_ptr Zy = Z->y;
-
-	//element_mul_si(a, Zx, 3);
-	element_double(e0, Zx);
-	element_add(a, Zx, e0);
-	element_set_si(e0, 2);
-	element_add(a, a, e0);
-	element_mul(a, a, Zx);
-	element_neg(a, a);
-
-	element_add(b, Zy, Zy);
-
-	element_mul(e0, b, Zy);
-	element_mul(c, a, Zx);
-	element_add(c, c, e0);
-	element_neg(c, c);
-
-	element_mul(e0, a, Qx);
-	element_mul(e1, b, Qy);
-	element_add(e0, e0, e1);
-	element_add(e0, e0, c);
-	element_mul(e, e, e0);
-    }
-
-    void do_line(element_ptr e)
-    {
-	//a = -(B.y - A.y) / (B.x - A.x);
-	//b = 1;
-	//c = -(A.y + a * A.x);
-	//but we'll multiply by B.x - A.x to avoid division
-
-	element_ptr Ax = Z->x;
-	element_ptr Ay = Z->y;
-	element_ptr Bx = P->x;
-	element_ptr By = P->y;
-
-	element_sub(b, Bx, Ax);
-	element_sub(a, Ay, By);
-	element_mul(e0, b, Ay);
-	element_mul(c, a, Ax);
-	element_add(c, c, e0);
-	element_neg(c, c);
-
-	element_mul(e0, a, Qx);
-	element_mul(e1, b, Qy);
-	element_add(e0, e0, e1);
-	element_add(e0, e0, c);
-	element_mul(e, e, e0);
-    }
-
-    element_init(a, P->curve->field);
-    element_init(b, P->curve->field);
-    element_init(c, P->curve->field);
-    element_init(e0, res->field);
-    element_init(e1, res->field);
-
-    element_init(v, res->field);
-    element_init(vd, res->field);
-    point_init(Z, P->curve);
-
-    point_set(Z, P);
-
-    element_set1(v);
-    element_set1(vd);
-    m = mpz_sizeinbase(q, 2) - 2;
-
-    while(m >= 0) {
-	element_mul(v, v, v);
-	element_mul(vd, vd, vd);
-	do_tangent(v);
-	point_double(Z, Z);
-	do_vertical(vd);
-	if (mpz_tstbit(q, m)) {
-	    do_line(v);
-	    point_add(Z, Z, P);
-	    do_vertical(vd);
-	}
-	m--;
-    }
-
-    element_invert(vd, vd);
-    element_mul(res, v, vd);
-
-    element_clear(v);
-    element_clear(vd);
-    point_clear(Z);
-    element_clear(a);
-    element_clear(b);
-    element_clear(c);
-    element_clear(e0);
-    element_clear(e1);
-}
-
-static void sn_pairing(element_ptr out, element_ptr in1, element_ptr in2,
-	pairing_t pairing)
-{
-    e_pairing_data_ptr p = pairing->data;
-    point_ptr Q = in2->data;
-    element_t e0;
-    point_t R, QR;
-    point_init(R, p->Eq);
-    point_init(QR, p->Eq);
-    point_random(R);
-    element_init(e0, out->field);
-    point_add(QR, Q, R);
-    sn_miller(out, pairing->r, in1->data, QR->x, QR->y);
-    sn_miller(e0, pairing->r, in1->data, R->x, R->y);
-    element_invert(e0, e0);
-    element_mul(out, out, e0);
-    //element_pow_mpz(out, out, p->tateexp);
-    point_clear(R);
-    point_clear(QR);
-}
-
-void pairing_init_singular_with_node(pairing_t pairing, mpz_t q)
-{
-    e_pairing_data_ptr p;
-    mpz_t one;
-
-    mpz_init(pairing->r);
-    mpz_sub_ui(pairing->r, q, 1);
-    field_init_fp(pairing->Zr, pairing->r);
-    pairing->map = sn_pairing;
-
-    p =	pairing->data = malloc(sizeof(e_pairing_data_t));
-    field_init_fp(p->Fq, q);
-    curve_init_singular_with_node(p->Eq, p->Fq);
-
-    //mpz_init(p->tateexp);
-    //mpz_sub_ui(p->tateexp, p->Fq->order, 1);
-    //mpz_divexact(p->tateexp, p->tateexp, pairing->r);
-
-    pairing->G1 = malloc(sizeof(field_t));
-    pairing->G2 = pairing->G1;
-
-    mpz_init(one);
-    mpz_set_ui(one, 1);
-    field_init_curve_group(pairing->G1, p->Eq, pairing->r, one);
-    mpz_clear(one);
-    pairing->GT = p->Fq;
-    //pairing->phi = trace;
 }

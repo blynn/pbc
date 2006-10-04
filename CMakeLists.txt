@@ -37,7 +37,7 @@ arith/field.c
 arith/fp.c
 arith/fieldquadratic.c
 arith/poly.c arith/random.c
-ecc/curve.c ecc/pairing.c ecc/param.c
+ecc/curve.c ecc/singular.c ecc/pairing.c ecc/param.c
 ecc/a1_param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c
 ecc/hilbert.c ecc/mnt.c ecc/mpc.c
 misc/darray.c misc/symtab.c

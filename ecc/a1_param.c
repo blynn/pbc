@@ -9,15 +9,12 @@
 #include "fieldquadratic.h"
 #include "pairing.h"
 #include "a1_param.h"
-#include "darray.h"
-#include "poly.h"
 #include "curve.h"
 #include "param.h"
 #include "tracker.h"
 
 struct a1_pairing_data_s {
-    field_t Fp, Fp2;
-    curve_t Ep;
+    field_t Fp, Fp2, Ep;
     mpz_t h;
 };
 typedef struct a1_pairing_data_s a1_pairing_data_t[1];
@@ -93,14 +90,15 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 //in1, in2 are from E(F_q), out from F_q^2
 {
     a1_pairing_data_ptr p = pairing->data;
-    point_t V;
-    point_ptr P;
+    element_t V;
     element_t f, f0;
     element_t a, b, c;
     element_t e0;
     int m;
-    element_ptr Qx = ((point_ptr) in2->data)->x;
-    element_ptr Qy = ((point_ptr) in2->data)->y;
+    element_ptr Qx = curve_x_coord(in2);
+    element_ptr Qy = curve_y_coord(in2);
+    element_ptr Vx;
+    element_ptr Vy;
 
     void do_tangent(void) {
 	//a = -slope_tangent(V.x, V.y);
@@ -110,8 +108,6 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	//a = -(3 Vx^2 + cc->a)
 	//b = 2 * Vy
 	//c = -(2 Vy^2 + a Vx);
-	element_ptr Vx = V->x;
-	element_ptr Vy = V->y;
 	element_square(a, Vx);
 	element_mul_si(a, a, 3);
 	element_set1(b);
@@ -134,7 +130,8 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	element_mul(f, f, f0);
     }
 
-    void do_line(point_ptr A, point_ptr B) {
+    //TODO: this only called once, get rid of arguments
+    void do_line(element_ptr A, element_ptr B) {
 	//a = -(B.y - A.y) / (B.x - A.x);
 	//b = 1;
 	//c = -(A.y + a * A.x);
@@ -142,10 +139,15 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	//a = -(By - Ay)
 	//b = Bx - Ax
 	//c = -(Ay b + a Ax);
-	element_sub(a, A->y, B->y);
-	element_sub(b, B->x, A->x);
-	element_mul(c, A->x, B->y);
-	element_mul(e0, A->y, B->x);
+	element_ptr Ax = curve_x_coord(A);
+	element_ptr Ay = curve_y_coord(A);
+	element_ptr Bx = curve_x_coord(B);
+	element_ptr By = curve_y_coord(B);
+
+	element_sub(a, Ay, By);
+	element_sub(b, Bx, Ax);
+	element_mul(c, Ax, By);
+	element_mul(e0, Ay, Bx);
 	element_sub(c, c, e0);
 
 	//we'll map Q via (x,y) --> (-x, iy)
@@ -157,9 +159,11 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	element_mul(f, f, f0);
     }
 
-    P = in1->data;
-    point_init(V, p->Ep);
-    point_set(V, P);
+    element_init(V, p->Ep);
+    element_set(V, in1);
+    Vx = curve_x_coord(V);
+    Vy = curve_y_coord(V);
+
     element_init(f, p->Fp2);
     element_init(f0, p->Fp2);
     element_set1(f);
@@ -170,14 +174,15 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 
     m = mpz_sizeinbase(pairing->r, 2) - 2;
 
+    //sliding NAF
     while(m >= 0) {
 	do_tangent();
 	if (!m) break;
 
-	point_double(V, V);
+	element_double(V, V);
 	if (mpz_tstbit(pairing->r, m)) {
-	    do_line(V, P);
-	    point_add(V, V, P);
+	    do_line(V, in1);
+	    element_add(V, V, in1);
 	}
 
 	m--;
@@ -195,7 +200,7 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 
     element_clear(f);
     element_clear(f0);
-    point_clear(V);
+    element_clear(V);
     element_clear(a);
     element_clear(b);
     element_clear(c);
@@ -206,15 +211,13 @@ void a1_pairing_clear(pairing_t pairing)
 {
     a1_pairing_data_ptr p = pairing->data;
     mpz_clear(p->h);
-    curve_clear(p->Ep);
+    field_clear(p->Ep);
     field_clear(p->Fp2);
     field_clear(p->Fp);
     free(p);
 
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
-    field_clear(pairing->G1);
-    free(pairing->G1);
 }
 
 void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
@@ -235,14 +238,13 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
     element_init(b, p->Fp);
     element_set1(a);
     element_set0(b);
-    curve_init_cc_ab(p->Ep, a, b);
+    field_init_curve_ab(p->Ep, a, b, pairing->r, p->h);
     element_clear(a);
     element_clear(b);
     field_init_fi(p->Fp2, p->Fp);
 
     pairing->G1 = malloc(sizeof(field_t));
-    field_init_curve_group(pairing->G1, p->Ep, pairing->r, p->h);
-    pairing->G2 = pairing->G1;
+    pairing->G2 = pairing->G1 = p->Ep;
     //pairing->phi = phi_identity;
     pairing->GT = p->Fp2;
 

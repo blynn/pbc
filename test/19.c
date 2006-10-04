@@ -32,29 +32,35 @@
 #include "fp.h"
 #include "fieldquadratic.h"
 
-static void miller(element_t res, point_t P,
-	element_ptr numx, element_ptr numy,
-	element_ptr denomx, element_ptr denomy, int n)
+static void miller(element_t res, element_t P,
+	element_ptr QR, element_ptr R, int n)
 {
     //collate divisions
     int m;
     element_t v, vd;
-    point_t Z;
+    element_t Z;
     element_t a, b, c;
-    const common_curve_ptr cc = P->curve->data;
+    const element_ptr cca = curve_a_coeff(P);
+    const element_ptr Px = curve_x_coord(P);
+    const element_ptr Py = curve_y_coord(P);
     element_t e0, e1;
     mpz_t q;
+    element_ptr Zx, Zy;
+    const element_ptr numx = curve_x_coord(QR);
+    const element_ptr numy = curve_y_coord(QR);
+    const element_ptr denomx = curve_x_coord(R);
+    const element_ptr denomy = curve_y_coord(R);
 
-    void do_vertical(element_t e, element_t edenom, point_ptr A)
+    void do_vertical(element_t e, element_t edenom)
     {
-	element_sub(e0, numx, A->x);
+	element_sub(e0, numx, Zx);
 	element_mul(e, e, e0);
 
-	element_sub(e0, denomx, A->x);
+	element_sub(e0, denomx, Zx);
 	element_mul(edenom, edenom, e0);
     }
 
-    void do_tangent(element_t e, element_t edenom, point_ptr A)
+    void do_tangent(element_t e, element_t edenom)
     {
 	//a = -slope_tangent(A.x, A.y);
 	//b = 1;
@@ -66,22 +72,20 @@ static void miller(element_t res, point_t P,
 	//a = -(3 Ax^2 + cc->a)
 	//b = 2 * Ay
 	//c = -(2 Ay^2 + a Ax);
-	const element_ptr Ax = A->x;
-	const element_ptr Ay = A->y;
 
-	if (element_is0(Ay)) {
-	    do_vertical(e, edenom, A);
+	if (element_is0(Zy)) {
+	    do_vertical(e, edenom);
 	    return;
 	}
-	element_square(a, Ax);
+	element_square(a, Zx);
 	element_mul_si(a, a, 3);
-	element_add(a, a, cc->a);
+	element_add(a, a, cca);
 	element_neg(a, a);
 
-	element_add(b, Ay, Ay);
+	element_add(b, Zy, Zy);
 
-	element_mul(e0, b, Ay);
-	element_mul(c, a, Ax);
+	element_mul(e0, b, Zy);
+	element_mul(c, a, Zx);
 	element_add(c, c, e0);
 	element_neg(c, c);
 
@@ -98,26 +102,21 @@ static void miller(element_t res, point_t P,
 	element_mul(edenom, edenom, e0);
     }
 
-    void do_line(element_ptr e, element_ptr edenom, point_ptr A, point_ptr B)
+    void do_line(element_ptr e, element_ptr edenom)
     {
-	const element_ptr Ax = A->x;
-	const element_ptr Ay = A->y;
-	const element_ptr Bx = B->x;
-	const element_ptr By = B->y;
-
-	if (!element_cmp(Ax, Bx)) {
-	    if (!element_cmp(Ay, By)) {
-		do_tangent(e, edenom, A);
+	if (!element_cmp(Zx, Px)) {
+	    if (!element_cmp(Zy, Py)) {
+		do_tangent(e, edenom);
 	    } else {
-		do_vertical(e, edenom, A);
+		do_vertical(e, edenom);
 	    }
 	    return;
 	}
 
-	element_sub(b, Bx, Ax);
-	element_sub(a, Ay, By);
-	element_mul(c, Ax, By);
-	element_mul(e0, Ay, Bx);
+	element_sub(b, Px, Zx);
+	element_sub(a, Zy, Py);
+	element_mul(c, Zx, Py);
+	element_mul(e0, Zy, Px);
 	element_sub(c, c, e0);
 
 	element_mul(e0, a, numx);
@@ -141,9 +140,11 @@ static void miller(element_t res, point_t P,
 
     element_init(v, res->field);
     element_init(vd, res->field);
-    point_init(Z, P->curve);
+    element_init(Z, P->field);
 
-    point_set(Z, P);
+    element_set(Z, P);
+    Zx = curve_x_coord(Z);
+    Zy = curve_y_coord(Z);
 
     element_set1(v);
     element_set1(vd);
@@ -155,15 +156,15 @@ static void miller(element_t res, point_t P,
     while(m >= 0) {
 	element_square(v, v);
 	element_square(vd, vd);
-	do_tangent(v, vd, Z);
-	point_double(Z, Z);
-	do_vertical(vd, v, Z);
+	do_tangent(v, vd);
+	element_double(Z, Z);
+	do_vertical(vd, v);
 
 	if (mpz_tstbit(q, m)) {
-	    do_line(v, vd, Z, P);
-	    point_add(Z, Z, P);
+	    do_line(v, vd);
+	    element_add(Z, Z, P);
 	    if (m) {
-		do_vertical(vd, v, Z);
+		do_vertical(vd, v);
 	    }
 	}
 	m--;
@@ -176,7 +177,7 @@ static void miller(element_t res, point_t P,
 
     element_clear(v);
     element_clear(vd);
-    point_clear(Z);
+    element_clear(Z);
     element_clear(a);
     element_clear(b);
     element_clear(c);
@@ -184,52 +185,52 @@ static void miller(element_t res, point_t P,
     element_clear(e1);
 }
 
-static void tate_3(element_ptr out, point_ptr P, point_ptr Q, point_ptr R)
+static void tate_3(element_ptr out, element_ptr P, element_ptr Q, element_ptr R)
 {
     mpz_t six;
 
     mpz_init(six);
     mpz_set_ui(six, 6);
-    point_t QR;
+    element_t QR;
     element_t e0;
 
-    point_init(QR, P->curve);
+    element_init(QR, P->field);
     element_init(e0, out->field);
 
-    point_add(QR, Q, R);
+    element_add(QR, Q, R);
 
     //for subgroup size 3, -2P = P, hence
     //the tangent line at P has divisor 3(P) - 3(O)
 
-    miller(out, P, QR->x, QR->y, R->x, R->y, 3);
+    miller(out, P, QR, R, 3);
 
     element_pow_mpz(out, out, six);
-    point_clear(QR);
+    element_clear(QR);
     element_clear(e0);
     mpz_clear(six);
 }
 
-static void tate_9(element_ptr out, point_ptr P, point_ptr Q, point_ptr R)
+static void tate_9(element_ptr out, element_ptr P, element_ptr Q, element_ptr R)
 {
-    point_t QR;
-    point_init(QR, P->curve);
+    element_t QR;
+    element_init(QR, P->field);
 
-    point_add(QR, Q, R);
+    element_add(QR, Q, R);
 
-    miller(out, P, QR->x, QR->y, R->x, R->y, 9);
+    miller(out, P, QR, R, 9);
 
     element_square(out, out);
 
-    point_clear(QR);
+    element_clear(QR);
 }
 
-static void tate_18(element_ptr out, point_ptr P, point_ptr Q, point_ptr R, point_ptr S)
+static void tate_18(element_ptr out, element_ptr P, element_ptr Q, element_ptr R, element_ptr S)
 {
     mpz_t pow;
-    point_t PR;
-    point_t QS;
-    point_init(PR, P->curve);
-    point_init(QS, P->curve);
+    element_t PR;
+    element_t QS;
+    element_init(PR, P->field);
+    element_init(QS, P->field);
     element_t outd;
 
     element_init(outd, out->field);
@@ -237,23 +238,23 @@ static void tate_18(element_ptr out, point_ptr P, point_ptr Q, point_ptr R, poin
     mpz_init(pow);
     mpz_set_ui(pow, (19*19-1)/18);
 
-    point_add(PR, P, R);
-    point_add(QS, Q, S);
+    element_add(PR, P, R);
+    element_add(QS, Q, S);
 
-    if (point_is_inf(QS)) {
-	point_t S2;
-	point_init(S2, P->curve);
-	point_double(S2, S);
-	miller(out, PR, S->x, S->y, S2->x, S2->y, 18);
-	miller(outd, R, S->x, S->y, S2->x, S2->y, 18);
-	point_clear(S2);
+    if (element_is0(QS)) {
+	element_t S2;
+	element_init(S2, P->field);
+	element_double(S2, S);
+	miller(out, PR, S, S2, 18);
+	miller(outd, R, S, S2, 18);
+	element_clear(S2);
     } else {
-	miller(out, PR, QS->x, QS->y, S->x, S->y, 18);
-	miller(outd, R, QS->x, QS->y, S->x, S->y, 18);
+	miller(out, PR, QS, S, 18);
+	miller(outd, R, QS, S, 18);
     }
 
-    point_clear(PR);
-    point_clear(QS);
+    element_clear(PR);
+    element_clear(QS);
 
     element_invert(outd, outd);
     element_mul(out, out, outd);
@@ -265,16 +266,16 @@ static void tate_18(element_ptr out, point_ptr P, point_ptr Q, point_ptr R, poin
 
 int main(void)
 {
-    curve_t c;
+    field_t c;
     field_t Z19;
-    point_t P, Q, R;
+    element_t P, Q, R;
     mpz_t q, z;
     element_t a, b;
     int i;
 
     field_t Z19_2;
-    curve_t c2;
-    point_t P2, Q2, R2;
+    field_t c2;
+    element_t P2, Q2, R2;
     element_t a2;
 
     mpz_init(q);
@@ -289,55 +290,46 @@ int main(void)
     element_set_si(a, 1);
     element_set_si(b, 6);
 
-    curve_init_cc_ab(c, a, b);
-    point_init(P, c);
-    point_init(Q, c);
-    point_init(R, c);
+    mpz_set_ui(q, 18);
+    field_init_curve_ab(c, a, b, q, NULL);
+    element_init(P, c);
+    element_init(Q, c);
+    element_init(R, c);
 
     printf("Y^2 = X^3 + X + 6 over F_19\n");
     //(0,+/-5) is a generator
     element_set0(a);
-    point_from_x(R, a);
+    curve_from_x(R, a);
 
     for (i=1; i<19; i++) {
-	printf("%dR = ", i);
 	mpz_set_si(z, i);
-	point_mul(Q, z, R);
-	point_out_str(stdout, 0, Q);
-	printf("\n");
+	element_mul_mpz(Q, R, z);
+	element_printf("%dR = %B\n", i, Q);
     }
 
     mpz_set_ui(z, 6);
-    point_mul(P, z, R);
+    element_mul_mpz(P, R, z);
     //P has order 3
-    printf("P = ");
-    point_out_str(stdout, 0, P);
-    printf("\n");
+    element_printf("P = %B\n", P);
 
     for (i=1; i<=3; i++) {
 	mpz_set_si(z, i);
-	point_mul(Q, z, R);
+	element_mul_mpz(Q, R, z);
 	tate_3(a, P, Q, R);
-	printf("e_3(P,%dR) = ", i);
-	element_out_str(stdout, 0, a);
-	printf("\n");
+	element_printf("e_3(P,%dR) = %B\n", i, a);
     }
 
-    point_double(P, R);
+    element_double(P, R);
     //P has order 9
-    printf("P = ");
-    point_out_str(stdout, 0, P);
-    printf("\n");
+    element_printf("P = %B\n", P);
     for (i=1; i<=9; i++) {
 	mpz_set_si(z, i);
 	//we're supposed to use multiples of R
 	//but 2R works just as well and it allows us
 	//to use R as the offset every time
-	point_mul(Q, z, P);
+	element_mul_mpz(Q, P, z);
 	tate_9(a, P, Q, R);
-	printf("e_9(P,%dP) = ", i);
-	element_out_str(stdout, 0, a);
-	printf("\n");
+	element_printf("e_9(P,%dP) = %B\n", i, a);
     }
 
     //to do the pairing on all of E(F_19) we need to move to F_19^2
@@ -345,43 +337,40 @@ int main(void)
     printf("moving to F_19^2\n");
     field_init_fi(Z19_2, Z19);
 
-    cc_init_map_curve(c2, c, Z19_2, element_field_to_fi);
-    point_init(P2, c2);
-    point_init(Q2, c2);
-    point_init(R2, c2);
+    //don't need to tell it the real order
+    field_init_curve_ab_map(c2, c, element_field_to_fi, Z19_2, q, NULL);
+    element_init(P2, c2);
+    element_init(Q2, c2);
+    element_init(R2, c2);
 
     element_init(a2, Z19_2);
     element_set0(a2);
-    point_from_x(P2, a2);
+    curve_from_x(P2, a2);
 
-    point_random(R2);
+    element_random(R2);
 
-    printf("P = ");
-    point_out_str(stdout, 0, P2);
-    printf("\n");
+    element_printf("P = %B\n", P2);
 
     for (i=1; i<=18; i++) {
 	mpz_set_si(z, i);
-	point_mul(Q2, z, P2);
+	element_mul_mpz(Q2, P2, z);
 	tate_18(a2, P2, Q2, R2, P2);
-	printf("e_18(P,%dP) = ", i);
-	element_out_str(stdout, 0, a2);
-	printf("\n");
+	element_printf("e_18(P,%dP) = %B\n", i, a2);
     }
 
-    point_clear(P2);
-    point_clear(Q2);
-    point_clear(R2);
+    element_clear(P2);
+    element_clear(Q2);
+    element_clear(R2);
     element_clear(a2);
-    curve_clear(c2);
+    field_clear(c2);
     field_clear(Z19_2);
 
-    curve_clear(c);
+    field_clear(c);
     element_clear(a);
     element_clear(b);
-    point_clear(P);
-    point_clear(Q);
-    point_clear(R);
+    element_clear(P);
+    element_clear(Q);
+    element_clear(R);
     field_clear(Z19);
 
     mpz_clear(q);

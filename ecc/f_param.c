@@ -20,7 +20,7 @@
 
 struct f_pairing_data_s {
     field_t Fq, Fq2, Fq2x, Fq12;
-    curve_t Eq, Etwist;
+    field_t Eq, Etwist;
     element_t negalpha;
     element_t negalphainv;
     mpz_t tateexp;
@@ -123,8 +123,8 @@ void f_param_gen(f_param_t fp, int bits)
     field_t Fq, Fq2, Fq2x;
     element_t e1;
     element_t f;
-    curve_t c;
-    point_t P;
+    field_t c;
+    element_t P;
 
     mpz_init(x);
     mpz_init(t);
@@ -151,15 +151,15 @@ void f_param_gen(f_param_t fp, int bits)
 
     for (;;) {
 	element_random(e1);
-	curve_init_b(c, e1);
-	point_init(P, c);
+	field_init_curve_b(c, e1, r, NULL);
+	element_init(P, c);
 
-	point_random(P);
+	element_random(P);
 
-	point_mul(P, r, P);
-	if (point_is_inf(P)) break;
-	point_clear(P);
-	curve_clear(c);
+	element_mul_mpz(P, P, r);
+	if (element_is0(P)) break;
+	element_clear(P);
+	field_clear(c);
     }
     element_to_mpz(b, e1);
 
@@ -185,8 +185,8 @@ void f_param_gen(f_param_t fp, int bits)
     //see if sextic twist contains a subgroup of order r
     //if not, it's the wrong twist: replace alpha with alpha^5
     {
-	curve_t ctest;
-	point_t Ptest;
+	field_t ctest;
+	element_t Ptest;
 	mpz_t z0, z1;
 	mpz_init(z0);
 	mpz_init(z1);
@@ -195,9 +195,9 @@ void f_param_gen(f_param_t fp, int bits)
 	element_mul(e1, e1, poly_coeff(f, 0));
 	element_neg(e1, e1);
 
-	curve_init_b(ctest, e1);
-	point_init(Ptest, ctest);
-	point_random(Ptest);
+	field_init_curve_b(ctest, e1, r, NULL);
+	element_init(Ptest, ctest);
+	element_random(Ptest);
 
 	//I'm not sure what the #E'(F_q^2) is, but
 	//it definitely divides n_12 = #E(F_q^12). It contains a
@@ -210,14 +210,14 @@ void f_param_gen(f_param_t fp, int bits)
 	mpz_mul(z0, r, r);
 	mpz_divexact(z1, z1, z0);
 
-	point_mul(Ptest, z1, Ptest);
-	if (point_is_inf(Ptest)) {
+	element_mul_mpz(Ptest, Ptest, z1);
+	if (element_is0(Ptest)) {
 	    mpz_set_ui(z0, 5);
 	    element_pow_mpz(poly_coeff(f, 0), poly_coeff(f, 0), z0);
 	}
 	element_clear(e1);
-	point_clear(Ptest);
-	curve_clear(ctest);
+	element_clear(Ptest);
+	field_clear(ctest);
 	mpz_clear(z0);
 	mpz_clear(z1);
     }
@@ -235,17 +235,18 @@ void f_param_gen(f_param_t fp, int bits)
     mpz_clear(x);
 }
 
-static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
+static void cc_miller_no_denom(element_t res, mpz_t q, element_t P,
 	element_ptr Qx, element_ptr Qy, element_t negalpha)
 {
     int m;
     element_t v;
-    point_t Z;
+    element_t Z;
     element_t a, b, c;
-    const common_curve_ptr cc = P->curve->data;
     element_t t0;
     element_t e0, e1;
-    UNUSED_VAR (cc);
+    element_ptr Zx, Zy;
+    const element_ptr Px = curve_x_coord(P);
+    const element_ptr Py = curve_y_coord(P);
 
     void f_miller_evalfn(void)
     {
@@ -314,9 +315,6 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
 	//a = -3 Zx^2 since cc->a is 0 for D = 3
 	//b = 2 * Zy
 	//c = -(2 Zy^2 + a Zx);
-	const element_ptr Zx = Z->x;
-	const element_ptr Zy = Z->y;
-
 	element_square(a, Zx);
 	element_mul_si(a, a, 3);
 	element_neg(a, a);
@@ -338,32 +336,29 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
 	//c = -(A.y + a * A.x);
 	//but we'll multiply by B.x - A.x to avoid division
 
-	const element_ptr Ax = Z->x;
-	const element_ptr Ay = Z->y;
-	const element_ptr Bx = P->x;
-	const element_ptr By = P->y;
-
-	element_sub(b, Bx, Ax);
-	element_sub(a, Ay, By);
-	element_mul(t0, b, Ay);
-	element_mul(c, a, Ax);
+	element_sub(b, Px, Zx);
+	element_sub(a, Zy, Py);
+	element_mul(t0, b, Zy);
+	element_mul(c, a, Zx);
 	element_add(c, c, t0);
 	element_neg(c, c);
 
 	f_miller_evalfn();
     }
 
-    element_init(a, P->curve->field);
-    element_init(b, P->curve->field);
-    element_init(c, P->curve->field);
-    element_init(t0, P->curve->field);
+    element_init(a, Px->field);
+    element_init(b, a->field);
+    element_init(c, a->field);
+    element_init(t0, a->field);
     element_init(e0, res->field);
     element_init(e1, Qx->field);
 
     element_init(v, res->field);
-    point_init(Z, P->curve);
+    element_init(Z, P->field);
 
-    point_set(Z, P);
+    element_set(Z, P);
+    Zx = curve_x_coord(Z);
+    Zy = curve_y_coord(Z);
 
     element_set1(v);
     m = mpz_sizeinbase(q, 2) - 2;
@@ -373,10 +368,10 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
 
 	if (!m) break;
 
-	point_double(Z, Z);
+	element_double(Z, Z);
 	if (mpz_tstbit(q, m)) {
 	    do_line();
-	    point_add(Z, Z, P);
+	    element_add(Z, Z, P);
 	}
 	m--;
 	element_square(v, v);
@@ -385,7 +380,7 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
     element_set(res, v);
 
     element_clear(v);
-    point_clear(Z);
+    element_clear(Z);
     element_clear(a);
     element_clear(b);
     element_clear(c);
@@ -397,7 +392,7 @@ static void cc_miller_no_denom(element_t res, mpz_t q, point_t P,
 static void f_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	pairing_t pairing)
 {
-    point_ptr Qbase = in2->data;
+    element_ptr Qbase = in2;
     element_t x, y;
     f_pairing_data_ptr p = pairing->data;
 
@@ -408,10 +403,10 @@ static void f_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     //i.e. v^6 = -alpha
     //thus v^-2 = -alpha^-1 v^4
     //and  v^-3 = -alpha^-1 v^3
-    element_mul(x, Qbase->x, p->negalphainv);
-    element_mul(y, Qbase->y, p->negalphainv);
+    element_mul(x, curve_x_coord(Qbase), p->negalphainv);
+    element_mul(y, curve_y_coord(Qbase), p->negalphainv);
 
-    cc_miller_no_denom(out, pairing->r, in1->data, x, y, p->negalpha);
+    cc_miller_no_denom(out, pairing->r, in1, x, y, p->negalpha);
 
     element_clear(x);
     element_clear(y);
@@ -458,8 +453,8 @@ void f_pairing_clear(pairing_t pairing)
     element_clear(p->xpowq2);
     element_clear(p->xpowq6);
     element_clear(p->xpowq8);
-    curve_clear(p->Etwist);
-    curve_clear(p->Eq);
+    field_clear(p->Etwist);
+    field_clear(p->Eq);
 
     field_clear(p->Fq12);
     field_clear(p->Fq2x);
@@ -469,10 +464,6 @@ void f_pairing_clear(pairing_t pairing)
 
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
-    field_clear(pairing->G1);
-    field_clear(pairing->G2);
-    free(pairing->G1);
-    free(pairing->G2);
 }
 
 void pairing_init_f_param(pairing_t pairing, f_param_t param)
@@ -480,7 +471,6 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
     f_pairing_data_ptr p;
     element_t irred;
     element_t e0, e1, e2;
-    mpz_t one;
     p = pairing->data = malloc(sizeof(f_pairing_data_t));
     mpz_init(pairing->r);
     mpz_set(pairing->r, param->r);
@@ -490,9 +480,7 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
     element_init(p->Fq->nqr, p->Fq);
     element_set_mpz(p->Fq->nqr, param->beta);
     field_init_quadratic(p->Fq2, p->Fq);
-    printf("hmm\n");
     field_clear(p->Fq2);
-    printf("hmm\n");
     field_init_quadratic(p->Fq2, p->Fq);
     field_init_poly(p->Fq2x, p->Fq2);
     element_init(irred, p->Fq2x);
@@ -515,7 +503,7 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
     element_init(e2, p->Fq2);
 
     element_set_mpz(e1, param->b);
-    curve_init_cc_ab(p->Eq, e0, e1);
+    field_init_curve_ab(p->Eq, e0, e1, pairing->r, NULL);
     element_set_mpz(e0, param->alpha0);
     element_neg(e0, e0);
     element_mul(fi_re(e2), e0, e1);
@@ -524,19 +512,13 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
     element_mul(fi_im(e2), e0, e1);
     element_clear(e0);
     element_init(e0, p->Fq2);
-    curve_init_cc_ab(p->Etwist, e0, e2);
+    field_init_curve_ab(p->Etwist, e0, e2, pairing->r, NULL);
     element_clear(e0);
     element_clear(e1);
     element_clear(e2);
 
-    pairing->G1 = malloc(sizeof(field_t));
-    pairing->G2 = malloc(sizeof(field_t));
-
-    mpz_init(one);
-    mpz_set_si(one, 1);
-    field_init_curve_group(pairing->G1, p->Eq, pairing->r, one);
-    field_init_curve_group(pairing->G2, p->Etwist, pairing->r, one);
-    mpz_clear(one);
+    pairing->G1 = p->Eq;
+    pairing->G2 = p->Etwist;
     pairing->GT = p->Fq12;
     pairing->map = f_pairing;
     pairing->clear_func = f_pairing_clear;

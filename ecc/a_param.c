@@ -10,8 +10,6 @@
 #include "fieldquadratic.h"
 #include "pairing.h"
 #include "a_param.h"
-#include "darray.h"
-#include "poly.h"
 #include "curve.h"
 #include "param.h"
 #include "random.h"
@@ -19,8 +17,7 @@
 #include "utils.h"
 
 struct a_pairing_data_s {
-    field_t Fq, Fq2;
-    curve_t Eq, Eq2;
+    field_t Fq, Fq2, Eq;
     mpz_t h;
     int exp2, exp1;
     int sign1;
@@ -151,9 +148,11 @@ static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
     a_pairing_data_ptr ainfo = pairing->data;
     p->data = malloc(sizeof(pp_coeff_t) * (ainfo->exp2 + 1));
     pp_coeff_t *coeff = (pp_coeff_t *) p->data;
-    point_t V, V1;
+    element_t V, V1;
     element_t a, b, c;
     element_t e0;
+    element_ptr Vx;
+    element_ptr Vy;
 
     void do_tangent(void) {
 	//a = -slope_tangent(V.x, V.y);
@@ -163,8 +162,6 @@ static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
 	//a = -(3 Vx^2 + cc->a)
 	//b = 2 * Vy
 	//c = -(2 Vy^2 + a Vx);
-	element_ptr Vx = V->x;
-	element_ptr Vy = V->y;
 	element_square(a, Vx);
 	//element_mul_si(a, a, 3);
 	element_add(e0, a, a);
@@ -188,7 +185,7 @@ static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
 	element_set(coeff[i]->c, c);
     }
 
-    void do_line(point_ptr A, point_ptr B) {
+    void do_line(element_ptr A, element_ptr B) {
 	//a = -(B.y - A.y) / (B.x - A.x);
 	//b = 1;
 	//c = -(A.y + a * A.x);
@@ -196,10 +193,15 @@ static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
 	//a = -(By - Ay)
 	//b = Bx - Ax
 	//c = -(Ay b + a Ax);
-	element_sub(a, A->y, B->y);
-	element_sub(b, B->x, A->x);
-	element_mul(c, A->x, B->y);
-	element_mul(e0, A->y, B->x);
+	element_ptr Ax = curve_x_coord(A);
+	element_ptr Ay = curve_y_coord(A);
+	element_ptr Bx = curve_x_coord(B);
+	element_ptr By = curve_y_coord(B);
+
+	element_sub(a, Ay, By);
+	element_sub(b, Bx, Ax);
+	element_mul(c, Ax, By);
+	element_mul(e0, Ay, Bx);
 	element_sub(c, c, e0);
 
 	element_init(coeff[i]->a, ainfo->Fq);
@@ -210,9 +212,11 @@ static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
 	element_set(coeff[i]->c, c);
     }
 
-    point_init(V, ainfo->Eq);
-    point_init(V1, ainfo->Eq);
-    point_set(V, in1->data);
+    element_init(V, ainfo->Eq);
+    element_init(V1, ainfo->Eq);
+    element_set(V, in1);
+    Vx = curve_x_coord(V);
+    Vy = curve_y_coord(V);
     element_init(e0, ainfo->Fq);
     element_init(a, ainfo->Fq);
     element_init(b, ainfo->Fq);
@@ -221,18 +225,18 @@ static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
     n = ainfo->exp1;
     for (i=0; i<n; i++) {
 	do_tangent();
-	point_double(V, V);
+	element_double(V, V);
     }
 
     if (ainfo->sign1 < 0) {
-	point_neg(V1, V);
+	element_neg(V1, V);
     } else {
-	point_set(V1, V);
+	element_set(V1, V);
     }
     n = ainfo->exp2;
     for (; i<n; i++) {
 	do_tangent();
-	point_double(V, V);
+	element_double(V, V);
     }
 
     do_line(V, V1);
@@ -241,8 +245,8 @@ static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
     element_clear(a);
     element_clear(b);
     element_clear(c);
-    point_clear(V);
-    point_clear(V1);
+    element_clear(V);
+    element_clear(V1);
 }
 
 static void a_pairing_pp_clear(pairing_pp_t p)
@@ -286,8 +290,8 @@ static inline void a_miller_evalfn(element_ptr out,
 static void a_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
 {
     //TODO: use proj coords here too to shave off a little time
-    element_ptr Qx = ((point_ptr) in2->data)->x;
-    element_ptr Qy = ((point_ptr) in2->data)->y;
+    element_ptr Qx = curve_x_coord(in2);
+    element_ptr Qy = curve_y_coord(in2);
     element_t f, f0;
     int i, n;
     a_pairing_data_ptr ainfo = p->pairing->data;
@@ -334,16 +338,20 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 //in1, in2 are from E(F_q), out from F_q^2
 {
     a_pairing_data_ptr p = pairing->data;
-    point_t V, V1;
+    element_t V, V1;
     element_t z, z2;
     element_t f, f0, f1;
     element_t a, b, c;
     element_t e0;
     const element_ptr e1 = a, e2 = b, e3 = c;
     int i, n;
-    element_ptr Qx = ((point_ptr) in2->data)->x;
-    element_ptr Qy = ((point_ptr) in2->data)->y;
+    element_ptr Vx;
+    element_ptr Vy;
+    element_ptr Qx = curve_x_coord(in2);
+    element_ptr Qy = curve_y_coord(in2);
 
+    //could save a couple of inversions by avoiding
+    //this funciton and rewriting do_line() to handle projective coords
     //convert V from weighted projective (Jacobian) to affine
     //i.e. (X, Y, Z) --> (X/Z^2, Y/Z^3)
     //also sets z to 1
@@ -351,20 +359,18 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
     {
 	element_invert(z, z);
 	element_square(e0, z);
-	element_mul(V->x, V->x, e0);
+	element_mul(Vx, Vx, e0);
 	element_mul(e0, e0, z);
-	element_mul(V->y, V->y, e0);
+	element_mul(Vy, Vy, e0);
 	element_set1(z);
 	element_set1(z2);
     }
 
     void proj_double(void)
     {
-	element_ptr x = V->x;
-	element_ptr y = V->y;
 	//e0 = 3x^2 + (cc->a) z^4
 	//for this case a = 1
-	element_square(e0, x);
+	element_square(e0, Vx);
 	////element_mul_si(e0, e0, 3);
 	//element_add(e1, e0, e0);
 	element_double(e1, e0);
@@ -373,15 +379,15 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	element_add(e0, e0, e1);
 
 	//z_out = 2 y z
-	element_mul(z, y, z);
+	element_mul(z, Vy, z);
 	////element_mul_si(z, z, 2);
 	//element_add(z, z, z);
 	element_double(z, z);
 	element_square(z2, z);
 
 	//e1 = 4 x y^2
-	element_square(e2, y);
-	element_mul(e1, x, e2);
+	element_square(e2, Vy);
+	element_mul(e1, Vx, e2);
 	////element_mul_si(e1, e1, 4);
 	//element_add(e1, e1, e1);
 	//element_add(e1, e1, e1);
@@ -392,8 +398,8 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	////element_mul_si(e3, e1, 2);
 	//element_add(e3, e1, e1);
 	element_double(e3, e1);
-	element_square(x, e0);
-	element_sub(x, x, e3);
+	element_square(Vx, e0);
+	element_sub(Vx, Vx, e3);
 
 	//e2 = 8y^4
 	element_square(e2, e2);
@@ -406,15 +412,12 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	element_double(e2, e2);
 
 	//y_out = e0(e1 - x_out) - e2
-	element_sub(e1, e1, x);
+	element_sub(e1, e1, Vx);
 	element_mul(e0, e0, e1);
-	element_sub(y, e0, e2);
+	element_sub(Vy, e0, e2);
     }
 
     void do_tangent(void) {
-	element_ptr Vx = V->x;
-	element_ptr Vy = V->y;
-
 	//a = -(3x^2 + cca z^4)
 	//for this case cca = 1
 	//b = 2 y z^3
@@ -445,7 +448,7 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	element_mul(f, f, f0);
     }
 
-    void do_line(point_ptr A, point_ptr B) {
+    void do_line(element_ptr A, element_ptr B) {
 	//a = -(B.y - A.y) / (B.x - A.x);
 	//b = 1;
 	//c = -(A.y + a * A.x);
@@ -453,19 +456,28 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	//a = -(By - Ay)
 	//b = Bx - Ax
 	//c = Ax By - Ay Bx;
-	element_sub(a, A->y, B->y);
-	element_sub(b, B->x, A->x);
-	element_mul(c, A->x, B->y);
-	element_mul(e0, A->y, B->x);
+	element_ptr Ax = curve_x_coord(A);
+	element_ptr Ay = curve_y_coord(A);
+	element_ptr Bx = curve_x_coord(B);
+	element_ptr By = curve_y_coord(B);
+
+	element_sub(a, Ay, By);
+	element_sub(b, Bx, Ax);
+	element_mul(c, Ax, By);
+	element_mul(e0, Ay, Bx);
 	element_sub(c, c, e0);
 
 	a_miller_evalfn(f0, a, b, c, Qx, Qy);
 	element_mul(f, f, f0);
     }
 
-    point_init(V, p->Eq);
-    point_init(V1, p->Eq);
-    point_set(V, in1->data);
+    element_init(V, p->Eq);
+    element_init(V1, p->Eq);
+    element_set(V, in1);
+
+    Vx = curve_x_coord(V);
+    Vy = curve_y_coord(V);
+
     element_init(f, p->Fq2);
     element_init(f0, p->Fq2);
     element_init(f1, p->Fq2);
@@ -488,10 +500,10 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
     }
     point_to_affine();
     if (p->sign1 < 0) {
-	point_neg(V1, V);
+	element_neg(V1, V);
 	element_invert(f1, f);
     } else {
-	point_set(V1, V);
+	element_set(V1, V);
 	element_set(f1, f);
     }
     n = p->exp2;
@@ -512,8 +524,8 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
     element_clear(f1);
     element_clear(z);
     element_clear(z2);
-    point_clear(V);
-    point_clear(V1);
+    element_clear(V);
+    element_clear(V1);
     element_clear(a);
     element_clear(b);
     element_clear(c);
@@ -525,13 +537,15 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 //in1, in2 are from E(F_q), out from F_q^2
 {
     a_pairing_data_ptr p = pairing->data;
-    point_t V, V1;
+    element_t V, V1;
     element_t f, f0, f1;
     element_t a, b, c;
     element_t e0;
     int i, n;
-    element_ptr Qx = ((point_ptr) in2->data)->x;
-    element_ptr Qy = ((point_ptr) in2->data)->y;
+    element_ptr Qx = curve_x_coord(in2);
+    element_ptr Qy = curve_y_coord(in2);
+    element_ptr Vx;
+    element_ptr Vy;
 
     void do_tangent(void) {
 	//a = -slope_tangent(V.x, V.y);
@@ -541,8 +555,6 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 	//a = -(3 Vx^2 + cc->a)
 	//b = 2 * Vy
 	//c = -(2 Vy^2 + a Vx);
-	element_ptr Vx = V->x;
-	element_ptr Vy = V->y;
 	element_square(a, Vx);
 	//element_mul_si(a, a, 3);
 	element_add(e0, a, a);
@@ -562,7 +574,7 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 	element_mul(f, f, f0);
     }
 
-    void do_line(point_ptr A, point_ptr B) {
+    void do_line(element_ptr A, element_ptr B) {
 	//a = -(B.y - A.y) / (B.x - A.x);
 	//b = 1;
 	//c = -(A.y + a * A.x);
@@ -570,19 +582,26 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 	//a = -(By - Ay)
 	//b = Bx - Ax
 	//c = -(Ay b + a Ax);
-	element_sub(a, A->y, B->y);
-	element_sub(b, B->x, A->x);
-	element_mul(c, A->x, B->y);
-	element_mul(e0, A->y, B->x);
+	element_ptr Ax = curve_x_coord(A);
+	element_ptr Ay = curve_y_coord(A);
+	element_ptr Bx = curve_x_coord(B);
+	element_ptr By = curve_y_coord(B);
+
+	element_sub(a, Ay, By);
+	element_sub(b, Bx, Ax);
+	element_mul(c, Ax, By);
+	element_mul(e0, Ay, Bx);
 	element_sub(c, c, e0);
 
 	a_miller_evalfn(f0, a, b, c, Qx, Qy);
 	element_mul(f, f, f0);
     }
 
-    point_init(V, p->Eq);
-    point_init(V1, p->Eq);
-    point_set(V, in1->data);
+    element_init(V, p->Eq);
+    Vx = curve_x_coord(V);
+    Vy = curve_y_coord(V);
+    element_init(V1, p->Eq);
+    element_set(V, in1);
     element_init(f, p->Fq2);
     element_init(f0, p->Fq2);
     element_init(f1, p->Fq2);
@@ -598,20 +617,20 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 	//where g_V,V = tangent at V
 	element_square(f, f);
 	do_tangent();
-	point_double(V, V);
+	element_double(V, V);
     }
     if (p->sign1 < 0) {
-	point_neg(V1, V);
+	element_neg(V1, V);
 	element_invert(f1, f);
     } else {
-	point_set(V1, V);
+	element_set(V1, V);
 	element_set(f1, f);
     }
     n = p->exp2;
     for (; i<n; i++) {
 	element_square(f, f);
 	do_tangent();
-	point_double(V, V);
+	element_double(V, V);
     }
 
     element_mul(f, f, f1);
@@ -622,8 +641,8 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
     element_clear(f);
     element_clear(f0);
     element_clear(f1);
-    point_clear(V);
-    point_clear(V1);
+    element_clear(V);
+    element_clear(V1);
     element_clear(a);
     element_clear(b);
     element_clear(c);
@@ -633,7 +652,7 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 static void a_pairing_clear(pairing_t pairing)
 {
     a_pairing_data_ptr p = pairing->data;
-    curve_clear(p->Eq);
+    field_clear(p->Eq);
     field_clear(p->Fq);
     field_clear(p->Fq2);
     mpz_clear(p->h);
@@ -641,8 +660,6 @@ static void a_pairing_clear(pairing_t pairing)
 
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
-    field_clear(pairing->G1);
-    free(pairing->G1);
 }
 
 static void a_pairing_option_set(pairing_t pairing, char *key, char *value)
@@ -675,7 +692,7 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
     element_init(b, p->Fq);
     element_set1(a);
     element_set0(b);
-    curve_init_cc_ab(p->Eq, a, b);
+    field_init_curve_ab(p->Eq, a, b, pairing->r, param->h);
     element_clear(a);
     element_clear(b);
 
@@ -684,8 +701,7 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
     mpz_init(p->h);
     mpz_set(p->h, param->h);
 
-    pairing->G1 = malloc(sizeof(field_t));
-    field_init_curve_group(pairing->G1, p->Eq, pairing->r, param->h);
+    pairing->G1 = p->Eq;
     pairing->G2 = pairing->G1;
     pairing->phi = phi_identity;
     pairing->GT = p->Fq2;
