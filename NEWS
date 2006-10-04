@@ -1,3 +1,16 @@
+Wed Oct  4 14:08:22 PDT 2006
+
+Bugfix: converting finite field elements to bytes now does not depend
+on the hardware. I previously left in a memcpy, which meant that it
+copied mp_limb_t's in host-byte order.
+
+Code cleanup. No more curve_t data type, some duplicate code removed,
+called library functions instead of writing my own.
+
+RSA timings program now also measures exponentiation using CRT method.
+
+[0.3.11]
+
 Tue Oct  3 00:06:41 PDT 2006
 
 Hovav Shacham contributed code to preprocess exponentiations, which saves
