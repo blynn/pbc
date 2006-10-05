@@ -35,6 +35,7 @@ struct field_s {
     void (*set1)(element_ptr);
     size_t (*out_str)(FILE *stream, int base, element_ptr);
     void (*add)(element_ptr, element_ptr, element_ptr);
+    void (*add_ui)(element_ptr, element_ptr, unsigned long int);
     void (*sub)(element_ptr, element_ptr, element_ptr);
     void (*mul)(element_ptr, element_ptr, element_ptr);
     void (*mul_mpz)(element_ptr, element_ptr, mpz_ptr);
@@ -165,6 +166,10 @@ static inline void element_set(element_t e, element_t a)
     e->field->set(e, a);
 }
 
+static inline void element_add_ui(element_t n, element_t a, unsigned long int b)
+{
+    n->field->add_ui(n, a, b);
+}
 /*@manual earith
 Set ''n'' to ''a'' + ''b''.
 */

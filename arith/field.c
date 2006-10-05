@@ -448,6 +448,19 @@ static void generic_sub(element_ptr c, element_ptr a, element_ptr b)
     }
 }
 
+static void generic_add_ui(element_ptr c, element_ptr a, unsigned long int b)
+{
+    element_t e;
+    mpz_t z;
+    element_init(e, c->field);
+    mpz_init(z);
+    mpz_set_ui(z, b);
+    element_set_mpz(e, z);
+    element_add(c, a, e);
+    mpz_clear(z);
+    element_clear(e);
+}
+
 static int generic_cmp(element_ptr a, element_ptr b)
 {
     int result;
@@ -516,6 +529,7 @@ void field_init(field_ptr f)
     f->print_info = generic_print_info;
 
     //many of these can usually be optimized for particular fields
+    //provided for developer's convenience
     f->halve = generic_halve;
     f->doub = generic_double;
     f->square = generic_square;
@@ -523,6 +537,7 @@ void field_init(field_ptr f)
     f->mul_si = generic_mul_si;
     f->cmp = generic_cmp;
     f->sub = generic_sub;
+    f->add_ui = generic_add_ui;
 
     //default: converts all elements to integer 0
     //reads all integers as 0
