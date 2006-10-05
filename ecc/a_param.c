@@ -731,30 +731,55 @@ void a1_param_gen(a1_param_t param, mpz_t order)
     mpz_clear(n);
 }
 
+struct pp2_coeff_s {
+    element_t cx2;
+    element_t cy2;
+    element_t cxy;
+    element_t cx;
+    element_t cy;
+    element_t c;
+};
+typedef struct pp2_coeff_s pp2_coeff_t[1];
+typedef struct pp2_coeff_s *pp2_coeff_ptr;
+
+static void pp2_coeff_set(pp2_coeff_ptr p,
+	element_t cx2, element_t cy2, element_t cxy,
+	element_t cx, element_t cy, element_t c)
+{
+    element_init(p->cx2, cx2->field);
+    element_init(p->cy2, cy2->field);
+    element_init(p->cxy, cxy->field);
+    element_init(p->cx, cx->field);
+    element_init(p->cy, cy->field);
+    element_init(p->c, c->field);
+    element_set(p->cx2, cx2);
+    element_set(p->cy2, cy2);
+    element_set(p->cxy, cxy);
+    element_set(p->cx, cx);
+    element_set(p->cy, cy);
+    element_set(p->c, c);
+}
+
 static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing)
 {
     int m;
     element_ptr Px = curve_x_coord(in1);
     element_ptr Py = curve_y_coord(in1);
     a1_pairing_data_ptr a1info = pairing->data;
-    p->data = malloc(sizeof(pp_coeff_t) * (mpz_popcount(pairing->r) + mpz_sizeinbase(pairing->r, 2)));
-    pp_coeff_t *coeff = (pp_coeff_t *) p->data;
-    pp_coeff_ptr pp = coeff[0];
+    p->data = malloc(sizeof(void *) * (mpz_popcount(pairing->r) + mpz_sizeinbase(pairing->r, 2)));
+    void **pp = p->data;
     element_t V;
     element_t a, b, c;
-    element_t e0;
+    element_t a2, b2, c2;
+    element_t e0, e1, e2;
     element_ptr Vx, Vy;
 
     void do_tangent(void) {
 	compute_abc_tangent(a, b, c, Vx, Vy, e0);
-	pp_coeff_set(pp, a, b, c);
-	pp++;
     }
 
     void do_line(void) {
-	compute_abc_line(a, b, c, Vx, Vy, Px, Py, e0);
-	pp_coeff_set(pp, a, b, c);
-	pp++;
+	compute_abc_line(a2, b2, c2, Vx, Vy, Px, Py, e0);
     }
 
     element_init(V, a1info->Ep);
@@ -766,21 +791,65 @@ static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairin
     element_init(b, a1info->Fp);
     element_init(c, a1info->Fp);
     element_init(e0, a1info->Fp);
+    element_init(e1, a1info->Fp);
+    element_init(e2, a1info->Fp);
+    element_init(a2, a1info->Fp);
+    element_init(b2, a1info->Fp);
+    element_init(c2, a1info->Fp);
 
     m = mpz_sizeinbase(pairing->r, 2) - 2;
 
     //TODO: sliding NAF
-    while(m >= 0) {
+    for(;;) {
 	do_tangent();
 	if (!m) break;
 	element_double(V, V);
+
 	if (mpz_tstbit(pairing->r, m)) {
 	    do_line();
 	    element_add(V, V, in1);
+	    //preprocess two at once
+	    //e0 = coeff of x
+	    element_mul(e0, a, c2);
+	    element_mul(e1, a2, c);
+	    element_add(e0, e0, e1);
+
+	    //e1 = coeff of y
+	    element_mul(e1, b2, c);
+	    element_mul(e2, b, c2);
+	    element_add(e1, e1, e2);
+
+	    //c = constant term
+	    element_mul(c, c, c2);
+
+	    //c2 = coeff of xy
+	    element_mul(c2, a, b2);
+	    element_mul(e2, a2, b);
+	    element_add(c2, c2, e2);
+
+	    //a = coeff of x^2
+	    element_mul(a, a, a2);
+
+	    //b = coeff of y^2
+	    element_mul(b, b, b2);
+
+	    *pp = malloc(sizeof(pp2_coeff_t));
+	    pp2_coeff_set(*pp, a, b, c2, e0, e1, c);
+	} else {
+	    *pp = malloc(sizeof(pp_coeff_t));
+	    pp_coeff_set(*pp, a, b, c);
 	}
+	pp++;
 	m--;
     }
+    *pp = malloc(sizeof(pp_coeff_t));
+    pp_coeff_set(*pp, a, b, c);
 
+    element_clear(a2);
+    element_clear(b2);
+    element_clear(c2);
+    element_clear(e2);
+    element_clear(e1);
     element_clear(e0);
     element_clear(a);
     element_clear(b);
@@ -790,48 +859,69 @@ static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairin
 
 static void a1_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
 {
-    pp_coeff_t *coeff = p->data;
-    pp_coeff_ptr pp = coeff[0];
+    void **pp = p->data;
     a1_pairing_data_ptr a1info = p->pairing->data;
     element_t f, f0;
-    element_t a, b, c, e0;
+    element_t e0, e1;
     int m;
     element_ptr Qx = curve_x_coord(in2);
     element_ptr Qy = curve_y_coord(in2);
+    element_t Qx2, Qy2, Qxy;
 
     void do_tangent(void) {
-	a_miller_evalfn(f0, pp->a, pp->b, pp->c, Qx, Qy);
-	element_mul(f, f, f0);
-	pp++;
+	pp_coeff_ptr ppp = *pp;
+	a_miller_evalfn(f0, ppp->a, ppp->b, ppp->c, Qx, Qy);
     }
 
     void do_line(void) {
-	a_miller_evalfn(f0, pp->a, pp->b, pp->c, Qx, Qy);
-	element_mul(f, f, f0);
-	pp++;
+	pp2_coeff_ptr ppp = *pp;
+	//we'll map Q via (x,y) --> (-x, iy)
+	//hence  Qx^2 = x^2, Qy^2 = -y^2, Qx Qy = -ixy
+	//where x = Q'x, y = Q'y
+
+	// Re = cx2 x^2 - cy2 y^2 - cx x + c
+	// Im = -cxy xy + cy y
+	element_mul(e0, ppp->cx2, Qx2);
+	element_mul(e1, ppp->cy2, Qy2);
+	element_sub(e0, e0, e1);
+	element_mul(e1, ppp->cx, Qx);
+	element_sub(e0, e0, e1);
+	element_add(fi_re(f0), e0, ppp->c);
+
+	element_mul(e0, ppp->cy, Qy);
+	element_mul(e1, ppp->cxy, Qxy);
+	element_sub(fi_im(f0), e0, e1);
     }
     element_init(f, out->field);
     element_init(f0, out->field);
 
     element_set1(f);
 
-    element_init(a, a1info->Fp);
-    element_init(b, a1info->Fp);
-    element_init(c, a1info->Fp);
     element_init(e0, a1info->Fp);
+    element_init(e1, a1info->Fp);
+    element_init(Qx2, a1info->Fp);
+    element_init(Qy2, a1info->Fp);
+    element_init(Qxy, a1info->Fp);
+
+    element_square(Qx2, Qx);
+    element_square(Qy2, Qy);
+    element_mul(Qxy, Qx, Qy);
 
     m = mpz_sizeinbase(p->pairing->r, 2) - 2;
 
-    //TODO: sliding NAF
-    while(m >= 0) {
-	do_tangent();
-	if (!m) break;
+    while (m > 0) {
 	if (mpz_tstbit(p->pairing->r, m)) {
 	    do_line();
+	} else {
+	    do_tangent();
 	}
+	element_mul(f, f, f0);
+	pp++;
 	m--;
 	element_square(f, f);
     }
+    do_tangent();
+    element_mul(f, f, f0);
 
     //Tate exponentiation
     //simpler but slower:
@@ -842,11 +932,12 @@ static void a1_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p
     element_mul(f, f, f0);
     element_pow_mpz(out, f, a1info->h);
 
+    element_clear(Qx2);
+    element_clear(Qy2);
+    element_clear(Qxy);
     element_clear(f);
     element_clear(f0);
-    element_clear(a);
-    element_clear(b);
-    element_clear(c);
+    element_clear(e1);
     element_clear(e0);
 }
 
@@ -895,7 +986,7 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     m = mpz_sizeinbase(pairing->r, 2) - 2;
 
     //TODO: sliding NAF
-    while(m >= 0) {
+    for(;;) {
 	do_tangent();
 	if (!m) break;
 

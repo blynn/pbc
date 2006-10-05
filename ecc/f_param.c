@@ -363,6 +363,7 @@ static void cc_miller_no_denom(element_t res, mpz_t q, element_t P,
     element_set1(v);
     m = mpz_sizeinbase(q, 2) - 2;
 
+    //TODO: sliding NAF
     for(;;) {
 	do_tangent();
 
