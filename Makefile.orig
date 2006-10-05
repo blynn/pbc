@@ -29,7 +29,7 @@ libpbc_srcs := \
 	ecc/mpc.c ecc/mnt.c ecc/hilbert.c \
 	ecc/curve.c ecc/pairing.c ecc/param.c \
 	ecc/singular.c \
-	ecc/a1_param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c
+	ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c
 libsig_srcs := sig/hash.c sig/sig.c		# eventually also bbs.c ...
 test_srcs := test/testbls.c test/testbb.c test/testsig.c test/testbbs.c \
 	test/testibs.c \

@@ -31,21 +31,24 @@ cd $PBCDIR
     rm -rf $TMPDIR
     exit 1
 }
+cd $TMPDIR
+tar cvfz $HERE/pbc-$VER.tar.gz pbc-$VER
+cd $PBCDIR
 ./configure || {
     echo ./configure error
     rm -rf $TMPDIR
     exit 1
 }
-make dist || {
-    echo make dist error
-    rm -rf $TMPDIR
-    exit 1
-}
-mv $PBCDIR/pbc-$VER.tar.gz $HERE || {
-    echo Failed: mv $PBCDIR/pbc-$VER.tar.gz
-    rm -rf $TMPDIR
-    exit 1
-}
+#make dist || {
+    #echo make dist error
+    #rm -rf $TMPDIR
+    #exit 1
+#}
+#mv $TMPDIR/pbc-$VER.tar.gz $HERE || {
+    #echo Failed: mv $PBCDIR/pbc-$VER.tar.gz
+    #rm -rf $TMPDIR
+    #exit 1
+#}
 echo Testing make
 make || {
     echo make error

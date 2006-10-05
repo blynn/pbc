@@ -1,3 +1,12 @@
+Thu Oct  5 14:50:50 PDT 2006
+
+I had forgot to include fieldmpz.h in the relevant Makefile.am so it
+was not being included in the source distribution.
+
+Implemented preprocessing for A1 pairings.
+
+[0.3.12]
+
 Wed Oct  4 14:08:22 PDT 2006
 
 Bugfix: converting finite field elements to bytes now does not depend

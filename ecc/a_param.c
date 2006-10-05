@@ -760,13 +760,23 @@ static void pp2_coeff_set(pp2_coeff_ptr p,
     element_set(p->c, c);
 }
 
+static void a1_pairing_pp_clear(pairing_pp_t p)
+{
+    void **pp = p->data;
+    while (*pp) {
+	free(*pp);
+	pp++;
+    }
+    free(p->data);
+}
+
 static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing)
 {
     int m;
     element_ptr Px = curve_x_coord(in1);
     element_ptr Py = curve_y_coord(in1);
     a1_pairing_data_ptr a1info = pairing->data;
-    p->data = malloc(sizeof(void *) * (mpz_popcount(pairing->r) + mpz_sizeinbase(pairing->r, 2)));
+    p->data = malloc(sizeof(void *) * mpz_sizeinbase(pairing->r, 2));
     void **pp = p->data;
     element_t V;
     element_t a, b, c;
@@ -799,7 +809,6 @@ static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairin
 
     m = mpz_sizeinbase(pairing->r, 2) - 2;
 
-    //TODO: sliding NAF
     for(;;) {
 	do_tangent();
 	if (!m) break;
@@ -844,6 +853,8 @@ static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairin
     }
     *pp = malloc(sizeof(pp_coeff_t));
     pp_coeff_set(*pp, a, b, c);
+    pp++;
+    *pp = NULL;
 
     element_clear(a2);
     element_clear(b2);
@@ -1065,6 +1076,6 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
     pairing->clear_func = a1_pairing_clear;
 
     pairing->pp_init = a1_pairing_pp_init;
-    //pairing->pp_clear = a1_pairing_pp_clear;
+    pairing->pp_clear = a1_pairing_pp_clear;
     pairing->pp_apply = a1_pairing_pp_apply;
 }
