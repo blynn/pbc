@@ -282,12 +282,11 @@ static void fp_random(element_ptr a)
 }
 
 static void fp_from_hash(element_ptr a, int len, void *data)
-    //TODO: something more sophisticated!
 {
     mpz_t z;
 
     mpz_init(z);
-    mpz_import(z, len, -1, 1, -1, 0, data);
+    pbc_mpz_from_hash(z, a->field->order, data, len);
     fp_set_mpz(a, z);
     mpz_clear(z);
 }
@@ -330,18 +329,15 @@ static int fp_is_sqr(element_ptr a)
     return res;
 }
 
-//TODO: could avoid converting to and from mpz
 static int fp_to_bytes(unsigned char *data, element_t e)
 {
     mpz_t z;
     int n;
-    unsigned int count;
 
     mpz_init(z);
     fp_to_mpz(z, e);
     n = e->field->fixed_length_in_bytes;
-    mpz_export(data, &count, -1, 1, -1, 0, z);
-    memset(&data[count], 0, n - count);
+    pbc_mpz_out_raw_n(data, n, z);
     mpz_clear(z);
     return n;
 }
@@ -354,7 +350,7 @@ static int fp_from_bytes(element_t e, unsigned char *data)
     mpz_init(z);
 
     n = e->field->fixed_length_in_bytes;
-    mpz_import(z, n, -1, 1, -1, 0, data);
+    mpz_import(z, n, 1, 1, 1, 0, data);
     fp_set_mpz(e, z);
     mpz_clear(z);
     return n;

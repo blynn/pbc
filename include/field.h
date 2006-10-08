@@ -537,4 +537,8 @@ static inline void element_pp_pow(element_t out, mpz_ptr power, element_pp_t p)
     p->field->pp_pow(out, power, p);
 }
 
+void pbc_mpz_out_raw_n(unsigned char *data, int n, mpz_t z);
+void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
+	unsigned char *data, unsigned int len);
+
 #endif //FIELD_H

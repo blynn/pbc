@@ -154,22 +154,35 @@ static void z_field_clear(field_t f)
 }
 
 static int z_to_bytes(unsigned char *data, element_t e)
-//could use mpz_export?
+//adhere to OpenSSL convention:
+//4 bytes containing length
+//followed by number
+//in big-endian, most-significant bit set if negative
+//(prepending null byte if necessary)
+//positive numbers also the same as mpz_out_raw
 {
     mpz_ptr z = e->data;
-    size_t n = (mpz_sizeinbase(z, 2) + 7) / 8;
+    size_t msb = mpz_sizeinbase(z, 2);
+    size_t n = 4;
     size_t i;
-    for (i=0; i<4; i++) {
-	data[i] = (n >> 8 * i);
-    }
 
+    if (!(msb % 8)) {
+	data[4] = 0;
+	n++;
+    }
     if (mpz_sgn(z) < 0) {
-	data[3] |= 128;
+	mpz_export(data + n, NULL, 1, 1, 1, 0, z);
+	data[4] |= 128;
+    } else {
+	mpz_export(data + n, NULL, 1, 1, 1, 0, z);
     }
+    n += (msb + 7) / 8 - 4;
+    for (i=0; i<4; i++) {
+	data[i] = (n >> 8 * (3 - i));
+    }
+    n += 4;
 
-    mpz_export(data + 4, NULL, -1, 1, -1, 0, z);
-
-    return n+4;
+    return n;
 }
 
 static int z_from_bytes(element_t e, unsigned char *data)
@@ -186,16 +199,16 @@ static int z_from_bytes(element_t e, unsigned char *data)
     ptr = data;
     n = 0;
     for (i=0; i<4; i++) {
-	n += ((unsigned int) *ptr) << 8 * i;
+	n += ((unsigned int) *ptr) << 8 * (3 - i);
 	ptr++;
     }
-    if (data[3] & 128) {
+    if (data[4] & 128) {
 	neg = 1;
-	n &= ~(1 << (sizeof(unsigned int) * 8 - 1));
+	data[4] &= 127;
     }
     for (i=0; i<n; i++) {
 	mpz_set_ui(z1, *ptr);
-	mpz_mul_2exp(z1, z1, i * 8);
+	mpz_mul_2exp(z1, z1, 8 * (n - 1 - i));
 	ptr++;
 	mpz_add(z, z, z1);
     }

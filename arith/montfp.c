@@ -117,7 +117,7 @@ static void fp_set_si(element_ptr e, signed long int op)
     }
 }
 
-//x is stored as xR, hence apply reduction before output
+//x is stored as xR
 static void fp_to_mpz(mpz_ptr z, element_ptr e)
 {
     dataptr dp = e->data;
@@ -430,12 +430,11 @@ static void fp_random(element_ptr a)
 }
 
 static void fp_from_hash(element_ptr a, int len, void *data)
-    //TODO: something more sophisticated!
 {
     mpz_t z;
 
     mpz_init(z);
-    mpz_import(z, len, -1, 1, -1, 0, data);
+    pbc_mpz_from_hash(z, a->field->order, data, len);
     fp_set_mpz(a, z);
     mpz_clear(z);
 }
@@ -500,13 +499,11 @@ static int fp_is_sqr(element_ptr a)
 static int fp_to_bytes(unsigned char *data, element_t a)
 {
     mpz_t z;
-    unsigned int count;
     int n = a->field->fixed_length_in_bytes;
 
     mpz_init(z);
     fp_to_mpz(z, a);
-    mpz_export(data, &count, -1, 1, -1, 0, z);
-    memset(&data[count], 0, n - count);
+    pbc_mpz_out_raw_n(data, n, z);
     mpz_clear(z);
     return n;
 }
@@ -521,7 +518,7 @@ static int fp_from_bytes(element_t a, unsigned char *data)
     mpz_init(z);
 
     n = a->field->fixed_length_in_bytes;
-    mpz_import(z, n, -1, 1, -1, 0, data);
+    mpz_import(z, n, 1, 1, 1, 0, data);
     if (!mpz_sgn(z)) ad->flag = 0;
     else {
 	ad->flag = 2;

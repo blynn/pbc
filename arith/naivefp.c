@@ -184,14 +184,8 @@ static void zp_random(element_ptr n)
 }
 
 static void zp_from_hash(element_ptr n, int len, void *data)
-    //TODO: something more sophisticated!
 {
-    mpz_t z;
-
-    mpz_init(z);
-    mpz_import(z, len, -1, 1, -1, 0, data);
-    zp_set_mpz(n, z);
-    mpz_clear(z);
+    pbc_mpz_from_hash(n->data, n->field->order, data, len);
 }
 
 static int zp_is1(element_ptr n)
@@ -223,13 +217,11 @@ static void zp_field_clear(field_t f)
 
 static int zp_to_bytes(unsigned char *data, element_t e)
 {
-    mpz_ptr z = e->data;
     int n;
-    unsigned int count;
 
     n = e->field->fixed_length_in_bytes;
-    mpz_export(data, &count, -1, 1, -1, 0, z);
-    memset(&data[count], 0, n - count);
+
+    pbc_mpz_out_raw_n(data, n, e->data);
     return n;
 }
 
@@ -238,7 +230,7 @@ static int zp_from_bytes(element_t e, unsigned char *data)
     mpz_ptr z = e->data;
     int n;
     n = e->field->fixed_length_in_bytes;
-    mpz_import(z, n, -1, 1, -1, 0, data);
+    mpz_import(z, n, 1, 1, 1, 0, data);
     return n;
 }
 

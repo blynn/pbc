@@ -566,3 +566,22 @@ void field_clear(field_ptr f)
     mpz_clear(f->order);
     f->field_clear(f);
 }
+
+void pbc_mpz_out_raw_n(unsigned char *data, int n, mpz_t z)
+{
+    size_t count;
+    if (mpz_sgn(z)) {
+	count = (mpz_sizeinbase(z, 2) + 7) / 8;
+	mpz_export(&data[n - count], NULL, 1, 1, 1, 0, z);
+	memset(data, 0, n - count);
+    } else {
+	memset(data, 0, n);
+    }
+}
+
+void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
+	unsigned char *data, unsigned int len)
+{
+    //TODO: something more sophisticated!
+    mpz_import(z, len, 1, 1, 1, 0, data);
+}
