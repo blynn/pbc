@@ -1,6 +1,6 @@
 Thu Oct  5 14:50:50 PDT 2006
 
-I had forgot to include fieldmpz.h in the relevant Makefile.am so it
+I had forgotten to include fieldmpz.h in the relevant Makefile.am so it
 was not being included in the source distribution.
 
 Implemented preprocessing for A1 pairings.

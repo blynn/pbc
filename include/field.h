@@ -170,6 +170,24 @@ static inline void element_add_ui(element_t n, element_t a, unsigned long int b)
 {
     n->field->add_ui(n, a, b);
 }
+
+/*@manual econvert
+Converts ''e'' to a GMP integer ''z''
+if such an operation makes sense
+*/
+static inline void element_to_mpz(mpz_t z, element_t e)
+{
+    e->field->to_mpz(z, e);
+}
+
+/*@manual econvert
+Generate an element ''e'' deterministically from
+the ''len'' bytes stored in the buffer ''data''.
+*/
+static inline void element_from_hash(element_t e, int len, void *data)
+{
+    e->field->from_hash(e, len, data);
+}
 /*@manual earith
 Set ''n'' to ''a'' + ''b''.
 */
@@ -202,12 +220,27 @@ static inline void element_mul_mpz(element_t n, element_t a, mpz_t z)
 }
 
 /*@manual earith
+''z'' must be a mpz_t/signed long int.
 Set ''n'' to ''a'' times ''z'', that is ''a'' + ''a'' + ... + ''a''
 where there are ''z'' ''a'''s.
 */
 static inline void element_mul_si(element_t n, element_t a, signed long int z) 
 {
     n->field->mul_si(n, a, z);
+}
+
+/*@manual earith
+''z'' must be an element of a integer mod ring (i.e. Z_n for some n).
+Set ''c'' to ''a'' times ''z'', that is ''a'' + ''a'' + ... + ''a''
+where there are ''z'' ''a'''s.
+*/
+static inline void element_mul_zn(element_t c, element_t a, element_t z)
+{
+    mpz_t z0;
+    mpz_init(z0);
+    element_to_mpz(z0, z);
+    element_mul_mpz(c, a, z0);
+    mpz_clear(z0);
 }
 
 /*@manual earith
@@ -232,24 +265,6 @@ Set ''n'' to ''a'' times ''a''.
 static inline void element_square(element_t n, element_t a)
 {
     n->field->square(n, a);
-}
-
-/*@manual econvert
-Converts ''e'' to a GMP integer ''z''
-if such an operation makes sense
-*/
-static inline void element_to_mpz(mpz_t z, element_t e)
-{
-    e->field->to_mpz(z, e);
-}
-
-/*@manual econvert
-Generate an element ''e'' deterministically from
-the ''len'' bytes stored in the buffer ''data''.
-*/
-static inline void element_from_hash(element_t e, int len, void *data)
-{
-    e->field->from_hash(e, len, data);
 }
 
 /*@manual epow

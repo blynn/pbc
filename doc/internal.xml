@@ -365,6 +365,10 @@ the Boneh-Waters broadcast encryption scheme.
 </section>
 <section><title>Religious Stances</title>
 <para>
+Some decisions I made are more controversial. Nonetheless,
+I would prefer submitted code to follow the conventions I picked.
+</para>
+<para>
 I chose C for several reasons:
 </para>
 <orderedlist>
@@ -383,7 +387,7 @@ to wrap PBC for other languages.
 <listitem>
 <para>
 Despite its drawbacks (I could really use operator overloading and
-genericity),
+genericity, and to a lesser extent garbage collection),
 I've found few languages I like better.
 To quote Rob Pike, C is the desert island language. (I also agree
 with his statement that OO languages conceptually provide little
@@ -393,6 +397,18 @@ extra over judicious use of function pointers in C.)
 </orderedlist>
 <para>
 I use the so-called One True Brace Style.
+</para>
+<para>
+I selected GMP because the library's focus is on multiprecision arithmetic
+and nothing else, and it aims to be
+as fast as possible on many platforms.
+Another important factor is that GMP is released under a free license.
+</para>
+<para>
+On the other hand, GMP is written to deal with extremely large numbers,
+while I mostly only need integers that are
+roughly between 160 and 2048 bits. It is possible a library specializing
+in numbers of these sizes would be better for PBC.
 </para>
 <para>
 I'm fond of GMP's method for eliminating the need for the <code>&amp;</code>

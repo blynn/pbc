@@ -47,8 +47,12 @@ they are mapped to algebraic structures canonically if it makes sense
 <section>
 <title>Element Arithmetic</title>
 <para>
-All <type>element_t</type> arguments to this function must have been
+Unless otherwise stated,
+all <type>element_t</type> arguments to these functions must have been
 initialized to be from the same algebraic structure.
+When one of these functions expects its arguments to be from
+particular algebraic structures, this is reflected in the name of the
+function.
 </para>
 <para>
 The addition and multiplication functions perform addition and multiplication

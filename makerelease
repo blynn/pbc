@@ -21,7 +21,7 @@ TMPDIR=`mktemp -d` || {
     exit 1
 }
 PBCDIR=$TMPDIR/pbc-$VER
-echo Creating tarball
+echo Running setup...
 cg-export $PBCDIR
 HERE=`pwd`
 cp ChangeLog $PBCDIR
@@ -32,6 +32,7 @@ cd $PBCDIR
     exit 1
 }
 cd $TMPDIR
+echo Creating tarball...
 tar cvfz $HERE/pbc-$VER.tar.gz pbc-$VER
 cd $PBCDIR
 ./configure || {
@@ -49,7 +50,7 @@ cd $PBCDIR
     #rm -rf $TMPDIR
     #exit 1
 #}
-echo Testing make
+echo Testing make...
 make || {
     echo make error
     rm -rf $TMPDIR
