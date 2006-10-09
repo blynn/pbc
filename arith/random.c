@@ -49,19 +49,33 @@ static void file_mpz_random(mpz_t r, mpz_t limit, void *data)
 static void (*current_mpz_random)(mpz_t, mpz_t, void *) = deterministic_mpz_random;
 static void *current_random_data;
 
+static int trydevrandom = 1;
 void pbc_mpz_random(mpz_t z, mpz_t limit)
 {
+    if (trydevrandom) {
+	FILE *fp;
+	fp = fopen("/dev/urandom", "rb");
+	if (!fp) {
+	    fprintf(stderr, "Warning: could not open /dev/urandom, using deterministic random number generator\n");
+	} else {
+	    random_set_file("/dev/urandom");
+	    fclose(fp);
+	}
+	trydevrandom = 0;
+    }
     current_mpz_random(z, limit, current_random_data);
 }
 
 void random_set_deterministic(void)
 {
+    trydevrandom = 0;
     current_mpz_random = deterministic_mpz_random;
     current_random_data = NULL;
 }
 
 void random_set_file(char *filename)
 {
+    trydevrandom = 0;
     current_mpz_random = file_mpz_random;
     current_random_data = filename;
 }
