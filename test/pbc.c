@@ -32,6 +32,7 @@ enum {
     t_pairing,
     t_element,
     t_field,
+    t_err,
 };
 
 enum {
@@ -41,6 +42,10 @@ enum {
     re_varnotfound = 200,
     re_badlvalue,
     re_funnotfound,
+    re_unimplemented,
+    re_badargcount,
+    re_badarg,
+    re_fieldmismatch,
 };
 
 static field_t Z;
@@ -208,12 +213,6 @@ static void setparseerror(int i)
     lastparseerror = i;
 }
 
-static int lastruntimeerror;
-static void setruntimeerror(int i)
-{
-    lastruntimeerror = i;
-}
-
 static tree_ptr parsesetexpr(void);
 
 static tree_ptr parseexprlist(tree_ptr t)
@@ -324,7 +323,6 @@ static tree_ptr parseterm(void)
 		    tree_delete(res);
 		    return NULL;
 		}
-		//t1 = tree_new(t_mul, NULL);
 		t1 = tree_new(t_function, id_new("mul"));
 		darray_append(t1->child, res);
 		darray_append(t1->child, t2);
@@ -337,7 +335,6 @@ static tree_ptr parseterm(void)
 		    tree_delete(res);
 		    return NULL;
 		}
-		//t1 = tree_new(t_div, NULL);
 		t1 = tree_new(t_function, id_new("div"));
 		darray_append(t1->child, res);
 		darray_append(t1->child, t2);
@@ -452,6 +449,16 @@ struct val_s {
 };
 typedef struct val_s *val_ptr;
 
+static int lastruntimeerror;
+static val_ptr newruntimeerror(int i)
+{
+    val_ptr res = malloc(sizeof(struct val_s));
+    lastruntimeerror = i;
+    res->type = t_err;
+    res->data = (void *) i;
+    return res;
+}
+
 val_ptr val_new(int type, void *data)
 {
     val_ptr res = malloc(sizeof(struct val_s));
@@ -513,6 +520,8 @@ void val_delete(val_ptr v)
 	    element_clear(v->data);
 	    free(v->data);
 	    break;
+	case t_err:
+	    break;
 	case t_pairing:
 	    break;
 	case t_field:
@@ -521,6 +530,7 @@ void val_delete(val_ptr v)
 	    printf("val_delete: case %d not handled: memory leak\n", v->type);
 	    break;
     }
+    free(v);
 }
 
 struct fun_s {
@@ -577,12 +587,12 @@ static val_ptr f_random(darray_ptr arg)
     val_ptr res;
     if (arg->count != 1) {
 	printf("expect one argument\n");
-	return NULL;
+	return newruntimeerror(re_badargcount);
     }
     val_ptr a0 = arg->item[0];
     if (a0->type != t_field) {
 	printf("arg not field!\n");
-	return NULL;
+	return newruntimeerror(re_badarg);
     }
     field_ptr f = a0->data;
     element_ptr e = malloc(sizeof(element_t));
@@ -598,12 +608,12 @@ static val_ptr f_unary(
     val_ptr res;
     if (arg->count != 1) {
 	printf("expect one argument\n");
-	return NULL;
+	return newruntimeerror(re_badargcount);
     }
     val_ptr a0 = arg->item[0];
     if (a0->type != t_element) {
 	printf("arg not element!\n");
-	return NULL;
+	return newruntimeerror(re_badarg);
     }
     element_ptr e0 = a0->data;
     element_ptr e = malloc(sizeof(element_t));
@@ -620,23 +630,23 @@ static val_ptr f_bin_op(
     val_ptr res;
     if (arg->count != 2) {
 	printf("expect two arguments\n");
-	return NULL;
+	return newruntimeerror(re_badargcount);
     }
     val_ptr a0 = arg->item[0];
     val_ptr a1 = arg->item[1];
     if (a0->type != t_element) {
 	printf("left arg not element!\n");
-	return NULL;
+	return newruntimeerror(re_badarg);
     }
     if (a1->type != t_element) {
 	printf("right arg not element!\n");
-	return NULL;
+	return newruntimeerror(re_badarg);
     }
     element_ptr e0 = a0->data;
     element_ptr e1 = a1->data;
     if (e0->field != e1->field) {
 	printf("field mismatch!\n");
-	return NULL;
+	return newruntimeerror(re_fieldmismatch);
     }
     element_ptr e = malloc(sizeof(element_t));
     element_init(e, e0->field);
@@ -663,16 +673,7 @@ static val_ptr f_sub(darray_ptr arg)
 
 static val_ptr f_div(darray_ptr arg)
 {
-    void invertandmul(element_ptr c, element_ptr a, element_ptr b)
-    {
-	element_t tmp;
-	element_init(tmp, b->field);
-	element_invert(tmp, b);
-	element_mul(c, a, tmp);
-	element_clear(tmp);
-    }
-
-    return f_bin_op(invertandmul, arg);
+    return f_bin_op(element_div, arg);
 }
 
 static val_ptr f_inv(darray_ptr arg)
@@ -690,17 +691,17 @@ static val_ptr f_pow(darray_ptr arg)
     val_ptr res;
     if (arg->count != 2) {
 	printf("expect two arguments\n");
-	return NULL;
+	return newruntimeerror(re_badargcount);
     }
     val_ptr a0 = arg->item[0];
     val_ptr a1 = arg->item[1];
     if (a0->type != t_element) {
 	printf("left arg not element!\n");
-	return NULL;
+	return newruntimeerror(re_badarg);
     }
     if (a1->type != t_element) {
 	printf("right arg not element!\n");
-	return NULL;
+	return newruntimeerror(re_badarg);
     }
     element_ptr e0 = a0->data;
     element_ptr e1 = a1->data;
@@ -714,38 +715,50 @@ static val_ptr f_pow(darray_ptr arg)
     mpz_clear(z);
     return res;
 }
+
+static pairing_ptr current_pairing;
 static val_ptr f_pairing(darray_ptr arg)
 {
     val_ptr res;
-    if (arg->count != 3) {
-	printf("expect three arguments\n");
-	return NULL;
+    if (arg->count < 2) {
+	printf("expect at least two arguments\n");
+	return newruntimeerror(re_badargcount);
+    }
+    if (arg->count > 3) {
+	printf("expect at most three arguments\n");
+	return newruntimeerror(re_badargcount);
     }
     val_ptr a0 = arg->item[0];
     val_ptr a1 = arg->item[1];
     val_ptr a2 = arg->item[2];
     if (a0->type != t_element) {
 	printf("arg 1 not element!\n");
-	return NULL;
+	return newruntimeerror(re_badarg);
     }
     if (a1->type != t_element) {
 	printf("arg 2 not element!\n");
-	return NULL;
+	return newruntimeerror(re_badarg);
     }
-    if (a2->type != t_pairing) {
-	printf("arg 3 not pairing!\n");
-	return NULL;
+    pairing_ptr p;
+    if (arg->count == 3) {
+	if (a2->type != t_pairing) {
+	    printf("arg 3 not pairing!\n");
+	    return newruntimeerror(re_badarg);
+	} else {
+	    p = a2->data;
+	}
+    } else {
+	p = current_pairing;
     }
     element_ptr e0 = a0->data;
     element_ptr e1 = a1->data;
-    pairing_ptr p = a2->data;
     if (e0->field != p->G1) {
 	printf("arg 1 not from G1!\n");
-	return NULL;
+	return newruntimeerror(re_badarg);
     }
     if (e1->field != p->G2) {
 	printf("arg 2 not from G2!\n");
-	return NULL;
+	return newruntimeerror(re_badarg);
     }
     element_ptr e = malloc(sizeof(element_t));
     element_init(e, p->GT);
@@ -768,19 +781,17 @@ static val_ptr execute_tree(tree_ptr t)
 	    id = t->data;
 	    v = symtab_at(var, id->data);
 	    if (!v) {
-		setruntimeerror(re_varnotfound);
-		return NULL;
+		return newruntimeerror(re_varnotfound);
 	    }
 	    return val_copy(v);
 	case t_set:
 	    t1 = t->child->item[0];
 	    if (t1->type != t_id) {
-		setruntimeerror(re_badlvalue);
-		return NULL;
+		return newruntimeerror(re_badlvalue);
 	    }
 	    t2 = t->child->item[1];
 	    v = execute_tree(t2);
-	    if (!v) return NULL;
+	    if (v->type == t_err) return v;
 	    id = t1->data;
 	    // clear what's there first
 	    if ((res = symtab_at(var, id->data))) {
@@ -793,15 +804,14 @@ static val_ptr execute_tree(tree_ptr t)
 	    id = t->data;
 	    fn = symtab_at(builtin, id->data);
 	    if (!fn) {
-		setruntimeerror(re_funnotfound);
-		return NULL;
+		return newruntimeerror(re_funnotfound);
 	    }
 	    darray_init(arg);
 	    for (i=0; i<t->child->count; i++) {
 		v = execute_tree(t->child->item[i]);
-		if (!v) {
+		if (v->type == t_err) {
 		    darray_forall(arg, (void (*)(void *)) val_delete);
-		    return NULL;
+		    return v;
 		}
 		darray_append(arg, v);
 	    }
@@ -826,7 +836,7 @@ static val_ptr execute_tree(tree_ptr t)
 	    mpz_clear(z);
 	    return val_new(t_element, e);
 	default:
-	    return NULL;
+	    return newruntimeerror(re_unimplemented);
     }
 }
 
@@ -845,10 +855,12 @@ static void parseline(char *line)
     }
     if (t) {
 	v = execute_tree(t);
-	if (!v) {
-	    printf("runtime error (error code = %d)\n", lastruntimeerror);
-	} else {
-	    if (t->type != t_set) val_print(v);
+	if (v) {
+	    if (v->type == t_err) {
+		printf("runtime error (error code = %d)\n", lastruntimeerror);
+	    } else {
+		if (t->type != t_set) val_print(v);
+	    }
 	    val_delete(v);
 	}
 	tree_delete(t);
@@ -867,6 +879,34 @@ exp1 107\n\
 sign1 1\n\
 sign0 1\n";
 
+static char *dparam =
+"type d\n\
+q 625852803282871856053922297323874661378036491717\n\
+n 625852803282871856053923088432465995634661283063\n\
+h 3\n\
+r 208617601094290618684641029477488665211553761021\n\
+a 581595782028432961150765424293919699975513269268\n\
+b 517921465817243828776542439081147840953753552322\n\
+k 6\n\
+nk 60094290356408407130984161127310078516360031868417968262992864809623507269833854678414046779817844853757026858774966331434198257512457993293271849043664655146443229029069463392046837830267994222789160047337432075266619082657640364986415435746294498140589844832666082434658532589211525696\n\
+hk 1380801711862212484403205699005242141541629761433899149236405232528956996854655261075303661691995273080620762287276051361446528504633283152278831183711301329765591450680250000592437612973269056\n\
+coeff0 472731500571015189154958232321864199355792223347\n\
+coeff1 352243926696145937581894994871017455453604730246\n\
+coeff2 289113341693870057212775990719504267185772707305\n\
+nqr 431211441436589568382088865288592347194866189652\n";
+
+static char *eparam =
+"type e\n\
+q 7245986106510086080714203333362098431608853335867425877960916928496629182991629664903654100214900946450053872786629995869445693724001299041657434948257845644905153122838458864000479326695430719258600053239930483226650953770354174712511646273516974069245462534034085895319225452125649979474047163305307830001\n\
+r 730750862221594424981965739670091261094297337857\n\
+h 13569343110918781839835249021482970252603216587988030044836106948825516930173270978617489032334001006615524543925753725725046733884363846960470444404747241287743773746682188521738728797153760275116924829183670000\n\
+a 7130970454025799000067946137594446075551569949583815943390108723282396973737794273397246892274981883807989525599540630855644968426794929215599380425269625872763801485968007136000471718335185787206876242871042697778608875139078711621836858237429403052273312335081163896980825048123655535355411494046493419999\n\
+b 7169309004853894693616698536183663527570664411678352588247044791687141043489072737232715961588288238022010974661903752526911876859197052490952065266265699130144252031591491045333807587788600764557450846327338626261289568016170532652061787582791926724597362401398804563093625182790987016728290050466098223333\n\
+exp2 159\n\
+exp1 135\n\
+sign1 1\n\
+sign0 1\n";
+
 static char *fparam =
 "type f\n\
 q 205523667896953300194896352429254920972540065223\n\
@@ -876,27 +916,30 @@ beta 115334401956802802075595682801335644058796914268\n\
 alpha0 191079354656274778837764015557338301375963168470\n\
 alpha1 71445317903696340296199556072836940741717506375\n";
 
-static pairing_t pairing_A;
-static pairing_t pairing_F;
+static pairing_t pairing_A, pairing_D, pairing_E, pairing_F;
 
 static void set_pairing_groups(pairing_ptr p) {
     symtab_put(var, val_new(t_field, p->G1), "G1");
     symtab_put(var, val_new(t_field, p->G2), "G2");
     symtab_put(var, val_new(t_field, p->GT), "GT");
     symtab_put(var, val_new(t_field, p->Zr), "Zr");
+    symtab_put(var, val_new(t_pairing, p), "current_pairing");
+    current_pairing = p;
 }
 
-static val_ptr f_init_A_pairing(darray_ptr arg)
+static val_ptr f_init_pairing(darray_ptr arg)
 {
-    UNUSED_VAR(arg);
-    set_pairing_groups(pairing_A);
-    return NULL;
-}
-
-static val_ptr f_init_F_pairing(darray_ptr arg)
-{
-    UNUSED_VAR(arg);
-    set_pairing_groups(pairing_F);
+    if (arg->count != 1) {
+	printf("expect one argument\n");
+	return newruntimeerror(re_badargcount);
+    }
+    val_ptr a0 = arg->item[0];
+    if (a0->type != t_pairing) {
+	printf("arg not element!\n");
+	return newruntimeerror(re_badarg);
+    }
+    pairing_ptr p = a0->data;
+    set_pairing_groups(p);
     return NULL;
 }
 
@@ -906,15 +949,17 @@ int main(void)
     symtab_init(builtin);
 
     pairing_init_inp_buf(pairing_A, aparam, strlen(aparam));
+    pairing_init_inp_buf(pairing_D, dparam, strlen(dparam));
+    pairing_init_inp_buf(pairing_E, eparam, strlen(eparam));
     pairing_init_inp_buf(pairing_F, fparam, strlen(fparam));
     symtab_put(var, val_new(t_pairing, pairing_A), "A");
+    symtab_put(var, val_new(t_pairing, pairing_D), "D");
+    symtab_put(var, val_new(t_pairing, pairing_E), "E");
     symtab_put(var, val_new(t_pairing, pairing_F), "F");
 
     set_pairing_groups(pairing_A);
 
-    symtab_put(builtin, f_init_A_pairing, "init_A_pairing");
-    //symtab_put(builtin, f_init_D159_pairing, "init_D159_pairing");
-    symtab_put(builtin, f_init_F_pairing, "init_F_pairing");
+    symtab_put(builtin, f_init_pairing, "init_pairing");
     symtab_put(builtin, f_pairing_G1, "get_G1");
     symtab_put(builtin, f_pairing_G2, "get_G2");
     symtab_put(builtin, f_pairing_GT, "get_GT");

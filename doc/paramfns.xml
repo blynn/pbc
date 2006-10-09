@@ -15,7 +15,7 @@ on embedding degree 10 ordinary curves.
 <para>
 Type A is best when speed is the main concern,
 and type D is a good choice when elements should be short,
-though type F has even short elements but is unfortunately slower.
+though type F has even shorter elements but is slower.
 </para>
 <section><title>Type A</title>
 <para>

@@ -105,10 +105,16 @@ static void z_neg(element_ptr n, element_ptr a)
     mpz_neg(n->data, a->data);
 }
 
-//only correct for 1, -1
 static void z_invert(element_ptr n, element_ptr a)
 {
-    mpz_set(n->data, a->data);
+    if (!mpz_cmpabs_ui(a->data, 1)) {
+	mpz_set(n->data, a->data);
+    } else mpz_set_ui(n->data, 0);
+}
+
+static void z_div(element_ptr c, element_ptr a, element_ptr b)
+{
+    mpz_tdiv_q(c->data, a->data, b->data);
 }
 
 //(doesn't make sense if order is infinite)
@@ -254,6 +260,7 @@ void field_init_z(field_ptr f)
     f->neg = z_neg;
     f->cmp = z_cmp;
     f->invert = z_invert;
+    f->div = z_div;
     f->random = z_random;
     f->from_hash = z_from_hash;
     f->is1 = z_is1;

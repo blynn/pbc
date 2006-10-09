@@ -612,6 +612,13 @@ static void poly_to_mpz(mpz_t z, element_ptr e)
     }
 }
 
+void poly_out_info(FILE *str, field_ptr f)
+{
+    poly_field_data_ptr p = f->data;
+    fprintf(str, "Polynomial ring. Base field:\n");
+    field_out_info(str, p->field);
+}
+
 void field_init_poly(field_ptr f, field_ptr base_field)
 {
     poly_field_data_ptr p;
@@ -642,6 +649,7 @@ void field_init_poly(field_ptr f, field_ptr base_field)
     f->mul_mpz = poly_mul_mpz;
     f->mul_si = poly_mul_si;
     f->cmp = poly_cmp;
+    f->out_info = poly_out_info;
 
     f->to_bytes = poly_to_bytes;
     f->from_bytes = poly_from_bytes;
@@ -1414,6 +1422,14 @@ static void compute_x_powers(field_ptr field, element_ptr poly)
     element_clear(p0);
 }
 
+void polymod_out_info(FILE *str, field_ptr f)
+{
+    polymod_field_data_ptr p = f->data;
+    element_fprintf(str, "Field extension. Min poly = %B\n", p->poly);
+    fprintf(str, "Base field:\n");
+    field_out_info(str, p->field);
+}
+
 void field_init_polymod(field_ptr f, element_ptr poly)
     //assumes poly is monic
 {
@@ -1471,6 +1487,8 @@ void field_init_polymod(field_ptr f, element_ptr poly)
     f->sqrt = polymod_sqrt;
     f->to_bytes = polymod_to_bytes;
     f->from_bytes = polymod_from_bytes;
+    f->out_info = polymod_out_info;
+
     if (pdp->field->fixed_length_in_bytes < 0) {
 	f->fixed_length_in_bytes = -1;
 	f->length_in_bytes = polymod_length_in_bytes;

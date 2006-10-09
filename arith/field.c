@@ -449,6 +449,20 @@ static void generic_sub(element_ptr c, element_ptr a, element_ptr b)
     }
 }
 
+static void generic_div(element_ptr c, element_ptr a, element_ptr b)
+{
+    if (c != a) {
+	element_invert(c, b);
+	element_mul(c, c, a);
+    } else {
+	element_t tmp;
+	element_init(tmp, a->field);
+	element_invert(tmp, b);
+	element_mul(c, tmp, a);
+	element_clear(tmp);
+    }
+}
+
 static void generic_add_ui(element_ptr c, element_ptr a, unsigned long int b)
 {
     element_t e;
@@ -538,6 +552,7 @@ void field_init(field_ptr f)
     f->mul_si = generic_mul_si;
     f->cmp = generic_cmp;
     f->sub = generic_sub;
+    f->div = generic_div;
     f->add_ui = generic_add_ui;
 
     //default: converts all elements to integer 0

@@ -348,6 +348,13 @@ static void field_clear_fq(field_ptr f)
     //f->order gets cleared automatically
 }
 
+static void fq_out_info(FILE *out, field_ptr f)
+{
+    field_ptr fbase = f->data;
+    element_fprintf(out, "x^2 + %B quadratic extension, base field:\n", fq_nqr(f));
+    field_out_info(out, fbase);
+}
+
 void field_init_quadratic(field_ptr f, field_ptr fbase)
 {
     field_init(f);
@@ -383,6 +390,7 @@ void field_init_quadratic(field_ptr f, field_ptr fbase)
     f->sqrt = fq_sqrt;
     f->to_bytes = fq_to_bytes;
     f->from_bytes = fq_from_bytes;
+    f->out_info = fq_out_info;
 
     mpz_mul(f->order, fbase->order, fbase->order);
     if (fbase->fixed_length_in_bytes < 0) {
@@ -555,7 +563,7 @@ void element_field_to_fi(element_ptr a, element_ptr b)
 static void fi_out_info(FILE *out, field_ptr f)
 {
     field_ptr fbase = f->data;
-    fprintf(out, "quadratic extension field using sqrt(-1), base field:\n");
+    fprintf(out, "x^2 + 1 quadratic extension, base field:\n");
     field_out_info(out, fbase);
 }
 

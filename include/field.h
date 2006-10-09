@@ -40,6 +40,7 @@ struct field_s {
     void (*mul)(element_ptr, element_ptr, element_ptr);
     void (*mul_mpz)(element_ptr, element_ptr, mpz_ptr);
     void (*mul_si)(element_ptr, element_ptr, signed long int);
+    void (*div)(element_ptr, element_ptr, element_ptr);
     void (*square)(element_ptr, element_ptr);
     int (*is_sqr)(element_ptr);
     void (*sqrt)(element_ptr, element_ptr);
@@ -241,6 +242,14 @@ static inline void element_mul_zn(element_t c, element_t a, element_t z)
     element_to_mpz(z0, z);
     element_mul_mpz(c, a, z0);
     mpz_clear(z0);
+}
+
+/*@manual earith
+Set ''n'' to ''a'' / ''b''.
+*/
+static inline void element_div(element_t n, element_t a, element_t b)
+{
+    n->field->div(n, a, b);
 }
 
 /*@manual earith
