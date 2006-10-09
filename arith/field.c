@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> //for memcmp()
@@ -582,6 +583,26 @@ void pbc_mpz_out_raw_n(unsigned char *data, int n, mpz_t z)
 void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
 	unsigned char *data, unsigned int len)
 {
-    //TODO: something more sophisticated!
-    mpz_import(z, len, 1, 1, 1, 0, data);
+    size_t i = 0, n, count = (mpz_sizeinbase(limit, 2) + 7) / 8;
+    unsigned char buf[count];
+    unsigned char counter = 0;
+    int done = 0;
+    for(;;) {
+	if (len >= count - i) {
+	    n = count - i;
+	    done = 1;
+	} else n = len;
+	memcpy(buf + i, data, n);
+	i += n;
+	if (done) break;
+	buf[i] = counter;
+	counter++;
+	i++;
+	if (i == count) break;
+    }
+    assert(i == count);
+    mpz_import(z, count, 1, 1, 1, 0, buf);
+    while (mpz_cmp(z, limit) > 0) {
+	mpz_tdiv_q_2exp(z, z, 1);
+    }
 }

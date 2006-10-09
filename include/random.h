@@ -20,7 +20,4 @@ a random ''z'' that is less than ''limit''.
 */
 void pbc_mpz_random(mpz_t z, mpz_t limit);
 
-void random_push(void (*random_fn)(mpz_t, mpz_t, void *), void *random_data);
-void random_pop(void);
-
 #endif //RANDOM_H

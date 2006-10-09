@@ -65,22 +65,3 @@ void random_set_file(char *filename)
     current_mpz_random = file_mpz_random;
     current_random_data = filename;
 }
-
-//TODO: use a linked list, or have some other way of managing RNGs
-
-static void (*kludge_mpz_random)(mpz_t, mpz_t, void *) = deterministic_mpz_random;
-static void *kludge_random_data;
-
-void random_push(void (*random_fn)(mpz_t, mpz_t, void *), void *random_data)
-{
-    kludge_mpz_random = current_mpz_random;
-    kludge_random_data = current_random_data;
-    current_mpz_random = random_fn;
-    current_random_data = random_data;
-}
-
-void random_pop()
-{
-    current_mpz_random = kludge_mpz_random;
-    current_random_data = kludge_random_data;
-}
