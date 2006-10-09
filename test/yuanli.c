@@ -73,16 +73,13 @@ int main(void)
     element_random(P);
     element_printf("P = %B\n", P);
     element_random(s);
-//element_mul(Ppub, s, P);
     element_mul_zn(Ppub, P, s);
     element_printf("Ppub = %B\n", Ppub);
 
 //Extract, key calculation
     printf("EXTRACT STAGE\n");
-//Let's A=Ann, B=Boris;
     element_from_hash(Qa, "A", 1);
     element_from_hash(Qb, "B", 1);
-//element_mul(Sb, s, Qb);
     element_mul_zn(Sa, Qa, s);
     element_mul_zn(Sb, Qb, s);
     element_printf("Sa = %B\n", Sa);
@@ -91,14 +88,12 @@ int main(void)
     printf("-----1-----\n");
 
     element_random(a);
-//element_mul(Ta, a, P);
     element_mul_zn(Ta, P, a);
     element_printf("A sends B Ta = %B\n", Ta);
 
     printf("-----2-----\n");
 
     element_random(b);
-//element_mul(Tb, b, P);
     element_mul_zn(Tb, P, b);
     element_printf("B sends A Tb = %B\n", Tb);
 
@@ -107,7 +102,6 @@ int main(void)
     printf("A calculates h and Kab\n");
     element_mul_zn(h, Tb, a);
     element_printf("h = %B\n", h);
-//element_mul(temp1, a, Ppub);
     element_mul_zn(temp1, Ppub, a);
     element_add(temp1, temp1, Sa);
     element_add(temp2, Tb, Qb);
@@ -120,7 +114,6 @@ int main(void)
     element_mul_zn(h, Ta, b);
     element_printf("h = %B\n", h);
     element_add(temp1, Ta, Qa);
-//element_mul(temp2, b, Ppub);
     element_mul_zn(temp2, Ppub, b);
     element_add(temp2, temp2, Sb);
     pairing_apply(Kba, temp1, temp2, pairing);

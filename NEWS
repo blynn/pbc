@@ -1,3 +1,14 @@
+Mon Oct  9 04:53:22 PDT 2006
+
+The makerelease script performed some sanity checks before cg-export,
+allowing some problems to slip through. In the last release,
+the newest version of this file was not included.
+
+Renamed quan.c to yuanli.c and changed some comments. Also uses
+element_mul_zn() instead of element_pow_zn(), and has single letter
+hashes. (In other words, I removed the workarounds I suggested to Dmitry
+Kosolapov because they're no longer needed.)
+
 Sun Oct  8 18:01:05 PDT 2006
 
 The element_mul_zn() function was added, so that switching between

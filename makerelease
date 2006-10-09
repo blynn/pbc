@@ -8,14 +8,6 @@ cat ChangeLog | head -20 | grep pbc-$GREPVER > /dev/null || {
     echo cg-log does not mention release 
     exit 1
 }
-grep $GREPVER NEWS > /dev/null || {
-    echo NEWS does not mention release 
-    exit 1
-}
-grep $GREPVER doc/manual.xml > /dev/null || {
-    echo Error: doc/manual.xml version number mismatch
-    exit 1
-}
 TMPDIR=`mktemp -d` || {
     echo Error creating temp directory
     exit 1
@@ -26,6 +18,18 @@ cg-export $PBCDIR
 HERE=`pwd`
 cp ChangeLog $PBCDIR
 cd $PBCDIR
+grep $GREPVER NEWS > /dev/null || {
+    echo NEWS does not mention release 
+    cd $HERE
+    rm -rf $TMPDIR
+    exit 1
+}
+grep $GREPVER doc/manual.xml > /dev/null || {
+    echo Error: doc/manual.xml version number mismatch
+    cd $HERE
+    rm -rf $TMPDIR
+    exit 1
+}
 ./setup || {
     echo ./setup error
     rm -rf $TMPDIR
