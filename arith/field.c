@@ -501,7 +501,7 @@ static int generic_is1(element_ptr a)
     return result;
 }
 
-static void generic_print_info(FILE *out, field_ptr f)
+static void generic_out_info(FILE *out, field_ptr f)
 {
     element_fprintf(out, "field %X unknown\n", (unsigned int) f);
     element_fprintf(out, "order = %Zd\n", f->order);
@@ -512,9 +512,9 @@ static void warn_field_clear(field_ptr f)
     fprintf(stderr, "field %X has no clear function\n", (unsigned int) f);
 }
 
-void field_print_info(FILE *out, field_ptr f)
+void field_out_info(FILE *out, field_ptr f)
 {
-    f->print_info(out, f);
+    f->out_info(out, f);
 }
 
 void field_init(field_ptr f)
@@ -527,7 +527,7 @@ void field_init(field_ptr f)
     f->field_clear = warn_field_clear;
 
     //and this to something more helpful
-    f->print_info = generic_print_info;
+    f->out_info = generic_out_info;
 
     //many of these can usually be optimized for particular fields
     //provided for developer's convenience

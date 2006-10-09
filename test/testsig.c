@@ -36,7 +36,7 @@ int main(void)
 
     //generate element from a hash
     //for toy examples, should check that pairing(g, h) != 1
-    element_from_hash(h, 13, "hashofmessage");
+    element_from_hash(h, "hashofmessage", 13);
     element_printf("message hash = %B\n", h);
 
     //h^secret_key is the signature

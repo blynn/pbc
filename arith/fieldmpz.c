@@ -117,8 +117,7 @@ static void z_random(element_ptr n)
     mpz_set_ui(n->data, 0);
 }
 
-static void z_from_hash(element_ptr n, int len, void *data)
-    //TODO: something more sophisticated!
+static void z_from_hash(element_ptr n, void *data, int len)
 {
     mpz_import(n->data, len, -1, 1, -1, 0, data);
 }
@@ -227,7 +226,7 @@ static int z_length_in_bytes(element_ptr a)
     return (mpz_sizeinbase(a->data, 2) + 7) / 8 + 4;
 }
 
-static void z_print_info(FILE *out, field_ptr f)
+static void z_out_info(FILE *out, field_ptr f)
 {
     UNUSED_VAR(f);
     fprintf(out, "Z: wrapped GMP\n");
@@ -269,7 +268,7 @@ void field_init_z(field_ptr f)
     f->to_mpz = z_to_mpz;
     f->length_in_bytes = z_length_in_bytes;
 
-    f->print_info = z_print_info;
+    f->out_info = z_out_info;
 
     mpz_set_ui(f->order, 0);
     f->data = NULL;

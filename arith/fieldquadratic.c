@@ -252,12 +252,12 @@ static void fq_invert(element_ptr n, element_ptr a)
     element_clear(e1);
 }
 
-static void fq_from_hash(element_ptr n, int len, void *data)
+static void fq_from_hash(element_ptr n, void *data, int len)
 {
     fq_data_ptr r = n->data;
     int k = len / 2;
-    element_from_hash(r->x, k, data);
-    element_from_hash(r->y, len - k, (char *)data + k);
+    element_from_hash(r->x, data, k);
+    element_from_hash(r->y, (char *)data + k, len - k);
 }
 
 static int fq_length_in_bytes(element_ptr e)
@@ -552,11 +552,11 @@ void element_field_to_fi(element_ptr a, element_ptr b)
     element_set0(p->y);
 }
 
-static void fi_print_info(FILE *out, field_ptr f)
+static void fi_out_info(FILE *out, field_ptr f)
 {
     field_ptr fbase = f->data;
     fprintf(out, "quadratic extension field using sqrt(-1), base field:\n");
-    field_print_info(out, fbase);
+    field_out_info(out, fbase);
 }
 
 static void field_clear_fi(field_ptr f)
@@ -598,7 +598,7 @@ void field_init_fi(field_ptr f, field_ptr fbase)
     f->sqrt = fi_sqrt;
     f->to_bytes = fq_to_bytes;
     f->from_bytes = fq_from_bytes;
-    f->print_info = fi_print_info;
+    f->out_info = fi_out_info;
 
     mpz_mul(f->order, fbase->order, fbase->order);
     if (fbase->fixed_length_in_bytes < 0) {

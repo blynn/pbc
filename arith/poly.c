@@ -301,13 +301,13 @@ static void polymod_random(element_ptr e)
     }
 }
 
-static void polymod_from_hash(element_ptr e, int len, void *data)
+static void polymod_from_hash(element_ptr e, void *data, int len)
 {
     //TODO: improve this
     element_t *coeff = e->data;
     int i, n = polymod_field_degree(e->field);
     for (i=0; i<n; i++) {
-	element_from_hash(coeff[i], len, data);
+	element_from_hash(coeff[i], data, len);
     }
 }
 

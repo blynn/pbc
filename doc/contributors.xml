@@ -23,7 +23,8 @@ Rob Figueiredo and Roger Khazan wrote changes which allow the PBC library
 to be compiled on Windows (via mingw).
 </para>
 <para>
-Dmitry Kosolapov sent in corrections to this manual.
+Dmitry Kosolapov sent in corrections to this manual, and wrote the
+Yuan-Li identity-based authenticated key agreement test program.
 </para>
 <para>
 If you're not mentioned here but should be, please let me know!

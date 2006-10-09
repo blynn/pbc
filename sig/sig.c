@@ -11,7 +11,7 @@ void bls_sign(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
     element_t h;
 
     element_init_G1(h, sk->param->pairing);
-    element_from_hash(h, hashlen, hash);
+    element_from_hash(h, hash, hashlen);
     element_pow_zn(h, h, sk->x);
     element_to_bytes_x_only(sig, h);
 
@@ -29,7 +29,7 @@ int bls_verify(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
     pairing_ptr pairing = pk->param->pairing;
 
     element_init_G1(h, pairing);
-    element_from_hash(h, hashlen, hash);
+    element_from_hash(h, hash, hashlen);
     element_init_G1(hx, pairing);
     element_from_bytes_x_only(hx, sig);
 
@@ -180,7 +180,7 @@ void ib_extract(ib_private_key_t priv, unsigned int idlen, unsigned char *id,
 
     element_init(priv->d, sk->param->pairing->G1);
     element_init(priv->q, sk->param->pairing->G1);
-    element_from_hash(priv->q, idlen, id);
+    element_from_hash(priv->q, id, idlen);
     element_pow_zn(priv->d, priv->q, sk->x);
 }
 
@@ -197,7 +197,7 @@ void ib_keyagree(unsigned char *key, ib_private_key_t priv, unsigned int idlen, 
 
     element_init(u, priv->param->pairing->G1);
     element_init(e, priv->param->pairing->GT);
-    element_from_hash(u, idlen, id);
+    element_from_hash(u, id, idlen);
     bilinear_map(e, u, priv->d, priv->param->pairing);
 
     element_to_bytes(key, e);
@@ -233,7 +233,7 @@ void cc_sign(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
     hash_final(digest, ctx);
     free(buf);
 
-    element_from_hash(h, hash_length, digest);
+    element_from_hash(h, digest, hash_length);
     element_add(r, r, h);
     element_pow_zn(v, sk->d, r);
     len = element_to_bytes(sig, u);
@@ -274,8 +274,8 @@ int cc_verify(unsigned char *sig, unsigned int hashlen, unsigned char *hash,
 
     element_init(h, param->pairing->Zr);
 
-    element_from_hash(h, hash_length, digest);
-    element_from_hash(temp, idlen, id);
+    element_from_hash(h, digest, hash_length);
+    element_from_hash(temp, id, idlen);
     element_pow_zn(temp, temp, h);
     element_mul(temp, temp, u);
 
@@ -321,7 +321,7 @@ void skschnorr_sign(unsigned char *sig, unsigned int hashlen, unsigned char *has
     hash_final(sig, ctx);
     free(buf);
 
-    element_from_hash(h, hash_length, sig);
+    element_from_hash(h, sig, hash_length);
     element_pow_zn(u, sk->d, h);
     element_pow_zn(temp, sk->q, r);
     element_mul(u, u, temp);
@@ -357,7 +357,7 @@ int skschnorr_verify(unsigned char *sig, unsigned int hashlen, unsigned char *ha
     element_init(u, param->pairing->G1);
     element_init(v, param->pairing->G2);
 
-    element_from_hash(h, hash_length, sig);
+    element_from_hash(h, sig, hash_length);
     element_neg(h, h);
 
     element_pow_zn(v, param->gx, h);
@@ -365,7 +365,7 @@ int skschnorr_verify(unsigned char *sig, unsigned int hashlen, unsigned char *ha
     element_from_bytes(u, &sig[hash_length]);
     bilinear_map(e, u, param->g, param->pairing);
 
-    element_from_hash(u, idlen, id);
+    element_from_hash(u, id, idlen);
     bilinear_map(e2, u, v, param->pairing);
 
     element_mul(e, e, e2);

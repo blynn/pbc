@@ -429,7 +429,7 @@ static void fp_random(element_ptr a)
     mpz_clear(z);
 }
 
-static void fp_from_hash(element_ptr a, int len, void *data)
+static void fp_from_hash(element_ptr a, void *data, int len)
 {
     mpz_t z;
 
@@ -539,7 +539,7 @@ static void fp_field_clear(field_t f)
     free(p);
 }
 
-void fp_print_info(FILE *out, field_ptr f)
+void fp_out_info(FILE *out, field_ptr f)
 {
     element_fprintf(out, "F_p: Montgomery representation,\nmodulus = %Zd\n",
 	    f->order);
@@ -578,7 +578,7 @@ void field_init_mont_fp(field_ptr f, mpz_t prime)
     f->to_bytes = fp_to_bytes;
     f->from_bytes = fp_from_bytes;
     f->to_mpz = fp_to_mpz;
-    f->print_info = fp_print_info;
+    f->out_info = fp_out_info;
 
     p = f->data = malloc(sizeof(fp_field_data_t));
     p->limbs = mpz_size(prime);

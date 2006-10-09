@@ -287,9 +287,9 @@ int main(void)
     field_init_mont_fp(f2, prime);
 
     printf("Field 1:\n");
-    field_print_info(stdout, f1);
+    field_out_info(stdout, f1);
     printf("Field 2:\n");
-    field_print_info(stdout, f2);
+    field_out_info(stdout, f2);
 
     printf("checking base fields\n");
     for (i=0; i<n; i++) run_check(f1, f2);

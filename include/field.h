@@ -49,7 +49,7 @@ struct field_s {
     void (*invert)(element_ptr, element_ptr);
     void (*neg)(element_ptr, element_ptr);
     void (*random)(element_ptr);
-    void (*from_hash)(element_ptr, int len, void *data);
+    void (*from_hash)(element_ptr, void *data, int len);
     int (*is1)(element_ptr);
     int (*is0)(element_ptr);
     int (*sign)(element_ptr); //satisfies sign(x) = -sign(-x)
@@ -61,7 +61,7 @@ struct field_s {
     mpz_t order; //0 for infinite order
     element_ptr nqr; //nonquadratic residue
     void (*to_mpz)(mpz_ptr, element_ptr);
-    void (*print_info)(FILE *, struct field_s *);
+    void (*out_info)(FILE *, struct field_s *);
     void (*pp_init)(element_pp_t p, element_t in);
     void (*pp_clear)(element_pp_t p);
     void (*pp_pow)(element_t out, mpz_ptr power, element_pp_t p);
@@ -184,9 +184,9 @@ static inline void element_to_mpz(mpz_t z, element_t e)
 Generate an element ''e'' deterministically from
 the ''len'' bytes stored in the buffer ''data''.
 */
-static inline void element_from_hash(element_t e, int len, void *data)
+static inline void element_from_hash(element_t e, void *data, int len)
 {
-    e->field->from_hash(e, len, data);
+    e->field->from_hash(e, data, len);
 }
 /*@manual earith
 Set ''n'' to ''a'' + ''b''.
@@ -508,7 +508,7 @@ Currently only implemented for points on an elliptic curve.
 */
 int element_length_in_bytes_compressed(element_t e);
 
-void field_print_info(FILE *out, field_ptr f);
+void field_out_info(FILE *out, field_ptr f);
 
 /*@manual epow
 Prepare to exponentiate an element ''in'', and store preprocessing information

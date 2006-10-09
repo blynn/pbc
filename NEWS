@@ -1,3 +1,34 @@
+Sun Oct  8 18:01:05 PDT 2006
+
+The element_mul_zn() function was added, so that switching between
+multiplicative and additive notation for groups is easier and more
+consistent.
+
+When integers are converted to bytes, they now follow the OpenSSL convention,
+and also the GMP convention for positive integers of type mpz_t:
+
+4-bytes hold the number of bytes that follow, and then the integer follows,
+both in big-endian. If the integer is negative, the most-significant bit
+is set. (A zero byte is prepended when necessary.)
+
+For Z_n, a similar scheme is used, except a constant length is used (extra
+bytes are filled with zeros when necessary) and integers are never negative.
+
+Output from previous versions of PBC will be incompatible.
+
+element_from_hash() also behaves differently now, mainly in response to
+a report that very short hashes often hash to the same point.
+
+The default behaviour for random number generation has changed. Now PBC
+attempts to open "/dev/urandom". If unsuccessful, PBC prints a warning on
+standard error and falls back to a determinstic random number generator
+(which of course is completely useless for cryptographic purposes).
+
+Dmitry Kosolapov wrote quan.c, which can be found in the test subdirectory.
+See the comments within for details.
+
+[0.3.13]
+
 Thu Oct  5 14:50:50 PDT 2006
 
 I had forgotten to include fieldmpz.h in the relevant Makefile.am so it

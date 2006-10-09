@@ -480,7 +480,7 @@ static void val_print(val_ptr v)
 	    break;
 	case t_field:
 	    field = v->data;
-	    field_print_info(stdout, field);
+	    field_out_info(stdout, field);
 	    break;
 	default:
 	    printf("val type %d unknown\n", v->type);
@@ -514,9 +514,6 @@ void val_delete(val_ptr v)
 	    free(v->data);
 	    break;
 	case t_pairing:
-	    //TODO: can't do stuff like this until refcounting is implemented.
-	    //pairing_clear(v->data);
-	    //free(v->data);
 	    break;
 	case t_field:
 	    break;
@@ -533,23 +530,6 @@ struct fun_s {
 };
 
 typedef val_ptr (*fun)(darray_ptr);
-
-static char *aparam =
-"type a\n\
-q 8780710799663312522437781984754049815806883199414208211028653399266475630880222957078625179422662221423155858769582317459277713367317481324925129998224791\n\
-h 12016012264891146079388821366740534204802954401251311822919615131047207289359704531102844802183906537786776\n\
-r 730750818665451621361119245571504901405976559617\n\
-exp2 159\n\
-exp1 107\n\
-sign1 1\n\
-sign0 1\n";
-static val_ptr f_pairing_new_a_default(darray_ptr arg)
-{
-    UNUSED_VAR(arg);
-    pairing_ptr p = malloc(sizeof(pairing_t));
-    pairing_init_inp_buf(p, aparam, strlen(aparam));
-    return val_new(t_pairing, p);
-}
 
 static val_ptr f_pairing_get_group(
 	field_ptr (*get_group)(pairing_ptr p), darray_ptr arg)
@@ -877,20 +857,64 @@ static void parseline(char *line)
     }
 }
 
+static char *aparam =
+"type a\n\
+q 8780710799663312522437781984754049815806883199414208211028653399266475630880222957078625179422662221423155858769582317459277713367317481324925129998224791\n\
+h 12016012264891146079388821366740534204802954401251311822919615131047207289359704531102844802183906537786776\n\
+r 730750818665451621361119245571504901405976559617\n\
+exp2 159\n\
+exp1 107\n\
+sign1 1\n\
+sign0 1\n";
+
+static char *fparam =
+"type f\n\
+q 205523667896953300194896352429254920972540065223\n\
+r 205523667896953300194895899082072403858390252929\n\
+b 40218105156867728698573668525883168222119515413\n\
+beta 115334401956802802075595682801335644058796914268\n\
+alpha0 191079354656274778837764015557338301375963168470\n\
+alpha1 71445317903696340296199556072836940741717506375\n";
+
+static pairing_t pairing_A;
+static pairing_t pairing_F;
+
+static void set_pairing_groups(pairing_ptr p) {
+    symtab_put(var, val_new(t_field, p->G1), "G1");
+    symtab_put(var, val_new(t_field, p->G2), "G2");
+    symtab_put(var, val_new(t_field, p->GT), "GT");
+    symtab_put(var, val_new(t_field, p->Zr), "Zr");
+}
+
+static val_ptr f_init_A_pairing(darray_ptr arg)
+{
+    UNUSED_VAR(arg);
+    set_pairing_groups(pairing_A);
+    return NULL;
+}
+
+static val_ptr f_init_F_pairing(darray_ptr arg)
+{
+    UNUSED_VAR(arg);
+    set_pairing_groups(pairing_F);
+    return NULL;
+}
+
 int main(void)
 {
     symtab_init(var);
     symtab_init(builtin);
 
-    pairing_ptr p = malloc(sizeof(pairing_t));
-    pairing_init_inp_buf(p, aparam, strlen(aparam));
-    symtab_put(var, val_new(t_pairing, p), "A");
-    symtab_put(var, val_new(t_field, p->G1), "G1");
-    symtab_put(var, val_new(t_field, p->G2), "G2");
-    symtab_put(var, val_new(t_field, p->GT), "GT");
-    symtab_put(var, val_new(t_field, p->Zr), "Zr");
+    pairing_init_inp_buf(pairing_A, aparam, strlen(aparam));
+    pairing_init_inp_buf(pairing_F, fparam, strlen(fparam));
+    symtab_put(var, val_new(t_pairing, pairing_A), "A");
+    symtab_put(var, val_new(t_pairing, pairing_F), "F");
 
-    symtab_put(builtin, f_pairing_new_a_default, "pairing_new_a_default");
+    set_pairing_groups(pairing_A);
+
+    symtab_put(builtin, f_init_A_pairing, "init_A_pairing");
+    //symtab_put(builtin, f_init_D159_pairing, "init_D159_pairing");
+    symtab_put(builtin, f_init_F_pairing, "init_F_pairing");
     symtab_put(builtin, f_pairing_G1, "get_G1");
     symtab_put(builtin, f_pairing_G2, "get_G2");
     symtab_put(builtin, f_pairing_GT, "get_GT");

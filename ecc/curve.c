@@ -225,7 +225,7 @@ static void curve_random(element_ptr a)
     if (cdp->cofac) element_mul_mpz(a, a, cdp->cofac);
 }
 
-static void curve_from_hash(element_t a, int len, void *data)
+static void curve_from_hash(element_t a, void *data, int len)
 {
     //TODO: don't find a hash by the 255th try = freeze!
     void *datacopy;
@@ -240,7 +240,7 @@ static void curve_from_hash(element_t a, int len, void *data)
     element_init(t1, cdp->field);
     p->inf_flag = 0;
     for(;;) {
-	element_from_hash(p->x, len, datacopy);
+	element_from_hash(p->x, datacopy, len);
 	element_square(t, p->x);
 	element_add(t, t, cdp->a);
 	element_mul(t, t, p->x);
@@ -312,7 +312,7 @@ static int curve_from_bytes(element_t e, unsigned char *data)
     return len;
 }
 
-static void curve_print_info(FILE *out, field_t f)
+static void curve_out_info(FILE *out, field_t f)
 {
     int len;
     fprintf(out, "Group of points on elliptic curve");
@@ -369,7 +369,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     }
     f->to_bytes = curve_to_bytes;
     f->from_bytes = curve_from_bytes;
-    f->print_info = curve_print_info;
+    f->out_info = curve_out_info;
 }
 
 int element_to_bytes_compressed(unsigned char *data, element_ptr e)

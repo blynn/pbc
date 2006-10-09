@@ -423,7 +423,7 @@ static void fp_random(element_ptr a)
     mpz_clear(z);
 }
 
-static void fp_from_hash(element_ptr a, int len, void *data)
+static void fp_from_hash(element_ptr a, void *data, int len)
 {
     mpz_t z;
 
@@ -515,7 +515,7 @@ static int fp_from_bytes(element_t a, unsigned char *data)
     return n;
 }
 
-static void fp_print_info(FILE *str, field_ptr f)
+static void fp_out_info(FILE *str, field_ptr f)
 {
     fprintf(str, "F_p: zero flag + mpn,\n");
     element_fprintf(str, "modulus = %Zd\n", f->order);
@@ -564,7 +564,7 @@ void field_init_faster_fp(field_ptr f, mpz_t prime)
     f->from_bytes = fp_from_bytes;
     f->to_mpz = fp_to_mpz;
 
-    f->print_info = fp_print_info;
+    f->out_info = fp_out_info;
 
     p = f->data = malloc(sizeof(fp_field_data_t));
     p->limbs = mpz_size(prime);

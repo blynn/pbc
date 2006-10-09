@@ -183,7 +183,7 @@ static void zp_random(element_ptr n)
     pbc_mpz_random(n->data, n->field->order);
 }
 
-static void zp_from_hash(element_ptr n, int len, void *data)
+static void zp_from_hash(element_ptr n, void *data, int len)
 {
     pbc_mpz_from_hash(n->data, n->field->order, data, len);
 }
@@ -239,7 +239,7 @@ static void zp_to_mpz(mpz_ptr z, element_ptr a)
     mpz_set(z, a->data);
 }
 
-static void zp_print_info(FILE *out, field_ptr f)
+static void zp_out_info(FILE *out, field_ptr f)
 {
     fprintf(out, "F_p: GMP wrapped version,\n");
     element_fprintf(out, "modulus = %Zd\n", f->order);
@@ -280,7 +280,7 @@ void field_init_naive_fp(field_ptr f, mpz_t prime)
     f->from_bytes = zp_from_bytes;
     f->to_mpz = zp_to_mpz;
 
-    f->print_info = zp_print_info;
+    f->out_info = zp_out_info;
 
     mpz_set(f->order, prime);
     f->data = NULL;

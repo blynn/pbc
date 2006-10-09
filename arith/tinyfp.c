@@ -206,7 +206,7 @@ static void fp_random(element_ptr c)
     mpz_clear(z);
 }
 
-static void fp_from_hash(element_ptr n, int len, void *data)
+static void fp_from_hash(element_ptr n, void *data, int len)
 {
     mpz_t z;
 

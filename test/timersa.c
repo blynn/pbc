@@ -38,7 +38,6 @@ int main(void)
     field_init_fp(f, N);
     element_init(a, f);
     element_init(b, f);
-    //field_print_info(stdout, f);
     n = 10;
     for (i=0; i<n; i++) {
 	pbc_mpz_random(d, N);
