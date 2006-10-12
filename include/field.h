@@ -89,7 +89,7 @@ lies in.
 */
 static inline void element_init_same_as(element_t e, element_t e2)
 {
-    e2->field->init(e);
+    element_init(e, e2->field);
 }
 
 /*@manual einit

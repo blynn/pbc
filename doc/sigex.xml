@@ -95,7 +95,7 @@ SHA-48!).
 We now map this string to an element h of G1,
 </para>
 <screen>
-    element_from_hash(h, 6, "ABCDEF");
+    element_from_hash(h, "ABCDEF", 6);
 </screen>
 <para>
 then sign it:
