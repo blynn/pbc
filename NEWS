@@ -1,3 +1,24 @@
+Sat Oct 14 18:39:05 PDT 2006
+
+I decided to reorder the arguments to from_hash. It seems to be standard
+to have the length of the data buffer follow the pointer to the data.
+
+Renamed quan.c to yuanli.c, and removed workarounds that were needed due
+to problems with older PBC versions.
+
+John Bethencourt sent in a bugfix for element_init_same_as(). It is now
+fixed.
+
+Added element_div().
+
+Implemented various discrete log attacks: brute force, Pollard rho, and
+index calculus (for the squarefree group order case).
+
+The pbc program saw some improvements. I plan to use it to do live demos of
+pbc, so I added things that would help me.
+
+[0.3.14]
+
 Mon Oct  9 04:53:22 PDT 2006
 
 The makerelease script performed some sanity checks before cg-export,

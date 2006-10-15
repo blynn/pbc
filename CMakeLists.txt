@@ -36,6 +36,7 @@ arith/tinyfp.c arith/fastfp.c arith/fasterfp.c
 arith/field.c
 arith/fp.c
 arith/fieldquadratic.c
+arith/indexcalculus.c
 arith/poly.c arith/random.c
 ecc/curve.c ecc/singular.c ecc/pairing.c ecc/param.c
 ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c
@@ -56,10 +57,10 @@ test/gena1param  test/listmnt    test/testfi       test/testpairing
 test/genaparam   test/sing       test/timefp       test/testpoly
 test/gendparam   test/testbb     test/testhilbert  test/testsig
 test/checkfp
-test/pbc
 test/testexp
 test/timersa
 test/yuanli
+test/testindexcalculus
 )
     add_executable(${bin} ${bin}.c)
     target_link_libraries(${bin} pbc ${GMP_LIBRARY} m)
@@ -69,7 +70,13 @@ foreach(bin
 )
     target_link_libraries(${bin} pbc_sig)
 endforeach(bin)
-target_link_libraries(test/pbc)
+
+#add_executable(test/pbc test/pbc.c test/pbc_getline.c)
+
+add_executable(test/pbc test/pbc.c test/pbc_getline.readline.c)
+target_link_libraries(test/pbc readline)
+
+target_link_libraries(test/pbc pbc ${GMP_LIBRARY} m)
 
 set(cppflags "-Iinclude")
 set(warnflags "-Wall -W -Wfloat-equal -Wendif-labels -Wshadow  \\

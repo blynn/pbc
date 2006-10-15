@@ -1501,10 +1501,11 @@ void field_init_polymod(field_ptr f, element_ptr poly)
     compute_x_powers(f, poly);
 }
 
-void trial_divide(darray_ptr factor, darray_ptr mult, mpz_t n)
+void trial_divide(darray_ptr factor, darray_ptr mult, mpz_t n, mpz_ptr limit)
 {
     mpz_t p, m;
-    mpz_ptr fac, mul;
+    mpz_ptr fac;
+    unsigned int mul;
 
     mpz_init(p);
     mpz_init(m);
@@ -1515,18 +1516,20 @@ void trial_divide(darray_ptr factor, darray_ptr mult, mpz_t n)
 	if (mpz_probab_prime_p(m, 10)) {
 	    mpz_set(p, m);
 	}
+	if (limit && mpz_cmp(p, limit) > 0) {
+	    mpz_set(p, m);
+	}
 	if (mpz_divisible_p(m, p)) {
 	    fac = malloc(sizeof(mpz_t));
-	    mul = malloc(sizeof(mpz_t));
+	    mul = 0;
 	    mpz_init(fac);
-	    mpz_init(mul);
 	    mpz_set(fac, p);
 	    darray_append(factor, fac);
-	    darray_append(mult, mul);
 	    do {
 		mpz_divexact(m, m, p);
-		mpz_add_ui(mul, mul, 1);
+		mul++;
 	    } while (mpz_divisible_p(m, p));
+	    darray_append(mult, (void *) mul);
 	}
 	mpz_nextprime(p, p);
     }
@@ -1630,11 +1633,10 @@ int poly_is_irred(element_ptr f)
 
     mpz_set_ui(deg, poly_degree(f));
 
-    trial_divide(fac, mul, deg);
+    trial_divide(fac, mul, deg, NULL);
     res = poly_is_irred_degfac(f, fac);
 
     darray_forall(fac, clear);
-    darray_forall(mul, clear);
 
     darray_clear(fac);
     darray_clear(mul);

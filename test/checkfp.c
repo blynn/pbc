@@ -274,17 +274,14 @@ int main(void)
 
     mpz_init(z);
     mpz_init(prime);
-    mpz_set_ui(prime, 82);
-    mpz_setbit(prime, 63);
-    mpz_setbit(prime, 62);
-    mpz_setbit(prime, 61);
-    mpz_setbit(prime, 60);
+    mpz_set_ui(prime, 1234);
+    mpz_setbit(prime, 160);
     mpz_nextprime(prime, prime);
 
     element_printf("prime = %Zd\n", prime);
 
     field_init_naive_fp(f1, prime);
-    field_init_mont_fp(f2, prime);
+    field_init_fp(f2, prime);
 
     printf("Field 1:\n");
     field_out_info(stdout, f1);

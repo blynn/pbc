@@ -55,6 +55,9 @@ void e_param_gen(e_param_t p, int rbits, int qbits)
     element_t j;
     int found = 0;
 
+    //won't find any curves is hbits is too low
+    if (hbits < 3) hbits = 3;
+
     mpz_init(n);
 
     do {

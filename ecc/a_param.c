@@ -80,9 +80,12 @@ void a_param_gen(a_param_t sp, int rbits, int qbits)
 	}
 	if (!mpz_probab_prime_p(r, 10)) continue;
 	for (i=0; i<10; i++) {
+	    int bit;
 	    //use q as a temp variable
 	    mpz_set_ui(q, 0);
-	    mpz_setbit(q, qbits - rbits - 4 + 1);
+	    bit = qbits - rbits - 4 + 1;
+	    if (bit < 3) bit = 3;
+	    mpz_setbit(q, bit);
 	    pbc_mpz_random(h, q);
 	    mpz_mul_ui(h, h, 12);
 	    //finally q takes the value it should

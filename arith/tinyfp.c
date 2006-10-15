@@ -223,6 +223,13 @@ static int fp_cmp(element_ptr a, element_ptr b)
     return *p != *q;
 }
 
+static int fp_sgn_odd(element_ptr a)
+{
+    unsigned long *p = a->data;
+    if (!*p) return 0;
+    return *p & 1 ? 1 : -1;
+}
+
 static int fp_is_sqr(element_ptr a)
 {
     int res;
@@ -238,13 +245,11 @@ static int fp_is_sqr(element_ptr a)
 
 static int fp_to_bytes(unsigned char *data, element_t e)
 {
-    unsigned char *ptr = data;
     unsigned long *p = e->data;
     unsigned long l = *p;
     int i, n = e->field->fixed_length_in_bytes;
     for (i = 0; i < n; i++) {
-	*ptr = (unsigned char) l;
-	ptr++;
+	data[n - i - 1] = (unsigned char) l;
 	l >>= 8;
     }
     return n;
@@ -254,13 +259,11 @@ static int fp_from_bytes(element_t e, unsigned char *data)
 {
     unsigned char *ptr = data;
     unsigned long *p = e->data;
-    unsigned long l = 0;
     int i, n = e->field->fixed_length_in_bytes;
     *p = 0;
     for (i=0; i<n; i++) {
-	l = *ptr;
-	l <<= 8 * i;
-	*p += l;
+	*p <<= 8;
+	*p += *ptr;
 	ptr++;
     }
     return n;
@@ -293,6 +296,7 @@ void field_init_tiny_fp(field_ptr f, mpz_t prime)
     f->pow_mpz = fp_pow_mpz;
     f->neg = fp_neg;
     f->cmp = fp_cmp;
+    f->sign = fp_sgn_odd;
     f->invert = fp_invert;
     f->random = fp_random;
     f->from_hash = fp_from_hash;

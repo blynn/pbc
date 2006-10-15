@@ -11,7 +11,7 @@ noinst_PROGRAMS = benchmark testhilbert testbbs testsig testibe \
 	checkfp timefp testexp pbc timersa yuanli
 
 yuanli_SOURCES = yuanli.c
-pbc_SOURCES = pbc.c
+pbc_SOURCES = pbc.c pbc_getline.c
 checkfp_SOURCES = checkfp.c
 timefp_SOURCES = timefp.c
 timersa_SOURCES = timersa.c

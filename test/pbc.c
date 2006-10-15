@@ -5,14 +5,14 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdarg.h>
 #include "pbc.h"
 #include "fieldmpz.h"
+#include "fp.h"
 #include "utils.h"
+#include "a_param.h"
 
-/* It's much nicer with readline
-#include <readline/readline.h>
-#include <readline/history.h>
-*/
+char *getline(void);
 
 enum {
     t_none = 0,
@@ -541,18 +541,37 @@ struct fun_s {
 
 typedef val_ptr (*fun)(darray_ptr);
 
+static val_ptr check_arg(darray_ptr arg, int n, ...)
+{
+    va_list ap;
+    int i;
+    val_ptr res = NULL;
+
+    va_start(ap, n);
+    if (arg->count != n) {
+	printf("expect %d argument(s)\n", n);
+	res = newruntimeerror(re_badargcount);
+    } else for (i=0; i<n; i++) {
+	int t = va_arg(ap, int);
+	val_ptr vp = arg->item[i];
+	if (vp->type != t) {
+	    printf("arg not type %d\n", t);
+	    return newruntimeerror(re_badarg);
+	    break;
+	}
+    }
+
+    va_end(ap);
+    return res;
+}
+
 static val_ptr f_pairing_get_group(
 	field_ptr (*get_group)(pairing_ptr p), darray_ptr arg)
 {
     val_ptr res;
-    if (arg->count != 1) {
-	printf("expect one argument\n");
-	return NULL;
-    }
+    res = check_arg(arg, 1, t_pairing);
+    if (res) return res;
     val_ptr a0 = arg->item[0];
-    if (a0->type != t_pairing) {
-	return NULL;
-    }
     pairing_ptr pairing = a0->data;
     res = val_new(t_field, get_group(pairing));
     return res;
@@ -585,15 +604,9 @@ static val_ptr f_pairing_Zr(darray_ptr arg)
 static val_ptr f_random(darray_ptr arg)
 {
     val_ptr res;
-    if (arg->count != 1) {
-	printf("expect one argument\n");
-	return newruntimeerror(re_badargcount);
-    }
+    res = check_arg(arg, 1, t_field);
+    if (res) return res;
     val_ptr a0 = arg->item[0];
-    if (a0->type != t_field) {
-	printf("arg not field!\n");
-	return newruntimeerror(re_badarg);
-    }
     field_ptr f = a0->data;
     element_ptr e = malloc(sizeof(element_t));
     element_init(e, f);
@@ -606,15 +619,9 @@ static val_ptr f_unary(
 	void (*unary)(element_ptr, element_ptr), darray_ptr arg)
 {
     val_ptr res;
-    if (arg->count != 1) {
-	printf("expect one argument\n");
-	return newruntimeerror(re_badargcount);
-    }
+    res = check_arg(arg, 1, t_element);
+    if (res) return res;
     val_ptr a0 = arg->item[0];
-    if (a0->type != t_element) {
-	printf("arg not element!\n");
-	return newruntimeerror(re_badarg);
-    }
     element_ptr e0 = a0->data;
     element_ptr e = malloc(sizeof(element_t));
     element_init(e, e0->field);
@@ -628,20 +635,10 @@ static val_ptr f_bin_op(
 	darray_ptr arg)
 {
     val_ptr res;
-    if (arg->count != 2) {
-	printf("expect two arguments\n");
-	return newruntimeerror(re_badargcount);
-    }
+    res = check_arg(arg, 2, t_element, t_element);
+    if (res) return res;
     val_ptr a0 = arg->item[0];
     val_ptr a1 = arg->item[1];
-    if (a0->type != t_element) {
-	printf("left arg not element!\n");
-	return newruntimeerror(re_badarg);
-    }
-    if (a1->type != t_element) {
-	printf("right arg not element!\n");
-	return newruntimeerror(re_badarg);
-    }
     element_ptr e0 = a0->data;
     element_ptr e1 = a1->data;
     if (e0->field != e1->field) {
@@ -689,20 +686,10 @@ static val_ptr f_neg(darray_ptr arg)
 static val_ptr f_pow(darray_ptr arg)
 {
     val_ptr res;
-    if (arg->count != 2) {
-	printf("expect two arguments\n");
-	return newruntimeerror(re_badargcount);
-    }
+    res = check_arg(arg, 2, t_element, t_element);
+    if (res) return res;
     val_ptr a0 = arg->item[0];
     val_ptr a1 = arg->item[1];
-    if (a0->type != t_element) {
-	printf("left arg not element!\n");
-	return newruntimeerror(re_badarg);
-    }
-    if (a1->type != t_element) {
-	printf("right arg not element!\n");
-	return newruntimeerror(re_badarg);
-    }
     element_ptr e0 = a0->data;
     element_ptr e1 = a1->data;
     element_ptr e = malloc(sizeof(element_t));
@@ -929,18 +916,190 @@ static void set_pairing_groups(pairing_ptr p) {
 
 static val_ptr f_init_pairing(darray_ptr arg)
 {
-    if (arg->count != 1) {
-	printf("expect one argument\n");
-	return newruntimeerror(re_badargcount);
-    }
+    val_ptr res;
+
+    res = check_arg(arg, 1, t_pairing);
+    if (res) return res;
+
     val_ptr a0 = arg->item[0];
-    if (a0->type != t_pairing) {
-	printf("arg not element!\n");
-	return newruntimeerror(re_badarg);
-    }
     pairing_ptr p = a0->data;
     set_pairing_groups(p);
     return NULL;
+}
+
+static val_ptr f_nextprime(darray_ptr arg)
+{
+    mpz_t p;
+    val_ptr res;
+
+    res = check_arg(arg, 1, t_element);
+    if (res) return res;
+    val_ptr a0 = arg->item[0];
+    element_ptr e0 = a0->data;
+    if (e0->field != Z) {
+	printf("arg not integer!\n");
+	return newruntimeerror(re_badarg);
+    }
+    element_ptr e = malloc(sizeof(element_t));
+    element_init(e, Z);
+    mpz_init(p);
+    element_to_mpz(p, e0);
+    mpz_nextprime(p, p);
+    element_set_mpz(e, p);
+    res = val_new(t_element, e);
+    mpz_clear(p);
+    return res;
+}
+
+static val_ptr f_brute_force_dlog(darray_ptr arg)
+{
+    val_ptr res;
+    res = check_arg(arg, 2, t_element, t_element);
+    if (res) return res;
+    val_ptr a0 = arg->item[0];
+    val_ptr a1 = arg->item[1];
+    element_ptr e0 = a0->data;
+    element_ptr e1 = a1->data;
+    if (e0->field != e1->field) {
+	printf("arg field mismatch!\n");
+	return newruntimeerror(re_badarg);
+    }
+    element_ptr e = malloc(sizeof(element_t));
+    element_init(e, Z);
+    brute_force_dlog(e, e0, e1);
+    res = val_new(t_element, e);
+    return res;
+}
+static val_ptr f_pollard_rho(darray_ptr arg)
+{
+    val_ptr res;
+    res = check_arg(arg, 3, t_element, t_element, t_field);
+    if (res) return res;
+    val_ptr a0 = arg->item[0];
+    val_ptr a1 = arg->item[1];
+    val_ptr a2 = arg->item[2];
+    element_ptr e0 = a0->data;
+    element_ptr e1 = a1->data;
+    if (e0->field != e1->field) {
+	printf("arg field mismatch!\n");
+	return newruntimeerror(re_badarg);
+    }
+    field_ptr f = a2->data;
+    element_ptr e = malloc(sizeof(element_t));
+    element_init(e, f);
+    pollard_rho(e, e0, e1);
+    res = val_new(t_element, e);
+    return res;
+}
+
+static val_ptr f_zz(darray_ptr arg)
+{
+    mpz_t p;
+    val_ptr res;
+    res = check_arg(arg, 1, t_element);
+    if (res) return res;
+    val_ptr a0 = arg->item[0];
+    element_ptr e0 = a0->data;
+    if (e0->field != Z) {
+	printf("arg not integer!\n");
+	return newruntimeerror(re_badarg);
+    }
+    field_ptr f = malloc(sizeof(field_t));
+    mpz_init(p);
+    element_to_mpz(p, e0);
+    field_init_fp(f, p);
+    res = val_new(t_field, f);
+    mpz_clear(p);
+    return res;
+}
+
+static val_ptr f_gen_A(darray_ptr arg)
+{
+    mpz_t rbits, qbits;
+    a_param_t param;
+    pairing_ptr p;
+    val_ptr res;
+    res = check_arg(arg, 2, t_element, t_element);
+    if (res) return res;
+    val_ptr a0 = arg->item[0];
+    val_ptr a1 = arg->item[1];
+    element_ptr e0 = a0->data;
+    if (e0->field != Z) {
+	printf("arg not integer!\n");
+	return newruntimeerror(re_badarg);
+    }
+    element_ptr e1 = a1->data;
+    if (e1->field != Z) {
+	printf("arg not integer!\n");
+	return newruntimeerror(re_badarg);
+    }
+    mpz_init(rbits);
+    mpz_init(qbits);
+    element_to_mpz(rbits, e0);
+    element_to_mpz(qbits, e1);
+    //TODO: check rbits and qbits aren't too big
+    a_param_init(param);
+    a_param_gen(param, mpz_get_ui(rbits), mpz_get_ui(qbits));
+    p = malloc(sizeof(pairing_t));
+    pairing_init_a_param(p, param);
+    res = val_new(t_pairing, p);
+    mpz_clear(rbits);
+    mpz_clear(qbits);
+    a_param_clear(param);
+    return res;
+}
+
+static val_ptr f_fromZZ(darray_ptr arg)
+{
+    val_ptr res;
+    res = check_arg(arg, 2, t_element, t_field);
+    if (res) return res;
+    val_ptr a0 = arg->item[0];
+    val_ptr a1 = arg->item[1];
+    element_ptr e = a0->data;
+    field_ptr f = a1->data;
+    if (e->field != Z) {
+	printf("arg not integer!\n");
+	return newruntimeerror(re_badarg);
+    }
+    element_ptr e1 = malloc(sizeof(element_t));
+    element_init(e1, f);
+    element_set_mpz(e1, e->data);
+    res = val_new(t_element, e1);
+    return res;
+}
+
+static val_ptr f_index_calculus(darray_ptr arg)
+{
+    val_ptr res;
+    res = check_arg(arg, 2, t_element, t_element);
+    if (res) return res;
+    val_ptr a0 = arg->item[0];
+    val_ptr a1 = arg->item[1];
+    element_ptr e0 = a0->data;
+    element_ptr e1 = a1->data;
+    element_ptr e = malloc(sizeof(element_t));
+    mpz_t x, g, h, q1;
+
+    //TODO: check e0, e1 are from an integer mod ring
+    mpz_init(x);
+    mpz_init(g);
+    mpz_init(h);
+    mpz_init(q1);
+
+    mpz_sub_ui(q1, e0->field->order, 1);
+
+    element_init(e, Z);
+    element_to_mpz(g, e0);
+    element_to_mpz(h, e1);
+    index_calculus_dlog(x, g, h, q1);
+    element_set_mpz(e, x);
+    res = val_new(t_element, e);
+    mpz_clear(x);
+    mpz_clear(g);
+    mpz_clear(h);
+    mpz_clear(q1);
+    return res;
 }
 
 int main(void)
@@ -976,23 +1135,23 @@ int main(void)
     symtab_put(builtin, f_inv, "invert");
     symtab_put(builtin, f_div, "div");
     symtab_put(builtin, f_pairing, "pairing");
+    symtab_put(builtin, f_nextprime, "nextprime");
+    symtab_put(builtin, f_brute_force_dlog, "brute_force_dlog");
+    symtab_put(builtin, f_pollard_rho, "pollard_rho");
+    symtab_put(builtin, f_index_calculus, "index_calculus");
+    symtab_put(builtin, f_zz, "ZZ");
+    symtab_put(builtin, f_gen_A, "gen_A");
+    symtab_put(builtin, f_fromZZ, "fromZZ");
 
     field_init_z(Z);
 
     fprintf(stderr, "Pairing-Based Calculator\n");
 
     for (;;) {
-	char s[1024];
-	fgets(s, 1024, stdin);
-	if (feof(stdin)) break;
+	char *s = getline();
+	if (!s) break;
 	parseline(s);
-	/* readline version:
-	char *line = readline(NULL);
-	if (!line) break;
-	parseline(line);
-	if (*line) add_history(line);
-	free(line);
-	*/
+	free(s);
     }
     return 0;
 }

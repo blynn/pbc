@@ -550,4 +550,8 @@ void pbc_mpz_out_raw_n(unsigned char *data, int n, mpz_t z);
 void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
 	unsigned char *data, unsigned int len);
 
+void brute_force_dlog(element_t x, element_t g, element_t h);
+void pollard_rho(element_t x, element_t g, element_t h);
+void index_calculus_dlog(mpz_t x, mpz_t g, mpz_t h, mpz_t q);
+
 #endif //FIELD_H

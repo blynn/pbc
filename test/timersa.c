@@ -62,11 +62,21 @@ int main(void)
 	t0 = get_time();
 	mpz_powm(adp, adp, d, p);
 	mpz_powm(adq, adq, d, q);
+
+	/* textbook CRT
 	mpz_mul(adp, adp, q);
 	mpz_mul(adp, adp, iqmp);
 	mpz_mul(adq, adq, p);
 	mpz_mul(adq, adq, ipmq);
 	mpz_add(adp, adp, adq);
+	*/
+	// Garner's algorithm
+	mpz_sub(adq, adq, adp);
+	mpz_mul(adq, adq, ipmq);
+	mpz_mod(adq, adq, q);
+	mpz_mul(adq, adq, p);
+	mpz_add(adp, adp, adq);
+
 	t1 = get_time();
 	tcrt += t1 - t0;
 	element_set_mpz(b, adp);

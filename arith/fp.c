@@ -54,12 +54,16 @@ void fp_tonelli(element_ptr x, element_ptr a)
 
 static void (*option_fpinit)(field_ptr f, mpz_t prime) = field_init_mont_fp;
 
-void field_init_fp(field_ptr f, mpz_t prime)
+void field_init_fp(field_ptr f, mpz_t modulus)
 {
-    if (mpz_fits_ulong_p(prime)) {
-	field_init_tiny_fp(f, prime);
+    if (mpz_fits_ulong_p(modulus)) {
+	field_init_naive_fp(f, modulus);
     } else {
-	option_fpinit(f, prime);
+	if (mpz_odd_p(modulus)) {
+	    option_fpinit(f, modulus);
+	} else {
+	    field_init_faster_fp(f, modulus);
+	}
     }
 }
 
