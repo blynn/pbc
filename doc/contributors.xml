@@ -27,6 +27,9 @@ Dmitry Kosolapov sent in corrections to this manual, and wrote the
 Yuan-Li identity-based authenticated key agreement test program.
 </para>
 <para>
+John Bethencourt sent in a bugfix.
+</para>
+<para>
 If you're not mentioned here but should be, please let me know!
 (blynn at cs dot stanford dot edu).
 </para>

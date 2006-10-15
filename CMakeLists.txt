@@ -19,9 +19,16 @@ if(crossmingw)
     set(CMAKE_SKIP_RPATH ON)
     set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
     set(get_time_src "misc/get_time.win32.c")
+
+    add_executable(test/pbc test/pbc.c test/pbc_getline.c)
+
 else(crossmingw)
     find_library(GMP_LIBRARY NAMES gmp PATHS /usr/lib /usr/local/lib)
     set(get_time_src "misc/get_time.c")
+
+    add_executable(test/pbc test/pbc.c test/pbc_getline.readline.c)
+    target_link_libraries(test/pbc readline)
+
 endif(crossmingw)
 
 set(leaksrc misc/leak.c)
@@ -70,11 +77,6 @@ foreach(bin
 )
     target_link_libraries(${bin} pbc_sig)
 endforeach(bin)
-
-#add_executable(test/pbc test/pbc.c test/pbc_getline.c)
-
-add_executable(test/pbc test/pbc.c test/pbc_getline.readline.c)
-target_link_libraries(test/pbc readline)
 
 target_link_libraries(test/pbc pbc ${GMP_LIBRARY} m)
 
