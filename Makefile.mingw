@@ -1,4 +1,3 @@
-PROJNAME := pbc
 # these (uppercase) variables apply to gmake-builtin rules
 CC:=gcc
 
@@ -24,7 +23,7 @@ libpbc_srcs := \
 	arith/field.c arith/fieldmpz.c \
 	arith/fp.c arith/tinyfp.c arith/naivefp.c \
 	arith/fastfp.c arith/fasterfp.c arith/montfp.c \
-	arith/indexcalculus.c
+	arith/indexcalculus.c \
 	arith/fieldquadratic.c arith/poly.c \
 	arith/random.c \
 	misc/parse.c misc/darray.c misc/symtab.c misc/get_time.win32.c \
@@ -43,9 +42,9 @@ test_srcs := test/testbls.c test/testbb.c test/testsig.c test/testbbs.c \
 	test/gena1param.c \
 	test/testpairing.c test/testpoly.c \
 	test/benchmark.c \
-	test/19.c test/sing.c test/pbc.c test/pbc_getline.c
+	test/19.c test/sing.c test/pbc.c
 
-srcs := $(libpbc_srcs) $(libsig_srcs) $(test_srcs)
+srcs := $(libpbc_srcs) $(libsig_srcs) $(test_srcs) test/pbc_getline.c
 libpbc_objs := $(libpbc_srcs:.c=.o)
 libsig_objs := $(libsig_srcs:.c=.o)
 objs := $(srcs:.c=.o)
@@ -104,7 +103,9 @@ depend:
 
 # DO NOT DELETE
 
-arith/field.o: include/field.h
+arith/field.o: include/darray.h include/field.h include/utils.h
+arith/fieldmpz.o: include/field.h include/random.h include/utils.h
+arith/fieldmpz.o: include/fp.h
 arith/fp.o: include/field.h include/fp.h
 arith/tinyfp.o: include/field.h include/random.h include/fp.h
 arith/naivefp.o: include/field.h include/random.h include/utils.h
@@ -112,14 +113,19 @@ arith/naivefp.o: include/fp.h
 arith/fastfp.o: include/field.h include/random.h include/fp.h
 arith/fasterfp.o: include/field.h include/random.h include/fp.h
 arith/montfp.o: include/field.h include/random.h include/fp.h
+arith/indexcalculus.o: include/pbc.h include/fops.h include/symtab.h
+arith/indexcalculus.o: include/darray.h include/field.h include/pairing.h
+arith/indexcalculus.o: include/poly.h include/curve.h include/mnt.h
+arith/indexcalculus.o: include/random.h include/utils.h
 arith/fieldquadratic.o: include/field.h include/fieldquadratic.h
+arith/fieldquadratic.o: include/utils.h
 arith/poly.o: include/field.h include/darray.h include/poly.h
 arith/random.o: include/random.h include/utils.h
 misc/parse.o: include/fops.h include/parse.h include/tracker.h
 misc/darray.o: include/noleak.h include/darray.h
-misc/symtab.o: include/strclone.h include/symtab.h include/darray.h
+misc/symtab.o: include/symtab.h include/darray.h
 misc/get_time.win32.o: include/utils.h
-misc/extend_printf.o: include/utils.h include/field.h include/strclone.h
+misc/extend_printf.o: include/utils.h include/field.h
 ecc/mpc.o: include/darray.h include/mpc.h
 ecc/mnt.o: include/darray.h include/mnt.h
 ecc/hilbert.o: include/field.h include/darray.h include/poly.h
@@ -130,16 +136,14 @@ ecc/pairing.o: include/curve.h include/fops.h include/symtab.h
 ecc/pairing.o: include/parse.h include/tracker.h include/pairing.h
 ecc/pairing.o: include/a_param.h include/mnt.h include/d_param.h
 ecc/pairing.o: include/e_param.h include/f_param.h include/a1_param.h
-ecc/pairing.o: include/strclone.h include/utils.h
+ecc/pairing.o: include/utils.h
 ecc/param.o: include/symtab.h include/darray.h include/fops.h include/parse.h
-ecc/param.o: include/tracker.h include/utils.h include/strclone.h
-ecc/a1_param.o: include/symtab.h include/darray.h include/fops.h
-ecc/a1_param.o: include/field.h include/fp.h include/fieldquadratic.h
-ecc/a1_param.o: include/pairing.h include/a1_param.h include/poly.h
-ecc/a1_param.o: include/curve.h include/param.h include/tracker.h
+ecc/param.o: include/tracker.h include/utils.h
+ecc/singular.o: include/field.h include/curve.h include/fops.h
+ecc/singular.o: include/pairing.h include/fp.h include/utils.h
 ecc/a_param.o: include/symtab.h include/darray.h include/fops.h
 ecc/a_param.o: include/field.h include/fp.h include/fieldquadratic.h
-ecc/a_param.o: include/pairing.h include/a_param.h include/poly.h
+ecc/a_param.o: include/pairing.h include/a_param.h include/a1_param.h
 ecc/a_param.o: include/curve.h include/param.h include/random.h
 ecc/a_param.o: include/tracker.h include/utils.h
 ecc/d_param.o: include/fops.h include/symtab.h include/darray.h
@@ -220,7 +224,8 @@ test/19.o: include/field.h include/pairing.h include/poly.h include/curve.h
 test/19.o: include/mnt.h include/fp.h include/fieldquadratic.h
 test/sing.o: include/pbc.h include/fops.h include/symtab.h include/darray.h
 test/sing.o: include/field.h include/pairing.h include/poly.h include/curve.h
-test/sing.o: include/mnt.h include/fp.h
+test/sing.o: include/mnt.h include/singular.h include/fp.h
 test/pbc.o: include/pbc.h include/fops.h include/symtab.h include/darray.h
 test/pbc.o: include/field.h include/pairing.h include/poly.h include/curve.h
-test/pbc.o: include/mnt.h include/utils.h
+test/pbc.o: include/mnt.h include/fieldmpz.h include/fp.h include/utils.h
+test/pbc.o: include/a_param.h

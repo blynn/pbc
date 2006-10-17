@@ -399,6 +399,12 @@ extra over judicious use of function pointers in C.)
 I use the so-called One True Brace Style.
 </para>
 <para>
+I'd like to have no library dependencies (except standard C libraries),
+but then I'd have to write a large integer library. Not only that, it'd
+have to be in assembly, and then I'd need to port it. To avoid this,
+I use an existing library instead.
+</para>
+<para>
 I selected GMP because the library's focus is on multiprecision arithmetic
 and nothing else, and it aims to be
 as fast as possible on many platforms.
@@ -415,6 +421,13 @@ I'm fond of GMP's method for eliminating the need for the <code>&amp;</code>
 and <code>*</code> operators most of the time by declaring a typedef on
 arrays of size 1.  I try to do the same with PBC for consistency,
 though this trick does have drawbacks.
+</para>
+<para>
+I would like to have GMP as the only library dependency, though I do
+not mind using other libraries so long as they are optional. For example,
+one of the test programs is much easier to use if compiled
+with the GNU readline library, but by default compiles without it and
+is still functional.
 </para>
 <para>
 I dislike the C preprocessor. I like to place platform-specific code in

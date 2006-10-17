@@ -8,6 +8,14 @@ cat ChangeLog | head -20 | grep pbc-$GREPVER > /dev/null || {
     echo cg-log does not mention release 
     exit 1
 }
+make -f Makefile.orig depend || {
+    echo Makefile.orig problem
+    exit 1
+}
+make -f Makefile.mingw depend || {
+    echo Makefile.mingw problem
+    exit 1
+}
 TMPDIR=`mktemp -d` || {
     echo Error creating temp directory
     exit 1
@@ -37,6 +45,7 @@ grep $GREPVER doc/manual.xml > /dev/null || {
 }
 cd $TMPDIR
 echo Creating tarball...
+rm -rf $PBCDIR/autom4te.cache
 tar cvfz $HERE/pbc-$VER.tar.gz pbc-$VER
 cd $PBCDIR
 ./configure || {
