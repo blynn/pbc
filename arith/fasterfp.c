@@ -14,7 +14,7 @@
 // I'm thinking of using the flag to also represent 1, -1,
 // but that complicates the logic even more, and I believe I need more
 // control than GMP is willing to give in order to avoid expensive
-// checkes for 1, -1 everywhere.
+// checks for 1, -1 everywhere.
 //
 // NOTE: does not work for moduli of the form
 // 2^(something * 8 * sizeof(mp_limb_t))
@@ -57,7 +57,7 @@ static inline void from_mpz(element_ptr e, mpz_ptr z)
     size_t count;
     dataptr dp = e->data;
     mpz_export(dp->d, &count, -1, sizeof(mp_limb_t), 0, 0, z);
-    memset((void *) (((unsigned int) dp->d) + count * sizeof(mp_limb_t)),
+    memset((void *) (((unsigned char*) dp->d) + count * sizeof(mp_limb_t)),
 	0, (p->limbs - count) * sizeof(mp_limb_t));
 }
 

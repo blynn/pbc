@@ -77,7 +77,7 @@ void darray_show(darray_ptr a)
 {
     int i;
     for (i=0;i<a->count;i++) {
-	printf("%d: %X\n", i, (int) a->item[i]);
+	printf("%d: %p\n", i, a->item[i]);
     }
 }
 

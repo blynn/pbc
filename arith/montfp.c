@@ -62,7 +62,7 @@ static inline void from_mpz(element_t e, mpz_t z)
     size_t count;
 
     mpz_export(ed->d, &count, -1, sizeof(mp_limb_t), 0, 0, z);
-    memset((void *) (((int) ed->d) + count * sizeof(mp_limb_t)),
+    memset((void *) (((unsigned char*) ed->d) + count * sizeof(mp_limb_t)),
 	0, (p->limbs - count) * sizeof(mp_limb_t));
 }
 
@@ -404,7 +404,7 @@ static void fp_invert(element_ptr c, element_ptr a)
     mpz_import(z, p->limbs, -1, sizeof(mp_limb_t), 0, 0, ad->d);
     mpz_invert(z, z, a->field->order);
     mpz_export(tmp, &count, -1, sizeof(mp_limb_t), 0, 0, z);
-    memset((void *) (((int) tmp) + count * sizeof(mp_limb_t)),
+    memset((void *) (((unsigned char*) tmp) + count * sizeof(mp_limb_t)),
 	0, (p->limbs - count) * sizeof(mp_limb_t));
 
     mont_mul(cd->d, tmp, p->R3, p);
@@ -583,12 +583,12 @@ void field_init_mont_fp(field_ptr f, mpz_t prime)
 	mpz_mod(z, z, prime);
 
 	mpz_export(p->R, &count, -1, sizeof(mp_limb_t), 0, 0, z);
-	memset((void *) (((int) p->R) + count * sizeof(mp_limb_t)),
+	memset((void *) (((unsigned char*) p->R) + count * sizeof(mp_limb_t)),
 		0, (p->limbs - count) * sizeof(mp_limb_t));
 
 	mpz_powm_ui(z, z, 3, prime);
 	mpz_export(p->R3, &count, -1, sizeof(mp_limb_t), 0, 0, z);
-	memset((void *) (((int) p->R3) + count * sizeof(mp_limb_t)),
+	memset((void *) (((unsigned char*) p->R3) + count * sizeof(mp_limb_t)),
 		0, (p->limbs - count) * sizeof(mp_limb_t));
 
 	mpz_set_ui(z, 0);

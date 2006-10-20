@@ -40,7 +40,7 @@ static inline void from_mpz(element_ptr e, mpz_ptr z)
     fp_field_data_ptr p = e->field->data;
     size_t count;
     mpz_export(e->data, &count, -1, sizeof(mp_limb_t), 0, 0, z);
-    memset((void *) (((unsigned int) e->data) + count * sizeof(mp_limb_t)),
+    memset((void *) (((unsigned char*) e->data) + count * sizeof(mp_limb_t)),
 	0, (p->limbs - count) * sizeof(mp_limb_t));
 }
 

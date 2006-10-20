@@ -455,7 +455,7 @@ static val_ptr newruntimeerror(int i)
     val_ptr res = malloc(sizeof(struct val_s));
     lastruntimeerror = i;
     res->type = t_err;
-    res->data = (void *) i;
+    res->data = int_to_voidp(i);
     return res;
 }
 

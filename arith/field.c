@@ -518,13 +518,13 @@ static int generic_is1(element_ptr a)
 
 static void generic_out_info(FILE *out, field_ptr f)
 {
-    element_fprintf(out, "field %X unknown\n", (unsigned int) f);
+    element_fprintf(out, "field %p unknown\n", f);
     element_fprintf(out, "order = %Zd\n", f->order);
 }
 
 static void warn_field_clear(field_ptr f)
 {
-    fprintf(stderr, "field %X has no clear function\n", (unsigned int) f);
+    fprintf(stderr, "field %p has no clear function\n", f);
 }
 
 void field_out_info(FILE *out, field_ptr f)

@@ -4,6 +4,7 @@
 #include "field.h"
 #include "darray.h"
 #include "poly.h"
+#include "utils.h"
 
 //implements R[x] for a given ring R
 //also R[x]_{f(x)}
@@ -1529,7 +1530,7 @@ void trial_divide(darray_ptr factor, darray_ptr mult, mpz_t n, mpz_ptr limit)
 		mpz_divexact(m, m, p);
 		mul++;
 	    } while (mpz_divisible_p(m, p));
-	    darray_append(mult, (void *) mul);
+	    darray_append(mult, int_to_voidp(mul));
 	}
 	mpz_nextprime(p, p);
     }
