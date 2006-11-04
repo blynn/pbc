@@ -4,8 +4,8 @@
  * this particular cryptosystem. -Ben Lynn
  */
 /* Here we represent the original Yuan-Li ID-Based Authenticated Key Agreement Protocol, 2005.
-This protocol has 2 stages: Setup and Extract. We represent them inside one code block with demo outputs. We don't apply the final function for calculating the session key H(A, B, h, Kab) and suppose session key to be the K=Kab.
-*/
+ * This protocol has 2 stages: Setup and Extract. We represent them inside one code block with demo and time outputs.
+ */
 
 /*Yuan-Li protocol description according to:
 Quan Yuan and Songping Li, A New Efficient ID-Based Authenticated Key Agreement Protocol, Cryptology ePrint Archive, Report 2005/309
@@ -24,7 +24,7 @@ For the user with ID public key can be calculated with Qid = H1(ID). KGS generat
 3. A calculates h = a*Tb = a*b*P and shared secret key Kab = e(a*Ppub + Sa, Tb + Qb)
 4. B calculates h = b*Ta = a*b*P and shared secret key Kba = e(Ta + Qa, b*Ppub + Sb)
 Session key is K = H(A, B, h, Kab).
-H was not defined in original article.
+H was not defined in the original article.
 I've defined it as H(A, B, h, Kab)=e(h,H1(A)+H1(B))+Kab.
 */
 

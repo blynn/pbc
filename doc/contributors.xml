@@ -27,7 +27,8 @@ Dmitry Kosolapov sent in corrections to this manual, and wrote the
 Yuan-Li identity-based authenticated key agreement test program.
 </para>
 <para>
-John Bethencourt sent in a bugfix.
+John Bethencourt sent in many helpful patches, e.g. fixes that allow PBC to
+work on 64-bit platforms.
 </para>
 <para>
 If you're not mentioned here but should be, please let me know!

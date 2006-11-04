@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "a_param.h"
 
-char *getline(void);
+char *pbc_getline(void);
 
 enum {
     t_none = 0,
@@ -1148,7 +1148,7 @@ int main(void)
     fprintf(stderr, "Pairing-Based Calculator\n");
 
     for (;;) {
-	char *s = getline();
+	char *s = pbc_getline();
 	if (!s) break;
 	parseline(s);
 	free(s);
