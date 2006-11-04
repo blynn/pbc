@@ -1,3 +1,14 @@
+Fri Nov  3 20:29:59 PST 2006
+
+John Bethencourt sent in bugfixes for PBC on 64-bit machines.
+Dmitry Kosolapov modified comments in yuanli.c.
+I fixed a problem causing a compilation error on cygwin (reported
+by Wei Ren).
+
+Some index calculus optimizations.
+
+[0.3.15]
+
 Sat Oct 14 18:39:05 PDT 2006
 
 I decided to reorder the arguments to from_hash. It seems to be standard

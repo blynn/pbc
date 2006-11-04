@@ -112,7 +112,7 @@ arith/indexcalculus.o: include/poly.h include/curve.h include/mnt.h
 arith/indexcalculus.o: include/random.h include/utils.h
 arith/fieldquadratic.o: include/field.h include/fieldquadratic.h
 arith/fieldquadratic.o: include/utils.h
-arith/poly.o: include/field.h include/darray.h include/poly.h
+arith/poly.o: include/field.h include/darray.h include/poly.h include/utils.h
 arith/random.o: include/random.h include/utils.h
 misc/fops.o: include/fops.h include/tracker.h
 misc/tracker.o: include/tracker.h
