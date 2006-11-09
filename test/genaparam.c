@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "pbc.h"
-#include "a_param.h"
 
 int main(int argc, char **argv)
 {

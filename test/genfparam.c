@@ -1,5 +1,4 @@
 #include "pbc.h"
-#include "f_param.h"
 
 int main(int argc, char **argv)
 {

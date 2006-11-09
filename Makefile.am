@@ -16,13 +16,16 @@ lib_LTLIBRARIES = libpbc.la
 
 # this should really be a versioned dir, i.e., $(includedir)/pbc-0.2.16/pbc
 library_includedir = $(includedir)/pbc
-library_include_HEADERS = include/a_param.h include/d_param.h include/darray.h include/f_param.h \
+library_include_HEADERS = include/darray.h \
+	include/a_param.h include/a1_param.h \
+	include/d_param.h \
+	include/e_param.h \
+	include/f_param.h \
 	include/field.h \
 	include/fp.h include/fieldquadratic.h include/hash.h include/leak.h \
 	include/mpc.h include/pairing.h \
 	include/parse.h include/poly.h include/curve.h \
 	include/singular.h \
-	include/e_param.h \
 	include/field.h include/get_time.h include/hilbert.h include/mnt.h include/noleak.h \
 	include/param.h include/pbc.h include/random.h include/symtab.h include/utils.h \
 	include/fops.h include/tracker.h

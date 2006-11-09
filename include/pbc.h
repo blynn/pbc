@@ -12,5 +12,10 @@
 #include "poly.h"
 #include "curve.h"
 #include "mnt.h"
+#include "a1_param.h"
+#include "a_param.h"
+#include "d_param.h"
+#include "e_param.h"
+#include "f_param.h"
 
 #endif //PBC_H

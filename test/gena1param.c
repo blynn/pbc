@@ -1,5 +1,4 @@
 #include "pbc.h"
-#include "a1_param.h"
 
 int main(void)
 {

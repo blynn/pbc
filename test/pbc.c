@@ -10,7 +10,6 @@
 #include "fieldmpz.h"
 #include "fp.h"
 #include "utils.h"
-#include "a_param.h"
 
 char *pbc_getline(void);
 
