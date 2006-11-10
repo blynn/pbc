@@ -20,4 +20,10 @@ a random ''z'' that is less than ''limit''.
 */
 void pbc_mpz_random(mpz_t z, mpz_t limit);
 
+/*@manual pbcrandom
+Use previously chosen random number generator to select
+a random ''bits''-bit integer ''z''.
+*/
+void pbc_mpz_randomb(mpz_t z, unsigned int bits);
+
 #endif //RANDOM_H

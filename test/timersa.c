@@ -25,10 +25,8 @@ int main(void)
     mpz_init(iqmp);
     mpz_init(adp);
     mpz_init(adq);
-    mpz_setbit(N, 513);
-    mpz_setbit(N, 513);
-    pbc_mpz_random(p, N);
-    pbc_mpz_random(q, N);
+    pbc_mpz_randomb(p, 512);
+    pbc_mpz_randomb(q, 512);
     mpz_nextprime(p, p);
     mpz_nextprime(q, q);
     mpz_mul(N, p, q);

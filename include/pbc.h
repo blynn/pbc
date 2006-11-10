@@ -17,5 +17,6 @@
 #include "d_param.h"
 #include "e_param.h"
 #include "f_param.h"
+#include "random.h"
 
 #endif //PBC_H

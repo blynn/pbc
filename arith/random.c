@@ -66,6 +66,15 @@ void pbc_mpz_random(mpz_t z, mpz_t limit)
     current_mpz_random(z, limit, current_random_data);
 }
 
+void pbc_mpz_randomb(mpz_t z, unsigned int bits)
+{
+    mpz_t limit;
+    mpz_init(limit);
+    mpz_setbit(limit, bits);
+    pbc_mpz_random(z, limit);
+    mpz_clear(limit);
+}
+
 void random_set_deterministic(void)
 {
     trydevrandom = 0;

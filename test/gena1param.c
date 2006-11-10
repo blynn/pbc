@@ -2,7 +2,6 @@
 
 int main(void)
 {
-    gmp_randstate_t rstate;
     a1_param_t param;
     mpz_t p, q, N;
 
@@ -10,10 +9,11 @@ int main(void)
     mpz_init(q);
     mpz_init(N);
 
-    gmp_randinit_default(rstate);
-    mpz_urandomb(p, rstate, 512);
+    //in a real application, p and q must be stored somewhere safe
+    pbc_mpz_randomb(p, 512);
+    pbc_mpz_randomb(q, 512);
+
     mpz_nextprime(p, p);
-    mpz_urandomb(q, rstate, 512);
     mpz_nextprime(q, q);
     mpz_mul(N, p, q);
 
