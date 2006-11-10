@@ -1,3 +1,12 @@
+Thu Nov  9 19:54:30 PST 2006
+
+pbc.h includes more header files, so that the functions documented in the
+manual can actually be used without generating warnings.
+
+Added pbc_mpz_randomb(), which works like GMP's mpz_urandomb() function.
+
+[0.3.16]
+
 Fri Nov  3 20:29:59 PST 2006
 
 John Bethencourt sent in bugfixes for PBC on 64-bit machines.
