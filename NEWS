@@ -1,3 +1,14 @@
+Wed Nov 15 15:35:38 PST 2006
+
+fieldmpz.h now installs to the PBC include directory. Currently it is
+only used by the pbc test program, but this header file could potentially
+play a greater role one day.
+
+Fixed a bug reported by Paul Miller: element_from_hash() was returning
+different points for the same hash.
+
+[0.3.17]
+
 Thu Nov  9 19:54:30 PST 2006
 
 pbc.h includes more header files, so that the functions documented in the
