@@ -249,6 +249,7 @@ static void curve_from_hash(element_t a, void *data, int len)
 	((char *) datacopy)[0]++;
     }
     element_sqrt(p->y, t);
+    if (element_sgn(p->y) < 0) element_neg(p->y, p->y);
 
     if (cdp->cofac) element_mul_mpz(a, a, cdp->cofac);
 
