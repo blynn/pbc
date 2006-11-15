@@ -22,6 +22,7 @@ library_include_HEADERS = include/darray.h \
 	include/e_param.h \
 	include/f_param.h \
 	include/field.h \
+	include/fieldmpz.h \
 	include/fp.h include/fieldquadratic.h include/hash.h include/leak.h \
 	include/mpc.h include/pairing.h \
 	include/parse.h include/poly.h include/curve.h \
