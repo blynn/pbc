@@ -823,7 +823,10 @@ void d_pairing_clear(pairing_t pairing)
     mpz_clear(p->tateexp);
     if (p->k == 6) {
 	int i;
-	for (i=1; i<=4; i++) element_clear(p->xpowq[i]);
+	for (i=1; i<=4; i++) {
+	    element_clear(p->xpowq[i]);
+	    free(p->xpowq[i]);
+	}
 	free(p->xpowq);
     }
 
@@ -835,6 +838,9 @@ void d_pairing_clear(pairing_t pairing)
     field_clear(p->Fqd);
     field_clear(p->Fqx);
     field_clear(p->Fq);
+    field_clear(pairing->Zr);
+    mpz_clear(pairing->r);
+    free(p);
 }
 
 void pairing_init_d_param(pairing_t pairing, d_param_t param)

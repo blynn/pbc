@@ -92,6 +92,9 @@ int main(int argc, char **argv)
     timefield(f1);
     printf("fasterfp.c\n");
     timefield(f2);
-    //mem_report();
+
+    mpz_clear(prime);
+    field_clear(f1);
+    field_clear(f2);
     return 0;
 }

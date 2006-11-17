@@ -61,3 +61,12 @@ void *symtab_at(symtab_t t, char *key)
     }
     return NULL;
 }
+
+void symtab_forall_data(symtab_t t, void (*func)(void *))
+{
+    int i, n = t->list->count;
+    for (i=0; i<n; i++) {
+	entry_ptr e = t->list->item[i];
+	func(e->data);
+    }
+}

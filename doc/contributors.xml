@@ -31,6 +31,9 @@ John Bethencourt sent in many helpful patches, e.g. fixes that allow PBC to
 work on 64-bit platforms.
 </para>
 <para>
+Paul Miller reported bugs and also wrote the Gentoo portage overlay for PBC.
+</para>
+<para>
 If you're not mentioned here but should be, please let me know!
 (blynn at cs dot stanford dot edu).
 </para>

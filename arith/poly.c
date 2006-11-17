@@ -686,6 +686,7 @@ static int polymod_is_sqr(element_ptr e)
     element_pow_mpz(e0, e, z);
     res = element_is1(e0);
     element_clear(e0);
+    mpz_clear(z);
     return res;
 }
 

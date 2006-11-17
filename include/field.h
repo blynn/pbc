@@ -366,7 +366,9 @@ static inline int element_sgn(element_t a)
 /*@manual ecmp
 If ''a'' is zero, returns 0. For nozero ''a'' the behaviour depends on
 the algebraic structure, but has the property that
-element_sgn(''a'') = -element_sgn(-''a'').
+element_sgn(''a'') = -element_sgn(-''a'')
+and
+element_sgn(''a'') = 0 implies ''a'' = 0 with overwhelming probability.
 Not implemented on elliptic curve groups yet.
 */
 static inline int element_sign(element_t a)

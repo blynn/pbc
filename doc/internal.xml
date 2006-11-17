@@ -99,13 +99,15 @@ extend a field an arbitrary number of times
   <listitem>
 <para>
 switch fields easily, so for example a program that benchmarks addition in
-polynomial rings can be modified trivially to bencmark addition
+polynomial rings can be trivially modified to benchmark addition
 in a group, and
 </para>
   </listitem>
   <listitem>
 <para>
 interchange different implementations of the same algebraic structure.
+For example, this was useful when I was comparing
+Montgomery representation versus a naive implementation of modular arithmetic.
 </para>
   </listitem>
 </itemizedlist>
@@ -191,7 +193,7 @@ data types with <type>_t</type> is common practice.
 Some algorithms require a quadratic nonresidue in a given field. The first
 time a quadratic nonresidue is requested, one is generated at random, using
 the same source of random bits as other PBC random functions. [Which
-reminds me, should get rid of the <parameter>nqr</parameter> field and
+reminds me, should I get rid of the <parameter>nqr</parameter> field and
 instead have it as part of the <parameter>data</parameter> field in
 struct field_s?]
 </para>

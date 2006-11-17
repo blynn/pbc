@@ -34,4 +34,6 @@ Returns pointer at key ''key'' in ''t''.
 */
 void *symtab_at(symtab_t t, char *key);
 
+void symtab_forall_data(symtab_t t, void (*func)(void *));
+
 #endif //SYMTAB_H

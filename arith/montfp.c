@@ -409,6 +409,7 @@ static void fp_invert(element_ptr c, element_ptr a)
 
     mont_mul(cd->d, tmp, p->R3, p);
     cd->flag = 2;
+    mpz_clear(z);
 }
 
 static void fp_random(element_ptr a)

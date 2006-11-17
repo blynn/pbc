@@ -596,6 +596,9 @@ void pbc_mpz_out_raw_n(unsigned char *data, int n, mpz_t z)
     }
 }
 
+//for short hashes H, do
+//  buf = H || 0 || H || 1 || H || ...
+//before calling mpz_import
 void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
 	unsigned char *data, unsigned int len)
 {

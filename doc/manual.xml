@@ -10,6 +10,7 @@
     <!ENTITY chapter_tutorial SYSTEM "sigex.xml">
     <!ENTITY chapter_internal SYSTEM "internal.xml">
     <!ENTITY chapter_auxfns SYSTEM "auxfns.xml">
+    <!ENTITY chapter_security SYSTEM "security.xml">
     <!ENTITY appendix_contributors SYSTEM "contributors.xml">
 
     <!ENTITY einit SYSTEM "gen/einit.xml">
@@ -156,5 +157,6 @@ have to be updated.
 &chapter_randomfns;
 &chapter_auxfns;
 &chapter_internal;
+&chapter_security;
 &appendix_contributors;
 </book>

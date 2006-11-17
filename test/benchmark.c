@@ -48,6 +48,9 @@ int main(void)
     element_clear(x);
     element_clear(y);
     element_clear(r);
+    element_clear(r2);
+
+    pairing_clear(pairing);
 
     return 0;
 }

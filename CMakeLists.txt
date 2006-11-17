@@ -86,11 +86,12 @@ set(warnflags "-Wall -W -Wfloat-equal -Wendif-labels -Wshadow  \\
     -Wredundant-decls"
 )
 set(excessivewarnflags "-std=c99 -pedantic")
-set(optflags "-O3 -ffast-math -fomit-frame-pointer \\
-    -Wall -W -Wfloat-equal -Wendif-labels -Wshadow \\
-    -Wpointer-arith -Wcast-align -Wstrict-prototypes  \\
-    -Wredundant-decls"
-)
+
+if(debug)
+set(optflags "-O0 -g")
+else(debug)
+set(optflags "-O3 -ffast-math -fomit-frame-pointer")
+endif(debug)
 
 # my laptop (IBM Thinkpad X31)
 #   cmake -D x31:BOOL=1 .

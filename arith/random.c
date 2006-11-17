@@ -44,6 +44,7 @@ static void file_mpz_random(mpz_t r, mpz_t limit, void *data)
     fclose(fp);
     mpz_set(r, z);
     mpz_clear(z);
+    free(bytes);
 }
 
 static void (*current_mpz_random)(mpz_t, mpz_t, void *) = deterministic_mpz_random;
