@@ -59,6 +59,8 @@ int main(void)
 
 	element_from_bytes_compressed(sig, data);
 	element_printf("decompressed = %B\n", sig);
+
+	free(data);
     }
 
     //verification part 1
@@ -103,6 +105,8 @@ int main(void)
 		printf("*BUG* signature does not verify *BUG*\n");
 	    }
 	}
+
+	free(data);
     }
 
     //a random signature shouldn't verify
@@ -114,5 +118,13 @@ int main(void)
 	printf("*BUG* random signature verifies *BUG*\n");
     }
 
+    element_clear(sig);
+    element_clear(public_key);
+    element_clear(secret_key);
+    element_clear(g);
+    element_clear(h);
+    element_clear(temp1);
+    element_clear(temp2);
+    pairing_clear(pairing);
     return 0;
 }

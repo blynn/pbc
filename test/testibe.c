@@ -62,5 +62,14 @@ int main(void)
     pairing_apply(s, rg, zh, pairing);
     element_printf("f(g^r, h^master) = %B\n", s);
 
+    element_clear(g);
+    element_clear(h);
+    element_clear(s);
+    element_clear(rg);
+    element_clear(zg);
+    element_clear(zh);
+    element_clear(master);
+    element_clear(r);
+    pairing_clear(pairing);
     return 0;
 }

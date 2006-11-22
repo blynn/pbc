@@ -74,5 +74,17 @@ int main(void)
       printf("Oops 2!\n");
     }
 
+    mpz_clear(r_mpz);
+    element_clear(g1);
+    element_clear(u1);
+    element_clear(up1);
+    element_clear(g2);
+    element_clear(u2);
+    element_clear(up2);
+    element_clear(r);
+    element_pp_clear(g1_pp);
+    element_pp_clear(g2_pp);
+    pairing_clear(pairing);
+
     return 0;
 }

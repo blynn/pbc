@@ -252,6 +252,7 @@ void element_pow3_mpz(element_ptr x, element_ptr a1, mpz_ptr n1,
 struct element_base_table {
     int k;
     int bits;
+    int num_lookups;
     element_t **table;
 };
 
@@ -262,24 +263,23 @@ static void *element_build_base_table(element_ptr a, int bits, int k)
     element_t multiplier;
     int i, j;
     int lookup_size;
-    int num_lookups;
 
     element_t *lookup;
 
     fprintf(stderr, "building %d bits %d k\n", bits, k);
 
     lookup_size = 1 << k;
-    num_lookups = bits/k + 1;
 
     base_table = malloc(sizeof(struct element_base_table));
+    base_table->num_lookups = bits/k + 1;
     base_table->k = k;
     base_table->bits = bits;
-    base_table->table = malloc(num_lookups * sizeof(element_t *));
+    base_table->table = malloc(base_table->num_lookups * sizeof(element_t *));
 
     element_init(multiplier, a->field);
     element_set(multiplier, a);
 
-    for (i = 0; i < num_lookups; i++) {
+    for (i = 0; i < base_table->num_lookups; i++) {
         lookup = malloc(lookup_size * sizeof(element_t));
         element_init(lookup[0], a->field);
         element_set1(lookup[0]);
@@ -345,8 +345,23 @@ void default_element_pp_pow(element_t out, mpz_ptr power, element_pp_t p)
 
 void default_element_pp_clear(element_pp_t p)
 {
-    //TODO: free space taken by p->data
-    UNUSED_VAR(p);
+    struct element_base_table *base_table = p->data;
+    int lookup_size = 1 << base_table->k;
+    element_t *lookup;
+    int i, j;
+
+    element_t **epp = base_table->table;
+
+    for (i = 0; i < base_table->num_lookups; i++) {
+	lookup = epp[i];
+	for (j = 0; j < lookup_size; j++) {
+	    element_clear(lookup[j]);
+	}
+	free(lookup);
+    }
+    free(epp);
+
+    free(base_table);
 }
 
 void field_set_nqr(field_ptr f, element_t nqr)

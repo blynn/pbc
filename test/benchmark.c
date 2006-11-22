@@ -1,3 +1,4 @@
+#define PBC_DEBUG
 #include "pbc.h"
 #include "get_time.h"
 

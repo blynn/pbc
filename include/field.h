@@ -1,6 +1,6 @@
 /*
- * Poorly named. Though this data structure can represent a field,
- * it is more general, as it is used to implement rings and groups as well.
+ * Though this data structure does represent fields,
+ * we also use it for rings and groups as well.
  */
 //requires
 // * stdio.h
@@ -23,6 +23,11 @@ struct element_pp_s {
 };
 typedef struct element_pp_s element_pp_t[1];
 typedef struct element_pp_s *element_pp_ptr;
+
+#include "pbc_assert.h"
+void pbc_assert(int expr, char *msg, const char *func);
+void pbc_assert_match2(element_ptr a, element_ptr b, const char *func);
+void pbc_assert_match3(element_ptr a, element_ptr b, element_ptr c, const char *func);
 
 struct field_s {
     void (*field_clear)(struct field_s *f);
@@ -164,6 +169,7 @@ Set ''e'' to ''a''.
 */
 static inline void element_set(element_t e, element_t a)
 {
+    PBC_ASSERT_MATCH2(e, a);
     e->field->set(e, a);
 }
 
@@ -194,6 +200,7 @@ Set ''n'' to ''a'' + ''b''.
 */
 static inline void element_add(element_t n, element_t a, element_t b)
 {
+    PBC_ASSERT_MATCH3(n, a, b);
     n->field->add(n, a, b);
 }
 
@@ -202,6 +209,7 @@ Set ''n'' to ''a'' - ''b''.
 */
 static inline void element_sub(element_t n, element_t a, element_t b)
 {
+    PBC_ASSERT_MATCH3(n, a, b);
     n->field->sub(n, a, b);
 }
 
@@ -210,6 +218,7 @@ Set ''n'' to ''a'' times ''b''.
 */
 static inline void element_mul(element_t n, element_t a, element_t b)
 {
+    PBC_ASSERT_MATCH3(n, a, b);
     n->field->mul(n, a, b);
 }
 
@@ -217,6 +226,7 @@ static inline void element_mul(element_t n, element_t a, element_t b)
 */
 static inline void element_mul_mpz(element_t n, element_t a, mpz_t z)
 {
+    PBC_ASSERT_MATCH2(n, a);
     n->field->mul_mpz(n, a, z);
 }
 
@@ -227,6 +237,7 @@ where there are ''z'' ''a'''s.
 */
 static inline void element_mul_si(element_t n, element_t a, signed long int z) 
 {
+    PBC_ASSERT_MATCH2(n, a);
     n->field->mul_si(n, a, z);
 }
 
@@ -238,6 +249,8 @@ where there are ''z'' ''a'''s.
 static inline void element_mul_zn(element_t c, element_t a, element_t z)
 {
     mpz_t z0;
+    PBC_ASSERT_MATCH2(c, a);
+    //TODO: check z->field is Zn
     mpz_init(z0);
     element_to_mpz(z0, z);
     element_mul_mpz(c, a, z0);
@@ -249,6 +262,7 @@ Set ''n'' to ''a'' / ''b''.
 */
 static inline void element_div(element_t n, element_t a, element_t b)
 {
+    PBC_ASSERT_MATCH3(n, a, b);
     n->field->div(n, a, b);
 }
 
@@ -257,6 +271,7 @@ Set ''n'' to ''a'' + ''a''.
 */
 static inline void element_double(element_t n, element_t a)
 {
+    PBC_ASSERT_MATCH2(n, a);
     n->field->doub(n, a);
 }
 
@@ -265,6 +280,7 @@ Set ''n'' to ''a/2''
 */
 static inline void element_halve(element_t n, element_t a)
 {
+    PBC_ASSERT_MATCH2(n, a);
     n->field->halve(n, a);
 }
 
@@ -273,6 +289,7 @@ Set ''n'' to ''a'' times ''a''.
 */
 static inline void element_square(element_t n, element_t a)
 {
+    PBC_ASSERT_MATCH2(n, a);
     n->field->square(n, a);
 }
 
@@ -282,6 +299,7 @@ Set ''x'' to ''a'' raised to the power ''n'', that is
 */
 static inline void element_pow_mpz(element_t x, element_t a, mpz_t n)
 {
+    PBC_ASSERT_MATCH2(x, a);
     x->field->pow_mpz(x, a, n);
 }
 
@@ -293,6 +311,7 @@ of the algebraic structure ''x'' lies in).
 static inline void element_pow_zn(element_t x, element_t a, element_t n)
 {
     mpz_t z;
+    PBC_ASSERT_MATCH2(x, a);
     mpz_init(z);
     element_to_mpz(z, n);
     x->field->pow_mpz(x, a, z);
@@ -304,6 +323,7 @@ Set ''n'' to -''a''.
 */
 static inline void element_neg(element_t n, element_t a)
 {
+    PBC_ASSERT_MATCH2(n, a);
     n->field->neg(n, a);
 }
 
@@ -312,6 +332,7 @@ Set ''n'' to the inverse of ''a''.
 */
 static inline void element_invert(element_t n, element_t a)
 {
+    PBC_ASSERT_MATCH2(n, a);
     n->field->invert(n, a);
 }
 
@@ -345,6 +366,7 @@ Returns 0 if ''a'' and ''b'' are the same, nonzero otherwise.
 */
 static inline int element_cmp(element_t a, element_t b)
 {
+    PBC_ASSERT_MATCH2(a, b);
     return a->field->cmp(a, b);
 }
 
@@ -378,6 +400,7 @@ static inline int element_sign(element_t a)
 
 static inline void element_sqrt(element_t a, element_t b)
 {
+    PBC_ASSERT_MATCH2(a, b);
     a->field->sqrt(a, b);
 }
 

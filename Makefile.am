@@ -29,7 +29,8 @@ library_include_HEADERS = include/darray.h \
 	include/singular.h \
 	include/field.h include/get_time.h include/hilbert.h include/mnt.h include/noleak.h \
 	include/param.h include/pbc.h include/random.h include/symtab.h include/utils.h \
-	include/fops.h include/tracker.h
+	include/fops.h include/tracker.h \
+	include/pbc_assert.h
 
 libpbc_la_CPPFLAGS = -Iinclude
 libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
@@ -39,6 +40,7 @@ libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
 	arith/indexcalculus.c \
 	arith/fieldquadratic.c arith/poly.c \
 	arith/random.c misc/parse.c misc/darray.c misc/symtab.c misc/get_time.c \
+	misc/pbc_assert.c \
 	misc/fops.c ecc/mpc.c ecc/mnt.c ecc/hilbert.c ecc/curve.c ecc/pairing.c \
 	ecc/singular.c \
 	ecc/param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
