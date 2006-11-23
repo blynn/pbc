@@ -1,40 +1,38 @@
 cmake_minimum_required(VERSION 2.4)
 project(pbc)
+set(CMAKE_MODULE_PATH .)
 include_directories(./include)
 
 # cross compiling for Windows using Debian's mingw package
 #   cmake -D crossmingw:BOOL=1
-# I keep my cross-compiled GMP in /home/ben/cross/gmp/
+# I keep my cross-compiled GMP in ~/cross/gmp/
 if(crossmingw)
-    include_directories(/home/ben/cross/gmp/include)
-    set(GMP_LIBRARY "/home/ben/cross/gmp/lib/libgmp.a" )
+    set(GMP_INCLUDE_DIR $ENV{HOME}/cross/gmp/include)
+    set(GMP_LIBRARY $ENV{HOME}/cross/gmp/lib/libgmp.a)
     set(CMAKE_EXECUTABLE_SUFFIX ".exe")
     set(CMAKE_COMPILER_IS_GNUCXX 1)
     set(CMAKE_CXX_COMPILER "i586-mingw32msvc-c++")
     set(CMAKE_C_COMPILER "i586-mingw32msvc-gcc")
     set(CMAKE_AR "i586-mingw32msvc-ar")
     set(CMAKE_RANLIB "i586-mingw32msvc-ranlib")
-    set(cppflags "${cppflags} -I/tmp/cross/include")
-    set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${optflags}")
     set(CMAKE_SKIP_RPATH ON)
     set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
     set(get_time_src "misc/get_time.win32.c")
-
-    add_executable(test/pbc test/pbc.c test/pbc_getline.c)
-
 else(crossmingw)
-    find_library(GMP_LIBRARY NAMES gmp PATHS /usr/lib /usr/local/lib)
+    find_package(GMP REQUIRED)
+    find_package(Readline)
     set(get_time_src "misc/get_time.c")
-
-    add_executable(test/pbc test/pbc.c test/pbc_getline.readline.c)
-    target_link_libraries(test/pbc readline)
-
 endif(crossmingw)
 
-set(leaksrc misc/leak.c)
-set(unused
-foo
-)
+if (READLINE_FOUND)
+    add_executable(test/pbc test/pbc.c test/pbc_getline.readline.c)
+    target_link_libraries(test/pbc readline)
+else (READLINE_FOUND)
+    add_executable(test/pbc test/pbc.c test/pbc_getline.c)
+endif (READLINE_FOUND)
+
+include_directories(GMP_INCLUDE_DIR)
+
 add_library(pbc
 arith/fieldmpz.c
 arith/montfp.c

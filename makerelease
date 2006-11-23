@@ -3,10 +3,18 @@
 VER=`grep AC_INIT configure.ac | sed 's/.*\[\([0-9]*\.[0-9]*\.[0-9]*\)\].*/\1/'`
 echo making pbc-$VER
 GREPVER=${VER//\./\\.}
+if [[ $1 == "test" ]]; then
+    echo test run
+    TESTRUN=1
+fi
 cg-log > ChangeLog
 cat ChangeLog | head -20 | grep pbc-$GREPVER > /dev/null || {
     echo cg-log does not mention release 
-    exit 1
+    if [[ $TESTRUN ]]; then
+	echo test run: continuing anyway...
+    else
+	exit 1
+    fi
 }
 make -f Makefile.orig depend || {
     echo Makefile.orig problem
@@ -28,9 +36,13 @@ cp ChangeLog $PBCDIR
 cd $PBCDIR
 grep $GREPVER NEWS > /dev/null || {
     echo NEWS does not mention release 
-    cd $HERE
-    rm -rf $TMPDIR
-    exit 1
+    if [[ $TESTRUN ]]; then
+	echo test run: continuing anyway...
+    else
+	cd $HERE
+	rm -rf $TMPDIR
+	exit 1
+    fi
 }
 grep $GREPVER doc/manual.xml > /dev/null || {
     echo Error: doc/manual.xml version number mismatch
@@ -46,7 +58,11 @@ grep $GREPVER doc/manual.xml > /dev/null || {
 cd $TMPDIR
 echo Creating tarball...
 rm -rf $PBCDIR/autom4te.cache
-tar cvfz $HERE/pbc-$VER.tar.gz pbc-$VER
+if [[ $TESTRUN ]]; then
+    echo test run: not building tarball...
+else
+    tar cvfz $HERE/pbc-$VER.tar.gz pbc-$VER
+fi
 cd $PBCDIR
 ./configure || {
     echo ./configure error
@@ -72,10 +88,18 @@ make || {
 make clean
 echo cmake with cross compile
 cmake -Dcrossmingw:BOOL=1 . || {
+    echo cmake mingw cross compile error
+    rm -rf $TMPDIR
+    exit 1
+}
+make || {
     echo mingw cross compile error
     rm -rf $TMPDIR
     exit 1
 }
-make
-zip $HERE/pbc-$VER-win32-bin.zip test/*.exe param/*
+if [[ $TESTRUN ]]; then
+    echo test run: not building zip...
+else
+    zip $HERE/pbc-$VER-win32-bin.zip test/*.exe param/*
+fi
 rm -rf $TMPDIR
