@@ -1,3 +1,18 @@
+Wed Nov 22 17:12:43 PST 2006
+
+The code for broadcast encryption and signature schemes has been removed.
+There will be new satellite libraries for these cryptosystems.
+The PBC library will focus on pairings only.
+
+Some memory leaks were plugged, including a couple of relatively low-level
+(hence serious) leaks in montfp.c and poly.c.
+
+I wrote pbc_assert.c and added some runtime checks to ensure elements from
+different algebraic structures are not mistakenly mixed. These checks are
+only performed if PBC_DEBUG is defined before pbc.h is included.
+
+[0.4.0]
+
 Wed Nov 15 15:35:38 PST 2006
 
 fieldmpz.h now installs to the PBC include directory. Currently it is

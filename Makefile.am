@@ -1,8 +1,7 @@
-SUBDIRS = . sig bce test 
-EXTRA_DIST = Makefile.mingw Makefile.orig param/*.param report_times list_hilbert genalldparams setup \
-	bce/bce.h \
-	misc/get_time.win32.c \
-	doc/pretty/pretty.css doc/makeover doc/extract doc/*.x[ms]l doc/default.css doc/Makefile
+SUBDIRS = . test 
+#EXTRA_DIST = Makefile.mingw Makefile.orig param/*.param report_times list_hilbert genalldparams setup \
+	#misc/get_time.win32.c \
+	#doc/pretty/pretty.css doc/makeover doc/extract doc/*.x[ms]l doc/default.css doc/Makefile
 
 ChangeLog :
 	cg-log > ChangeLog

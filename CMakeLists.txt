@@ -55,15 +55,12 @@ misc/fops.c misc/tracker.c
 misc/extend_printf.c
 ${get_time_src}
 )
-add_library(pbc_sig
-sig/sig.c sig/hash.c
-)
 foreach(bin
-test/19          test/geneparam  test/testbbs      test/testibe
-test/benchmark   test/genfparam  test/testbls      test/testibs
+test/19          test/geneparam  test/testibe
+test/benchmark   test/genfparam  test/testbls
 test/gena1param  test/listmnt    test/testfi       test/testpairing
 test/genaparam   test/sing       test/timefp       test/testpoly
-test/gendparam   test/testbb     test/testhilbert  test/testsig
+test/gendparam   test/testhilbert
 test/checkfp
 test/testexp
 test/timersa
@@ -72,11 +69,6 @@ test/testindexcalculus
 )
     add_executable(${bin} ${bin}.c)
     target_link_libraries(${bin} pbc ${GMP_LIBRARY} m)
-endforeach(bin)
-foreach(bin
-    test/testbb test/testbls test/testibs
-)
-    target_link_libraries(${bin} pbc_sig)
 endforeach(bin)
 
 target_link_libraries(test/pbc pbc ${GMP_LIBRARY} m)
@@ -134,7 +126,6 @@ include/param.h
 include/parse.h
 include/pbc_assert.h
 include/pbc.h
-include/pbc_sig.h
 include/poly.h
 include/random.h
 include/singular.h

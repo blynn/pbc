@@ -92,8 +92,6 @@ AC_CHECK_FUNCS([floor gettimeofday memmove memset pow sqrt strchr strdup])
 
 
 AC_CONFIG_FILES([Makefile
-		 sig/Makefile
-		 bce/Makefile
 		 test/Makefile])
 AC_OUTPUT
 
