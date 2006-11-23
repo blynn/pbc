@@ -336,14 +336,6 @@ symbol tables, parsing, benchmarking, debugging and so on.
 The <filename>test</filename> directory contains test programs. They
 were used to generate the files in the <filename>param</filename> directory.
 </para>
-<para>
-The <filename>sig</filename> directory contains code for the PBC
-signature library.
-</para>
-<para>
-The <filename>bce</filename> directory contains Matt Stein's code for
-the Boneh-Waters broadcast encryption scheme.
-</para>
 </section>
 <section><title>Religious Stances</title>
 <para>
@@ -420,6 +412,10 @@ I intend to minimize the number of
 use as much as possible
 (they should be in the <filename>.c</filename> files instead), and later
 perhaps even remove those annoying <code>#ifndef</code> statements too.
+</para>
+<para>
+Unfortunately I do not know of an easy way to avoid the C preprocessor
+for PBC's debugging features.
 </para>
 </section>
 </chapter>

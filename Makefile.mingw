@@ -32,7 +32,7 @@ libpbc_srcs := \
 	ecc/curve.c ecc/pairing.c ecc/param.c \
 	ecc/singular.c \
 	ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c
-test_srcs := test/testbls.c \
+test_srcs := test/testsig.c \
 	test/testibe.c \
 	test/testhilbert.c test/listmnt.c \
 	test/genaparam.c test/gencparam.c test/geneparam.c test/genfparam.c \
@@ -61,7 +61,7 @@ libpbc.a: libpbc.a($(libpbc_objs))
 # to specify its dependencies
 test/benchmark: test/benchmark.o libpbc.a
 test/testhilbert: test/testhilbert.o libpbc.a
-test/testbls: test/testbls.o libpbc.a
+test/testsig: test/testsig.o libpbc.a
 test/testibe: test/testibe.o libpbc.a
 test/testpairing: test/testpairing.o libpbc.a
 test/genaparam: test/genaparam.o libpbc.a
@@ -159,6 +159,12 @@ ecc/f_param.o: include/field.h include/pbc_assert.h include/fp.h
 ecc/f_param.o: include/fieldquadratic.h include/pairing.h include/f_param.h
 ecc/f_param.o: include/param.h include/poly.h include/curve.h
 ecc/f_param.o: include/tracker.h include/utils.h include/get_time.h
+test/testsig.o: include/pbc.h include/fops.h include/symtab.h
+test/testsig.o: include/darray.h include/field.h include/pbc_assert.h
+test/testsig.o: include/pairing.h include/poly.h include/curve.h
+test/testsig.o: include/mnt.h include/a1_param.h include/a_param.h
+test/testsig.o: include/d_param.h include/e_param.h include/f_param.h
+test/testsig.o: include/random.h
 test/testibe.o: include/pbc.h include/fops.h include/symtab.h
 test/testibe.o: include/darray.h include/field.h include/pbc_assert.h
 test/testibe.o: include/pairing.h include/poly.h include/curve.h

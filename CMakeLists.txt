@@ -57,7 +57,7 @@ ${get_time_src}
 )
 foreach(bin
 test/19          test/geneparam  test/testibe
-test/benchmark   test/genfparam  test/testbls
+test/benchmark   test/genfparam  test/testsig
 test/gena1param  test/listmnt    test/testfi       test/testpairing
 test/genaparam   test/sing       test/timefp       test/testpoly
 test/gendparam   test/testhilbert

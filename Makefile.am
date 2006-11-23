@@ -22,11 +22,11 @@ library_include_HEADERS = include/darray.h \
 	include/f_param.h \
 	include/field.h \
 	include/fieldmpz.h \
-	include/fp.h include/fieldquadratic.h include/hash.h include/leak.h \
+	include/fp.h include/fieldquadratic.h include/hash.h \
 	include/mpc.h include/pairing.h \
 	include/parse.h include/poly.h include/curve.h \
 	include/singular.h \
-	include/field.h include/get_time.h include/hilbert.h include/mnt.h include/noleak.h \
+	include/field.h include/get_time.h include/hilbert.h include/mnt.h \
 	include/param.h include/pbc.h include/random.h include/symtab.h include/utils.h \
 	include/fops.h include/tracker.h \
 	include/pbc_assert.h

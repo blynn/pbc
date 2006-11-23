@@ -123,17 +123,6 @@ short signature scheme and the Boneh-Franklin identity-based encryption scheme.
 </para></listitem>
 </varlistentry>
 <varlistentry>
-<term>testbb</term>
-<term>testbls</term>
-<term>testbbs</term>
-<term>testibs</term>
-<listitem><para>
-These test programs are more realistic, and test the implementations
-of the Boneh-Boyen, Boneh-Lynn-Shacham, Boneh-Boyen-Shacham signature schemes
-and the Cha-Cheon and Sakai-Kasahara-Schnorr identity-based signature schemes
-</para></listitem>
-</varlistentry>
-<varlistentry>
 <term>benchmark</term>
 <listitem><para>
 Reads pairing parameters on standard input and benchmarks the pairing.
