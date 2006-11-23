@@ -4,9 +4,9 @@
 //requires
 // * field.h
 
-#ifndef FIELDMPZ_H
-#define FIELDMPZ_H
+#ifndef __PBC_FIELDMPZ_H__
+#define __PBC_FIELDMPZ_H__
 
 void field_init_z(field_ptr f);
 
-#endif //FIELDMPZ_H
+#endif //__PBC_FIELDMPZ_H__

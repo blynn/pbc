@@ -3,8 +3,8 @@
 // * gmp.h
 // * fops.h
 // * field.h
-#ifndef PAIRING_H
-#define PAIRING_H
+#ifndef __PBC_PAIRING_H__
+#define __PBC_PAIRING_H__
 
 struct pairing_pp_s {
     struct pairing_s *pairing;
@@ -216,4 +216,4 @@ static inline void pairing_option_set(pairing_t pairing, char *key, char *value)
 {
     pairing->option_set(pairing, key, value);
 }
-#endif //PAIRING_H
+#endif //__PBC_PAIRING_H__

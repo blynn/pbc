@@ -2,8 +2,8 @@
 // * stdio.h
 // * gmp.h
 // * field.h
-#ifndef CURVE_H
-#define CURVE_H
+#ifndef __PBC_CURVE_H__
+#define __PBC_CURVE_H__
 
 /* called in {e,f}_param.c */
 void field_init_curve_b(field_ptr f, element_ptr b, mpz_t order, mpz_t cofac);
@@ -38,4 +38,4 @@ void curve_from_x(element_ptr e, element_t x);
 void curve_set_si(element_t R, long int x, long int y);
 void curve_random_no_cofac(element_ptr a);
 
-#endif //CURVE_H
+#endif //__PBC_CURVE_H__

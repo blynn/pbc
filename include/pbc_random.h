@@ -1,7 +1,7 @@
 //requires
 // * gmp.h
-#ifndef RANDOM_H
-#define RANDOM_H
+#ifndef __PBC_RANDOM_H__
+#define __PBC_RANDOM_H__
 
 /*@manual pbcrandom
 Uses ''filename'' as a source of random bytes. For example,
@@ -26,4 +26,4 @@ a random ''bits''-bit integer ''z''.
 */
 void pbc_mpz_randomb(mpz_t z, unsigned int bits);
 
-#endif //RANDOM_H
+#endif //__PBC_RANDOM_H__

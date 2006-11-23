@@ -3,8 +3,8 @@
 // * gmp.h
 // * fops.h
 // * pairing.h
-#ifndef F_PARAM_H
-#define F_PARAM_H
+#ifndef __PBC_F_PARAM_H__
+#define __PBC_F_PARAM_H__
 
 struct f_param_s {
     mpz_t q; //curve defined over F_q
@@ -49,4 +49,4 @@ void f_param_out_str(FILE *stream, f_param_ptr p);
 void f_param_inp_generic (f_param_ptr p, fetch_ops_t fops, void *ctx);
 void pairing_init_f_param(pairing_t pairing, f_param_t param);
 
-#endif //F_PARAM_H
+#endif //__PBC_F_PARAM_H__

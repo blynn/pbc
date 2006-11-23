@@ -2,8 +2,8 @@
 // * gmp.h
 // * field.h
 // * darray.h
-#ifndef POLY_H
-#define POLY_H
+#ifndef __PBC_POLY_H__
+#define __PBC_POLY_H__
 
 //implements R[x] for a given ring R
 //also R[x]_{f(x)}
@@ -78,4 +78,4 @@ element_ptr polymod_coeff(element_ptr e, int i);
 
 void polymod_const_mul(element_ptr res, element_ptr a, element_ptr e);
 int polymod_field_degree(field_t f);
-#endif //POLY_H
+#endif //__PBC_POLY_H__

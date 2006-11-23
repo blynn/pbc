@@ -1,5 +1,5 @@
-#ifndef __UTIL_H__
-#define __UTIL_H__
+#ifndef __PBC_UTIL_H__
+#define __PBC_UTIL_H__
 
 // from the ACE project: http://www.cs.wustl.edu/~schmidt/ACE.html
 // silences warnings, and generates no code for many compilers
@@ -18,4 +18,4 @@ static inline void *int_to_voidp(int i)
     return (void *) (long) i;
 }
 
-#endif
+#endif //__PBC_UTIL_H__

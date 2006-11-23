@@ -3,8 +3,8 @@
 // * gmp.h
 // * fops.h
 // * symtab.h
-#ifndef PARAM_H
-#define PARAM_H
+#ifndef __PBC_PARAM_H__
+#define __PBC_PARAM_H__
 
 void param_out_type(FILE *stream, char *s);
 void param_out_mpz(FILE *stream, char *s, mpz_t z);
@@ -16,4 +16,4 @@ void param_clear_tab(symtab_t tab);
 int lookup_int(symtab_t tab, char *key);
 void lookup_mpz(mpz_t z, symtab_t tab, char *key);
 
-#endif //PARAM_H
+#endif //__PBC_PARAM_H__

@@ -1,5 +1,5 @@
-#ifndef SYMTAB_H
-#define SYMTAB_H
+#ifndef __PBC_SYMTAB_H__
+#define __PBC_SYMTAB_H__
 
 #include "pbc_darray.h"
 
@@ -36,4 +36,4 @@ void *symtab_at(symtab_t t, char *key);
 
 void symtab_forall_data(symtab_t t, void (*func)(void *));
 
-#endif //SYMTAB_H
+#endif //__PBC_SYMTAB_H__

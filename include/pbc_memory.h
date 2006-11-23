@@ -1,7 +1,7 @@
 // requires
 // * stdlib.h
-#ifndef PBC_MEMORY_H
-#define PBC_MEMORY_H
+#ifndef __PBC_MEMORY_H__
+#define __PBC_MEMORY_H__
 //memory allocation functions
 extern void *(*pbc_malloc)(size_t);
 extern void *(*pbc_realloc)(void *, size_t);
@@ -17,4 +17,4 @@ terminate the program on failure: they must not return.
 */
 void pbc_set_memory_functions(void *(*malloc_fn)(size_t),
 	void *(*realloc_fn)(void *, size_t), void (*free_fn)(void *));
-#endif //PBC_MEMORY_H
+#endif //__PBC_MEMORY_H__

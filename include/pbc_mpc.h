@@ -4,8 +4,8 @@
 // * stdio.h
 // * gmp.h
 
-#ifndef MPC_H
-#define MPC_H
+#ifndef __PBC_MPC_H__
+#define __PBC_MPC_H__
 
 //GMP based complex floats
 
@@ -100,4 +100,4 @@ void mpc_inv(mpc_t res, mpc_t z);
 size_t mpc_out_str(FILE *stream, int base, size_t n_digits, mpc_t op);
 void mpc_pow_ui(mpc_t res, mpc_t z, unsigned int n);
 
-#endif //MPC_H
+#endif //__PBC_MPC_H__

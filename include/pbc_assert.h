@@ -1,5 +1,5 @@
-#ifndef PBC_ASSERT_H
-#define PBC_ASSERT_H
+#ifndef __PBC_ASSERT_H__
+#define __PBC_ASSERT_H__
 
 #ifdef PBC_DEBUG
 
@@ -15,4 +15,4 @@
 
 #endif
 
-#endif //PBC_ASSERT_H
+#endif //__PBC_ASSERT_H__

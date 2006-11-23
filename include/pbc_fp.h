@@ -6,8 +6,8 @@
  */
 // Requires
 // * field.h
-#ifndef FP_H
-#define FP_H
+#ifndef __PBC_FP_H__
+#define __PBC_FP_H__
 
 void field_init_naive_fp(field_ptr f, mpz_t prime);
 void field_init_tiny_fp(field_ptr f, mpz_t prime);
@@ -21,4 +21,4 @@ void fp_tonelli(element_ptr x, element_ptr a);
 
 void field_init_fp(field_ptr f, mpz_t prime);
 
-#endif //FP_H
+#endif //__PBC_FP_H__

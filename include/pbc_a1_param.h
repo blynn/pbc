@@ -3,8 +3,8 @@
 // * gmp.h
 // * pairing.h
 // * fops.h
-#ifndef A1_PARAM_H
-#define A1_PARAM_H
+#ifndef __PBC_A1_PARAM_H__
+#define __PBC_A1_PARAM_H__
 
 struct a1_param_s {
     mpz_t p;
@@ -44,4 +44,4 @@ void a1_param_gen(a1_param_t param, mpz_t n);
 void a1_param_inp_generic(a1_param_ptr p, fetch_ops_t fops, void *ctx);
 void pairing_init_a1_param(pairing_t pairing, a1_param_t param);
 
-#endif //A1_PARAM_H
+#endif //__PBC_A1_PARAM_H__

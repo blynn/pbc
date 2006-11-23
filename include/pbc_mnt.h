@@ -1,8 +1,8 @@
 //requires
 // * gmp.h
 // * darray.h
-#ifndef MNT_H
-#define MNT_H
+#ifndef __PBC_MNT_H__
+#define __PBC_MNT_H__
 
 struct cm_info_s {
     mpz_t q; //curve defined over F_q
@@ -39,4 +39,4 @@ no longer needed <command>darray_clear</command> should be called on ''L''.)
 */
 int find_mnt6_curve(darray_t L, unsigned int D, unsigned int bitlimit);
 
-#endif //MNT_H
+#endif //__PBC_MNT_H__

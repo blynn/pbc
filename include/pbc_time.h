@@ -1,6 +1,6 @@
-#ifndef GET_TIME_H
-#define GET_TIME_H
+#ifndef __PBC_TIME_H__
+#define __PBC_TIME_H__
 
 double get_time(void);
 
-#endif //GET_TIME_H
+#endif //__PBC_TIME_H__

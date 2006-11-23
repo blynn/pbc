@@ -31,7 +31,7 @@ else (READLINE_FOUND)
     add_executable(test/pbc test/pbc.c test/pbc_getline.c)
 endif (READLINE_FOUND)
 
-include_directories(GMP_INCLUDE_DIR)
+include_directories(${GMP_INCLUDE_DIR})
 
 add_library(pbc
 arith/fieldmpz.c
@@ -78,7 +78,6 @@ set(warnflags "-Wall -W -Wfloat-equal -Wendif-labels -Wshadow  \\
     -Wredundant-decls"
 )
 
-set(morewarnflags "-Werror -Wfatal-errors")
 set(excessivewarnflags "-std=c99 -pedantic")
 
 if(debug)
@@ -92,7 +91,7 @@ endif(debug)
 # doesn't help much
 set(x31flags "-march=pentium-m -mmmx -msse -msse2 -mfpmath=sse -malign-double -maccumulate-outgoing-args")
 
-set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${morewarnflags} ${optflags}")
+set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${optflags}")
 
 if(x31)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${x31flags}")

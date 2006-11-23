@@ -3,8 +3,8 @@
 // * gmp.h
 // * pairing.h
 // * fops.h
-#ifndef A_PARAM_H
-#define A_PARAM_H
+#ifndef __PBC_A_PARAM_H__
+#define __PBC_A_PARAM_H__
 
 struct a_param_s {
     int exp2;
@@ -48,4 +48,4 @@ void a_param_inp_generic (a_param_ptr p, fetch_ops_t fops, void *ctx);
 
 void pairing_init_a_param(pairing_t pairing, a_param_t p);
 
-#endif //A_PARAM_H
+#endif //__PBC_A_PARAM_H__

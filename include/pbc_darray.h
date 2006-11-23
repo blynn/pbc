@@ -1,7 +1,7 @@
 //darray = "dynamic array"
 //A linked-list implementation using C arrays
-#ifndef DARRAY_H
-#define DARRAY_H
+#ifndef __PBC_DARRAY_H__
+#define __PBC_DARRAY_H__
 
 struct darray_s {
     void **item;
@@ -68,4 +68,4 @@ static inline void *darray_last(darray_t a)
     return a->item[a->count - 1];
 }
 
-#endif //DARRAY_H
+#endif //__PBC_DARRAY_H__

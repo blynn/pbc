@@ -30,6 +30,7 @@ include/pbc_f_param.h \
 include/pbc_fp.h \
 include/pbc.h \
 include/pbc_hilbert.h \
+include/pbc_memory.h \
 include/pbc_mnt.h \
 include/pbc_mpc.h \
 include/pbc_pairing.h \
@@ -52,9 +53,9 @@ libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
 	arith/fieldquadratic.c arith/poly.c \
 	arith/random.c misc/parse.c misc/darray.c misc/symtab.c misc/get_time.c \
 	misc/pbc_assert.c \
+	misc/memory.c \
 	misc/fops.c ecc/mpc.c ecc/mnt.c ecc/hilbert.c ecc/curve.c ecc/pairing.c \
 	ecc/singular.c \
 	ecc/param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
 	ecc/f_param.c misc/tracker.c misc/extend_printf.c
 libpbc_la_LDFLAGS =  -lgmp -lm
-

@@ -5,8 +5,8 @@
 //requires
 // * stdio.h
 // * gmp.h
-#ifndef FIELD_H
-#define FIELD_H
+#ifndef __PBC_FIELD_H__
+#define __PBC_FIELD_H__
 
 struct field_s;
 
@@ -579,4 +579,4 @@ void brute_force_dlog(element_t x, element_t g, element_t h);
 void pollard_rho(element_t x, element_t g, element_t h);
 void index_calculus_dlog(mpz_t x, mpz_t g, mpz_t h, mpz_t q);
 
-#endif //FIELD_H
+#endif //__PBC_FIELD_H__

@@ -1,5 +1,5 @@
-#ifndef __FOPS_H__
-#define __FOPS_H__
+#ifndef __PBC_FOPS_H__
+#define __PBC_FOPS_H__
 
 struct fetch_ops_s {
    int (*fops_getc) (void *ctx);

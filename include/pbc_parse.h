@@ -1,7 +1,7 @@
 //requires
 // * fops.h
-#ifndef PARSE_H
-#define PARSE_H
+#ifndef __PBC_PARSE_H__
+#define __PBC_PARSE_H__
 
 enum {
     token_none = 0,
@@ -23,4 +23,4 @@ void token_init(token_t tok);
 void token_clear(token_t tok);
 void token_get_generic (token_t tok, fetch_ops_t fops, void *ctx);
 
-#endif //PARSE_H
+#endif //__PBC_PARSE_H__

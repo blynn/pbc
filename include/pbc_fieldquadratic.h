@@ -4,8 +4,8 @@
 
 //requires
 // * field.h
-#ifndef FIELDQUADRATIC_H
-#define FIELDQUADRATIC_H
+#ifndef __PBC_FIELDQUADRATIC_H__
+#define __PBC_FIELDQUADRATIC_H__
 
 void field_init_quadratic(field_ptr f, field_ptr fbase);
 void field_init_fi(field_ptr f, field_ptr fbase);
@@ -34,4 +34,4 @@ static inline element_ptr fi_im(element_ptr a)
 
 void element_field_to_fi(element_ptr a, element_ptr b);
 
-#endif //FIELDQUADRATIC_H
+#endif //__PBC_FIELDQUADRATIC_H__

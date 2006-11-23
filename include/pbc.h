@@ -1,5 +1,5 @@
-#ifndef PBC_H
-#define PBC_H
+#ifndef __PBC_H__
+#define __PBC_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,4 +20,4 @@
 #include "pbc_random.h"
 #include "pbc_memory.h"
 
-#endif //PBC_H
+#endif //__PBC_H__

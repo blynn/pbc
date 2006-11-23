@@ -1,7 +1,7 @@
 //requires
 // * stddef.h
-#ifndef __TRACKER_H__
-#define __TRACKER_H__
+#ifndef __PBC_TRACKER_H__
+#define __PBC_TRACKER_H__
 
 typedef struct tracker_t {
     const char *base;
@@ -11,4 +11,4 @@ typedef struct tracker_t {
 
 void tracker_init (tracker_t *t, const char *buf, size_t len);
 
-#endif
+#endif //__PBC_TRACKER_H__
