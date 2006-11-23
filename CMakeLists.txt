@@ -72,7 +72,6 @@ endforeach(bin)
 
 target_link_libraries(test/pbc pbc ${GMP_LIBRARY} m)
 
-set(cppflags "-Iinclude")
 set(warnflags "-Wall -W -Wfloat-equal -Wendif-labels -Wshadow  \\
     -Wpointer-arith -Wcast-align -Wstrict-prototypes \\
     -Wredundant-decls"
@@ -91,7 +90,7 @@ endif(debug)
 # doesn't help much
 set(x31flags "-march=pentium-m -mmmx -msse -msse2 -mfpmath=sse -malign-double -maccumulate-outgoing-args")
 
-set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${optflags}")
+set(CMAKE_C_FLAGS "-pipe ${warnflags} ${optflags}")
 
 if(x31)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${x31flags}")
