@@ -135,9 +135,9 @@ that variable remains modified when control return is returned to the caller.
     </listitem>
     <listitem>
 <para>
-Variables automatically allocate memory via <function>malloc()</function>
-when needed. Unlike GMP, there is no simple way to change the memory
-allocator yet.
+Like GMP, variables automatically allocate memory when needed.
+By default. <function>malloc()</function> and friends
+are called but this can be changed.
 </para>
     </listitem>
     <listitem>

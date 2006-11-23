@@ -3,6 +3,7 @@
 #include <gmp.h>
 #include "pbc_random.h"
 #include "pbc_utils.h"
+#include "pbc_memory.h"
 
 static void deterministic_mpz_random(mpz_t z, mpz_t limit, void *data)
 {
@@ -32,7 +33,7 @@ static void file_mpz_random(mpz_t r, mpz_t limit, void *data)
     n = mpz_sizeinbase(limit, 2);
     bytecount = (n + 7) / 8;
     leftover = n % 8;
-    bytes = (unsigned char *) malloc(bytecount);
+    bytes = (unsigned char *) pbc_malloc(bytecount);
     for (;;) {
 	fread(bytes, 1, bytecount, fp);
 	if (leftover) {
@@ -44,7 +45,7 @@ static void file_mpz_random(mpz_t r, mpz_t limit, void *data)
     fclose(fp);
     mpz_set(r, z);
     mpz_clear(z);
-    free(bytes);
+    pbc_free(bytes);
 }
 
 static void (*current_mpz_random)(mpz_t, mpz_t, void *) = deterministic_mpz_random;

@@ -1,6 +1,5 @@
 #include <pbc.h>
 #include "pbc_fp.h"
-#include "pbc_random.h"
 #include "pbc_time.h"
 
 int main(void)

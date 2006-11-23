@@ -54,7 +54,7 @@ int main(void)
 	int i;
 	int len = element_length_in_bytes(h);
 	printf("length_in_bytes(h) = %d\n", len);
-	unsigned char *data = malloc(len);
+	unsigned char *data = pbc_malloc(len);
 	element_to_bytes(data, h);
 	for (i=0; i<len; i++) {
 	    printf(" %02X", data[i]);

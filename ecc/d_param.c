@@ -17,6 +17,7 @@
 #include "pbc_d_param.h"
 #include "pbc_param.h"
 #include "pbc_tracker.h"
+#include "pbc_memory.h"
 #include "pbc_utils.h"
 
 struct mnt_pairing_data_s {
@@ -61,7 +62,7 @@ void d_param_clear(d_param_ptr param)
     for (i=0; i<d; i++) {
 	mpz_clear(param->coeff[i]);
     }
-    free(param->coeff);
+    pbc_free(param->coeff);
 }
 
 void d_param_out_str(FILE *stream, d_param_ptr p)
@@ -109,7 +110,7 @@ void d_param_inp_generic (d_param_ptr p, fetch_ops_t fops, void *ctx)
     lookup_mpz(p->nqr, tab, "nqr");
 
     d = p->k / 2;
-    p->coeff = realloc(p->coeff, sizeof(mpz_t) * d);
+    p->coeff = pbc_realloc(p->coeff, sizeof(mpz_t) * d);
     for (i=0; i<d; i++) {
 	sprintf(s, "coeff%d", i);
 	mpz_init(p->coeff[i]);
@@ -729,7 +730,7 @@ static void d_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
     element_init(c, Fq);
 
     m = mpz_sizeinbase(q, 2) - 2;
-    p->data = malloc(sizeof(pp_coeff_t) * 2 * m);
+    p->data = pbc_malloc(sizeof(pp_coeff_t) * 2 * m);
     coeff = (pp_coeff_t *) p->data;
     pp = coeff[0];
 
@@ -767,7 +768,7 @@ static void d_pairing_pp_clear(pairing_pp_t p)
 	element_clear(pp->b);
 	element_clear(pp->c);
     }
-    free(p->data);
+    pbc_free(p->data);
 }
 
 static void d_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
@@ -825,9 +826,9 @@ void d_pairing_clear(pairing_t pairing)
 	int i;
 	for (i=1; i<=4; i++) {
 	    element_clear(p->xpowq[i]);
-	    free(p->xpowq[i]);
+	    pbc_free(p->xpowq[i]);
 	}
-	free(p->xpowq);
+	pbc_free(p->xpowq);
     }
 
     field_clear(p->Etwist);
@@ -840,7 +841,7 @@ void d_pairing_clear(pairing_t pairing)
     field_clear(p->Fq);
     field_clear(pairing->Zr);
     mpz_clear(pairing->r);
-    free(p);
+    pbc_free(p);
 }
 
 void pairing_init_d_param(pairing_t pairing, d_param_t param)
@@ -862,7 +863,7 @@ void pairing_init_d_param(pairing_t pairing, d_param_t param)
     pairing->map = cc_pairing;
     pairing->is_almost_coddh = cc_is_almost_coddh;
 
-    p =	pairing->data = malloc(sizeof(mnt_pairing_data_t));
+    p =	pairing->data = pbc_malloc(sizeof(mnt_pairing_data_t));
     field_init_fp(p->Fq, param->q);
     element_init(a, p->Fq);
     element_init(b, p->Fq);
@@ -881,7 +882,7 @@ void pairing_init_d_param(pairing_t pairing, d_param_t param)
     field_init_polymod(p->Fqd, irred);
     element_clear(irred);
 
-    p->Fqd->nqr = malloc(sizeof(element_t));
+    p->Fqd->nqr = pbc_malloc(sizeof(element_t));
     element_init(p->Fqd->nqr, p->Fqd);
     element_set_mpz(((element_t *) p->Fqd->nqr->data)[0], param->nqr);
 
@@ -897,11 +898,11 @@ void pairing_init_d_param(pairing_t pairing, d_param_t param)
 	mpz_add_ui(z, z, 1);
 	mpz_divexact(z, z, pairing->r);
 
-	p->xpowq = malloc(sizeof(element_ptr) * 5);
+	p->xpowq = pbc_malloc(sizeof(element_ptr) * 5);
 	element_init(e0, p->Fqd);
 	element_set1(((element_t *) e0->data)[1]);
 	for (i=1; i<=4; i++) {
-	    element_ptr e = p->xpowq[i] = malloc(sizeof(element_t));
+	    element_ptr e = p->xpowq[i] = pbc_malloc(sizeof(element_t));
 	    element_init(e, p->Fqd);
 	    element_pow_mpz(e0, e0, q);
 	    element_set(e, e0);
@@ -1052,7 +1053,7 @@ void d_param_from_cm(d_param_t param, cm_info_ptr cm)
 	element_random(((element_t *) nqr->data)[0]);
     } while (element_is_sqr(nqr));
 
-    param->coeff = realloc(param->coeff, sizeof(mpz_t) * d);
+    param->coeff = pbc_realloc(param->coeff, sizeof(mpz_t) * d);
 
     for (i=0; i<d; i++) {
 	mpz_init(param->coeff[i]);

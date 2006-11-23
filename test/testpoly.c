@@ -36,7 +36,7 @@ int main(void)
 	int i;
 	int n = element_length_in_bytes(f);
 	printf("serialized f =");
-	data = (unsigned char *) malloc(n);
+	data = (unsigned char *) pbc_malloc(n);
 	element_to_bytes(data, f);
 	for (i=0; i<n; i++) {
 	    printf(" %02X", data[i]);
@@ -75,7 +75,7 @@ int main(void)
 	int i;
 	int n = element_length_in_bytes(f);
 	printf("serialized f =");
-	data = (unsigned char *) malloc(n);
+	data = (unsigned char *) pbc_malloc(n);
 	element_to_bytes(data, f);
 	for (i=0; i<n; i++) {
 	    printf(" %02X", data[i]);

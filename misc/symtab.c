@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pbc_symtab.h"
+#include "pbc_memory.h"
 
 struct entry_s {
     char *key;
@@ -19,8 +20,8 @@ void symtab_clear(symtab_t t)
     void clear(void *data)
     {
 	entry_ptr e = data;
-	free(e->key);
-	free(e);
+	pbc_free(e->key);
+	pbc_free(e);
     }
 
     darray_forall(t->list, clear);
@@ -35,7 +36,7 @@ void symtab_put(symtab_t t, void *data, char *key)
 	e = t->list->item[i];
 	if (!strcmp(e->key, key)) goto doit;
     }
-    e = malloc(sizeof(entry_t));
+    e = pbc_malloc(sizeof(entry_t));
     e->key = strdup(key);
     darray_append(t->list, e);
 doit:

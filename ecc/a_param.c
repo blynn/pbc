@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h> //for rand, malloc, free
+#include <stdlib.h> //for rand, pbc_malloc, pbc_free
 #include <string.h> //for strcmp
 #include <gmp.h>
 #include "pbc_symtab.h"
@@ -15,6 +15,7 @@
 #include "pbc_param.h"
 #include "pbc_random.h"
 #include "pbc_tracker.h"
+#include "pbc_memory.h"
 #include "pbc_utils.h"
 
 struct a_pairing_data_s {
@@ -234,7 +235,7 @@ static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
 {
     int i, n;
     a_pairing_data_ptr ainfo = pairing->data;
-    p->data = malloc(sizeof(pp_coeff_t) * (ainfo->exp2 + 1));
+    p->data = pbc_malloc(sizeof(pp_coeff_t) * (ainfo->exp2 + 1));
     pp_coeff_t *coeff = (pp_coeff_t *) p->data;
     element_t V, V1;
     element_t a, b, c;
@@ -302,7 +303,7 @@ static void a_pairing_pp_clear(pairing_pp_t p)
 	element_clear(pp->b);
 	element_clear(pp->c);
     }
-    free(p->data);
+    pbc_free(p->data);
 }
 
 static inline void a_tateexp(element_ptr out, element_ptr in, element_ptr temp, mpz_t cofactor)
@@ -612,7 +613,7 @@ static void a_pairing_clear(pairing_t pairing)
     field_clear(p->Fq);
     field_clear(p->Fq2);
     mpz_clear(p->h);
-    free(p);
+    pbc_free(p);
 
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
@@ -634,7 +635,7 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
     element_t a, b;
     a_pairing_data_ptr p;
 
-    p =	pairing->data = malloc(sizeof(a_pairing_data_t));
+    p =	pairing->data = pbc_malloc(sizeof(a_pairing_data_t));
     p->exp2 = param->exp2;
     p->exp1 = param->exp1;
     p->sign1 = param->sign1;
@@ -767,10 +768,10 @@ static void a1_pairing_pp_clear(pairing_pp_t p)
 {
     void **pp = p->data;
     while (*pp) {
-	free(*pp);
+	pbc_free(*pp);
 	pp++;
     }
-    free(p->data);
+    pbc_free(p->data);
 }
 
 static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing)
@@ -779,7 +780,7 @@ static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairin
     element_ptr Px = curve_x_coord(in1);
     element_ptr Py = curve_y_coord(in1);
     a1_pairing_data_ptr a1info = pairing->data;
-    p->data = malloc(sizeof(void *) * mpz_sizeinbase(pairing->r, 2));
+    p->data = pbc_malloc(sizeof(void *) * mpz_sizeinbase(pairing->r, 2));
     void **pp = p->data;
     element_t V;
     element_t a, b, c;
@@ -845,16 +846,16 @@ static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairin
 	    //b = coeff of y^2
 	    element_mul(b, b, b2);
 
-	    *pp = malloc(sizeof(pp2_coeff_t));
+	    *pp = pbc_malloc(sizeof(pp2_coeff_t));
 	    pp2_coeff_set(*pp, a, b, c2, e0, e1, c);
 	} else {
-	    *pp = malloc(sizeof(pp_coeff_t));
+	    *pp = pbc_malloc(sizeof(pp_coeff_t));
 	    pp_coeff_set(*pp, a, b, c);
 	}
 	pp++;
 	m--;
     }
-    *pp = malloc(sizeof(pp_coeff_t));
+    *pp = pbc_malloc(sizeof(pp_coeff_t));
     pp_coeff_set(*pp, a, b, c);
     pp++;
     *pp = NULL;
@@ -1039,7 +1040,7 @@ void a1_pairing_clear(pairing_t pairing)
     field_clear(p->Ep);
     field_clear(p->Fp2);
     field_clear(p->Fp);
-    free(p);
+    pbc_free(p);
 
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
@@ -1054,7 +1055,7 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
 
     a1_pairing_data_ptr p;
 
-    p =	pairing->data = malloc(sizeof(a1_pairing_data_t));
+    p =	pairing->data = pbc_malloc(sizeof(a1_pairing_data_t));
     mpz_init(p->h);
     mpz_set_ui(p->h, param->l);
 
@@ -1068,7 +1069,7 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
     element_clear(b);
     field_init_fi(p->Fp2, p->Fp);
 
-    pairing->G1 = malloc(sizeof(field_t));
+    pairing->G1 = pbc_malloc(sizeof(field_t));
     pairing->G2 = pairing->G1 = p->Ep;
     //pairing->phi = phi_identity;
     pairing->GT = p->Fp2;

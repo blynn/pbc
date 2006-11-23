@@ -1,10 +1,11 @@
 #include <assert.h>
 #include <stdio.h> //for EOF
 #include <string.h> //strchr
-#include <stdlib.h> //for malloc, free
+#include <stdlib.h> //for pbc_malloc, pbc_free
 #include "pbc_fops.h"
 #include "pbc_parse.h"
 #include "pbc_tracker.h"
+#include "pbc_memory.h"
 
 void 
 token_get_generic (token_t tok, fetch_ops_t fops, void *ctx)
@@ -52,15 +53,15 @@ skipwhitespace:
    return;
    } else {
    tok->type = token_word;
-   free(tok->s);
-   buf = (char *) malloc(n);
+   pbc_free(tok->s);
+   buf = (char *) pbc_malloc(n);
    i = 0;
    for (;;) {
        buf[i] = c;
        i++;
        if (i == n) {
        n += 32;
-       buf = (char *) realloc(buf, n);
+       buf = (char *) pbc_realloc(buf, n);
        }
        c = fops->fops_getc(ctx);
        if (c == EOF || strchr(" \t\r\n</>", c)) break;
@@ -79,5 +80,5 @@ void token_init(token_t tok)
 
 void token_clear(token_t tok)
 {
-    free(tok->s);
+    pbc_free(tok->s);
 }

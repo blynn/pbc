@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "pbc_darray.h"
+#include "pbc_memory.h"
 
 #define NDEBUG
 #include <assert.h>
@@ -14,12 +15,12 @@ void darray_init(darray_ptr a)
 {
     a->max = max_init;
     a->count = 0;
-    a->item = malloc(sizeof(void *) * a->max);
+    a->item = pbc_malloc(sizeof(void *) * a->max);
 }
 
 darray_ptr darray_new(void)
 {
-    darray_ptr res = malloc(sizeof(darray_t));
+    darray_ptr res = pbc_malloc(sizeof(darray_t));
     darray_init(res);
     return res;
 }
@@ -28,8 +29,8 @@ void darray_remove_all(darray_ptr a)
 {
     a->max = max_init;
     a->count = 0;
-    free(a->item);
-    a->item = malloc(sizeof(void *) * a->max);
+    pbc_free(a->item);
+    a->item = pbc_malloc(sizeof(void *) * a->max);
 }
 
 void darray_remove_last(darray_ptr a)
@@ -41,7 +42,7 @@ void darray_remove_last(darray_ptr a)
 void darray_realloc(darray_ptr a, int size)
 {
     a->max = size;
-    a->item = realloc(a->item, sizeof(void *) * a->max);
+    a->item = pbc_realloc(a->item, sizeof(void *) * a->max);
 }
 
 void darray_append(darray_ptr a, void *p)
@@ -49,7 +50,7 @@ void darray_append(darray_ptr a, void *p)
     if (a->count == a->max) {
 	if (!a->max) a->max = max_init;
 	else a->max *= 2;
-	a->item = realloc(a->item, sizeof(void *) * a->max);
+	a->item = pbc_realloc(a->item, sizeof(void *) * a->max);
     }
     a->item[a->count] = p;
     a->count++;
@@ -66,7 +67,7 @@ int darray_index_of(darray_ptr a, void *p)
 
 void darray_clear(darray_t a)
 {
-    free(a->item);
+    pbc_free(a->item);
     a->max = 0;
     a->count = 0;
 }

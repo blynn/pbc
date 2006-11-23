@@ -68,5 +68,4 @@ static inline void *darray_last(darray_t a)
     return a->item[a->count - 1];
 }
 
-
 #endif //DARRAY_H

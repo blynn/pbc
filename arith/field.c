@@ -6,6 +6,7 @@
 #include "pbc_darray.h"
 #include "pbc_field.h"
 #include "pbc_utils.h"
+#include "pbc_memory.h"
 
 /* returns recommended window size.  n is exponent. */
 static int optimal_pow_window_size(mpz_ptr n)
@@ -46,7 +47,7 @@ static element_t *build_pow_window(element_ptr a, int k)
      *       us to avoid calculating even lookup entries > 2
      */
     lookup_size = 1 << k;
-    lookup = malloc(lookup_size * sizeof(element_t));
+    lookup = pbc_malloc(lookup_size * sizeof(element_t));
     element_init(lookup[0], a->field);
     element_set1(lookup[0]);
     for (s = 1; s < lookup_size; s++) {
@@ -65,7 +66,7 @@ static void clear_pow_window(int k, element_t *lookup)
     for (s = 0; s < lookup_size; s++) {
         element_clear(lookup[s]);
     }
-    free(lookup);
+    pbc_free(lookup);
 }
 
 /*
@@ -270,17 +271,17 @@ static void *element_build_base_table(element_ptr a, int bits, int k)
 
     lookup_size = 1 << k;
 
-    base_table = malloc(sizeof(struct element_base_table));
+    base_table = pbc_malloc(sizeof(struct element_base_table));
     base_table->num_lookups = bits/k + 1;
     base_table->k = k;
     base_table->bits = bits;
-    base_table->table = malloc(base_table->num_lookups * sizeof(element_t *));
+    base_table->table = pbc_malloc(base_table->num_lookups * sizeof(element_t *));
 
     element_init(multiplier, a->field);
     element_set(multiplier, a);
 
     for (i = 0; i < base_table->num_lookups; i++) {
-        lookup = malloc(lookup_size * sizeof(element_t));
+        lookup = pbc_malloc(lookup_size * sizeof(element_t));
         element_init(lookup[0], a->field);
         element_set1(lookup[0]);
         for (j = 1; j < lookup_size; j++) {
@@ -357,17 +358,17 @@ void default_element_pp_clear(element_pp_t p)
 	for (j = 0; j < lookup_size; j++) {
 	    element_clear(lookup[j]);
 	}
-	free(lookup);
+	pbc_free(lookup);
     }
-    free(epp);
+    pbc_free(epp);
 
-    free(base_table);
+    pbc_free(base_table);
 }
 
 void field_set_nqr(field_ptr f, element_t nqr)
 {
     if (!f->nqr) {
-	f->nqr = malloc(sizeof(element_t));
+	f->nqr = pbc_malloc(sizeof(element_t));
 	element_init(f->nqr, f);
     }
     element_set(f->nqr, nqr);
@@ -375,7 +376,7 @@ void field_set_nqr(field_ptr f, element_t nqr)
 
 void field_gen_nqr(field_ptr f)
 {
-    f->nqr = malloc(sizeof(element_t));
+    f->nqr = pbc_malloc(sizeof(element_t));
     element_init(f->nqr, f);
     do {
 	element_random(f->nqr);
@@ -500,13 +501,13 @@ static int generic_cmp(element_ptr a, element_ptr b)
     if (a == b) return 0;
     len = element_length_in_bytes(a);
     if (len != element_length_in_bytes(b)) return 1;
-    buf1 = malloc(len);
-    buf2 = malloc(len);
+    buf1 = pbc_malloc(len);
+    buf2 = pbc_malloc(len);
     element_to_bytes(buf1, a);
     element_to_bytes(buf2, b);
     result = memcmp(buf1, buf2, len);
-    free(buf1);
-    free(buf2);
+    pbc_free(buf1);
+    pbc_free(buf2);
     return result;
 }
 
@@ -593,7 +594,7 @@ void field_clear(field_ptr f)
 {
     if (f->nqr) {
 	element_clear(f->nqr);
-	free(f->nqr);
+	pbc_free(f->nqr);
     }
     mpz_clear(f->order);
     f->field_clear(f);
@@ -693,7 +694,7 @@ void pollard_rho(element_t x, element_t g, element_t h)
 
     void record(void)
     {
-	snapshot_ptr ss = malloc(sizeof(struct snapshot_s));
+	snapshot_ptr ss = pbc_malloc(sizeof(struct snapshot_s));
 	element_init_same_as(ss->a, asum);
 	element_init_same_as(ss->b, bsum);
 	element_init_same_as(ss->snark, snark);
@@ -731,7 +732,7 @@ element_printf("snark %Zd: %B\n", counter, snark);
     record();
     for (;;) {
 	int len = element_length_in_bytes(snark);
-	unsigned char *buf = malloc(len);
+	unsigned char *buf = pbc_malloc(len);
 	unsigned char hash = 0;
 
 	element_to_bytes(buf, snark);
@@ -739,7 +740,7 @@ element_printf("snark %Zd: %B\n", counter, snark);
 	    hash += buf[i];
 	}
 	i = hash % s;
-	free(buf);
+	pbc_free(buf);
 
 	element_mul(snark, snark, m[i]);
 	element_add(asum, asum, a[i]);
@@ -812,7 +813,7 @@ element_printf("snark %Zd: %B\n", counter, snark);
 	element_clear(ss->a);
 	element_clear(ss->b);
 	element_clear(ss->snark);
-	free(ss);
+	pbc_free(ss);
     }
     darray_clear(hole);
     element_clear(asum);

@@ -1,12 +1,13 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <gmp.h>
 #include "pbc_symtab.h"
 #include "pbc_fops.h"
 #include "pbc_parse.h"
 #include "pbc_tracker.h"
-#include <stdlib.h>
-#include <string.h>
+#include "pbc_memory.h"
 
 void param_out_type(FILE *stream, char *s)
 {
@@ -46,12 +47,12 @@ void param_read_generic (symtab_t tab, fetch_ops_t fops, void *ctx)
 	s = strdup(tok->s);
 	token_get_generic (tok, fops, ctx);
 	if (tok->type != token_word) {
-	    free(s);
+	    pbc_free(s);
 	    break;
 	}
 	s1 = strdup(tok->s);
 	symtab_put(tab, s1, s);
-	free(s);
+	pbc_free(s);
     }
     token_clear(tok);
 }
@@ -73,7 +74,7 @@ void param_read_str (symtab_t tab, FILE *stream)
 
 void param_clear_tab(symtab_t tab)
 {
-    symtab_forall_data(tab, free);
+    symtab_forall_data(tab, pbc_free);
 }
 
 void lookup_mpz(mpz_t z, symtab_t tab, char *key)

@@ -5,18 +5,19 @@
 #include "pbc_random.h"
 #include "pbc_utils.h"
 #include "pbc_fp.h"
+#include "pbc_memory.h"
 // wrappers around GMP mpz functions to implement Z
 
 static void z_init(element_ptr e)
 {
-    e->data = malloc(sizeof(mpz_t));
+    e->data = pbc_malloc(sizeof(mpz_t));
     mpz_init(e->data);
 }
 
 static void z_clear(element_ptr e)
 {
     mpz_clear(e->data);
-    free(e->data);
+    pbc_free(e->data);
 }
 
 static void z_set_si(element_ptr e, signed long int op)

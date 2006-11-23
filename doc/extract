@@ -1,5 +1,8 @@
 #!/usr/bin/gawk -f
 # hack to extract GMP-style documentation from source
+# extremely fragile, requires function definition/declaration
+# to end with ")\n" or ");" (e.g. no whitespace allowed)
+# and does not play well with function pointer parameters
 /^\/\*@/ {
     outfile = "gen/" gensub(".*manual ", "", 1) ".xml"
     print "Writing to " outfile
@@ -23,7 +26,7 @@
     s = gensub("\\((.*$)", "(<parameter>\\1", 1, s)
     gsub(",", "</parameter><parameter>", s)
     gsub("_ptr", "_t", s)
-    while (!match(s, ")")) {
+    while (!match(s, ");") && !match(s, ")$")) {
 	print s > outfile
 	getline
 	s = $0

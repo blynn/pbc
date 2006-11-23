@@ -9,6 +9,7 @@
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"
+#include "pbc_memory.h"
 
 //TODO: remove repeated code for error handling 
 int element_vfprintf(FILE *stream, const char *format, va_list ap)
@@ -94,7 +95,7 @@ int element_vfprintf(FILE *stream, const char *format, va_list ap)
     }
 
 done:
-    free(copy);
+    pbc_free(copy);
 
     return count;
 }

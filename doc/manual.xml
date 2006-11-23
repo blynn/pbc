@@ -10,6 +10,7 @@
     <!ENTITY chapter_tutorial SYSTEM "sigex.xml">
     <!ENTITY chapter_internal SYSTEM "internal.xml">
     <!ENTITY chapter_auxfns SYSTEM "auxfns.xml">
+    <!ENTITY chapter_customalloc SYSTEM "alloc.xml">
     <!ENTITY chapter_security SYSTEM "security.xml">
     <!ENTITY appendix_contributors SYSTEM "contributors.xml">
 
@@ -38,6 +39,7 @@
 
     <!ENTITY darray SYSTEM "gen/darray.xml">
     <!ENTITY symtab SYSTEM "gen/symtab.xml">
+    <!ENTITY alloc SYSTEM "gen/alloc.xml">
     ]
 >
 <book>
@@ -156,6 +158,7 @@ have to be updated.
 &chapter_paramfns;
 &chapter_randomfns;
 &chapter_auxfns;
+&chapter_customalloc;
 &chapter_internal;
 &chapter_security;
 &appendix_contributors;

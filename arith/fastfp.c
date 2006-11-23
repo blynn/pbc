@@ -6,6 +6,7 @@
 #include "pbc_field.h"
 #include "pbc_random.h"
 #include "pbc_fp.h"
+#include "pbc_memory.h"
 // naive implementation of F_p
 // uses lowlevel GMP routines (mpn_* functions)
 // ''data'' field of element holds pointer to array of mp_limb_t
@@ -25,14 +26,14 @@ typedef struct fp_field_data_s *fp_field_data_ptr;
 static void fp_init(element_ptr e)
 {
     fp_field_data_ptr p = e->field->data;
-    //e->data = malloc(p->bytes);
-    //memset(e->data, 0, p->bytes);
-    e->data = calloc(sizeof(mp_limb_t), p->limbs);
+    e->data = pbc_malloc(p->bytes);
+    memset(e->data, 0, p->bytes);
+    //e->data = pbc_calloc(sizeof(mp_limb_t), p->limbs);
 }
 
 static void fp_clear(element_ptr e)
 {
-    free(e->data);
+    pbc_free(e->data);
 }
 
 static inline void from_mpz(element_ptr e, mpz_ptr z)
@@ -359,8 +360,8 @@ static int fp_from_bytes(element_t e, unsigned char *data)
 static void fp_field_clear(field_t f)
 {
     fp_field_data_ptr p = f->data;
-    free(p->primelimbs);
-    free(p);
+    pbc_free(p->primelimbs);
+    pbc_free(p);
 }
 
 void field_init_fast_fp(field_ptr f, mpz_t prime)
@@ -399,10 +400,10 @@ void field_init_fast_fp(field_ptr f, mpz_t prime)
     f->from_bytes = fp_from_bytes;
     f->to_mpz = fp_to_mpz;
 
-    p = f->data = malloc(sizeof(fp_field_data_t));
+    p = f->data = pbc_malloc(sizeof(fp_field_data_t));
     p->limbs = mpz_size(prime);
     p->bytes = p->limbs * sizeof(mp_limb_t);
-    p->primelimbs = malloc(p->bytes);
+    p->primelimbs = pbc_malloc(p->bytes);
     mpz_export(p->primelimbs, &p->limbs, -1, sizeof(mp_limb_t), 0, 0, prime);
 
     mpz_set(f->order, prime);

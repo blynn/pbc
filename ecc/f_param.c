@@ -14,9 +14,8 @@
 #include "pbc_poly.h"
 #include "pbc_curve.h"
 #include "pbc_tracker.h"
+#include "pbc_memory.h"
 #include "pbc_utils.h"
-
-#include "pbc_time.h"
 
 struct f_pairing_data_s {
     field_t Fq, Fq2, Fq2x, Fq12;
@@ -461,7 +460,7 @@ void f_pairing_clear(pairing_t pairing)
     field_clear(p->Fq2x);
     field_clear(p->Fq2);
     field_clear(p->Fq);
-    free(p);
+    pbc_free(p);
 
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
@@ -472,12 +471,12 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
     f_pairing_data_ptr p;
     element_t irred;
     element_t e0, e1, e2;
-    p = pairing->data = malloc(sizeof(f_pairing_data_t));
+    p = pairing->data = pbc_malloc(sizeof(f_pairing_data_t));
     mpz_init(pairing->r);
     mpz_set(pairing->r, param->r);
     field_init_fp(pairing->Zr, pairing->r);
     field_init_fp(p->Fq, param->q);
-    p->Fq->nqr = malloc(sizeof(element_t));
+    p->Fq->nqr = pbc_malloc(sizeof(element_t));
     element_init(p->Fq->nqr, p->Fq);
     element_set_mpz(p->Fq->nqr, param->beta);
     field_init_quadratic(p->Fq2, p->Fq);

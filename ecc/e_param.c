@@ -1,6 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h> //for rand, malloc, free
+#include <stdlib.h> //for rand, pbc_malloc, pbc_free
 #include <string.h> //for strcmp
 #include <gmp.h>
 #include "pbc_fops.h"
@@ -13,6 +13,7 @@
 #include "pbc_curve.h"
 #include "pbc_random.h"
 #include "pbc_tracker.h"
+#include "pbc_memory.h"
 #include "pbc_utils.h"
 
 struct e_pairing_data_s {
@@ -634,7 +635,7 @@ void e_pairing_clear(pairing_t pairing)
     field_clear(p->Fq);
     field_clear(p->Eq);
     mpz_clear(p->tateexp);
-    free(p);
+    pbc_free(p);
 
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
@@ -651,7 +652,7 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     pairing->map = e_pairing;
     e_miller_fn = e_miller_proj;
 
-    p =	pairing->data = malloc(sizeof(e_pairing_data_t));
+    p =	pairing->data = pbc_malloc(sizeof(e_pairing_data_t));
     p->exp2 = param->exp2;
     p->exp1 = param->exp1;
     p->sign1 = param->sign1;

@@ -6,6 +6,7 @@
 #include "pbc_darray.h"
 #include "pbc_poly.h"
 #include "pbc_curve.h"
+#include "pbc_memory.h"
 
 struct curve_data_s {
     field_ptr field;
@@ -26,7 +27,7 @@ typedef struct point_s point_t[1];
 static void curve_init(element_ptr e)
 {
     curve_data_ptr cdp = e->field->data;
-    e->data = malloc(sizeof(point_t));
+    e->data = pbc_malloc(sizeof(point_t));
     point_ptr p = e->data;
     element_init(p->x, cdp->field);
     element_init(p->y, cdp->field);
@@ -38,7 +39,7 @@ static void curve_clear(element_ptr e)
     point_ptr p = e->data;
     element_clear(p->x);
     element_clear(p->y);
-    free(e->data);
+    pbc_free(e->data);
 }
 
 static void curve_invert(element_ptr c, element_ptr a)
@@ -233,7 +234,7 @@ static void curve_from_hash(element_t a, void *data, int len)
     point_ptr p = a->data;
     curve_data_ptr cdp = a->field->data;
 
-    datacopy = malloc(len);
+    datacopy = pbc_malloc(len);
     memcpy(datacopy, data, len);
 
     element_init(t, cdp->field);
@@ -255,7 +256,7 @@ static void curve_from_hash(element_t a, void *data, int len)
 
     element_clear(t);
     element_clear(t1);
-    free(datacopy);
+    pbc_free(datacopy);
 }
 
 static size_t curve_out_str(FILE *stream, int base, element_ptr a)
@@ -280,11 +281,11 @@ static void field_clear_curve(field_t f)
     cdp = f->data;
     if (cdp->cofac) {
 	mpz_clear(cdp->cofac);
-	free(cdp->cofac);
+	pbc_free(cdp->cofac);
     }
     element_clear(cdp->a);
     element_clear(cdp->b);
-    free(cdp);
+    pbc_free(cdp);
 }
 
 static int curve_length_in_bytes(element_ptr x)
@@ -336,7 +337,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     curve_data_ptr cdp;
     field_init(f);
     mpz_set(f->order, order);
-    cdp = f->data = malloc(sizeof(curve_data_t));
+    cdp = f->data = pbc_malloc(sizeof(curve_data_t));
     cdp->field = a->field;
     element_init(cdp->a, cdp->field);
     element_init(cdp->b, cdp->field);
@@ -344,7 +345,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     element_set(cdp->b, b);
 
     if (cofac) {
-	cdp->cofac = malloc(sizeof(mpz_t));
+	cdp->cofac = pbc_malloc(sizeof(mpz_t));
 	mpz_init(cdp->cofac);
 	mpz_set(cdp->cofac, cofac);
     } else cdp->cofac = NULL;

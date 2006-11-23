@@ -4,6 +4,7 @@
 #include "pbc_field.h"
 #include "pbc_fieldquadratic.h"
 #include "pbc_utils.h"
+#include "pbc_memory.h"
 
 static inline element_ptr fq_nqr(field_ptr f)
 {
@@ -12,7 +13,7 @@ static inline element_ptr fq_nqr(field_ptr f)
 
 static void fq_init(element_ptr e)
 {
-    fq_data_ptr p = e->data = malloc(sizeof(fq_data_t));
+    fq_data_ptr p = e->data = pbc_malloc(sizeof(fq_data_t));
     field_ptr f = e->field->data;
     element_init(p->x, f);
     element_init(p->y, f);
@@ -23,7 +24,7 @@ static void fq_clear(element_ptr e)
     fq_data_ptr p = e->data;
     element_clear(p->x);
     element_clear(p->y);
-    free(e->data);
+    pbc_free(e->data);
 }
 
 static void fq_set_si(element_ptr e, signed long int i)

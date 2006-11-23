@@ -4,6 +4,7 @@
 #include <gmp.h>
 #include "pbc_darray.h"
 #include "pbc_mnt.h"
+#include "pbc_memory.h"
 
 void cm_info_init(cm_info_t cm)
 {
@@ -89,7 +90,7 @@ int mnt_step2(darray_ptr L, unsigned int D, mpz_t U)
     }
 }
 
-    cm = malloc(sizeof(cm_info_t));
+    cm = pbc_malloc(sizeof(cm_info_t));
     cm_info_init(cm);
     cm->k = 6;
     cm->D = D;
@@ -179,20 +180,20 @@ int find_mnt6_curve(darray_t L, unsigned int D, unsigned int bitlimit)
 	if (d == -1) {
 	    //printf("-");
 	    if (!mpz_cmp_ui(Q1, 8)) {
-		zptr = (mpz_ptr) malloc(sizeof(mpz_t));
+		zptr = (mpz_ptr) pbc_malloc(sizeof(mpz_t));
 		mpz_init(zptr);
 		mpz_set(zptr, p0);
 		darray_append(listp, zptr);
-		zptr = (mpz_ptr) malloc(sizeof(mpz_t));
+		zptr = (mpz_ptr) pbc_malloc(sizeof(mpz_t));
 		mpz_init(zptr);
 		mpz_set(zptr, q0);
 		darray_append(listq, zptr);
 	    } else if (!mpz_cmp_ui(Q1, 2)) {
-		zptr = (mpz_ptr) malloc(sizeof(mpz_t));
+		zptr = (mpz_ptr) pbc_malloc(sizeof(mpz_t));
 		mpz_init(zptr);
 		mpz_mul_ui(zptr, p0, 2);
 		darray_append(listp, zptr);
-		zptr = (mpz_ptr) malloc(sizeof(mpz_t));
+		zptr = (mpz_ptr) pbc_malloc(sizeof(mpz_t));
 		mpz_init(zptr);
 		mpz_mul_ui(zptr, q0, 2);
 		darray_append(listq, zptr);

@@ -6,6 +6,7 @@
 #include "pbc_fops.h"
 #include "pbc_pairing.h"
 #include "pbc_fp.h"
+#include "pbc_memory.h"
 #include "pbc_utils.h"
 
 //TODO: store as integer mod ring instead and convert at last minute?
@@ -20,7 +21,7 @@ typedef struct point_s point_t[1];
 static void sn_init(element_ptr e)
 {
     field_ptr f = e->field->data;
-    e->data = malloc(sizeof(point_t));
+    e->data = pbc_malloc(sizeof(point_t));
     point_ptr p = e->data;
     element_init(p->x, f);
     element_init(p->y, f);
@@ -32,7 +33,7 @@ static void sn_clear(element_ptr e)
     point_ptr p = e->data;
     element_clear(p->x);
     element_clear(p->y);
-    free(e->data);
+    pbc_free(e->data);
 }
 
 static void sn_set0(element_ptr x)
@@ -456,7 +457,7 @@ void pairing_init_singular_with_node(pairing_t pairing, mpz_t q)
     field_init_fp(pairing->Zr, pairing->r);
     pairing->map = sn_pairing;
 
-    p =	pairing->data = malloc(sizeof(sn_pairing_data_t));
+    p =	pairing->data = pbc_malloc(sizeof(sn_pairing_data_t));
     field_init_fp(p->Fq, q);
     field_init_curve_singular_with_node(p->Eq, p->Fq);
 

@@ -4,7 +4,6 @@
 #include <math.h>
 #include <gmp.h>
 #include "pbc.h"
-#include "pbc_random.h"
 #include "pbc_utils.h"
 
 static int is_gen(mpz_t x, mpz_t q, darray_ptr fac, darray_ptr mul)
@@ -79,9 +78,9 @@ void index_calculus_step1(mpz_t *ind, int r, mpz_t g, mpz_t q,
     int i, j;
     mpz_t z, z0, z1;
     int relcount;
-    unsigned int *prime = malloc(sizeof(unsigned int) * r);
+    unsigned int *prime = pbc_malloc(sizeof(unsigned int) * r);
     int bundlecount = (r - 10 + 19) / 20;
-    mpz_t *bundle = malloc(sizeof(mpz_t) * bundlecount);
+    mpz_t *bundle = pbc_malloc(sizeof(mpz_t) * bundlecount);
     int faci;
     mpz_t k, km;
 
@@ -94,8 +93,8 @@ void index_calculus_step1(mpz_t *ind, int r, mpz_t g, mpz_t q,
     cell_ptr newcell(void)
     {
 	cell_ptr res;
-	res = malloc(sizeof(struct cell_s));
-	//res->data = malloc(sizeof(mpz_t));
+	res = pbc_malloc(sizeof(struct cell_s));
+	//res->data = pbc_malloc(sizeof(mpz_t));
 	//mpz_init(res->data);
 	mpz_init(res->data);
 	return res;
@@ -104,14 +103,14 @@ void index_calculus_step1(mpz_t *ind, int r, mpz_t g, mpz_t q,
     {
 	cell_ptr cp = p;
 	mpz_clear(cp->data);
-	free(p);
+	pbc_free(p);
     }
 
-    cell_ptr *rel = malloc(sizeof(cell_ptr) * r);
-    cell_ptr *relm = malloc(sizeof(cell_ptr) * r);
+    cell_ptr *rel = pbc_malloc(sizeof(cell_ptr) * r);
+    cell_ptr *relm = pbc_malloc(sizeof(cell_ptr) * r);
     //''matrix'' is actually a list of matrices
     //(we solve over different moduli and combine using CRT)
-    //darray_t **matrix = malloc(sizeof(darray_t *) * fac->count);
+    //darray_t **matrix = pbc_malloc(sizeof(darray_t *) * fac->count);
     darray_t *matrix[fac->count];
     int minfound[fac->count];
 
@@ -121,7 +120,7 @@ void index_calculus_step1(mpz_t *ind, int r, mpz_t g, mpz_t q,
     }
     for (i=0; i<fac->count; i++) {
 	//similarly ''row'' refers to a list of rows
-	darray_t *row = malloc(sizeof(darray_t) * r);
+	darray_t *row = pbc_malloc(sizeof(darray_t) * r);
 	for (j=0; j<r; j++) {
 	    darray_init(row[j]);
 	}
@@ -405,9 +404,9 @@ gmp_printf(" %Zd\n", km);
 	}
     }
 
-    mpz_ptr *tmp = malloc(sizeof(mpz_ptr) * fac->count);
+    mpz_ptr *tmp = pbc_malloc(sizeof(mpz_ptr) * fac->count);
     for (i=0; i<fac->count; i++) {
-	tmp[i] = malloc(sizeof(mpz_t));
+	tmp[i] = pbc_malloc(sizeof(mpz_t));
 	mpz_init(tmp[i]);
 	mpz_pow_ui(fac->item[i], fac->item[i], (unsigned int) mul->item[i]);
     }
@@ -424,7 +423,7 @@ gmp_printf(" %Zd\n", km);
     for (i=0; i<fac->count; i++) {
 	mpz_clear(tmp[i]);
     }
-    free(tmp);
+    pbc_free(tmp);
 
     for (faci=0; i<fac->count; faci++) {
 	//similarly ''row'' refers to a list of rows
@@ -433,7 +432,7 @@ gmp_printf(" %Zd\n", km);
 	    darray_forall(row[j], delcell);
 	    darray_clear(row[j]);
 	}
-	free(matrix[faci]);
+	pbc_free(matrix[faci]);
     }
 
     for (i=0; i<r; i++) {
@@ -441,9 +440,9 @@ gmp_printf(" %Zd\n", km);
 	delcell(relm[i]);
     }
 
-    free(prime);
-    free(rel);
-    free(relm);
+    pbc_free(prime);
+    pbc_free(rel);
+    pbc_free(relm);
     mpz_clear(k);
     mpz_clear(km);
     mpz_clear(z);
@@ -460,9 +459,9 @@ void slow_index_calculus_step1(mpz_t *ind, int r, mpz_t g, mpz_t q,
     mpz_t z, z0, z1;
     //mpz_t rel[r + 1];
     //mpz_t relm[r + 1];
-    mpz_t *rel = malloc(sizeof(mpz_t) * (r + 1));
-    mpz_t *relm = malloc(sizeof(mpz_t) * (r + 1));
-    unsigned int *prime = malloc(sizeof(unsigned int) * r);
+    mpz_t *rel = pbc_malloc(sizeof(mpz_t) * (r + 1));
+    mpz_t *relm = pbc_malloc(sizeof(mpz_t) * (r + 1));
+    unsigned int *prime = pbc_malloc(sizeof(unsigned int) * r);
     darray_t matrix;
     int faci;
     mpz_t k;
@@ -479,7 +478,7 @@ void slow_index_calculus_step1(mpz_t *ind, int r, mpz_t g, mpz_t q,
     darray_init(matrix);
 
     for (i=0; i<fac->count; i++) {
-	darray_append(matrix, malloc(r * sizeof(mpz_t *)));
+	darray_append(matrix, pbc_malloc(r * sizeof(mpz_t *)));
 	minfound[i] = 0;
     }
 
@@ -564,7 +563,7 @@ void slow_index_calculus_step1(mpz_t *ind, int r, mpz_t g, mpz_t q,
 		}
 		mpz_set(z0, relm[i]);
 		if (!row[i]) {
-		    row[i] = malloc(sizeof(mpz_t) * (r + 1));
+		    row[i] = pbc_malloc(sizeof(mpz_t) * (r + 1));
 		    mpz_invert(z1, z0, order);
 		    for (j=0; j<r+1; j++) {
 			mpz_init(row[i][j]);
@@ -677,9 +676,9 @@ gmp_printf(" %Zd\n", row[i][j]);
 	*/
     }
 
-    mpz_ptr *tmp = malloc(sizeof(mpz_ptr) * fac->count);
+    mpz_ptr *tmp = pbc_malloc(sizeof(mpz_ptr) * fac->count);
     for (i=0; i<fac->count; i++) {
-	tmp[i] = malloc(sizeof(mpz_t));
+	tmp[i] = pbc_malloc(sizeof(mpz_t));
 	mpz_init(tmp[i]);
 	mpz_pow_ui(fac->item[i], fac->item[i], (unsigned int) mul->item[i]);
     }
@@ -695,7 +694,7 @@ gmp_printf(" %Zd\n", row[i][j]);
     for (i=0; i<fac->count; i++) {
 	mpz_clear(tmp[i]);
     }
-    free(tmp);
+    pbc_free(tmp);
 
     for (faci=0; faci<matrix->count; faci++) {
 	mpz_t **row = matrix->item[faci];
@@ -703,16 +702,16 @@ gmp_printf(" %Zd\n", row[i][j]);
 	    for (i=0; i<r+1; i++) {
 		mpz_clear(row[j][i]);
 	    }
-	    free(row[j]);
+	    pbc_free(row[j]);
 	}
-	free(row);
+	pbc_free(row);
     }
     darray_clear(matrix);
     for (i=0; i<r+1; i++) mpz_clear(rel[i]);
     for (i=0; i<r+1; i++) mpz_clear(relm[i]);
-    free(prime);
-    free(rel);
-    free(relm);
+    pbc_free(prime);
+    pbc_free(rel);
+    pbc_free(relm);
     mpz_clear(k);
     mpz_clear(z);
     mpz_clear(z0);
@@ -778,7 +777,7 @@ void index_calculus_dlog(mpz_t x, mpz_t g, mpz_t h, mpz_t q)
     void mpzclear(void *p)
     {
 	mpz_clear(p);
-	free(p);
+	pbc_free(p);
     }
 
     darray_init(fac);
@@ -807,7 +806,7 @@ void index_calculus_dlog(mpz_t x, mpz_t g, mpz_t h, mpz_t q)
 	r = exp(1.2 * sqrt(log(dq)));
 	printf("r = %d\n", r);
     }
-    mpz_t *ind = malloc(sizeof(mpz_t) * r);
+    mpz_t *ind = pbc_malloc(sizeof(mpz_t) * r);
     for (i=0; i<r; i++) mpz_init(ind[i]);
 
     if (is_gen(g, q, fac, mul)) {
@@ -858,7 +857,7 @@ void index_calculus_dlog(mpz_t x, mpz_t g, mpz_t h, mpz_t q)
     }
 
     for (i=0; i<r; i++) mpz_clear(ind[i]);
-    free(ind);
+    pbc_free(ind);
 
     darray_forall(fac, mpzclear);
     darray_clear(mul);

@@ -6,6 +6,7 @@
 #include "pbc_field.h"
 #include "pbc_random.h"
 #include "pbc_fp.h"
+#include "pbc_memory.h"
 // naive implementation of F_p
 // like fastfp.c, uses lowlevel GMP routines (mpn_* functions)
 // but also has a flag for the value 0
@@ -38,16 +39,16 @@ typedef struct data_s *dataptr;
 static void fp_init(element_ptr e)
 {
     fp_field_data_ptr p = e->field->data;
-    dataptr dp = e->data = malloc(sizeof(struct data_s));
+    dataptr dp = e->data = pbc_malloc(sizeof(struct data_s));
     dp->flag = 0;
-    dp->d = malloc(p->bytes);
+    dp->d = pbc_malloc(p->bytes);
 }
 
 static void fp_clear(element_ptr e)
 {
     dataptr dp = e->data;
-    free(dp->d);
-    free(e->data);
+    pbc_free(dp->d);
+    pbc_free(e->data);
 }
 
 //assumes z is nonzero
@@ -524,8 +525,8 @@ static void fp_out_info(FILE *str, field_ptr f)
 static void fp_field_clear(field_t f)
 {
     fp_field_data_ptr p = f->data;
-    free(p->primelimbs);
-    free(p);
+    pbc_free(p->primelimbs);
+    pbc_free(p);
 }
 
 void field_init_faster_fp(field_ptr f, mpz_t prime)
@@ -566,10 +567,10 @@ void field_init_faster_fp(field_ptr f, mpz_t prime)
 
     f->out_info = fp_out_info;
 
-    p = f->data = malloc(sizeof(fp_field_data_t));
+    p = f->data = pbc_malloc(sizeof(fp_field_data_t));
     p->limbs = mpz_size(prime);
     p->bytes = p->limbs * sizeof(mp_limb_t);
-    p->primelimbs = malloc(p->bytes);
+    p->primelimbs = pbc_malloc(p->bytes);
     mpz_export(p->primelimbs, &p->limbs, -1, sizeof(mp_limb_t), 0, 0, prime);
 
     mpz_set(f->order, prime);

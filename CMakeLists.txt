@@ -51,6 +51,7 @@ misc/darray.c misc/symtab.c
 misc/parse.c
 misc/fops.c misc/tracker.c
 misc/extend_printf.c
+misc/memory.c
 ${get_time_src}
 )
 foreach(bin
@@ -76,6 +77,8 @@ set(warnflags "-Wall -W -Wfloat-equal -Wendif-labels -Wshadow  \\
     -Wpointer-arith -Wcast-align -Wstrict-prototypes \\
     -Wredundant-decls"
 )
+
+set(morewarnflags "-Werror -Wfatal-errors")
 set(excessivewarnflags "-std=c99 -pedantic")
 
 if(debug)
@@ -89,7 +92,7 @@ endif(debug)
 # doesn't help much
 set(x31flags "-march=pentium-m -mmmx -msse -msse2 -mfpmath=sse -malign-double -maccumulate-outgoing-args")
 
-set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${optflags}")
+set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${morewarnflags} ${optflags}")
 
 if(x31)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${x31flags}")
@@ -117,6 +120,7 @@ include/pbc_f_param.h
 include/pbc_fp.h
 include/pbc.h
 include/pbc_hilbert.h
+include/pbc_memory.h
 include/pbc_mnt.h
 include/pbc_mpc.h
 include/pbc_pairing.h

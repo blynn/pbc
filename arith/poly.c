@@ -5,6 +5,7 @@
 #include "pbc_darray.h"
 #include "pbc_poly.h"
 #include "pbc_utils.h"
+#include "pbc_memory.h"
 
 //implements R[x] for a given ring R
 //also R[x]_{f(x)}
@@ -17,7 +18,7 @@ void poly_alloc(element_ptr e, int n)
     int k;
     k = p->coeff->count;
     while (k < n) {
-	e0 = malloc(sizeof(element_t));
+	e0 = pbc_malloc(sizeof(element_t));
 	element_init(e0, pdp->field);
 	darray_append(p->coeff, e0);
 	k++;
@@ -26,7 +27,7 @@ void poly_alloc(element_ptr e, int n)
 	k--;
 	e0 = darray_at(p->coeff, k);
 	element_clear(e0);
-	free(e0);
+	pbc_free(e0);
 	darray_remove_last(p->coeff);
     }
 }
@@ -34,7 +35,7 @@ void poly_alloc(element_ptr e, int n)
 static void poly_init(element_ptr e)
 {
     poly_element_ptr p;
-    e->data = malloc(sizeof(poly_element_t));
+    e->data = pbc_malloc(sizeof(poly_element_t));
     p = e->data;
     darray_init(p->coeff);
 }
@@ -45,7 +46,7 @@ static void poly_clear(element_ptr e)
 
     poly_alloc(e, 0);
     darray_clear(p->coeff);
-    free(e->data);
+    pbc_free(e->data);
 }
 
 void poly_remove_leading_zeroes(element_ptr e)
@@ -56,7 +57,7 @@ void poly_remove_leading_zeroes(element_ptr e)
 	element_ptr e0 = p->coeff->item[n];
 	if (!element_is0(e0)) return;
 	element_clear(e0);
-	free(e0);
+	pbc_free(e0);
 	darray_remove_last(p->coeff);
 	n--;
     }
@@ -560,7 +561,7 @@ static int poly_cmp(element_ptr f, element_ptr g)
 static void field_clear_poly(field_ptr f)
 {
     poly_field_data_ptr p = f->data;
-    free(p);
+    pbc_free(p);
 }
 
 //2 bytes hold the number of terms
@@ -625,7 +626,7 @@ void field_init_poly(field_ptr f, field_ptr base_field)
     poly_field_data_ptr p;
 
     field_init(f);
-    f->data = malloc(sizeof(poly_field_data_t));
+    f->data = pbc_malloc(sizeof(poly_field_data_t));
     p = f->data;
     p->field = base_field;
     p->mapbase = element_field_to_poly;
@@ -666,10 +667,10 @@ static void field_clear_polymod(field_ptr f)
     for (i=0; i<n; i++) {
 	element_clear(p->xpwr[i]);
     }
-    free(p->xpwr);
+    pbc_free(p->xpwr);
 
     element_clear(p->poly);
-    free(f->data);
+    pbc_free(f->data);
 }
 
 static int polymod_is_sqr(element_ptr e)
@@ -835,7 +836,7 @@ static void polymod_init(element_t e)
     polymod_field_data_ptr p = e->field->data;
     int n = p->n;
     element_t *coeff;
-    coeff = e->data = malloc(sizeof(element_t) * n);
+    coeff = e->data = pbc_malloc(sizeof(element_t) * n);
 
     for (i=0; i<n; i++) {
 	element_init(coeff[i], p->field);
@@ -850,7 +851,7 @@ static void polymod_clear(element_t e)
     for (i=0; i<n; i++) {
 	element_clear(coeff[i]);
     }
-    free(e->data);
+    pbc_free(e->data);
 }
 
 static void polymod_set_si(element_t e, signed long int x)
@@ -1165,7 +1166,7 @@ static void polymod_mul(element_ptr res, element_ptr e, element_ptr f)
     int i, j;
     element_t *high; //coefficients of x^n,...,x^{2n-2}
 
-    high = malloc(sizeof(element_t) * (n - 1));
+    high = pbc_malloc(sizeof(element_t) * (n - 1));
     for (i=0; i<n-1; i++) {
 	element_init(high[i], p->field);
 	element_set0(high[i]);
@@ -1192,7 +1193,7 @@ static void polymod_mul(element_ptr res, element_ptr e, element_ptr f)
 	element_add(prod, prod, p0);
 	element_clear(high[i]);
     }
-    free(high);
+    pbc_free(high);
 
     element_set(res, prod);
     element_clear(prod);
@@ -1255,7 +1256,7 @@ static void polymod_square(element_ptr res, element_ptr e)
 
     element_t *high; //coefficients of x^n,...,x^{2n-2}
 
-    high = malloc(sizeof(element_t) * (n - 1));
+    high = pbc_malloc(sizeof(element_t) * (n - 1));
     for (i=0; i<n-1; i++) {
 	element_init(high[i], p->field);
 	element_set0(high[i]);
@@ -1292,7 +1293,7 @@ static void polymod_square(element_ptr res, element_ptr e)
 	element_add(prod, prod, p0);
 	element_clear(high[i]);
     }
-    free(high);
+    pbc_free(high);
 
     element_set(res, prod);
     element_clear(prod);
@@ -1440,7 +1441,7 @@ void field_init_polymod(field_ptr f, element_ptr poly)
     int n;
 
     field_init(f);
-    f->data = malloc(sizeof(polymod_field_data_t));
+    f->data = pbc_malloc(sizeof(polymod_field_data_t));
     p = f->data;
     p->field = pdp->field;
     p->mapbase = element_field_to_poly;
@@ -1499,7 +1500,7 @@ void field_init_polymod(field_ptr f, element_ptr poly)
     }
     mpz_pow_ui(f->order, p->field->order, n);
 
-    p->xpwr = malloc(sizeof(element_t) * n);
+    p->xpwr = pbc_malloc(sizeof(element_t) * n);
     compute_x_powers(f, poly);
 }
 
@@ -1522,7 +1523,7 @@ void trial_divide(darray_ptr factor, darray_ptr mult, mpz_t n, mpz_ptr limit)
 	    mpz_set(p, m);
 	}
 	if (mpz_divisible_p(m, p)) {
-	    fac = malloc(sizeof(mpz_t));
+	    fac = pbc_malloc(sizeof(mpz_t));
 	    mul = 0;
 	    mpz_init(fac);
 	    mpz_set(fac, p);
@@ -1624,7 +1625,7 @@ int poly_is_irred(element_ptr f)
     int res;
     void clear(void *p) {
 	mpz_clear(p);
-	free(p);
+	pbc_free(p);
     }
 
     if (poly_degree(f) <= 1) return 1;

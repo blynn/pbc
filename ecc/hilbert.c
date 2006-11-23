@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h> //for malloc, free
+#include <stdlib.h> //for pbc_malloc, pbc_free
 #include <gmp.h>
 #include <math.h>
 #include "pbc_field.h"
@@ -7,6 +7,7 @@
 #include "pbc_poly.h"
 #include "pbc_hilbert.h"
 #include "pbc_mpc.h"
+#include "pbc_memory.h"
 
 static mpf_t pi, eulere, recipeulere, epsilon, negepsilon;
 
@@ -439,7 +440,7 @@ if (0) {
 		//P *= X - j
 		int i, n;
 		mpc_ptr p0;
-		p0 = (mpc_ptr) malloc(sizeof(mpc_t));
+		p0 = (mpc_ptr) pbc_malloc(sizeof(mpc_t));
 		mpc_init(p0);
 		mpc_neg(p0, j);
 		n = Pz->count;
@@ -458,8 +459,8 @@ if (0) {
 		//P *= X^2 - 2 Re(j) X + |j|^2
 		int i, n;
 		mpc_ptr p0, p1;
-		p0 = (mpc_ptr) malloc(sizeof(mpc_t));
-		p1 = (mpc_ptr) malloc(sizeof(mpc_t));
+		p0 = (mpc_ptr) pbc_malloc(sizeof(mpc_t));
+		p1 = (mpc_ptr) pbc_malloc(sizeof(mpc_t));
 		mpc_init(p0);
 		mpc_init(p1);
 		//p1 = - 2 Re(j)
@@ -512,7 +513,7 @@ if (0) {
 	int i;
 	mpz_ptr coeff;
 	for (i=Pz->count - 1; i>=0; i--) {
-	    coeff = (mpz_ptr) malloc(sizeof(mpz_t));
+	    coeff = (mpz_ptr) pbc_malloc(sizeof(mpz_t));
 	    mpz_init(coeff);
 	    if (mpf_sgn(mpc_re(Pz->item[i])) < 0) {
 		mpf_set_d(f0, -0.5);
@@ -523,9 +524,9 @@ if (0) {
 	    mpz_set_f(coeff, f0);
 	    darray_append(P, coeff);
 	    mpc_clear(Pz->item[i]);
-	    free(Pz->item[i]);
+	    pbc_free(Pz->item[i]);
 	}
-	coeff = (mpz_ptr) malloc(sizeof(mpz_t));
+	coeff = (mpz_ptr) pbc_malloc(sizeof(mpz_t));
 	mpz_init(coeff);
 	mpz_set_ui(coeff, 1);
 	darray_append(P, coeff);

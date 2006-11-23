@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <gmp.h>
 #include "pbc_fops.h"
-#include "pbc_symtab.h"
 #include "pbc_darray.h"
+#include "pbc_symtab.h"
 #include "pbc_field.h"
 #include "pbc_pairing.h"
 #include "pbc_poly.h"
@@ -18,5 +18,6 @@
 #include "pbc_e_param.h"
 #include "pbc_f_param.h"
 #include "pbc_random.h"
+#include "pbc_memory.h"
 
 #endif //PBC_H

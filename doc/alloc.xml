@@ -1,0 +1,23 @@
+<chapter>
+<title>Custom Allocation</title>
+<para>
+Like GMP, PBC can be instructed to use custom memory allocation functions.
+This must be done before any memory allocation is performed,
+usually at the beginning of a program before any other PBC functions have
+been called.
+</para>
+<para>
+Also like GMP, the PBC wrappers around <function>malloc</function>
+and <function>realloc</function> will print a message on standard error
+and terminate program execution if the calls fail.
+Replacements for these functions should act similarly.
+</para>
+<para>
+However, unlike GMP, PBC does not pass the number of bytes previously allocated
+along with the pointer in calls to <function>realloc</function> and
+<function>free</function>.
+</para>
+<variablelist>
+&alloc;
+</variablelist>
+</chapter>

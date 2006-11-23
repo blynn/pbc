@@ -11,6 +11,8 @@ I wrote pbc_assert.c and added some runtime checks to ensure elements from
 different algebraic structures are not mistakenly mixed. These checks are
 only performed if PBC_DEBUG is defined before pbc.h is included.
 
+Custom allocation.
+
 Wed Nov 15 15:35:38 PST 2006
 
 fieldmpz.h now installs to the PBC include directory. Currently it is

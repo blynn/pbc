@@ -6,19 +6,20 @@
 #include "pbc_field.h"
 #include "pbc_random.h"
 #include "pbc_fp.h"
+#include "pbc_memory.h"
 // F_p for small (p at most sizeof(long) bytes long)
 // assumes long long is at least twice long
 
 // pow_mpz, invert use GMP
 static void fp_init(element_ptr e)
 {
-    unsigned long *p = e->data = malloc(sizeof(unsigned long));
+    unsigned long *p = e->data = pbc_malloc(sizeof(unsigned long));
     *p = 0;
 }
 
 static void fp_clear(element_ptr e)
 {
-    free(e->data);
+    pbc_free(e->data);
 }
 
 static void fp_set_mpz(element_ptr e, mpz_ptr z)
@@ -271,7 +272,7 @@ static int fp_from_bytes(element_t e, unsigned char *data)
 
 static void fp_field_clear(field_t f)
 {
-    free(f->data);
+    pbc_free(f->data);
 }
 
 void field_init_tiny_fp(field_ptr f, mpz_t prime)
@@ -311,7 +312,7 @@ void field_init_tiny_fp(field_ptr f, mpz_t prime)
     f->from_bytes = fp_from_bytes;
     f->to_mpz = fp_to_mpz;
 
-    p = f->data = malloc(sizeof(long));
+    p = f->data = pbc_malloc(sizeof(long));
     *p = mpz_get_ui(prime);
     {
 	unsigned long int l = 255;

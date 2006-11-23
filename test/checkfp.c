@@ -3,7 +3,6 @@
 #include "pbc.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
-#include "pbc_random.h"
 
 static mpz_t prime;
 
@@ -62,8 +61,8 @@ static void check_match(element_t e1, element_t e2, char *s)
 	bug();
     }
 
-    buf1 = malloc(len);
-    buf2 = malloc(len);
+    buf1 = pbc_malloc(len);
+    buf2 = pbc_malloc(len);
     element_to_bytes(buf1, e1);
     element_to_bytes(buf2, e2);
 
@@ -71,8 +70,8 @@ static void check_match(element_t e1, element_t e2, char *s)
 	bug();
     }
 
-    free(buf1);
-    free(buf2);
+    pbc_free(buf1);
+    pbc_free(buf2);
 }
 
 static void run_check(field_ptr f1, field_ptr f2)
@@ -88,10 +87,10 @@ static void run_check(field_ptr f1, field_ptr f2)
 	int len;
 
 	len = element_length_in_bytes(in);
-	buf = malloc(len);
+	buf = pbc_malloc(len);
 	element_to_bytes(buf, in);
 	element_from_bytes(out, buf);
-	free(buf);
+	pbc_free(buf);
 	check_match(in, out, "conversion");
     }
 
@@ -324,10 +323,10 @@ int main(void)
 	unsigned char *buf;
 	int len;
 	len = element_length_in_bytes(irred1);
-	buf = malloc(len);
+	buf = pbc_malloc(len);
 	element_to_bytes(buf, irred1);
 	element_from_bytes(irred2, buf);
-	free(buf);
+	pbc_free(buf);
     }
     field_init_polymod(f2p, irred2);
 

@@ -48,7 +48,7 @@ int main(void)
 	int n = pairing_length_in_bytes_compressed_G1(pairing);
 	//int n = element_length_in_bytes_compressed(sig);
 	int i;
-	unsigned char *data = malloc(n);
+	unsigned char *data = pbc_malloc(n);
 
 	element_to_bytes_compressed(data, sig);
 	printf("compressed = ");
@@ -60,7 +60,7 @@ int main(void)
 	element_from_bytes_compressed(sig, data);
 	element_printf("decompressed = %B\n", sig);
 
-	free(data);
+	pbc_free(data);
     }
 
     //verification part 1
@@ -82,7 +82,7 @@ int main(void)
 	int n = pairing_length_in_bytes_x_only_G1(pairing);
 	//int n = element_length_in_bytes_x_only(sig);
 	int i;
-	unsigned char *data = malloc(n);
+	unsigned char *data = pbc_malloc(n);
 
 	element_to_bytes_x_only(data, sig);
 	printf("x-coord = ");
@@ -106,7 +106,7 @@ int main(void)
 	    }
 	}
 
-	free(data);
+	pbc_free(data);
     }
 
     //a random signature shouldn't verify

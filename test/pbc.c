@@ -60,17 +60,17 @@ typedef struct id_s *id_ptr;
 
 id_ptr id_new(char *id)
 {
-    id_ptr res = malloc(sizeof(struct id_s));
+    id_ptr res = pbc_malloc(sizeof(struct id_s));
     res->alloc = strlen(id) + 1;
-    res->data = malloc(res->alloc);
+    res->data = pbc_malloc(res->alloc);
     strcpy(res->data, id);
     return res;
 }
 
 void id_delete(id_ptr id)
 {
-    free(id->data);
-    free(id);
+    pbc_free(id->data);
+    pbc_free(id);
 }
 
 struct tree_s {
@@ -82,7 +82,7 @@ typedef struct tree_s *tree_ptr;
 
 tree_ptr tree_new(int type, void *data)
 {
-    tree_ptr res = malloc(sizeof(struct tree_s));
+    tree_ptr res = pbc_malloc(sizeof(struct tree_s));
     res->type = type;
     res->data = data;
     darray_init(res->child);
@@ -101,7 +101,7 @@ void tree_delete(tree_ptr t)
 	    id_delete(t->data);
 	    break;
     }
-    free(t);
+    pbc_free(t);
 }
 
 static char *lexcp;
@@ -451,7 +451,7 @@ typedef struct val_s *val_ptr;
 static int lastruntimeerror;
 static val_ptr newruntimeerror(int i)
 {
-    val_ptr res = malloc(sizeof(struct val_s));
+    val_ptr res = pbc_malloc(sizeof(struct val_s));
     lastruntimeerror = i;
     res->type = t_err;
     res->data = int_to_voidp(i);
@@ -460,7 +460,7 @@ static val_ptr newruntimeerror(int i)
 
 val_ptr val_new(int type, void *data)
 {
-    val_ptr res = malloc(sizeof(struct val_s));
+    val_ptr res = pbc_malloc(sizeof(struct val_s));
     res->type = type;
     res->data = data;
     return res;
@@ -496,11 +496,11 @@ static void val_print(val_ptr v)
 
 val_ptr val_copy(val_ptr v)
 {
-    val_ptr res = malloc(sizeof(struct val_s));
+    val_ptr res = pbc_malloc(sizeof(struct val_s));
     res->type = v->type;
     if (v->type == t_element) {
 	//current policy: always clear elements, always copy elements
-	res->data = malloc(sizeof(element_t));
+	res->data = pbc_malloc(sizeof(element_t));
 	element_ptr e = v->data;
 	element_init(res->data, e->field);
 	element_set(res->data, e);
@@ -517,7 +517,7 @@ void val_delete(val_ptr v)
 	case t_element:
 	    //current policy: always clear elements, always copy elements
 	    element_clear(v->data);
-	    free(v->data);
+	    pbc_free(v->data);
 	    break;
 	case t_err:
 	    break;
@@ -529,7 +529,7 @@ void val_delete(val_ptr v)
 	    printf("val_delete: case %d not handled: memory leak\n", v->type);
 	    break;
     }
-    free(v);
+    pbc_free(v);
 }
 
 struct fun_s {
@@ -607,7 +607,7 @@ static val_ptr f_random(darray_ptr arg)
     if (res) return res;
     val_ptr a0 = arg->item[0];
     field_ptr f = a0->data;
-    element_ptr e = malloc(sizeof(element_t));
+    element_ptr e = pbc_malloc(sizeof(element_t));
     element_init(e, f);
     element_random(e);
     res = val_new(t_element, e);
@@ -622,7 +622,7 @@ static val_ptr f_unary(
     if (res) return res;
     val_ptr a0 = arg->item[0];
     element_ptr e0 = a0->data;
-    element_ptr e = malloc(sizeof(element_t));
+    element_ptr e = pbc_malloc(sizeof(element_t));
     element_init(e, e0->field);
     unary(e, e0);
     res = val_new(t_element, e);
@@ -644,7 +644,7 @@ static val_ptr f_bin_op(
 	printf("field mismatch!\n");
 	return newruntimeerror(re_fieldmismatch);
     }
-    element_ptr e = malloc(sizeof(element_t));
+    element_ptr e = pbc_malloc(sizeof(element_t));
     element_init(e, e0->field);
     binop(e, e0, e1);
     res = val_new(t_element, e);
@@ -691,7 +691,7 @@ static val_ptr f_pow(darray_ptr arg)
     val_ptr a1 = arg->item[1];
     element_ptr e0 = a0->data;
     element_ptr e1 = a1->data;
-    element_ptr e = malloc(sizeof(element_t));
+    element_ptr e = pbc_malloc(sizeof(element_t));
     mpz_t z;
     mpz_init(z);
     element_to_mpz(z, e1);
@@ -746,7 +746,7 @@ static val_ptr f_pairing(darray_ptr arg)
 	printf("arg 2 not from G2!\n");
 	return newruntimeerror(re_badarg);
     }
-    element_ptr e = malloc(sizeof(element_t));
+    element_ptr e = pbc_malloc(sizeof(element_t));
     element_init(e, p->GT);
     pairing_apply(e, e0, e1, p);
     res = val_new(t_element, e);
@@ -816,7 +816,7 @@ static val_ptr execute_tree(tree_ptr t)
 		mpz_mul_ui(z, z, 10);
 		mpz_add_ui(z, z, *cp - '0');
 	    }
-	    element_ptr e = malloc(sizeof(element_t));
+	    element_ptr e = pbc_malloc(sizeof(element_t));
 	    element_init(e, Z);
 	    element_set_mpz(e, z);
 	    mpz_clear(z);
@@ -939,7 +939,7 @@ static val_ptr f_nextprime(darray_ptr arg)
 	printf("arg not integer!\n");
 	return newruntimeerror(re_badarg);
     }
-    element_ptr e = malloc(sizeof(element_t));
+    element_ptr e = pbc_malloc(sizeof(element_t));
     element_init(e, Z);
     mpz_init(p);
     element_to_mpz(p, e0);
@@ -963,7 +963,7 @@ static val_ptr f_brute_force_dlog(darray_ptr arg)
 	printf("arg field mismatch!\n");
 	return newruntimeerror(re_badarg);
     }
-    element_ptr e = malloc(sizeof(element_t));
+    element_ptr e = pbc_malloc(sizeof(element_t));
     element_init(e, Z);
     brute_force_dlog(e, e0, e1);
     res = val_new(t_element, e);
@@ -984,7 +984,7 @@ static val_ptr f_pollard_rho(darray_ptr arg)
 	return newruntimeerror(re_badarg);
     }
     field_ptr f = a2->data;
-    element_ptr e = malloc(sizeof(element_t));
+    element_ptr e = pbc_malloc(sizeof(element_t));
     element_init(e, f);
     pollard_rho(e, e0, e1);
     res = val_new(t_element, e);
@@ -1003,7 +1003,7 @@ static val_ptr f_zz(darray_ptr arg)
 	printf("arg not integer!\n");
 	return newruntimeerror(re_badarg);
     }
-    field_ptr f = malloc(sizeof(field_t));
+    field_ptr f = pbc_malloc(sizeof(field_t));
     mpz_init(p);
     element_to_mpz(p, e0);
     field_init_fp(f, p);
@@ -1039,7 +1039,7 @@ static val_ptr f_gen_A(darray_ptr arg)
     //TODO: check rbits and qbits aren't too big
     a_param_init(param);
     a_param_gen(param, mpz_get_ui(rbits), mpz_get_ui(qbits));
-    p = malloc(sizeof(pairing_t));
+    p = pbc_malloc(sizeof(pairing_t));
     pairing_init_a_param(p, param);
     res = val_new(t_pairing, p);
     mpz_clear(rbits);
@@ -1061,7 +1061,7 @@ static val_ptr f_fromZZ(darray_ptr arg)
 	printf("arg not integer!\n");
 	return newruntimeerror(re_badarg);
     }
-    element_ptr e1 = malloc(sizeof(element_t));
+    element_ptr e1 = pbc_malloc(sizeof(element_t));
     element_init(e1, f);
     element_set_mpz(e1, e->data);
     res = val_new(t_element, e1);
@@ -1077,7 +1077,7 @@ static val_ptr f_index_calculus(darray_ptr arg)
     val_ptr a1 = arg->item[1];
     element_ptr e0 = a0->data;
     element_ptr e1 = a1->data;
-    element_ptr e = malloc(sizeof(element_t));
+    element_ptr e = pbc_malloc(sizeof(element_t));
     mpz_t x, g, h, q1;
 
     //TODO: check e0, e1 are from an integer mod ring
@@ -1150,7 +1150,7 @@ int main(void)
 	char *s = pbc_getline();
 	if (!s) break;
 	parseline(s);
-	free(s);
+	pbc_free(s);
     }
     return 0;
 }
