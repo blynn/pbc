@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
-#include "field.h"
-#include "curve.h"
-#include "fops.h"
-#include "pairing.h"
-#include "fp.h"
-#include "utils.h"
+#include "pbc_field.h"
+#include "pbc_curve.h"
+#include "pbc_fops.h"
+#include "pbc_pairing.h"
+#include "pbc_fp.h"
+#include "pbc_utils.h"
 
 //TODO: store as integer mod ring instead and convert at last minute?
 struct point_s {

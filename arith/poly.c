@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
-#include "field.h"
-#include "darray.h"
-#include "poly.h"
-#include "utils.h"
+#include "pbc_field.h"
+#include "pbc_darray.h"
+#include "pbc_poly.h"
+#include "pbc_utils.h"
 
 //implements R[x] for a given ring R
 //also R[x]_{f(x)}

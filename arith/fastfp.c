@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
-#include "field.h"
-#include "random.h"
-#include "fp.h"
+#include "pbc_field.h"
+#include "pbc_random.h"
+#include "pbc_fp.h"
 // naive implementation of F_p
 // uses lowlevel GMP routines (mpn_* functions)
 // ''data'' field of element holds pointer to array of mp_limb_t

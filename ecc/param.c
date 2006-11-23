@@ -1,10 +1,10 @@
 #include <assert.h>
 #include <stdio.h>
 #include <gmp.h>
-#include "symtab.h"
-#include "fops.h"
-#include "parse.h"
-#include "tracker.h"
+#include "pbc_symtab.h"
+#include "pbc_fops.h"
+#include "pbc_parse.h"
+#include "pbc_tracker.h"
 #include <stdlib.h>
 #include <string.h>
 

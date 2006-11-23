@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
-#include "field.h"
-#include "fieldquadratic.h"
-#include "utils.h"
+#include "pbc_field.h"
+#include "pbc_fieldquadratic.h"
+#include "pbc_utils.h"
 
 static inline element_ptr fq_nqr(field_ptr f)
 {

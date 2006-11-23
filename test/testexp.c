@@ -2,7 +2,7 @@
 //This one uses the signature library and is more realistic
 #include <string.h>
 #include "pbc.h"
-#include "get_time.h"
+#include "pbc_time.h"
 
 
 int main(void)

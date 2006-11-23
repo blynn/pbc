@@ -2,8 +2,8 @@
 
 #include <stdlib.h>
 #include <gmp.h>
-#include "darray.h"
-#include "mnt.h"
+#include "pbc_darray.h"
+#include "pbc_mnt.h"
 
 void cm_info_init(cm_info_t cm)
 {

@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
-#include "field.h"
-#include "random.h"
-#include "fp.h"
+#include "pbc_field.h"
+#include "pbc_random.h"
+#include "pbc_fp.h"
 // F_p for small (p at most sizeof(long) bytes long)
 // assumes long long is at least twice long
 

@@ -4,8 +4,8 @@
 #include <math.h>
 #include <gmp.h>
 #include "pbc.h"
-#include "random.h"
-#include "utils.h"
+#include "pbc_random.h"
+#include "pbc_utils.h"
 
 static int is_gen(mpz_t x, mpz_t q, darray_ptr fac, darray_ptr mul)
 {

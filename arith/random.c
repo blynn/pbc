@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
-#include "random.h"
-#include "utils.h"
+#include "pbc_random.h"
+#include "pbc_utils.h"
 
 static void deterministic_mpz_random(mpz_t z, mpz_t limit, void *data)
 {

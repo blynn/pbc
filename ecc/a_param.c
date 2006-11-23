@@ -3,19 +3,19 @@
 #include <stdlib.h> //for rand, malloc, free
 #include <string.h> //for strcmp
 #include <gmp.h>
-#include "symtab.h"
-#include "fops.h"
-#include "field.h"
-#include "fp.h"
-#include "fieldquadratic.h"
-#include "pairing.h"
-#include "a_param.h"
-#include "a1_param.h"
-#include "curve.h"
-#include "param.h"
-#include "random.h"
-#include "tracker.h"
-#include "utils.h"
+#include "pbc_symtab.h"
+#include "pbc_fops.h"
+#include "pbc_field.h"
+#include "pbc_fp.h"
+#include "pbc_fieldquadratic.h"
+#include "pbc_pairing.h"
+#include "pbc_a_param.h"
+#include "pbc_a1_param.h"
+#include "pbc_curve.h"
+#include "pbc_param.h"
+#include "pbc_random.h"
+#include "pbc_tracker.h"
+#include "pbc_utils.h"
 
 struct a_pairing_data_s {
     field_t Fq, Fq2, Eq;

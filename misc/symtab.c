@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
-#include "symtab.h"
+#include "pbc_symtab.h"
 
 struct entry_s {
     char *key;

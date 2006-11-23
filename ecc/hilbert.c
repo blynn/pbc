@@ -2,11 +2,11 @@
 #include <stdlib.h> //for malloc, free
 #include <gmp.h>
 #include <math.h>
-#include "field.h"
-#include "darray.h"
-#include "poly.h"
-#include "hilbert.h"
-#include "mpc.h"
+#include "pbc_field.h"
+#include "pbc_darray.h"
+#include "pbc_poly.h"
+#include "pbc_hilbert.h"
+#include "pbc_mpc.h"
 
 static mpf_t pi, eulere, recipeulere, epsilon, negepsilon;
 

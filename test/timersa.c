@@ -1,7 +1,7 @@
 #include <pbc.h>
-#include "fp.h"
-#include "random.h"
-#include "get_time.h"
+#include "pbc_fp.h"
+#include "pbc_random.h"
+#include "pbc_time.h"
 
 int main(void)
 {

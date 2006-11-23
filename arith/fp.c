@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <gmp.h>
 #include <string.h>
-#include "field.h"
-#include "fp.h"
+#include "pbc_field.h"
+#include "pbc_fp.h"
 
 void fp_tonelli(element_ptr x, element_ptr a)
 {

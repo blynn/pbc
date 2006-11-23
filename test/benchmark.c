@@ -1,6 +1,6 @@
 #define PBC_DEBUG
 #include "pbc.h"
-#include "get_time.h"
+#include "pbc_time.h"
 
 int main(void)
 {

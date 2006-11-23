@@ -1,6 +1,6 @@
 #include "pbc.h"
-#include "fp.h"
-#include "get_time.h"
+#include "pbc_fp.h"
+#include "pbc_time.h"
 
 void timefield(field_t fp)
 {

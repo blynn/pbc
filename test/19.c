@@ -29,8 +29,8 @@
  */
 
 #include "pbc.h"
-#include "fp.h"
-#include "fieldquadratic.h"
+#include "pbc_fp.h"
+#include "pbc_fieldquadratic.h"
 
 static void miller(element_t res, element_t P,
 	element_ptr QR, element_ptr R, int n)

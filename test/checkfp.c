@@ -1,9 +1,9 @@
 //compares two implementations of Fp against each other
 #include <string.h>
 #include "pbc.h"
-#include "fp.h"
-#include "fieldquadratic.h"
-#include "random.h"
+#include "pbc_fp.h"
+#include "pbc_fieldquadratic.h"
+#include "pbc_random.h"
 
 static mpz_t prime;
 

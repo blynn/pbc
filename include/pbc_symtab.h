@@ -1,7 +1,7 @@
 #ifndef SYMTAB_H
 #define SYMTAB_H
 
-#include "darray.h"
+#include "pbc_darray.h"
 
 struct symtab_s {
     darray_t list;

@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h> //for atoi, exit
 #include <gmp.h>
-#include "field.h"
-#include "darray.h"
-#include "poly.h"
-#include "hilbert.h"
+#include "pbc_field.h"
+#include "pbc_darray.h"
+#include "pbc_poly.h"
+#include "pbc_hilbert.h"
 
 int main(int argc, char **argv)
 {

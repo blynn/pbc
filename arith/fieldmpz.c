@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
-#include "field.h"
-#include "random.h"
-#include "utils.h"
-#include "fp.h"
+#include "pbc_field.h"
+#include "pbc_random.h"
+#include "pbc_utils.h"
+#include "pbc_fp.h"
 // wrappers around GMP mpz functions to implement Z
 
 static void z_init(element_ptr e)

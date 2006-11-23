@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h> //for memcmp()
 #include <gmp.h>
-#include "darray.h"
-#include "field.h"
-#include "utils.h"
+#include "pbc_darray.h"
+#include "pbc_field.h"
+#include "pbc_utils.h"
 
 /* returns recommended window size.  n is exponent. */
 static int optimal_pow_window_size(mpz_ptr n)

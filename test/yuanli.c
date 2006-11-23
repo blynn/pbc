@@ -29,7 +29,7 @@ I've defined it as H(A, B, h, Kab)=e(h,H1(A)+H1(B))+Kab.
 */
 
 #include <pbc.h>
-#include <get_time.h>
+#include <pbc_time.h>
 #include <stdio.h>
 
 int main(void)

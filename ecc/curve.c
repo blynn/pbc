@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
-#include "field.h"
-#include "darray.h"
-#include "poly.h"
-#include "curve.h"
+#include "pbc_field.h"
+#include "pbc_darray.h"
+#include "pbc_poly.h"
+#include "pbc_curve.h"
 
 struct curve_data_s {
     field_ptr field;

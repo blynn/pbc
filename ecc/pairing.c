@@ -3,24 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
-#include "field.h"
-#include "darray.h"
-#include "poly.h"
-#include "curve.h"
-#include "fops.h"
-#include "symtab.h"
-#include "parse.h"
-#include "tracker.h"
-#include "pairing.h"
+#include "pbc_field.h"
+#include "pbc_darray.h"
+#include "pbc_poly.h"
+#include "pbc_curve.h"
+#include "pbc_fops.h"
+#include "pbc_symtab.h"
+#include "pbc_parse.h"
+#include "pbc_tracker.h"
+#include "pbc_pairing.h"
 
-#include "a_param.h"
-#include "mnt.h"
-#include "d_param.h"
-#include "e_param.h"
-#include "f_param.h"
-#include "a1_param.h"
+#include "pbc_a_param.h"
+#include "pbc_mnt.h"
+#include "pbc_d_param.h"
+#include "pbc_e_param.h"
+#include "pbc_f_param.h"
+#include "pbc_a1_param.h"
 
-#include "utils.h"
+#include "pbc_utils.h"
 
 int generic_is_almost_coddh(element_ptr a, element_ptr b,
 	element_ptr c, element_ptr d, pairing_t pairing)

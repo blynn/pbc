@@ -1,5 +1,5 @@
 #include "pbc.h"
-#include "fp.h"
+#include "pbc_fp.h"
 
 int main(void)
 {

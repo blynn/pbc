@@ -2,9 +2,9 @@
 #include <stdio.h> //for EOF
 #include <string.h> //strchr
 #include <stdlib.h> //for malloc, free
-#include "fops.h"
-#include "parse.h"
-#include "tracker.h"
+#include "pbc_fops.h"
+#include "pbc_parse.h"
+#include "pbc_tracker.h"
 
 void 
 token_get_generic (token_t tok, fetch_ops_t fops, void *ctx)

@@ -7,8 +7,8 @@
  */
 
 #include "pbc.h"
-#include "singular.h"
-#include "fp.h"
+#include "pbc_singular.h"
+#include "pbc_fp.h"
 
 static void miller(element_t res, element_t P, element_t Q, element_t R, int n)
 {

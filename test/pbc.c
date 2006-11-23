@@ -7,9 +7,9 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include "pbc.h"
-#include "fieldmpz.h"
-#include "fp.h"
-#include "utils.h"
+#include "pbc_fieldmpz.h"
+#include "pbc_fp.h"
+#include "pbc_utils.h"
 
 char *pbc_getline(void);
 

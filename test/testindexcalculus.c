@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <gmp.h>
 #include "pbc.h"
-#include "random.h"
+#include "pbc_random.h"
 
 int main(int argc, char **argv)
 {

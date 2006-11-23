@@ -15,21 +15,33 @@ lib_LTLIBRARIES = libpbc.la
 
 # this should really be a versioned dir, i.e., $(includedir)/pbc-0.2.16/pbc
 library_includedir = $(includedir)/pbc
-library_include_HEADERS = include/darray.h \
-	include/a_param.h include/a1_param.h \
-	include/d_param.h \
-	include/e_param.h \
-	include/f_param.h \
-	include/field.h \
-	include/fieldmpz.h \
-	include/fp.h include/fieldquadratic.h include/hash.h \
-	include/mpc.h include/pairing.h \
-	include/parse.h include/poly.h include/curve.h \
-	include/singular.h \
-	include/field.h include/get_time.h include/hilbert.h include/mnt.h \
-	include/param.h include/pbc.h include/random.h include/symtab.h include/utils.h \
-	include/fops.h include/tracker.h \
-	include/pbc_assert.h
+library_include_HEADERS = include/pbc_a1_param.h \
+include/pbc_a_param.h \
+include/pbc_assert.h \
+include/pbc_curve.h \
+include/pbc_darray.h \
+include/pbc_d_param.h \
+include/pbc_e_param.h \
+include/pbc_field.h \
+include/pbc_fieldmpz.h \
+include/pbc_fieldquadratic.h \
+include/pbc_fops.h \
+include/pbc_f_param.h \
+include/pbc_fp.h \
+include/pbc.h \
+include/pbc_hilbert.h \
+include/pbc_mnt.h \
+include/pbc_mpc.h \
+include/pbc_pairing.h \
+include/pbc_param.h \
+include/pbc_parse.h \
+include/pbc_poly.h \
+include/pbc_random.h \
+include/pbc_singular.h \
+include/pbc_symtab.h \
+include/pbc_time.h \
+include/pbc_tracker.h \
+include/pbc_utils.h
 
 libpbc_la_CPPFLAGS = -Iinclude
 libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \

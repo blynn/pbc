@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <gmp.h>
 
-#include "field.h"
+#include "pbc_field.h"
 
 static void print_warning(void)
 {

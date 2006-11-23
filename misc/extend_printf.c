@@ -7,8 +7,8 @@
 #include <string.h>
 #include <stdarg.h>
 #include <gmp.h>
-#include "utils.h"
-#include "field.h"
+#include "pbc_utils.h"
+#include "pbc_field.h"
 
 //TODO: remove repeated code for error handling 
 int element_vfprintf(FILE *stream, const char *format, va_list ap)
