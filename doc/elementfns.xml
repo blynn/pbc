@@ -16,6 +16,19 @@ in a ring, one cannot in general invert elements.
 Another caveat is that many of these functions assume their arguments come
 from the same ring, group or field. No implicit type casting is performed.
 </para>
+<para>
+Because of the way PBC is designed, checking that elements
+from different algberaic structures have not been mistakenly mixed is
+not easy to do at compile-time. Instead, runtime checks are performed if
+PBC_DEBUG is defined before the PBC header file is included:
+</para>
+<programlisting>#define PBC_DEBUG
+#include &lt;pbc.h&gt;
+</programlisting>
+<para>
+Note performance will be impaired, so this debugging features should be
+disabled in the final build.
+</para>
 <section>
 <title>Initializing Elements</title>
 <para>

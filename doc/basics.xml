@@ -21,9 +21,17 @@ The file <filename>pbc.h</filename> includes <filename>gmp.h</filename>
 thus all GMP functions are available.
 </para>
 <para>
-The PBC signatures library is currently bundled with PBC.
-Documentation will eventually written for it, but for now look
-at sample signature programs in the test directory.
+To catch certain bugs, first define the PBC_DEBUG symbol before including
+<filename>pbc.h</filename>:
+</para>
+<programlisting>#define PBC_DEBUG
+#include &lt;pbc.h&gt;
+</programlisting>
+<para>
+The program will now abort when PBC detects a statement incorrectly
+mixing elements from different algebraic structures. Note these checks are
+performed at runtime, so this feature should be disabled for production
+builds.
 </para>
 </section>
 <section>

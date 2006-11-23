@@ -104,3 +104,43 @@ set(CMAKE_C_FLAGS "-pipe ${cppflags} ${warnflags} ${optflags}")
 if(x31)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${x31flags}")
 endif(x31)
+
+# e.g: cmake -D CMAKE_INSTALL_PREFIX=~/.local .
+# make install
+
+install(TARGETS pbc pbc LIBRARY DESTINATION lib
+ARCHIVE DESTINATION lib)
+
+set(pbc_header
+include/a1_param.h
+include/a_param.h
+include/curve.h
+include/darray.h
+include/d_param.h
+include/e_param.h
+include/field.h
+include/fieldmpz.h
+include/fieldquadratic.h
+include/fops.h
+include/f_param.h
+include/fp.h
+include/get_time.h
+include/hash.h
+include/hilbert.h
+include/mnt.h
+include/mpc.h
+include/pairing.h
+include/param.h
+include/parse.h
+include/pbc_assert.h
+include/pbc.h
+include/pbc_sig.h
+include/poly.h
+include/random.h
+include/singular.h
+include/symtab.h
+include/tracker.h
+include/utils.h
+)
+
+install(FILES ${pbc_header} DESTINATION include/pbc)

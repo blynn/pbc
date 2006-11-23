@@ -123,27 +123,7 @@ fall under the same data type, with unpleasant results if their elements
 are mistakenly mixed.
 </para>
 <para>
-I have found that though my approach appears not to be type-safe, I almost
-never accidently mix elements from different fields. But even if this
-were a serious problem, it would not be difficult to check that
-the all the arguments belong to the same field during a function call,
-which also addresses the issue in the previous paragraph, and similarly
-check that the current algebraic structure supports the requested
-operation. For example, in its simplest form:
-</para>
-<programlisting>
-void element_add(element_t n, element_t a, element_t b)
-{
-    assert(n->field == a-->field &amp;&amp; a-->field == b->field);
-    n->field->add(n, a, b);
-}
-</programlisting>
-<para>
-This library ought to have such a feature eventually
-to aid the less experienced, but I have other priorities at present.
-</para>
-<para>
-I also have vague plans to add flags to
+I have vague plans to add flags to
 <type>field_t</type>
 describing the capabilities of a particular <type>field_t</type>.
 These flags would be set during initialization, and would indicate 
