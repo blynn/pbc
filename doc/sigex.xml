@@ -3,7 +3,7 @@
 <para>
 This chapter walks through how one might implement the
 Boneh-Lynn-Shacham (BLS) signature scheme using the PBC library.
-It is based on the file <filename>test/testsig.c</filename>.
+It is based on the file <filename>example/bls.c</filename>.
 </para>
 <para>
 Recall the scheme works as follows. We have three groups

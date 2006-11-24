@@ -1,0 +1,16 @@
+CLEANFILES = *~
+maintainer-clean-local:
+	-rm -rf Makefile.in
+
+AM_CPPFLAGS = -I../include
+LDADD = ../libpbc.la
+
+noinst_PROGRAMS = gena1param genaparam gendparam geneparam genfparam hilbertpoly listmnt
+
+gena1param_SOURCES = gena1param.c
+genaparam_SOURCES = genaparam.c
+gendparam_SOURCES = gendparam.c
+geneparam_SOURCES = geneparam.c
+genfparam_SOURCES = genfparam.c
+hilbertpoly_SOURCES = hilbertpoly.c
+listmnt_SOURCES = listmnt.c

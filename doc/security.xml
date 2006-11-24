@@ -37,10 +37,10 @@ be convinced to do so if I hear enough reasons.
 </para>
 </section>
 <section>
-<title>Determinism in Random Number Generators</title>
+<title>PRNG Determinism</title>
 <para>
 On platforms without <filename>/dev/urandom</filename> PBC falls back on
-a deterministic random number generator, which needless to say is
+a deterministic pseudo-random number generator, which needless to say is
 useless for any security applications.
 </para>
 <para>

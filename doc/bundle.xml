@@ -1,0 +1,86 @@
+<chapter>
+<title>Bundled Programs</title>
+<para>
+Several binaries and curve parameters are bundled with the PBC library,
+such as the <command>pbc</command> program
+that was discussed in an earlier chapter.
+</para>
+<para>
+The <filename>param</filename>
+subdirectory contains pairing parameters one might use in
+a real cryptosystem. Many of the test programs read the parameters
+from files such as these on standard input, for example:
+</para>
+<screen>benchmark/benchmark &lt; param/c159.param
+example/bls &lt; param/e.param
+</screen>
+<section>
+<title>Parameter Generation</title>
+<para>
+Programs that generate pairing parameters are located in the
+<filename>gen</filename> subdirectory. Some of the programs are already
+functional enough to be used to find parameters for real applications.
+I need to write more documentation first; for now, read
+the source!
+</para>
+<variablelist>
+<varlistentry>
+<term>listmnt</term>
+<listitem><para>
+Searches for discriminants D that lead to MNT curves with subgroups
+of prime order.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>genaparam</term>
+<term>gena1param</term>
+<term>gendparam</term>
+<term>geneparam</term>
+<term>genfparam</term>
+<listitem><para>
+Prints parameters for a curve suitable for computing pairings of a given
+type. The output can be fed to some of the other test programs.
+</para>
+<para>
+The program <command>gendparam</command>
+should be given a discriminant as the first argument.
+</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>hilbertpoly</term>
+<listitem><para>
+Prints the Hilbert polynomial for a given discriminant (the first argument).
+Computing the Hilbert polynomial is an intermediate step when generating
+type D parameters.
+</para></listitem>
+</varlistentry>
+</variablelist>
+</section>
+<section>
+<title>Example Cryptosystems</title>
+<para>
+In the <filename>example</filename> subdirectory there are various programs
+that read curve parameters on standard input and perform computations
+that would be required in a typical implementation of a pairing-based
+cryptosystem.
+</para>
+<para>
+Of course, more work would be required to turn these programs
+into real applications. The main purpose is to showcase the PBC library
+API.
+</para>
+</section>
+<section>
+<title>Benchmarks</title>
+<para>
+I use the programs in the <filename>benchmark</filename> subdirectory
+to measure running times of pairings, and also RSA decryptions.
+</para>
+<para>
+The <command>benchmark</command> program takes
+pairing parameters on standard input and reports the average running
+time of the pairing over 10 runs, while <command>timersa</command>
+reports the time required to perform one 1024-bit RSA decryption.
+</para>
+</section>
+</chapter>

@@ -46,9 +46,13 @@ grep $GREPVER NEWS > /dev/null || {
 }
 grep $GREPVER doc/manual.xml > /dev/null || {
     echo Error: doc/manual.xml version number mismatch
-    cd $HERE
-    rm -rf $TMPDIR
-    exit 1
+    if [[ $TESTRUN ]]; then
+	echo test run: continuing anyway...
+    else
+	cd $HERE
+	rm -rf $TMPDIR
+	exit 1
+    fi
 }
 ./setup || {
     echo ./setup error
@@ -100,6 +104,8 @@ make || {
 if [[ $TESTRUN ]]; then
     echo test run: not building zip...
 else
-    zip $HERE/pbc-$VER-win32-bin.zip test/*.exe param/*
+    mkdir pbc-$VER
+    mv pbc/*.exe benchmark/*.exe gen/*.exe param/* pbc-$VER
+    zip -r $HERE/pbc-$VER-win32-bin.zip pbc-$VER
 fi
 rm -rf $TMPDIR

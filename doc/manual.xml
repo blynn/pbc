@@ -3,14 +3,16 @@
                "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
     [
     <!ENTITY chapter_basics SYSTEM "basics.xml">
+    <!ENTITY chapter_quickstart SYSTEM "quickstart.xml">
+    <!ENTITY chapter_tutorial SYSTEM "sigex.xml">
     <!ENTITY chapter_pairingfns SYSTEM "pairingfns.xml">
     <!ENTITY chapter_elementfns SYSTEM "elementfns.xml">
     <!ENTITY chapter_paramfns SYSTEM "paramfns.xml">
     <!ENTITY chapter_randomfns SYSTEM "randomfns.xml">
-    <!ENTITY chapter_tutorial SYSTEM "sigex.xml">
     <!ENTITY chapter_internal SYSTEM "internal.xml">
     <!ENTITY chapter_auxfns SYSTEM "auxfns.xml">
     <!ENTITY chapter_customalloc SYSTEM "alloc.xml">
+    <!ENTITY chapter_bundle SYSTEM "bundle.xml">
     <!ENTITY chapter_security SYSTEM "security.xml">
     <!ENTITY appendix_contributors SYSTEM "contributors.xml">
 
@@ -51,7 +53,7 @@
 <preface><title>Preface</title>
 <para>
 This manual describes how to install and use the PBC pairing-based
-cryptography library, version 0.4.0.
+cryptography library, version 0.4.1.
 </para>
 <para>
 It is modeled on the GMP manual. GMP is the GNU multiple precision
@@ -132,6 +134,7 @@ which may change in future releases. In that case, the PBC code will also
 have to be updated.
 </para>
 </chapter>
+&chapter_quickstart;
 &chapter_basics;
 &chapter_tutorial;
 &chapter_pairingfns;
@@ -140,6 +143,7 @@ have to be updated.
 &chapter_randomfns;
 &chapter_auxfns;
 &chapter_customalloc;
+&chapter_bundle;
 &chapter_internal;
 &chapter_security;
 &appendix_contributors;

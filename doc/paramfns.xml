@@ -63,7 +63,7 @@ as short as type F pairings, but much faster.
 <para>
 I sometimes refer to a type D curve as a triplet of numbers:
 the discriminant, the number of bits in the prime q, and the number of
-bits in the prime r. The <command>test/listmnt</command> program prints
+bits in the prime r. The <command>gen/listmnt</command> program prints
 these numbers.
 </para>
 <para>
@@ -77,8 +77,8 @@ Among the bundled type D curve parameters are the curves
 The <type>d_param_t</type> data type holds parameters for a type D pairing.
 </para>
 <para>
-See <filename>test/listmnt.c</filename> and
-<filename>test/gendparam.c</filename> for how to generate type
+See <filename>gen/listmnt.c</filename> and
+<filename>gen/gendparam.c</filename> for how to generate type
 D pairing parameters.
 </para>
 <para>

@@ -42,7 +42,8 @@ typedef struct pairing_s *pairing_ptr;
 Get ready to perform a pairing whose first input is ''in1'',
 and store the results of time-saving precomputation in ''p''.
 */
-static inline void pairing_pp_init(pairing_pp_t p, element_t in1, pairing_t pairing) {
+static inline void pairing_pp_init(pairing_pp_t p, element_t in1, pairing_t pairing)
+{
     p->pairing = pairing;
     pairing->pp_init(p, in1, pairing);
 }
@@ -101,7 +102,8 @@ will be set to the map applied to ''in1'' and ''in2'', that is
 ''out'' must be in the group GT.
 */
 static inline void pairing_apply(element_t out, element_t in1, element_t in2,
-    pairing_t pairing) {
+    pairing_t pairing)
+{
     pairing->map(out, in1, in2, pairing);
 }
 

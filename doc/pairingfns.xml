@@ -1,15 +1,20 @@
 <chapter>
 <title>Pairing Functions</title>
 <para>
-An application will most likely need to
-instantiate a bilinear pairing before performing any other PBC
-operations.
+An application will most likely need to instantiate a bilinear pairing
+before performing any other operations.
+The easiest way to do this is to initialize a pairing with
+previously-generated pairing parameters.
 </para>
 <para>
-Parameters for various pairings are bundled with PBC and should
-be suitable for cryptographic use. Most programs will probably
-want to start by initializing a pairing by reading a set of
-pairing parameters.
+Parameters for various pairings are included with
+the PBC library distribution in the
+<filename>param</filename> subdirectory and should
+be suitable for cryptographic use. Some programs in
+the <filename>gen</filename> subdirectory may be used to
+generate parameters (see the chapter on bundled programs).
+Also, on the PBC website an archive containing many pairing
+parameters is available for download.
 </para>
 <para>
 Particular instantiations of bilinear pairings are stored in the data

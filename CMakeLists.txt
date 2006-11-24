@@ -3,6 +3,32 @@ project(pbc)
 set(CMAKE_MODULE_PATH .)
 include_directories(./include)
 
+set(examplebin
+example/bls
+example/bonehfranklin
+example/hess
+example/joux
+example/paterson
+example/yuanli
+example/zhang
+example/zss
+)
+
+set(goodbin
+pbc/pbc
+gen/gena1param
+gen/genaparam
+gen/gendparam
+gen/geneparam
+gen/genfparam
+gen/hilbertpoly
+gen/listmnt
+benchmark/benchmark
+benchmark/timersa
+)
+
+set(buildbin ${goodbin} ${examplebin})
+
 # cross compiling for Windows using Debian's mingw package
 #   cmake -D crossmingw:BOOL=1
 # I keep my cross-compiled GMP in ~/cross/gmp/
@@ -55,26 +81,7 @@ misc/memory.c
 ${get_time_src}
 )
 
-foreach(bin
-pbc/pbc
-example/bls
-example/bonehfranklin
-example/hess
-example/joux
-example/paterson
-example/yuanli
-example/zhang
-example/zss
-gen/gena1param
-gen/genaparam
-gen/gendparam
-gen/geneparam
-gen/genfparam
-gen/hilbertpoly
-gen/listmnt
-benchmark/benchmark
-benchmark/timersa
-)
+foreach(bin ${buildbin})
     add_executable(${bin} ${bin}.c)
     target_link_libraries(${bin} pbc ${GMP_LIBRARY} m)
 endforeach(bin)

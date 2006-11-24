@@ -1,4 +1,4 @@
-SUBDIRS = . example
+SUBDIRS = . example gen
 
 ChangeLog :
 	cg-log > ChangeLog
@@ -57,7 +57,13 @@ libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
 	ecc/f_param.c misc/tracker.c misc/extend_printf.c
 libpbc_la_LDFLAGS =  -lgmp -lm
 
-noinst_PROGRAMS = pbc/pbc
+noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa
 pbc_pbc_CPPFLAGS = -I include
 pbc_pbc_LDADD = libpbc.la
 pbc_pbc_SOURCES = pbc/pbc.c pbc/pbc_getline.c
+benchmark_benchmark_CPPFLAGS = -I include
+benchmark_benchmark_LDADD = libpbc.la
+benchmark_benchmark_SOURCES = benchmark/benchmark.c
+benchmark_timersa_CPPFLAGS = -I include
+benchmark_timersa_LDADD = libpbc.la
+benchmark_timersa_SOURCES = benchmark/timersa.c

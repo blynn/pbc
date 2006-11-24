@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.5)
-AC_INIT([pbc], [0.4.0], [blynn@cs.stanford.edu])
-AM_INIT_AUTOMAKE(pbc,0.4.0)
+AC_INIT([pbc], [0.4.1], [blynn@cs.stanford.edu])
+AM_INIT_AUTOMAKE(pbc,0.4.1)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR([./])
 AC_PROG_LIBTOOL
@@ -89,7 +89,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor gettimeofday memmove memset pow sqrt strchr strdup])
 
-AC_CONFIG_FILES([Makefile example/Makefile])
+AC_CONFIG_FILES([Makefile example/Makefile gen/Makefile])
 AC_OUTPUT
 
 echo -ne "\n"
