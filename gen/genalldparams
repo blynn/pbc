@@ -1,11 +1,13 @@
-#!/bin/bassh
-#Generates all type D curve parameters within certain limits
+#!/bin/bash
+# Generates all type D curve parameters within certain limits
+#
+# Use with the output of listmnt
 
 function myfunc {
     until [ -z "$1" ]
     do
 	filename=d$1-$2-$3.param
-	test/gendparam $1 > $filename
+	gen/gendparam $1 > $filename
 	shift 3
     done
 }

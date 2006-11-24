@@ -1,3 +1,6 @@
+// Prints Hilbert polynomial H_D(X)
+// D is the first argument on the command-line
+// If no D is specified, set D = 3
 #include <stdio.h>
 #include <stdlib.h> //for atoi, exit
 #include <gmp.h>

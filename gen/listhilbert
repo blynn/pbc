@@ -1,7 +1,8 @@
 #!/bin/bash
+# Prints a big list of Hilbert polynomials
 
 function doit {
-    test/testhilbert $1
+    gen/hilbertpoly $1
 }
 
 for ((i=3; i<10000000; i=i+4))

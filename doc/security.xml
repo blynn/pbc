@@ -47,6 +47,7 @@ useless for any security applications.
 One should note how <filename>/dev/urandom</filename> differs from
 <filename>/dev/random</filename>. A quote from its manpage:
 </para>
+<para>
 <quote>
 A  read  from  the  /dev/urandom device will not block waiting for more
 entropy.  As a result, if  there  is  not  sufficient  entropy  in  the
@@ -56,5 +57,6 @@ of how to do this is not available in the current non-classified literature,
 but it is theoretically possible that such an attack may  exist.
 If this is a concern in your application, use /dev/random instead.
 </quote>
+</para>
 </section>
 </chapter>

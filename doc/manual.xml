@@ -124,25 +124,6 @@ make
 </listitem>
 </varlistentry>
 
-<varlistentry><term>
-Make
-</term>
-<listitem><para>
-If the above methods do not work, one can always resort to the editing
-the file
-<filename>Makefile.orig</filename>
-and running Make:
-</para>
-<screen>
-make -f Makefile.orig
-</screen>
-<para>
-Another file named <filename>Makefile.mingw</filename> is written
-for the MinGW compiler, but is not often tested.
-</para>
-</listitem>
-</varlistentry>
-
 </variablelist>
 <para>
 PBC uses some GNU C extensions, notably nested functions.

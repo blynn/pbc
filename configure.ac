@@ -89,10 +89,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor gettimeofday memmove memset pow sqrt strchr strdup])
 
-
-
-AC_CONFIG_FILES([Makefile
-		 test/Makefile])
+AC_CONFIG_FILES([Makefile example/Makefile])
 AC_OUTPUT
 
 echo -ne "\n"

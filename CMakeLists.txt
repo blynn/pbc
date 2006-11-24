@@ -25,10 +25,10 @@ else(crossmingw)
 endif(crossmingw)
 
 if (READLINE_FOUND)
-    add_executable(test/pbc test/pbc.c test/pbc_getline.readline.c)
-    target_link_libraries(test/pbc readline)
+    add_executable(pbc/pbc pbc/pbc.c pbc/pbc_getline.readline.c)
+    target_link_libraries(pbc/pbc readline)
 else (READLINE_FOUND)
-    add_executable(test/pbc test/pbc.c test/pbc_getline.c)
+    add_executable(pbc/pbc pbc/pbc.c pbc/pbc_getline.c)
 endif (READLINE_FOUND)
 
 include_directories(${GMP_INCLUDE_DIR})
@@ -54,23 +54,32 @@ misc/extend_printf.c
 misc/memory.c
 ${get_time_src}
 )
+
 foreach(bin
-test/19          test/geneparam  test/testibe
-test/benchmark   test/genfparam  test/testsig
-test/gena1param  test/listmnt    test/testfi       test/testpairing
-test/genaparam   test/sing       test/timefp       test/testpoly
-test/gendparam   test/testhilbert
-test/checkfp
-test/testexp
-test/timersa
-test/yuanli
-test/testindexcalculus
+pbc/pbc
+example/bls
+example/bonehfranklin
+example/hess
+example/joux
+example/paterson
+example/yuanli
+example/zhang
+example/zss
+gen/gena1param
+gen/genaparam
+gen/gendparam
+gen/geneparam
+gen/genfparam
+gen/hilbertpoly
+gen/listmnt
+benchmark/benchmark
+benchmark/timersa
 )
     add_executable(${bin} ${bin}.c)
     target_link_libraries(${bin} pbc ${GMP_LIBRARY} m)
 endforeach(bin)
 
-target_link_libraries(test/pbc pbc ${GMP_LIBRARY} m)
+target_link_libraries(pbc/pbc pbc ${GMP_LIBRARY} m)
 
 set(warnflags "-Wall -W -Wfloat-equal -Wendif-labels -Wshadow  \\
     -Wpointer-arith -Wcast-align -Wstrict-prototypes \\

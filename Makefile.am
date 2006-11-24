@@ -1,7 +1,4 @@
-SUBDIRS = . test 
-#EXTRA_DIST = Makefile.mingw Makefile.orig param/*.param report_times list_hilbert genalldparams setup \
-	#misc/get_time.win32.c \
-	#doc/pretty/pretty.css doc/makeover doc/extract doc/*.x[ms]l doc/default.css doc/Makefile
+SUBDIRS = . example
 
 ChangeLog :
 	cg-log > ChangeLog
@@ -59,3 +56,8 @@ libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
 	ecc/param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
 	ecc/f_param.c misc/tracker.c misc/extend_printf.c
 libpbc_la_LDFLAGS =  -lgmp -lm
+
+noinst_PROGRAMS = pbc/pbc
+pbc_pbc_CPPFLAGS = -I include
+pbc_pbc_LDADD = libpbc.la
+pbc_pbc_SOURCES = pbc/pbc.c pbc/pbc_getline.c

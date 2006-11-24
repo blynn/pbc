@@ -3,5 +3,5 @@
 for p in a d159 d201 d224 e f a1
 do
     echo -en $p'\t'
-    test/benchmark < param/$p.param | awk '/time =/ {printf "%s", $5 "\t" } /prepro/ {print $6}'
+    benchmark/benchmark < param/$p.param | awk '/time =/ {printf "%s", $5 "\t" } /prepro/ {print $6}'
 done
