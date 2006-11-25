@@ -1,8 +1,12 @@
-//Boneh-Franklin Identity-Based Encryption demo
-//Note: in real life it may be better to swap the roles of G1 and G2
-//although the system parameters take longer to compute
-//(and more room to store), hashing ID's to elements of G1
-//is faster than to G2, and this has to be done often.
+// Boneh-Franklin Identity-Based Encryption demo
+//
+// Note: in real life it may be better to swap the roles
+// of G1 and G2 for some pairing types. Although the system
+// parameters take longer to compute (and more room to store),
+// hashing ID's to elements of G1 is faster than to G2, and
+// this has to be done often.
+//
+// Ben Lynn
 #include "pbc.h"
 
 int main(void)

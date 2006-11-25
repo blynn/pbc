@@ -32,13 +32,13 @@ To verify a signature sigma, one checks that e(h,g^x) = e(sigma, g).
 <section>
 <title>BLS Signatures</title>
 <para>
-First we need to include <filename>pbc.h</filename>:
+First we include <filename>pbc.h</filename>:
 </para>
 <screen>
-#include "pbc.h"
+#include &lt;pbc.h&gt;
 </screen>
 <para>
-Next we need to initialize a pairing:
+Next we initialize a pairing:
 </para>
 <screen>
     pairing_t pairing;
@@ -46,10 +46,13 @@ Next we need to initialize a pairing:
     pairing_init_inp_str(pairing, stdin);
 </screen>
 <para>
-Later when the program is run we will give pairing parameters to our program
+Later we will give pairing parameters to our program
 on standard input. Any file in the <filename>param</filename> subdirectory
-will suffice.
+will suffice, for example:
 </para>
+<screen>
+bls &lt; param/a.param
+</screen>
 <para>
 We shall need several <type>element_t</type> variables to
 hold the system parameters, keys and other quantities. We declare
@@ -88,11 +91,17 @@ and the corresponding public key.
     element_pow_zn(public_key, g, secret_key);
 </screen>
 <para>
-Now suppose we are given a message. We feed
-it into a standard hash algorithm, and say it outputs
-the string ABCDEF (I guess we're using the highly obscure
-SHA-48!).
-We now map this string to an element h of G1,
+When given a message to sign, we first
+compute its hash, using some standard hash algorithm.
+Many libraries can do this, and this operation
+does not involve pairings, so PBC does not provide
+functions for this step. For this example,
+and our message has already been hashed, possibly
+using another library.
+</para>
+<para>
+Say the message hash is "ABCDEF" (a 48-bit hash).
+We map these bytes to an element h of G1,
 </para>
 <screen>
     element_from_hash(h, "ABCDEF", 6);
@@ -104,9 +113,10 @@ then sign it:
     element_pow_zn(sig, h, secret_key);
 </screen>
 <para>
-To verify this signature, we input (signature, system parameter)
-to the pairing, input (message hash, public key) to the pairing,
-and check the outputs match.
+To verify this signature, we compare the
+outputs of the pairing applied to the signature and system parameter,
+and the pairing applied to the message hash and public key.
+If the pairing outputs match then the signature is valid.
 </para>
 <screen>
     pairing_apply(temp1, sig, g, pairing);

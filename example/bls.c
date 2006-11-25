@@ -1,5 +1,9 @@
-//Boneh-Lynn-Shacham short signatures demo
-//see PBC_sig library for a more practical implementation
+// Boneh-Lynn-Shacham short signatures demo
+//
+// See the PBC_sig library for an implementation that can be used
+// in real applications.
+//
+// Ben Lynn
 #include "pbc.h"
 
 int main(void)
@@ -35,7 +39,7 @@ int main(void)
     element_printf("public key = %B\n", public_key);
 
     //generate element from a hash
-    //for toy examples, should check that pairing(g, h) != 1
+    //for toy pairings, should check that pairing(g, h) != 1
     element_from_hash(h, "hashofmessage", 13);
     element_printf("message hash = %B\n", h);
 

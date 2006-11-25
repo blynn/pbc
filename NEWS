@@ -1,5 +1,19 @@
 The PBC pairing-based cryptography library. See COPYING for license.
 
+Ben Lynn
+
+Changes between PBC version 0.4.1 and 0.4.0
+
+* Removed test subdirectory: moved programs to new subdirectories:
+  - benchmark: programs for obtaining timings.
+  - example: pairing-based cryptosystem demos.
+  - gen: programs that generate pairing parameters.
+  - pbc: the "Pairing-Based Calculator".
+  - guru: for testing obscure parts of the library. Most need not
+    know of its existence.
+* Documentation for some of the above programs.
+* New cryptosystem demos (by Dmitry Kosolapov)
+
 Changes between PBC version 0.4.0 and 0.3.17
 
 * Signatures and broadcast encryption spun off into new libraries.

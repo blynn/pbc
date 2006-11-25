@@ -7,6 +7,8 @@ if [[ $1 == "test" ]]; then
     echo test run
     TESTRUN=1
 fi
+echo cg-diff: ideally should do nothing...
+cg-diff
 cg-log > ChangeLog
 cat ChangeLog | head -20 | grep pbc-$GREPVER > /dev/null || {
     echo cg-log does not mention release 
@@ -15,14 +17,6 @@ cat ChangeLog | head -20 | grep pbc-$GREPVER > /dev/null || {
     else
 	exit 1
     fi
-}
-make -f Makefile.orig depend || {
-    echo Makefile.orig problem
-    exit 1
-}
-make -f Makefile.mingw depend || {
-    echo Makefile.mingw problem
-    exit 1
 }
 TMPDIR=`mktemp -d` || {
     echo Error creating temp directory
@@ -105,7 +99,7 @@ if [[ $TESTRUN ]]; then
     echo test run: not building zip...
 else
     mkdir pbc-$VER
-    mv pbc/*.exe benchmark/*.exe gen/*.exe param/* pbc-$VER
+    mv pbc/*.exe benchmark/*.exe param/* pbc-$VER
     zip -r $HERE/pbc-$VER-win32-bin.zip pbc-$VER
 fi
 rm -rf $TMPDIR

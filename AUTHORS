@@ -23,7 +23,7 @@ Rob Figueiredo, Roger Khazan
 
 Dmitry Kosolapov
     Manual corrections
-    Yuan-Li identity-based authenticated key agreement test program
+    Several example cryptosystems
 
 John Bethencourt
     Patches including fixes for 64-bit platforms
