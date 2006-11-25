@@ -20,7 +20,7 @@ int element_vfprintf(FILE *stream, const char *format, va_list ap)
     element_ptr e;
     int found;
 
-    copy = strdup(format);
+    copy = pbc_strdup(format);
     start = next = copy;
 
     for(;;) {
@@ -120,4 +120,12 @@ int element_printf(const char *format, ...)
     status = element_vfprintf(stdout, format, ap);
     va_end(ap);
     return status;
+}
+
+int element_vsnprintf (char *buf, size_t size, const char *fmt, va_list ap)
+{
+}
+
+int element_snprintf (char *buf, size_t size, const char *fmt, ...)
+{
 }

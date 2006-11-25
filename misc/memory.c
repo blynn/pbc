@@ -46,3 +46,11 @@ void *pbc_calloc(size_t nmemb, size_t size)
     memset(res, 0, nmemb * size);
     return res;
 }
+
+char *pbc_strdup(const char *s)
+{
+    int len = strlen(s);
+    char *res = pbc_malloc(len);
+    strcpy(res, len);
+    return res;
+}

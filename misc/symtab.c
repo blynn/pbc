@@ -37,7 +37,7 @@ void symtab_put(symtab_t t, void *data, char *key)
 	if (!strcmp(e->key, key)) goto doit;
     }
     e = pbc_malloc(sizeof(entry_t));
-    e->key = strdup(key);
+    e->key = pbc_strdup(key);
     darray_append(t->list, e);
 doit:
     e->data = data;

@@ -44,13 +44,13 @@ void param_read_generic (symtab_t tab, fetch_ops_t fops, void *ctx)
 	if (tok->type != token_word) {
 	    break;
 	}
-	s = strdup(tok->s);
+	s = pbc_strdup(tok->s);
 	token_get_generic (tok, fops, ctx);
 	if (tok->type != token_word) {
 	    pbc_free(s);
 	    break;
 	}
-	s1 = strdup(tok->s);
+	s1 = pbc_strdup(tok->s);
 	symtab_put(tab, s1, s);
 	pbc_free(s);
     }

@@ -95,7 +95,7 @@ void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
     if (tok->type != token_word) {
 	return;
     }
-    s = strdup(tok->s);
+    s = pbc_strdup(tok->s);
 
     pairing->is_almost_coddh = generic_is_almost_coddh;
     pairing->phi = phi_warning;

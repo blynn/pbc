@@ -12,7 +12,7 @@ Changes between PBC version 0.4.1 and 0.4.0
   - guru: for testing obscure parts of the library. Most need not
     know of its existence.
 * Documentation for some of the above programs.
-* New cryptosystem demos (by Dmitry Kosolapov)
+* New cryptosystem demos (by Dmitry Kosolapov).
 
 Changes between PBC version 0.4.0 and 0.3.17
 
