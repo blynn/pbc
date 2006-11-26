@@ -371,7 +371,7 @@ static inline void element_random(element_t e)
 }
 
 /*@manual ecmp
-Returns 0 if ''n'' is 1, nonzero otherwise.
+Returns nonzero if ''n'' is 1, zero otherwise.
 */
 static inline int element_is1(element_t n)
 {
@@ -379,7 +379,7 @@ static inline int element_is1(element_t n)
 }
 
 /*@manual ecmp
-Returns 0 if ''n'' is 0, nonzero otherwise.
+Returns nonzero if ''n'' is 0, zero otherwise.
 */
 static inline int element_is0(element_t n)
 {
@@ -396,7 +396,8 @@ static inline int element_cmp(element_t a, element_t b)
 }
 
 /*@manual ecmp
-Returns 0 if ''a'' is a perfect square (quadratic residue), nonzero otherwise.
+Returns nonzero if ''a'' is a perfect square (quadratic residue),
+zero otherwise.
 */
 static inline int element_is_sqr(element_t a)
 {
@@ -416,7 +417,6 @@ the algebraic structure, but has the property that
 element_sgn(''a'') = -element_sgn(-''a'')
 and
 element_sgn(''a'') = 0 implies ''a'' = 0 with overwhelming probability.
-Not implemented on elliptic curve groups yet.
 */
 static inline int element_sign(element_t a)
 {

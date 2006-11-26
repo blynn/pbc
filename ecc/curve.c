@@ -250,6 +250,13 @@ static void curve_random(element_ptr a)
     if (cdp->cofac) element_mul_mpz(a, a, cdp->cofac);
 }
 
+static int curve_sign(element_ptr e)
+{
+    point_ptr p = e->data;
+    if (p->inf_flag) return 0;
+    return element_sign(p->y);
+}
+
 static void curve_from_hash(element_t a, void *data, int len)
 {
     //TODO: don't find a hash by the 255th try = freeze!
@@ -446,6 +453,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     f->cmp = curve_cmp;
     f->set0 = f->set1 = curve_set1;
     f->is0 = f->is1 = curve_is1;
+    f->sign = curve_sign;
     f->set = curve_set;
     f->random = curve_random;
     f->from_hash = curve_from_hash;
