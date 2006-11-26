@@ -71,6 +71,7 @@ struct field_s {
     void (*pp_init)(element_pp_t p, element_t in);
     void (*pp_clear)(element_pp_t p);
     void (*pp_pow)(element_t out, mpz_ptr power, element_pp_t p);
+    int (*snprint)(char *s, size_t n, element_ptr e);
     void *data;
 };
 typedef struct field_s *field_ptr;
@@ -117,7 +118,12 @@ static inline size_t element_out_str(FILE *stream, int base, element_t e)
 
 /*@manual eio
 */
+int element_printf(const char *format, ...);
+
+/*@manual eio
+*/
 int element_fprintf(FILE *stream, const char *format, ...);
+
 /*@manual eio
 Same as printf family
 except also has the 'B' conversion specifier for types
@@ -128,9 +134,17 @@ of <function>element_t</function>, and 'Y', 'Z' conversion specifiers for
 element_printf("%B\n", e);
 </screen>
 will print the value of ''e'' in a human-readable form on standard output.
-Side effect: once called, regular printf will act in the same manner.
 */
-int element_printf(const char *format, ...);
+int element_snprintf (char *buf, size_t size, const char *fmt, ...);
+
+/*@manual eio
+Convert an element to a human-friendly string.
+Behaves as <function>snprintf</function> but only on one element at a time.
+*/
+static inline int element_snprint(char *s, size_t n, element_t e)
+{
+    return e->field->snprint(s, n, e);
+}
 
 /*@manual eassign
 Set ''e'' to zero.

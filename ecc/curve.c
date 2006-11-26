@@ -267,12 +267,49 @@ static size_t curve_out_str(FILE *stream, int base, element_ptr a)
 	if (EOF == fputc('O', stream)) return 0;
 	return 1;
     }
+    if (EOF == fputc('(', stream)) return 0;
     result = element_out_str(stream, base, p->x);
     if (!result) return 0;
     if (EOF == fputc(' ', stream)) return 0;
     status = element_out_str(stream, base, p->y);
     if (!status) return 0;
-    return result + status + 1;
+    if (EOF == fputc(')', stream)) return 0;
+    return result + status + 3;
+}
+
+static int curve_snprint(char *s, size_t n, element_ptr a)
+{
+    point_ptr p = a->data;
+    size_t result = 0, left;
+    int status;
+
+    void clip_sub(void)
+    {
+	result += status;
+	left = result >= n ? 0 : n - result;
+    }
+
+    if (p->inf_flag) {
+	status = snprintf(s, n, "O");
+	if (status < 0) return status;
+	return 1;
+    }
+
+    status = snprintf(s, n, "(");
+    if (status < 0) return status;
+    clip_sub();
+    status = element_snprint(s + result, left, p->x);
+    if (status < 0) return status;
+    clip_sub();
+    status = snprintf(s + result, left, " ");
+    if (status < 0) return status;
+    clip_sub();
+    status = element_snprint(s + result, left, p->y);
+    if (status < 0) return status;
+    clip_sub();
+    status = snprintf(s + result, left, ")");
+    if (status < 0) return status;
+    return result + status;
 }
 
 static void field_clear_curve(field_t f)
@@ -363,6 +400,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     f->random = curve_random;
     f->from_hash = curve_from_hash;
     f->out_str = curve_out_str;
+    f->snprint = curve_snprint;
     f->field_clear = field_clear_curve;
     if (cdp->field->fixed_length_in_bytes < 0) {
 	f->length_in_bytes = curve_length_in_bytes;

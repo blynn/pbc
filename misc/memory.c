@@ -50,7 +50,7 @@ void *pbc_calloc(size_t nmemb, size_t size)
 char *pbc_strdup(const char *s)
 {
     int len = strlen(s);
-    char *res = pbc_malloc(len);
-    strcpy(res, len);
+    char *res = pbc_malloc(len + 1);
+    strcpy(res, s);
     return res;
 }

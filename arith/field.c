@@ -538,6 +538,18 @@ static void generic_out_info(FILE *out, field_ptr f)
     element_fprintf(out, "order = %Zd\n", f->order);
 }
 
+int default_element_snprint(char *s, size_t n, element_t e)
+{
+    UNUSED_VAR(e);
+    if (n == 1) {
+	s[0] = '0';
+    } else if (n >= 2) {
+	s[0] = '?';
+	s[1] = '\0';
+    }
+    return 1;
+}
+
 static void warn_field_clear(field_ptr f)
 {
     fprintf(stderr, "field %p has no clear function\n", f);
@@ -588,6 +600,7 @@ void field_init(field_ptr f)
     f->pp_init = default_element_pp_init;
     f->pp_clear = default_element_pp_clear;
     f->pp_pow = default_element_pp_pow;
+    f->snprint = default_element_snprint;
 }
 
 void field_clear(field_ptr f)

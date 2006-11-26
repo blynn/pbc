@@ -360,10 +360,12 @@ static size_t poly_out_str(FILE *stream, int base, element_ptr e)
     int n = poly_coeff_count(e);
     size_t result = 2, status;
 
+    /*
     if (!n) {
 	if (EOF == fputs("[0]", stream)) return 0;
 	return 3;
     }
+    */
     if (EOF == fputc('[', stream)) return 0;
     for (i=0; i<n; i++) {
 	if (i) {
@@ -376,6 +378,38 @@ static size_t poly_out_str(FILE *stream, int base, element_ptr e)
     }
     if (EOF == fputc(']', stream)) return 0;
     return result;
+}
+
+static int poly_snprint(char *s, size_t size, element_ptr e)
+{
+    int i;
+    int n = poly_coeff_count(e);
+    size_t result = 0, left;
+    int status;
+
+    void clip_sub(void)
+    {
+	result += status;
+	left = result >= size ? 0 : size - result;
+    }
+
+    status = snprintf(s, size, "[");
+    if (status < 0) return status;
+    clip_sub();
+
+    for (i=0; i<n; i++) {
+	if (i) {
+	    status = snprintf(s + result, left, " ");
+	    if (status < 0) return status;
+	    clip_sub();
+	}
+	status = element_snprint(s + result, left, poly_coeff(e, i));
+	if (status < 0) return status;
+	clip_sub();
+    }
+    status = snprintf(s + result, left, "]");
+    if (status < 0) return status;
+    return result + status;
 }
 
 void poly_div(element_ptr quot, element_ptr rem,
@@ -637,6 +671,7 @@ void field_init_poly(field_ptr f, field_ptr base_field)
     f->set_mpz = poly_set_mpz;
     f->to_mpz = poly_to_mpz;
     f->out_str = poly_out_str;
+    f->snprint = poly_snprint;
     f->set = poly_set;
     f->sign = poly_sgn;
     f->add = poly_add;
@@ -1362,7 +1397,6 @@ static int polymod_sgn(element_ptr e)
     return res;
 }
 
-
 static size_t polymod_out_str(FILE *stream, int base, element_ptr e)
 {
     size_t result = 2, status;
@@ -1383,6 +1417,40 @@ static size_t polymod_out_str(FILE *stream, int base, element_ptr e)
     if (EOF == fputc(']', stream)) return 0;
     return result;
 }
+
+static int polymod_snprint(char *s, size_t size, element_ptr e)
+{
+    polymod_field_data_ptr p = e->field->data;
+    element_t *coeff = e->data;
+    int i, n = p->n;
+    size_t result = 0, left;
+    int status;
+
+    void clip_sub(void)
+    {
+	result += status;
+	left = result >= size ? 0 : size - result;
+    }
+
+    status = snprintf(s, size, "[");
+    if (status < 0) return status;
+    clip_sub();
+
+    for (i=0; i<n; i++) {
+	if (i) {
+	    status = snprintf(s + result, left, " ");
+	    if (status < 0) return status;
+	    clip_sub();
+	}
+	status = element_snprint(s + result, left, coeff[i]);
+	if (status < 0) return status;
+	clip_sub();
+    }
+    status = snprintf(s + result, left, "]");
+    if (status < 0) return status;
+    return result + status;
+}
+
 
 //Contrived? This returns to_mpz(constant term)
 static void polymod_to_mpz(mpz_t z, element_ptr e)
@@ -1454,6 +1522,7 @@ void field_init_polymod(field_ptr f, element_ptr poly)
     f->set_si = polymod_set_si;
     f->set_mpz = polymod_set_mpz;
     f->out_str = polymod_out_str;
+    f->snprint = polymod_snprint;
     f->set = polymod_set;
     f->sign = polymod_sgn;
     f->add = polymod_add;
