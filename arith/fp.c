@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <gmp.h>
 #include <string.h>
@@ -78,4 +79,40 @@ void pbc_tweak_use_fp(char *s)
     } else if (!strcmp(s, "mont")) {
 	option_fpinit = field_init_mont_fp;
     }
+}
+
+int pbc_mpz_set_str(mpz_t z, char *s, int base)
+{
+    int b, i = 0;
+    mpz_set_ui(z, 0);
+    if (!base) {
+	b = 10;
+    } else {
+	if (base < 2) return 0;
+	if (base > 36) return 0;
+	b = base;
+    }
+    for (;;) {
+	int j;
+	char c = s[i];
+	if (!c) break;
+	if (isspace(c)) {
+	    i++;
+	    continue;
+	}
+	if (isdigit(c)) {
+	    j = c - '0';
+	} else if (c >= 'A' && c <= 'Z') {
+	    j = c - 'A';
+	} else if (c >= 'a' && c <= 'z') {
+	    j = c - 'a';
+	} else break;
+
+	if (j >= b) break;
+
+	mpz_mul_ui(z, z, b);
+	mpz_add_ui(z, z, j);
+	i++;
+    }
+    return i;
 }

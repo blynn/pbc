@@ -56,7 +56,7 @@ int main(void)
 
 	element_to_bytes_compressed(data, sig);
 	printf("compressed = ");
-	for (i=0; i<n; i++) {
+	for (i = 0; i < n; i++) {
 	    printf("%02X", data[i]);
 	}
 	printf("\n");
@@ -90,7 +90,7 @@ int main(void)
 
 	element_to_bytes_x_only(data, sig);
 	printf("x-coord = ");
-	for (i=0; i<n; i++) {
+	for (i = 0; i < n; i++) {
 	    printf("%02X", data[i]);
 	}
 	printf("\n");

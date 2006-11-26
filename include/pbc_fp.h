@@ -21,4 +21,5 @@ void fp_tonelli(element_ptr x, element_ptr a);
 
 void field_init_fp(field_ptr f, mpz_t prime);
 
+int pbc_mpz_set_str(mpz_t z, char *s, int base);
 #endif //__PBC_FP_H__

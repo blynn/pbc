@@ -12,7 +12,8 @@ int main(void)
 {
     pairing_t pairing;
     double time1, time2;
-    element_t Ppub, s, P, R, k, S, Did, Qid, t1, t2, t4, t5, t6, t7, t8, t9, t10, t11;
+    element_t Ppub, s, P, R, k, S, Did, Qid, t1, t2, t4, t5, t6, t7, t8,
+	t9, t10, t11;
     mpz_t t3;
     mpz_init(t3);
     pairing_init_inp_str(pairing, stdin);
@@ -26,7 +27,7 @@ int main(void)
     element_init_G1(t4, pairing);
     element_init_G1(t5, pairing);
     element_init_G1(t7, pairing);
-    
+
     element_init_Zr(s, pairing);
     element_init_Zr(k, pairing);
     element_init_Zr(t1, pairing);
@@ -48,7 +49,7 @@ int main(void)
     element_from_hash(Qid, "ID", 2);
     element_printf("Qid = %B\n", Qid);
     element_mul_zn(Did, Qid, s);
-    
+
     printf("SIGN\n");
     element_random(k);
     element_mul_zn(R, P, k);
@@ -75,21 +76,21 @@ int main(void)
     pairing_apply(t8, Ppub, Qid, pairing);
     element_to_mpz(t3, R);
     element_pow_mpz(t9, t8, t3);
-    element_printf("t8 = %B\n",t8);
-    element_printf("t9 = %B\n",t9);
+    element_printf("t8 = %B\n", t8);
+    element_printf("t9 = %B\n", t9);
     element_mul(t10, t6, t9);
-    element_printf("t10 = %B\n",t10);
+    element_printf("t10 = %B\n", t10);
     pairing_apply(t11, R, S, pairing);
     element_printf("[e(P, P)^H2(M)][e(Ppub, Qid)^H3(R)] = %B\n", t10);
     element_printf("e(R, S) = %B\n", t11);
-    if(!element_cmp(t10, t11)) {
+    if (!element_cmp(t10, t11)) {
 	printf("Signature is valid!\n");
     } else {
 	printf("Signature is invalid!\n");
     }
     time2 = get_time();
     printf("All time = %fs\n", time2 - time1);
-	
+
     element_clear(P);
     element_clear(Ppub);
     element_clear(Qid);
@@ -109,5 +110,5 @@ int main(void)
     element_clear(t11);
     pairing_clear(pairing);
 
-return 0;
+    return 0;
 }

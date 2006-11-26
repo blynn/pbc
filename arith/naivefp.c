@@ -49,6 +49,18 @@ static size_t zp_out_str(FILE *stream, int base, element_ptr e)
     return mpz_out_str(stream, base, e->data);
 }
 
+static int zp_snprint(char *s, size_t n, element_ptr e)
+{
+    return gmp_snprintf(s, n, "%Zd", e->data);
+}
+
+static int zp_set_str(element_ptr e, char *s, int base)
+{
+    int result = pbc_mpz_set_str(e->data, s, base);
+    mpz_mod(e->data, e->data, e->field->order);
+    return result;
+}
+
 static int zp_sgn_odd(element_ptr a)
 {
     mpz_ptr z = a->data;
@@ -254,6 +266,8 @@ void field_init_naive_fp(field_ptr f, mpz_t prime)
     f->set_si = zp_set_si;
     f->set_mpz = zp_set_mpz;
     f->out_str = zp_out_str;
+    f->snprint = zp_snprint;
+    f->set_str = zp_set_str;
     f->sign = mpz_odd_p(prime) ? zp_sgn_odd : zp_sgn_even;
     f->add = zp_add;
     f->sub = zp_sub;

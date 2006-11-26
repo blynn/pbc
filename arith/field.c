@@ -550,6 +550,14 @@ int default_element_snprint(char *s, size_t n, element_t e)
     return 1;
 }
 
+int default_element_set_str(element_t e, char *s, int base)
+{
+    UNUSED_VAR(s);
+    UNUSED_VAR(base);
+    element_set0(e);
+    return 0;
+}
+
 static void warn_field_clear(field_ptr f)
 {
     fprintf(stderr, "field %p has no clear function\n", f);
@@ -601,6 +609,7 @@ void field_init(field_ptr f)
     f->pp_clear = default_element_pp_clear;
     f->pp_pow = default_element_pp_pow;
     f->snprint = default_element_snprint;
+    f->set_str = default_element_set_str;
 }
 
 void field_clear(field_ptr f)

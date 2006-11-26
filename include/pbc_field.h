@@ -72,6 +72,7 @@ struct field_s {
     void (*pp_clear)(element_pp_t p);
     void (*pp_pow)(element_t out, mpz_ptr power, element_pp_t p);
     int (*snprint)(char *s, size_t n, element_ptr e);
+    int (*set_str)(element_ptr e, char *s, int base);
     void *data;
 };
 typedef struct field_s *field_ptr;
@@ -144,6 +145,16 @@ Behaves as <function>snprintf</function> but only on one element at a time.
 static inline int element_snprint(char *s, size_t n, element_t e)
 {
     return e->field->snprint(s, n, e);
+}
+
+/*@manual eio
+Set the element 'e' from 's', a null-terminated C string in base 'base'.
+Whitespace is ignored. Points have the format '(x,y)' while polynomials
+have the form '[a0,...,an]'.
+*/
+static inline int element_set_str(element_t e, char *s, int base)
+{
+    return e->field->set_str(e, s, base);
 }
 
 /*@manual eassign

@@ -5,7 +5,7 @@ maintainer-clean-local:
 AM_CPPFLAGS = -I../include
 LDADD = ../libpbc.la
 
-noinst_PROGRAMS = bls bonehfranklin hess joux paterson yuanli zhang zss
+noinst_PROGRAMS = bls bonehfranklin hess joux paterson yuanli zhangkim zss
 
 bls_SOURCES = bls.c
 bonehfranklin_SOURCES = bonehfranklin.c
@@ -13,5 +13,5 @@ hess_SOURCES = hess.c
 joux_SOURCES = joux.c
 paterson_SOURCES = paterson.c
 yuanli_SOURCES = yuanli.c
-zhang_SOURCES = zhang.c
+zhangkim_SOURCES = zhangkim.c
 zss_SOURCES = zss.c

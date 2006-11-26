@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
@@ -76,12 +77,12 @@ static int fq_is1(element_ptr e)
 
 static size_t fq_out_str(FILE *stream, int base, element_ptr e)
 {
-    size_t result = 3, status;
+    size_t result = 4, status;
     fq_data_ptr p = e->data;
     if (EOF == fputc('[', stream)) return 0;
     result = element_out_str(stream, base, p->x);
     if (!result) return 0;
-    if (EOF == fputc(' ', stream)) return 0;
+    if (EOF == fputs(", ", stream)) return 0;
     status = element_out_str(stream, base, p->y);
     if (!status) return 0;
     if (EOF == fputc(']', stream)) return 0;
@@ -106,7 +107,7 @@ static int fq_snprint(char *s, size_t n, element_ptr e)
     status = element_snprint(s + result, left, p->x);
     if (status < 0) return status;
     clip_sub();
-    status = snprintf(s + result, left, " ");
+    status = snprintf(s + result, left, ", ");
     if (status < 0) return status;
     clip_sub();
     status = element_snprint(s + result, left, p->y);
@@ -115,6 +116,21 @@ static int fq_snprint(char *s, size_t n, element_ptr e)
     status = snprintf(s + result, left, "]");
     if (status < 0) return status;
     return result + status;
+}
+
+static int fq_set_str(element_ptr e, char *s, int base)
+{
+    char *cp = s;
+    element_set0(e);
+    while (*cp && isspace(*cp)) cp++;
+    if (*cp++ != '[') return 0;
+    fq_data_ptr p = e->data;
+    cp += element_set_str(p->x, cp, base);
+    while (*cp && isspace(*cp)) cp++;
+    if (*cp++ != ',') return 0;
+    cp += element_set_str(p->y, cp, base);
+    if (*cp++ != ']') return 0;
+    return cp - s;
 }
 
 static int fq_sign(element_ptr n)
@@ -399,6 +415,7 @@ void field_init_quadratic(field_ptr f, field_ptr fbase)
     f->to_mpz = fq_to_mpz;
     f->out_str = fq_out_str;
     f->snprint = fq_snprint;
+    f->set_str = fq_set_str;
     f->sign = fq_sign;
     f->add = fq_add;
     f->sub = fq_sub;
@@ -616,6 +633,7 @@ void field_init_fi(field_ptr f, field_ptr fbase)
     f->to_mpz = fq_to_mpz;
     f->out_str = fq_out_str;
     f->snprint = fq_snprint;
+    f->set_str = fq_set_str;
     f->sign = fq_sign;
     f->add = fq_add;
     f->sub = fq_sub;

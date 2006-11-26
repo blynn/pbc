@@ -85,6 +85,9 @@ void pairing_init_inp_str(pairing_t pairing, FILE *stream);
 /*@manual pairing_init
 Free the space occupied by ''pairing''. Call
 whenever a <type>pairing_t</type> variable is no longer needed.
+IMPORTANT: only call this after all elements associated with ''pairing''
+have been cleared, as they need information stored in the ''pairing''
+structure.
 */
 void pairing_clear(pairing_t pairing);
 

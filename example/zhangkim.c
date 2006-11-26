@@ -7,12 +7,13 @@
 #include <pbc.h>
 #include <pbc_time.h>
 #include <stdio.h>
-                                                                                                                              
+
 int main(void)
 {
     pairing_t pairing;
     double time1, time2;
-    element_t P, Ppub, s, R, Qid, Sid, a, b, r, c, S, negc, t1, t2, t3, t5, t6, t7, t8, t9, t10, t11, t12, t14;
+    element_t P, Ppub, s, R, Qid, Sid, a, b, r, c, S, negc, t1, t2, t3, t5,
+	t6, t7, t8, t9, t10, t11, t12, t14;
     mpz_t t4, t13;
     mpz_init(t4);
     mpz_init(t13);
@@ -28,7 +29,7 @@ int main(void)
     element_init_G1(t7, pairing);
     element_init_G1(t8, pairing);
     element_init_G1(t9, pairing);
-	    
+
     element_init_Zr(r, pairing);
     element_init_Zr(s, pairing);
     element_init_Zr(c, pairing);
@@ -43,8 +44,8 @@ int main(void)
     element_init_GT(t10, pairing);
     element_init_GT(t11, pairing);
     element_init_GT(t12, pairing);
-    
-    time1=get_time();
+
+    time1 = get_time();
     printf("Zhang and Kim ID-based Blind Signature scheme\n");
     printf("SETUP\n");
     element_random(P);
@@ -91,7 +92,7 @@ int main(void)
     printf("Blind Signature of message \"Message\" is:\n");
     element_printf("S1 = %B\n", S);
     element_printf("c1 = %B\n", c);
-    
+
     printf("VERIFICATION\n");
     pairing_apply(t10, Qid, Ppub, pairing);
     element_neg(negc, c);
@@ -104,12 +105,13 @@ int main(void)
     element_printf("c1 = %B\n", c);
     element_printf("H(m, [e(S1, P)][e(Qid, Ppub)^(-c1)]) = %B\n", t14);
 
-    if(!element_cmp(t14 ,c))
-    printf ("Signature is valid\n");
-    else printf("Signature is invalid\n");
-    time2=get_time();
+    if (!element_cmp(t14, c))
+	printf("Signature is valid\n");
+    else
+	printf("Signature is invalid\n");
+    time2 = get_time();
     printf("All time = %fs\n", time2 - time1);
-    
+
     element_clear(P);
     element_clear(Ppub);
     element_clear(Qid);
@@ -136,5 +138,5 @@ int main(void)
     element_clear(t12);
     pairing_clear(pairing);
 
-return 0;
+    return 0;
 }

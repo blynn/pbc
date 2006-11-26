@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
@@ -369,8 +370,8 @@ static size_t poly_out_str(FILE *stream, int base, element_ptr e)
     if (EOF == fputc('[', stream)) return 0;
     for (i=0; i<n; i++) {
 	if (i) {
-	    if (EOF == fputc(' ', stream)) return 0;
-	    result++;
+	    if (EOF == fputs(", ", stream)) return 0;
+	    result += 2;
 	}
 	status = element_out_str(stream, base, poly_coeff(e, i));
 	if (!status) return 0;
@@ -399,7 +400,7 @@ static int poly_snprint(char *s, size_t size, element_ptr e)
 
     for (i=0; i<n; i++) {
 	if (i) {
-	    status = snprintf(s + result, left, " ");
+	    status = snprintf(s + result, left, ", ");
 	    if (status < 0) return status;
 	    clip_sub();
 	}
@@ -1407,8 +1408,8 @@ static size_t polymod_out_str(FILE *stream, int base, element_ptr e)
     if (EOF == fputc('[', stream)) return 0;
     for (i=0; i<n; i++) {
 	if (i) {
-	    if (EOF == fputc(' ', stream)) return 0;
-	    result++;
+	    if (EOF == fputs(", ", stream)) return 0;
+	    result += 2;
 	}
 	status = element_out_str(stream, base, coeff[i]);
 	if (!status) return 0;
@@ -1438,7 +1439,7 @@ static int polymod_snprint(char *s, size_t size, element_ptr e)
 
     for (i=0; i<n; i++) {
 	if (i) {
-	    status = snprintf(s + result, left, " ");
+	    status = snprintf(s + result, left, ", ");
 	    if (status < 0) return status;
 	    clip_sub();
 	}
@@ -1451,6 +1452,23 @@ static int polymod_snprint(char *s, size_t size, element_ptr e)
     return result + status;
 }
 
+static int polymod_set_str(element_ptr e, char *s, int base)
+{
+    polymod_field_data_ptr p = e->field->data;
+    element_t *coeff = e->data;
+    int i, n = p->n;
+    char *cp = s;
+    element_set0(e);
+    while (*cp && isspace(*cp)) cp++;
+    if (*cp++ != '[') return 0;
+    for (i=0; i<n; i++) {
+	cp += element_set_str(coeff[i], cp, base);
+	while (*cp && isspace(*cp)) cp++;
+	if (i<n-1 && *cp++ != ',') return 0;
+    }
+    if (*cp++ != ']') return 0;
+    return cp - s;
+}
 
 //Contrived? This returns to_mpz(constant term)
 static void polymod_to_mpz(mpz_t z, element_ptr e)
@@ -1523,6 +1541,7 @@ void field_init_polymod(field_ptr f, element_ptr poly)
     f->set_mpz = polymod_set_mpz;
     f->out_str = polymod_out_str;
     f->snprint = polymod_snprint;
+    f->set_str = polymod_set_str;
     f->set = polymod_set;
     f->sign = polymod_sgn;
     f->add = polymod_add;

@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,6 +41,29 @@ static void curve_clear(element_ptr e)
     element_clear(p->x);
     element_clear(p->y);
     pbc_free(e->data);
+}
+
+static int curve_is_valid_point(element_ptr e)
+{
+    element_t t0, t1;
+    int result;
+    curve_data_ptr cdp = e->field->data;
+    point_ptr p = e->data;
+
+    if (p->inf_flag) return 1;
+
+    element_init(t0, cdp->field);
+    element_init(t1, cdp->field);
+    element_square(t0, p->x);
+    element_add(t0, t0, cdp->a);
+    element_mul(t0, t0, p->x);
+    element_add(t0, t0, cdp->b);
+    element_square(t1, p->y);
+    result = !element_cmp(t0, t1);
+
+    element_clear(t0);
+    element_clear(t1);
+    return result;
 }
 
 static void curve_invert(element_ptr c, element_ptr a)
@@ -267,14 +291,14 @@ static size_t curve_out_str(FILE *stream, int base, element_ptr a)
 	if (EOF == fputc('O', stream)) return 0;
 	return 1;
     }
-    if (EOF == fputc('(', stream)) return 0;
+    if (EOF == fputc('[', stream)) return 0;
     result = element_out_str(stream, base, p->x);
     if (!result) return 0;
-    if (EOF == fputc(' ', stream)) return 0;
+    if (EOF == fputs(", ", stream)) return 0;
     status = element_out_str(stream, base, p->y);
     if (!status) return 0;
-    if (EOF == fputc(')', stream)) return 0;
-    return result + status + 3;
+    if (EOF == fputc(']', stream)) return 0;
+    return result + status + 4;
 }
 
 static int curve_snprint(char *s, size_t n, element_ptr a)
@@ -295,21 +319,47 @@ static int curve_snprint(char *s, size_t n, element_ptr a)
 	return 1;
     }
 
-    status = snprintf(s, n, "(");
+    status = snprintf(s, n, "[");
     if (status < 0) return status;
     clip_sub();
     status = element_snprint(s + result, left, p->x);
     if (status < 0) return status;
     clip_sub();
-    status = snprintf(s + result, left, " ");
+    status = snprintf(s + result, left, ", ");
     if (status < 0) return status;
     clip_sub();
     status = element_snprint(s + result, left, p->y);
     if (status < 0) return status;
     clip_sub();
-    status = snprintf(s + result, left, ")");
+    status = snprintf(s + result, left, "]");
     if (status < 0) return status;
     return result + status;
+}
+
+static int curve_set_str(element_ptr e, char *s, int base)
+{
+    point_ptr p = e->data;
+    char *cp = s;
+    element_set0(e);
+    while (*cp && isspace(*cp)) cp++;
+    if (*cp == 'O') {
+	return cp - s + 1;
+    }
+    p->inf_flag = 0;
+    if (*cp != '[') return 0;
+    cp++;
+    cp += element_set_str(p->x, cp, base);
+    while (*cp && isspace(*cp)) cp++;
+    if (*cp != ',') return 0;
+    cp++;
+    cp += element_set_str(p->y, cp, base);
+    if (*cp != ']') return 0;
+
+    if (!curve_is_valid_point(e)) {
+	element_set0(e);
+	return 0;
+    }
+    return cp - s + 1;
 }
 
 static void field_clear_curve(field_t f)
@@ -401,6 +451,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     f->from_hash = curve_from_hash;
     f->out_str = curve_out_str;
     f->snprint = curve_snprint;
+    f->set_str = curve_set_str;
     f->field_clear = field_clear_curve;
     if (cdp->field->fixed_length_in_bytes < 0) {
 	f->length_in_bytes = curve_length_in_bytes;

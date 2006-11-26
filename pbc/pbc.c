@@ -17,6 +17,7 @@ enum {
     t_none = 0,
     t_id,
     t_int,
+    t_string,
     t_comma,
     t_lparen,
     t_rparen,
@@ -50,7 +51,8 @@ enum {
 static field_t Z;
 
 static int tok_type;
-static char word[128];
+//TODO: dynamic allocation:
+static char word[1024];
 
 struct id_s {
     char *data;
@@ -96,6 +98,7 @@ void tree_delete(tree_ptr t)
     darray_clear(t->child);
     switch(t->type) {
 	case t_id:
+	case t_string:
 	case t_function:
 	case t_int:
 	    id_delete(t->data);
@@ -104,7 +107,9 @@ void tree_delete(tree_ptr t)
     pbc_free(t);
 }
 
+static char *currentline;
 static char *lexcp;
+
 
 static void lex(void)
 {
@@ -124,6 +129,7 @@ static void lex(void)
 	c = *lexcp++;
     }
 
+    //comments start with '#' and end at a newline
     if (c == '#') {
 	for (;;) {
 	    c = *lexcp++;
@@ -134,6 +140,30 @@ static void lex(void)
 	    if (c == '\n') break;
 	}
 	goto skipwhitespace;
+    }
+
+    //strings
+    if (c == '"') {
+	tok_type = t_string;
+	int i = 0;
+	for (;;) {
+	    c = *lexcp++;
+	    if (!c) {
+		//string continues on next line
+		word[i++] = '\n';
+		pbc_free(currentline);
+		currentline = pbc_getline();
+		lexcp = currentline;
+		if (!currentline) break;
+		c = *lexcp++;
+	    }
+	    if (c == '"') {
+		break;
+	    }
+	    word[i++] = c;
+	}
+	word[i] = '\0';
+	return;
     }
 
     if (isdigit(c)) {
@@ -258,6 +288,9 @@ static tree_ptr parsesubfactor(void)
 	    } else {
 		return tree_new(t_id, id);
 	    }
+	case t_string:
+	    lex();
+	    return tree_new(t_string, id_new(word));
 	case t_sub:
 	    lex();
 	    t = parsesubfactor();
@@ -488,6 +521,9 @@ static void val_print(val_ptr v)
 	    field = v->data;
 	    field_out_info(stdout, field);
 	    break;
+	case t_string:
+	    printf("%s", (char *) v->data);
+	    break;
 	default:
 	    printf("val type %d unknown\n", v->type);
 	    break;
@@ -518,6 +554,9 @@ void val_delete(val_ptr v)
 	    //current policy: always clear elements, always copy elements
 	    element_clear(v->data);
 	    pbc_free(v->data);
+	    break;
+	case t_string:
+	    //if I ever implement string ops then I might need to clear them
 	    break;
 	case t_err:
 	    break;
@@ -821,17 +860,21 @@ static val_ptr execute_tree(tree_ptr t)
 	    element_set_mpz(e, z);
 	    mpz_clear(z);
 	    return val_new(t_element, e);
+	case t_string:
+	    //strings are immutable for now, so can use the copy
+	    //in the parse tree
+	    id = t->data;
+	    return val_new(t_string, id->data);
 	default:
 	    return newruntimeerror(re_unimplemented);
     }
 }
 
-static void parseline(char *line)
+static void parseline(void)
 {
     val_ptr v;
 
     tree_ptr t;
-    lexcp = line;
     lex();
     if (tok_type == t_none) return;
     t = parsesetexpr();
@@ -1068,6 +1111,21 @@ static val_ptr f_fromZZ(darray_ptr arg)
     return res;
 }
 
+static val_ptr f_fromstr(darray_ptr arg)
+{
+    val_ptr res;
+    res = check_arg(arg, 2, t_string, t_field);
+    if (res) return res;
+    val_ptr a0 = arg->item[0];
+    val_ptr a1 = arg->item[1];
+    field_ptr f = a1->data;
+    element_ptr e1 = pbc_malloc(sizeof(element_t));
+    element_init(e1, f);
+    element_set_str(e1, a0->data, 0);
+    res = val_new(t_element, e1);
+    return res;
+}
+
 static val_ptr f_index_calculus(darray_ptr arg)
 {
     val_ptr res;
@@ -1141,16 +1199,18 @@ int main(void)
     symtab_put(builtin, f_zz, "ZZ");
     symtab_put(builtin, f_gen_A, "gen_A");
     symtab_put(builtin, f_fromZZ, "fromZZ");
+    symtab_put(builtin, f_fromstr, "fromstr");
 
     field_init_z(Z);
 
     fprintf(stderr, "Pairing-Based Calculator\n");
 
     for (;;) {
-	char *s = pbc_getline();
-	if (!s) break;
-	parseline(s);
-	pbc_free(s);
+	currentline = pbc_getline();
+	if (!currentline) break;
+	lexcp = currentline;
+	parseline();
+	pbc_free(currentline);
     }
     return 0;
 }

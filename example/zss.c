@@ -22,7 +22,7 @@ int main(void)
     element_init_G1(P, pairing);
     element_init_G1(Ppub, pairing);
     element_init_G1(t2, pairing);
-    
+
     element_init_GT(t3, pairing);
     element_init_GT(t4, pairing);
 
@@ -36,7 +36,7 @@ int main(void)
     element_printf("P = %B\n", P);
     element_printf("x = %B\n", x);
     element_printf("Ppub = %B\n", Ppub);
-	
+
     printf("SIGN\n");
     element_from_hash(H, "Message", 13);
     element_add(t1, H, x);
@@ -53,8 +53,10 @@ int main(void)
     pairing_apply(t4, P, P, pairing);
     element_printf("e(H(m)P + Ppub, S) = %B\n", t3);
     element_printf("e(P, P) = %B\n", t4);
-    if(!element_cmp(t3, t4)) printf ("Signature is valid\n");
-    else printf ("Signature is invalid\n");
+    if (!element_cmp(t3, t4))
+	printf("Signature is valid\n");
+    else
+	printf("Signature is invalid\n");
     time2 = get_time();
     printf("All time = %fs\n", time2 - time1);
     element_clear(P);
@@ -68,5 +70,5 @@ int main(void)
     element_clear(t4);
     pairing_clear(pairing);
 
-return 0;
+    return 0;
 }

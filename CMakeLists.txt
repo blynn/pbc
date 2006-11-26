@@ -10,7 +10,7 @@ example/hess
 example/joux
 example/paterson
 example/yuanli
-example/zhang
+example/zhangkim
 example/zss
 )
 

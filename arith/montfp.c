@@ -191,6 +191,17 @@ static int fp_snprint(char *s, size_t n, element_ptr e)
     return result;
 }
 
+static int fp_set_str(element_ptr e, char *s, int base)
+{
+    mpz_t z;
+    mpz_init(z);
+    int result = pbc_mpz_set_str(z, s, base);
+    mpz_mod(z, z, e->field->order);
+    fp_set_mpz(e, z);
+    mpz_clear(z);
+    return result;
+}
+
 static void fp_set(element_ptr c, element_ptr a)
 {
     dataptr ad = a->data;
@@ -553,6 +564,7 @@ void field_init_mont_fp(field_ptr f, mpz_t prime)
     f->set_mpz = fp_set_mpz;
     f->out_str = fp_out_str;
     f->snprint = fp_snprint;
+    f->set_str = fp_set_str;
     f->add = fp_add;
     f->sub = fp_sub;
     f->set = fp_set;
