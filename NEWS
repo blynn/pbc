@@ -5,6 +5,7 @@ Ben Lynn
 Changes between PBC version 0.4.2 and 0.4.1
 
 * Added element_set_str, element_snprintf, element_snprint functions.
+* Added fromstr function and string handling to pbc/pbc test program.
 * Minor bugfixes and cleanup.
 
 Changes between PBC version 0.4.1 and 0.4.0

@@ -547,6 +547,8 @@ val_ptr val_copy(val_ptr v)
 	element_ptr e = v->data;
 	element_init(res->data, e->field);
 	element_set(res->data, e);
+    } else if (v->type == t_string) {
+	res->data = pbc_strdup(v->data);
     } else {
 	res->data = v->data;
     }
@@ -563,7 +565,7 @@ void val_delete(val_ptr v)
 	    pbc_free(v->data);
 	    break;
 	case t_string:
-	    //if I ever implement string ops then I might need to clear them
+	    pbc_free(v->data);
 	    break;
 	case t_err:
 	    break;
@@ -868,10 +870,8 @@ static val_ptr execute_tree(tree_ptr t)
 	    mpz_clear(z);
 	    return val_new(t_element, e);
 	case t_string:
-	    //strings are immutable for now, so can use the copy
-	    //in the parse tree
 	    id = t->data;
-	    return val_new(t_string, id->data);
+	    return val_new(t_string, pbc_strdup(id->data));
 	default:
 	    return newruntimeerror(re_unimplemented);
     }

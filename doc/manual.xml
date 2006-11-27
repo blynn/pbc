@@ -50,7 +50,7 @@
     <author><firstname>Ben</firstname><surname>Lynn</surname></author>
     <copyright><year>2006</year><holder>Ben Lynn</holder></copyright>
 </bookinfo>
-<preface><title>Preface</title>
+<preface id="preface"><title>Preface</title>
 <para>
 This manual describes how to install and use the PBC pairing-based
 cryptography library, version 0.4.2.
@@ -62,7 +62,7 @@ is strongly influenced by the GMP API, so it is appropriate that
 this manual imitates the look and feel of the GMP manual.
 </para>
 </preface>
-<chapter><title>Overview</title>
+<chapter id="overview"><title>Overview</title>
 <para>
 The PBC library is a free portable C library designed to make it easy
 to implement
@@ -84,7 +84,7 @@ The GMP library homepage: <ulink url="http://www.swox.com/gmp/">
 http://www.swox.com/gmp/</ulink>
 </para>
 </chapter>
-<chapter><title>Installing PBC</title>
+<chapter id="install"><title>Installing PBC</title>
 <para>
 The PBC library needs the GMP library, which can be found at
 <ulink url="http://www.swox.com/gmp/">http://www.swox.com/gmp/</ulink>

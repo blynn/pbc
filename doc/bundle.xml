@@ -3,7 +3,7 @@
 <para>
 Several binaries and curve parameters are bundled with the PBC library,
 such as the <command>pbc</command> program
-that was discussed in an earlier chapter.
+<link linkend="pbcintro">discussed earlier</link>.
 </para>
 <para>
 The <filename>param</filename>
@@ -14,6 +14,103 @@ from files such as these on standard input, for example:
 <screen>benchmark/benchmark &lt; param/c159.param
 example/bls &lt; param/e.param
 </screen>
+<section id="sect.pbc">
+<title>Pairing-Based Calculator</title>
+<para>
+The <filename>pbc</filename> contains a program also named
+<filename>pbc</filename> which allows interactive testing of the PBC library.
+</para>
+<para>
+Its syntax is loosely based on that of <filename>bc</filename>, a well-known
+arbitrary precision calculator language. I do not intend for
+<filename>pbc</filename> to be a fully-fledged scripting language. If this
+were the aim I would add a module to an extant popular language.
+Instead, pbc is meant to be a test program.
+(Nonetheless, it possesses enough functionality to
+be used to implement cryptosystems in shell scripts.)
+</para>
+<para>
+Four pairings named A, D, E and F are initialized during startup, and
+furthermore, the variables G1, G2, GT and Zr are setup to represent groups
+associated with the A pairing. To use a different pairing, call the init_pairing
+funciton.
+</para>
+<para>
+Assignments have a C-like syntax "variable = expression", and return the
+value of the variable.
+Function calls and expressions also resemble C.
+The arithmetic operators +, -, /, *, ^ have the standard precedence.
+Perhaps the only significant difference is that no terminating semicolon
+is required.
+</para>
+<para>
+Comments begin with "#" and end at a newline.
+Double quotes are used to denote strings.
+On error, pbc prints the error code which I have yet to translate to English.
+</para>
+<para>
+Some of the pbc functions:
+</para>
+
+<variablelist>
+<varlistentry><term>
+<command>init_pairing</command>(<parameter>pairing</parameter>)
+</term>
+<listitem><para>
+Set the variables G1, G2, GT and Zr to the groups in
+<parameter>pairing</parameter>, e.g:
+</para>
+<screen>
+init_pairing(D)
+</screen>
+</listitem>
+</varlistentry>
+
+<varlistentry><term>
+<command>rnd</command>(<parameter>G</parameter>)
+</term>
+<listitem><para>
+Returns a random element of the group G, e.g:
+</para>
+<screen>
+g = rnd(Zr)
+</screen>
+<para>
+Has synonyms <command>rand</command> and <command>random</command>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry><term>
+<command>pairing</command>(<parameter>g</parameter>, <parameter>h</parameter>)
+</term>
+<listitem><para>
+Returns the pairing applied to
+<parameter>g</parameter> and <parameter>h</parameter>.
+The element <parameter>g</parameter> must be an element of G1
+and <parameter>h</parameter> of G2, e.g:
+</para>
+<screen>
+pairing(rnd(G1), rnd(G2))
+</screen>
+</listitem>
+</varlistentry>
+
+<varlistentry><term>
+<command>fromstr</command>(<parameter>string</parameter>, <parameter>G</parameter>)
+</term>
+<listitem><para>
+Returns <parameter>string</parameter> converted to an element of
+<parameter>G</parameter>, e.g.
+</para>
+<screen>
+x = fromstr("[123,456]", GT)
+</screen>
+</listitem>
+</varlistentry>
+
+</variablelist>
+</section>
+
 <section>
 <title>Parameter Generation</title>
 <para>
@@ -62,11 +159,37 @@ type D parameters.
 In the <filename>example</filename> subdirectory there are various programs
 that read curve parameters on standard input and perform computations
 that would be required in a typical implementation of a pairing-based
-cryptosystem.
+cryptosystem. Sample schemes include:
 </para>
+<itemizedlist>
+    <listitem>
+    Boneh-Franklin identity-based encryption
+    </listitem>
+    <listitem>
+    Boneh-Lynn-Shacham short signatures
+    </listitem>
+    <listitem>
+    Hess identity-based signatures
+    </listitem>
+    <listitem>
+    Joux tripartite Diffie-Hellman
+    </listitem>
+    <listitem>
+    Paterson identity-based signatures
+    </listitem>
+    <listitem>
+    Yuan-Li identity-based authenticated key agreement
+    </listitem>
+    <listitem>
+    Zhang-Kim identity-based blind/ring signatures
+    </listitem>
+    <listitem>
+    Zhang-Safavi-Naini-Susilo signatures
+    </listitem>
+</itemizedlist>
 <para>
 Of course, more work would be required to turn these programs
-into real applications. The main purpose is to showcase the PBC library
+into real applications. Their main purpose is to showcase the PBC library
 API.
 </para>
 </section>
@@ -80,7 +203,7 @@ to measure running times of pairings, and also RSA decryptions.
 The <command>benchmark</command> program takes
 pairing parameters on standard input and reports the average running
 time of the pairing over 10 runs, while <command>timersa</command>
-reports the time required to perform one 1024-bit RSA decryption.
+estimates the time required to perform one 1024-bit RSA decryption.
 </para>
 </section>
 </chapter>

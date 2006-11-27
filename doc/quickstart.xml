@@ -1,4 +1,4 @@
-<chapter>
+<chapter id="quickstart">
 <title>Quick Start</title>
 <para>
 One can experiment with the PBC libraryp without writing a single line of C.
@@ -10,7 +10,7 @@ The <command>pbc</command> program is an interactive calculator
 that can be used to test the PBC library,
 and also experiment with pairings in general.
 </para>
-<section>
+<section id="pbcintro">
 <title>Playing with Pairings</title>
 <para>
 We shall use the following notation. For our purposes,
@@ -60,8 +60,8 @@ pairing(g^a,h^b)
 pairing(g,h)^(a*b)
 </screen>
 <para>
-This program has other features that hopefully will be documented eventually.
-But the commands shown here should be enough to quickly and interactively
+This program has <link linkend="sect.pbc">other features</link>,
+but the commands shown here should be enough to quickly and interactively
 experiment with many pairing-based cryptosystems using real numbers.
 </para>
 </section>
