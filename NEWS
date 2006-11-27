@@ -2,6 +2,11 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.2 and 0.4.1
+
+* Added element_set_str, element_snprintf, element_snprint functions.
+* Minor bugfixes and cleanup.
+
 Changes between PBC version 0.4.1 and 0.4.0
 
 * Removed test subdirectory: moved programs to new subdirectories:

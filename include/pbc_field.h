@@ -148,9 +148,12 @@ static inline int element_snprint(char *s, size_t n, element_t e)
 }
 
 /*@manual eio
-Set the element 'e' from 's', a null-terminated C string in base 'base'.
-Whitespace is ignored. Points have the format '(x,y)' while polynomials
-have the form '[a0,...,an]'.
+Set the element ''e'' from ''s'', a null-terminated C string in base 'base'.
+Whitespace is ignored. Points have the form "[''x,y'']" or "''O''",
+while polynomials have the form "[''a0,...,an'']".
+Returns number of characters read (unlike GMP's mpz_set_str).
+A return code of zero means PBC could not find a well-formed string
+describing an element.
 */
 static inline int element_set_str(element_t e, char *s, int base)
 {

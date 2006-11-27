@@ -42,7 +42,7 @@
     
     print "<listitem><para>" > outfile
     for(i=0; i<n; i++) {
-	a[i] = gensub("''(\\w*)''", "<parameter>\\1</parameter>", "g", a[i])
+	a[i] = gensub("''([^']*)''", "<parameter>\\1</parameter>", "g", a[i])
 	print a[i] > outfile
     }
     print "</para></listitem>" > outfile

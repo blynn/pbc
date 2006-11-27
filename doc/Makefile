@@ -6,7 +6,7 @@ target : pretty/index.html
 GENFILES:=gen/*.xml
 SRCFILES:=*.xml $(GENFILES)
 
-genxml $(GENFILES) : ../include/*.h
+genxml $(GENFILES) : ../include/*.h extract
 	-rm $(GENFILES)
 	-mkdir gen
 	cat ../include/*.h | ./extract

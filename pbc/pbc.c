@@ -271,7 +271,7 @@ static tree_ptr parseexprlist(tree_ptr t)
     }
 }
 
-static tree_ptr parsesubfactor(void)
+static tree_ptr parseprimitive(void)
 {
     tree_ptr t;
     switch(tok_type) {
@@ -291,13 +291,6 @@ static tree_ptr parsesubfactor(void)
 	case t_string:
 	    lex();
 	    return tree_new(t_string, id_new(word));
-	case t_sub:
-	    lex();
-	    t = parsesubfactor();
-	    if (!t) return NULL;
-	    tree_ptr t1 = tree_new(t_function, id_new("neg"));
-	    darray_append(t1->child, t);
-	    return t1;
 	case t_lparen:
 	    lex();
 	    t = parsesetexpr();
@@ -318,17 +311,15 @@ static tree_ptr parsesubfactor(void)
 	    return NULL;
     }
 }
-
-static tree_ptr parsefactor(void)
+    
+static tree_ptr parsepow(void)
 {
     tree_ptr t1;
-    t1 = parsesubfactor();
-    if (!t1) return NULL;
-    
+    t1 = parseprimitive();
     if (tok_type == t_pow) {
 	tree_ptr t2, res;
 	lex();
-	t2 = parsefactor();
+	t2 = parseprimitive();
 	if (!t2) {
 	    tree_delete(t1);
 	    return NULL;
@@ -339,6 +330,22 @@ static tree_ptr parsefactor(void)
 	return res;
     }
     return t1;
+}
+
+static tree_ptr parsefactor(void)
+{
+    tree_ptr t;
+    if (tok_type == t_sub) {
+	lex();
+	t = parsefactor();
+	if (!t) return NULL;
+	tree_ptr t1 = tree_new(t_function, id_new("neg"));
+	darray_append(t1->child, t);
+	return t1;
+    }
+
+    t = parsepow();
+    return t;
 }
 
 static tree_ptr parseterm(void)
