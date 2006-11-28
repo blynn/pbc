@@ -8,6 +8,7 @@
 #include "pbc_poly.h"
 #include "pbc_curve.h"
 #include "pbc_memory.h"
+#include "pbc_utils.h"
 
 struct curve_data_s {
     field_ptr field;
@@ -419,6 +420,31 @@ static void curve_out_info(FILE *out, field_t f)
     }
 }
 
+int odd_curve_is_sqr(element_ptr e)
+{
+    UNUSED_VAR(e);
+    return 1;
+}
+
+//TODO: untested
+int even_curve_is_sqr(element_ptr e)
+{
+    mpz_t z;
+    element_t e1;
+    int result;
+
+    mpz_init(z);
+    element_init(e1, e->field);
+    mpz_sub_ui(z, e->field->order, 1);
+    mpz_fdiv_q_2exp(z, z, 1);
+    element_pow_mpz(e1, e, z);
+    result = element_is1(e1);
+
+    mpz_clear(z);
+    element_clear(e1);
+    return result;
+}
+
 void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order, mpz_t cofac)
     /*
     if (element_is0(a)) {
@@ -444,6 +470,11 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
 	mpz_set(cdp->cofac, cofac);
     } else cdp->cofac = NULL;
 
+    if (mpz_odd_p(order)) {
+	f->is_sqr = odd_curve_is_sqr;
+    } else {
+	f->is_sqr = even_curve_is_sqr;
+    }
     f->init = curve_init;
     f->clear = curve_clear;
     f->neg = f->invert = curve_invert;

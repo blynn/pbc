@@ -17,7 +17,7 @@ example/bls &lt; param/e.param
 <section id="sect.pbc">
 <title>Pairing-Based Calculator</title>
 <para>
-The <filename>pbc</filename> contains a program also named
+The <filename>pbc</filename> subdirectory contains a program also named
 <filename>pbc</filename> which allows interactive testing of the PBC library.
 </para>
 <para>
@@ -163,28 +163,44 @@ cryptosystem. Sample schemes include:
 </para>
 <itemizedlist>
     <listitem>
+    <para>
     Boneh-Franklin identity-based encryption
+    </para>
     </listitem>
     <listitem>
+    <para>
     Boneh-Lynn-Shacham short signatures
+    </para>
     </listitem>
     <listitem>
+    <para>
     Hess identity-based signatures
+    </para>
     </listitem>
     <listitem>
+    <para>
     Joux tripartite Diffie-Hellman
+    </para>
     </listitem>
     <listitem>
+    <para>
     Paterson identity-based signatures
+    </para>
     </listitem>
     <listitem>
+    <para>
     Yuan-Li identity-based authenticated key agreement
+    </para>
     </listitem>
     <listitem>
+    <para>
     Zhang-Kim identity-based blind/ring signatures
+    </para>
     </listitem>
     <listitem>
+    <para>
     Zhang-Safavi-Naini-Susilo signatures
+    </para>
     </listitem>
 </itemizedlist>
 <para>
