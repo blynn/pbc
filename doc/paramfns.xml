@@ -1,4 +1,4 @@
-<chapter>
+<chapter id="chapter.param">
 <title>Param Functions</title>
 <para>
 These functions are mainly used to generate pairing parameters.
@@ -13,9 +13,17 @@ reducing its utility. I hope to implement type G, which is based
 on embedding degree 10 ordinary curves.
 </para>
 <para>
-Type A is best when speed is the main concern,
-and type D is a good choice when elements should be short,
-though type F has even shorter elements but is slower.
+Type A is best when speed is the main concern.
+Type D is a good choice when elements should be short but is slower
+(can be roughly two to five times slower).
+Type F has even shorter elements but is slower still (can be at least
+ten times slower than type A).
+The speed differences are hardware-dependent,
+and also change when preprocessing is used.
+</para>
+<para>
+PBC uses G1 to denote the group with the shorter representation (G1 is
+the group of points over the ground field) when G1 and G2 differ.
 </para>
 <section><title>Type A</title>
 <para>

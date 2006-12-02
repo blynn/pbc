@@ -111,6 +111,14 @@ static inline void pairing_apply(element_t out, element_t in1, element_t in2,
 }
 
 /*@manual pairing_op
+Returns 1 if G1 and G2 are the same group, 0 otherwise
+*/
+static inline int pairing_is_symmetric(pairing_t pairing)
+{
+    return pairing->G1 == pairing->G2;
+}
+
+/*@manual pairing_op
 Returns the length in bytes needed to represent an element of G1.
 */
 static inline int pairing_length_in_bytes_G1(pairing_t pairing)
