@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.4)
 project(pbc)
 set(CMAKE_MODULE_PATH .)
-include_directories(./include)
+include_directories(. ./include)
 
 set(examplebin
 example/bls

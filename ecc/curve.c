@@ -406,6 +406,10 @@ static int curve_from_bytes(element_t e, unsigned char *data)
     P->inf_flag = 0;
     len = element_from_bytes(P->x, data);
     len += element_from_bytes(P->y, data + len);
+    //if point does not lie on curve, set it to O
+    if (!curve_is_valid_point(e)) {
+	element_set0(e);
+    }
     return len;
 }
 

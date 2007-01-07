@@ -6,10 +6,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <unistd.h> //for getopt
 #include "pbc.h"
 #include "pbc_fieldmpz.h"
 #include "pbc_fp.h"
 #include "pbc_utils.h"
+
+#include "config.h"
 
 char *pbc_getline(void);
 
@@ -47,6 +50,8 @@ enum {
     re_badarg,
     re_fieldmismatch,
 };
+
+static int option_echo = 0;
 
 static field_t Z;
 
@@ -153,8 +158,9 @@ static void lex(void)
 		word[i++] = '\n';
 		pbc_free(currentline);
 		currentline = pbc_getline();
-		lexcp = currentline;
 		if (!currentline) break;
+		if (option_echo) puts(currentline);
+		lexcp = currentline;
 		c = *lexcp++;
 	    }
 	    if (c == '"') {
@@ -1166,8 +1172,22 @@ static val_ptr f_index_calculus(darray_ptr arg)
     return res;
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
+    for (;;)
+    {
+	int c = getopt(argc, argv, "e");
+	if (c == -1) break;
+	switch (c) {
+	    case 'e':
+		option_echo = 1;
+		break;
+	    default:
+		fprintf(stderr, "unrecognized option: %c\n", c);
+		break;
+	}
+    }
+
     symtab_init(var);
     symtab_init(builtin);
 
@@ -1210,11 +1230,12 @@ int main(void)
 
     field_init_z(Z);
 
-    fprintf(stderr, "Pairing-Based Calculator\n");
+    fprintf(stderr, "%s\n", PACKAGE_STRING);
 
     for (;;) {
 	currentline = pbc_getline();
 	if (!currentline) break;
+	if (option_echo) puts(currentline);
 	lexcp = currentline;
 	parseline();
 	pbc_free(currentline);
