@@ -2,6 +2,12 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.3 and 0.4.2
+
+* Added pairing_is_symmetric function.
+* element_from_bytes for G1, G2 check input is valid.
+* Added -e option for pbc.
+
 Changes between PBC version 0.4.2 and 0.4.1
 
 * Added element_set_str, element_snprintf, element_snprint functions.
