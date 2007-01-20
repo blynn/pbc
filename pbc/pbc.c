@@ -668,6 +668,21 @@ static val_ptr f_random(darray_ptr arg)
     return res;
 }
 
+static val_ptr f_order(darray_ptr arg)
+{
+    val_ptr res;
+    res = check_arg(arg, 1, t_field);
+    if (res) return res;
+    val_ptr a0 = arg->item[0];
+    field_ptr f = a0->data;
+
+    element_ptr e = pbc_malloc(sizeof(element_t));
+    element_init(e, Z);
+    element_set_mpz(e, f->order);
+    res = val_new(t_element, e);
+    return res;
+}
+
 static val_ptr f_unary(
 	void (*unary)(element_ptr, element_ptr), darray_ptr arg)
 {
@@ -1210,6 +1225,8 @@ int main(int argc, char **argv)
     symtab_put(builtin, f_random, "random");
     symtab_put(builtin, f_random, "rand");
     symtab_put(builtin, f_random, "rnd");
+    symtab_put(builtin, f_order, "order");
+    symtab_put(builtin, f_order, "ord");
     symtab_put(builtin, f_neg, "neg");
     symtab_put(builtin, f_sub, "sub");
     symtab_put(builtin, f_add, "add");

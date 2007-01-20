@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "pbc_memory.h"
+
 char *pbc_getline(void)
 {
     char s[1024];

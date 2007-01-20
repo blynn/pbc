@@ -308,13 +308,79 @@ static void a_pairing_pp_clear(pairing_pp_t p)
 
 static inline void a_tateexp(element_ptr out, element_ptr in, element_ptr temp, mpz_t cofactor)
 {
+    element_ptr in0 = fi_re(in);
+    element_ptr in1 = fi_im(in);
     //simpler but slower:
     //element_pow_mpz(out, f, tateexp);
 
+    //exponentiate by q-1
+    //which is equivalent to the following
     element_invert(temp, in);
-    element_neg(fi_im(in), fi_im(in));
+    element_neg(in1, in1);
     element_mul(in, in, temp);
-    element_pow_mpz(out, in, cofactor);
+
+    //then exponentiate by (q+1)/r
+
+    //Instead of:
+    //	element_pow_mpz(out, in, cofactor);
+    //we use Lucas sequences (see Scott and Barreto)
+
+    {
+	element_ptr v0 = fi_re(out);
+	element_ptr v1 = fi_im(out);
+	element_ptr t0 = fi_re(temp);
+	element_ptr t1 = fi_im(temp);
+	int j;
+
+	element_set_si(t0, 2);
+	element_double(t1, in0);
+
+	element_set(v0, t0);
+	element_set(v1, t1);
+
+	j = mpz_sizeinbase(cofactor, 2) - 1;
+	for (;;) {
+	    if (!j) {
+		element_mul(v1, v0, v1);
+		element_sub(v1, v1, t1);
+		element_square(v0, v0);
+		element_sub(v0, v0, t0);
+		break;
+	    }
+	    if (mpz_tstbit(cofactor, j)) {
+		element_mul(v0, v0, v1);
+		element_sub(v0, v0, t1);
+		element_square(v1, v1);
+		element_sub(v1, v1, t0);
+	    } else {
+		element_mul(v1, v0, v1);
+		element_sub(v1, v1, t1);
+		element_square(v0, v0);
+		element_sub(v0, v0, t0);
+	    }
+	    j--;
+	}
+
+	//assume cofactor = (q + 1) / r is even
+	//(since r should be odd, q + 1 is always even)
+	//thus v0 = V_k, v1 = V_{k+1}
+	//and V_{k-1} = P v0 - v1
+
+	//so U_k = (P V_k - 2 V_{k-1}) / (P^2 - 4)
+	//       = (2 v1 - P v0) / (P^2 - 4)
+
+	element_mul(in0, v0, t1);
+	element_double(v1, v1);
+	element_sub(v1, v1, in0);
+
+	element_square(t1, t1);
+	element_sub(t1, t1, t0);
+	element_sub(t1, t1, t0);
+	element_div(v1, v1, t1);
+
+	element_halve(v0, v0);
+	element_mul(v1, v1, in1);
+    }
 }
 
 //computes a Qx + b Qy + c for type A pairing
