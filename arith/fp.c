@@ -41,11 +41,11 @@ void fp_tonelli(element_ptr x, element_ptr a)
     element_mul(e0, e0, a);
     mpz_add_ui(t, t, 1);
     mpz_tdiv_q_2exp(t, t, 1);
-    element_pow_mpz(e0, e0, t);
     mpz_tdiv_q_2exp(e, e, 1);
-    element_pow_mpz(x, nqr, e);
-    /* TODO: this would be a good place to use element_pow2 ... -hs */
-    element_mul(x, x, e0);
+
+    //suggested by Hovav Shacham
+    element_pow2_mpz(x, e0, t, nqr, e);
+
     mpz_clear(t);
     mpz_clear(e);
     mpz_clear(t0);
