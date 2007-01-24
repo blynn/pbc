@@ -306,7 +306,10 @@ static void a_pairing_pp_clear(pairing_pp_t p)
     pbc_free(p->data);
 }
 
-static inline void lucas(element_ptr out, element_ptr in, element_ptr temp, mpz_t cofactor)
+static void lucas_odd(element_ptr out, element_ptr in, element_ptr temp, mpz_t cofactor)
+//assumes cofactor is odd
+//overwrites in and temp, out must not be in
+//luckily this touchy routine is only used internally
 {
     element_ptr in0 = fi_re(in);
     element_ptr in1 = fi_im(in);
@@ -346,7 +349,7 @@ static inline void lucas(element_ptr out, element_ptr in, element_ptr temp, mpz_
     }
 
     //assume cofactor = (q + 1) / r is even
-    //(since r should be odd, q + 1 is always even)
+    //(r should be odd and q + 1 is always even)
     //thus v0 = V_k, v1 = V_{k+1}
     //and V_{k-1} = P v0 - v1
 
@@ -384,7 +387,7 @@ static inline void a_tateexp(element_ptr out, element_ptr in, element_ptr temp, 
     //Instead of:
     //	element_pow_mpz(out, in, cofactor);
     //we use Lucas sequences (see "Compressed Pairings", Scott and Barreto)
-    lucas(out, in, temp, cofactor);
+    lucas_odd(out, in, temp, cofactor);
 }
 
 //computes a Qx + b Qy + c for type A pairing
