@@ -43,8 +43,12 @@ void fp_tonelli(element_ptr x, element_ptr a)
     mpz_tdiv_q_2exp(t, t, 1);
     mpz_tdiv_q_2exp(e, e, 1);
 
-    //suggested by Hovav Shacham
-    element_pow2_mpz(x, e0, t, nqr, e);
+    //as suggested by Hovav Shacham, replace next three lines with
+    //  element_pow2_mpz(x, e0, t, nqr, e);
+    //once sliding windows for pow2 has been done
+    element_pow_mpz(e0, e0, t);
+    element_pow_mpz(x, nqr, e);
+    element_mul(x, x, e0);
 
     mpz_clear(t);
     mpz_clear(e);
