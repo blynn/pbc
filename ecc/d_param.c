@@ -489,7 +489,9 @@ static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing)
 	element_mul(e0, e0, in);
 	element_invert(e0, e0);
 	element_mul(out, e3, e0);
+
 	element_pow_mpz(out, out, p->tateexp);
+
 	element_clear(e0);
 	element_clear(e1);
 	element_clear(e2);

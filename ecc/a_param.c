@@ -446,6 +446,701 @@ static void a_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
     element_clear(f0);
 }
 
+static void a_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
+	pairing_t pairing)
+//in1, in2 are from E(F_q), out from F_q^2
+//uses elliptic nets (see Stange)
+{
+    a_pairing_data_ptr ainfo = pairing->data;
+    element_ptr x = curve_x_coord(in1);
+    element_ptr y = curve_y_coord(in1);
+
+    element_ptr x2 = curve_x_coord(in2);
+    element_ptr y2 = curve_y_coord(in2);
+
+    //we map (x2,y2) to (-x2, i y2) before pairing
+    //notation: cmi means c_{k-i}, ci means c_{k+i}
+    element_t cm3, cm2, cm1, c0, c1, c2, c3, c4;
+    element_t dm1, d0, d1;
+    element_t A, B, C;
+
+    element_init_same_as(cm3, x);
+    element_init_same_as(cm2, x);
+    element_init_same_as(cm1, x);
+    element_init_same_as(c0, x);
+    element_init_same_as(c1, x);
+    element_init_same_as(c2, x);
+    element_init_same_as(c3, x);
+    element_init_same_as(c4, x);
+    element_init_same_as(C, x);
+
+    element_init_same_as(dm1, out);
+    element_init_same_as(d0, out);
+    element_init_same_as(d1, out);
+    element_init_same_as(A, x);
+    element_init_same_as(B, out);
+
+    // c1 = 2y
+    // c0 = 1
+    // cm2 = -1
+    // cm3 = -2y
+    element_double(c1, y);
+    element_set1(c0);
+    element_neg(cm3, c1);
+    element_neg(cm2, c0);
+
+    // a = 1, b = 0 for Y^2 = X^3 + X
+    //hence c3 = c_{k+3} = c_4 = 4y(x^6 +  5(x^4 - x^2) - 1)
+    //use cm1, C, c2 as temp variables for now
+    element_square(cm1, x);
+    element_square(C, cm1);
+    element_sub(c2, C, cm1);
+    element_double(c3, c2);
+    element_double(c3, c3);
+    element_add(c3, c3, c2);
+    element_mul(c2, C, cm1);
+    element_add(c3, c3, c2);
+    element_add(c3, c3, cm2);
+    element_mul(c3, c3, c1);
+    element_double(c3, c3);
+
+    // c2 = c_3 = 3x^4 + 6x^2 - 1
+    element_double(cm1, cm1);
+    element_add(cm1, cm1, C);
+    element_double(C, cm1);
+    element_add(C, C, cm1);
+    element_add(c2, C, cm2);
+
+    // c4 = c_5 = c_2^3 c_4 - c_3^3 = c1^3 c3 - c2^3
+    element_square(C, c1);
+    element_mul(c4, C, c1);
+    element_mul(c4, c4, c3);
+    element_square(C, c2);
+    element_mul(C, C, c2);
+    element_sub(c4, c4, C);
+
+    //compute A, B, d1 (which is d_2 since k = 1)
+    //(recall phi takes x2 to -x2, y2 to i y2)
+    element_add(A, x, x2);
+    element_double(C, x);
+    element_sub(C, C, x2);
+    element_square(cm1, A);
+    element_mul(cm1, C, cm1);
+    element_set(fi_re(d1), y);
+    element_set(fi_im(d1), y2);
+    element_square(d1, d1);
+    element_sub(fi_re(d1), fi_re(d1), cm1);
+    element_neg(B, d1);
+    element_invert(B, B);
+    element_invert(A, A);
+    element_mul(fi_re(d1), y, A);
+    element_neg(fi_re(d1), fi_re(d1));
+    element_mul(fi_im(d1), y2, A);
+    element_square(d1, d1);
+    element_sub(fi_re(d1), C, fi_re(d1));
+    element_neg(fi_im(d1), fi_im(d1));
+
+    // cm1 = 0
+    // C = (2y)^-1
+    element_set0(cm1);
+    element_invert(C, c1);
+
+    element_set1(dm1);
+    element_set1(d0);
+
+    element_t sm2, sm1;
+    element_t s0, s1, s2, s3;
+    element_t tm2, tm1;
+    element_t t0, t1, t2, t3;
+    element_t e0, e1;
+    element_t u, v;
+
+    element_init_same_as(sm2, x);
+    element_init_same_as(sm1, x);
+    element_init_same_as(s0, x);
+    element_init_same_as(s1, x);
+    element_init_same_as(s2, x);
+    element_init_same_as(s3, x);
+
+    element_init_same_as(tm2, x);
+    element_init_same_as(tm1, x);
+    element_init_same_as(t0, x);
+    element_init_same_as(t1, x);
+    element_init_same_as(t2, x);
+    element_init_same_as(t3, x);
+
+    element_init_same_as(e0, x);
+    element_init_same_as(e1, x);
+
+    element_init_same_as(u, d0);
+    element_init_same_as(v, d0);
+
+    int m = mpz_sizeinbase(pairing->r, 2) - 2;
+    for (;;) {
+	element_square(sm2, cm2);
+	element_square(sm1, cm1);
+	element_square(s0, c0);
+	element_square(s1, c1);
+	element_square(s2, c2);
+	element_square(s3, c3);
+
+	element_mul(tm2, cm3, cm1);
+	element_mul(tm1, cm2, c0);
+	element_mul(t0, cm1, c1);
+	element_mul(t1, c0, c2);
+	element_mul(t2, c1, c3);
+	element_mul(t3, c2, c4);
+
+	element_square(u, d0);
+	element_mul(v, dm1, d1);
+
+	if (mpz_tstbit(pairing->r, m)) {
+	    //double-and-add
+	    element_mul(e0, t0, sm2);
+	    element_mul(e1, tm2, s0);
+	    element_sub(cm3, e0, e1);
+	    element_mul(cm3, cm3, C);
+
+	    element_mul(e0, t0, sm1);
+	    element_mul(e1, tm1, s0);
+	    element_sub(cm2, e0, e1);
+
+	    element_mul(e0, t1, sm1);
+	    element_mul(e1, tm1, s1);
+	    element_sub(cm1, e0, e1);
+	    element_mul(cm1, cm1, C);
+
+	    element_mul(e0, t1, s0);
+	    element_mul(e1, t0, s1);
+	    element_sub(c0, e0, e1);
+
+	    element_mul(e0, t2, s0);
+	    element_mul(e1, t0, s2);
+	    element_sub(c1, e0, e1);
+	    element_mul(c1, c1, C);
+
+	    element_mul(e0, t2, s1);
+	    element_mul(e1, t1, s2);
+	    element_sub(c2, e0, e1);
+
+	    element_mul(e0, t3, s1);
+	    element_mul(e1, t1, s3);
+	    element_sub(c3, e0, e1);
+	    element_mul(c3, c3, C);
+
+	    element_mul(e0, t3, s2);
+	    element_mul(e1, t2, s3);
+	    element_sub(c4, e0, e1);
+
+	    element_mul(fi_re(out), fi_re(u), t0);
+	    element_mul(fi_im(out), fi_im(u), t0);
+	    element_mul(fi_re(dm1), fi_re(v), s0);
+	    element_mul(fi_im(dm1), fi_im(v), s0);
+	    element_sub(dm1, dm1, out);
+
+	    element_mul(fi_re(out), fi_re(u), t1);
+	    element_mul(fi_im(out), fi_im(u), t1);
+	    element_mul(fi_re(d0), fi_re(v), s1);
+	    element_mul(fi_im(d0), fi_im(v), s1);
+	    element_sub(d0, d0, out);
+	    element_mul(fi_re(d0), fi_re(d0), A);
+	    element_mul(fi_im(d0), fi_im(d0), A);
+
+	    element_mul(fi_re(out), fi_re(u), t2);
+	    element_mul(fi_im(out), fi_im(u), t2);
+	    element_mul(fi_re(d1), fi_re(v), s2);
+	    element_mul(fi_im(d1), fi_im(v), s2);
+	    element_sub(d1, d1, out);
+	    element_mul(d1, d1, B);
+	} else {
+	    //double
+	    element_mul(e0, tm1, sm2);
+	    element_mul(e1, tm2, sm1);
+	    element_sub(cm3, e0, e1);
+
+	    element_mul(e0, t0, sm2);
+	    element_mul(e1, tm2, s0);
+	    element_sub(cm2, e0, e1);
+	    element_mul(cm2, cm2, C);
+
+	    element_mul(e0, t0, sm1);
+	    element_mul(e1, tm1, s0);
+	    element_sub(cm1, e0, e1);
+
+	    element_mul(e0, t1, sm1);
+	    element_mul(e1, tm1, s1);
+	    element_sub(c0, e0, e1);
+	    element_mul(c0, c0, C);
+
+	    element_mul(e0, t1, s0);
+	    element_mul(e1, t0, s1);
+	    element_sub(c1, e0, e1);
+
+	    element_mul(e0, t2, s0);
+	    element_mul(e1, t0, s2);
+	    element_sub(c2, e0, e1);
+	    element_mul(c2, c2, C);
+
+	    element_mul(e0, t2, s1);
+	    element_mul(e1, t1, s2);
+	    element_sub(c3, e0, e1);
+
+	    element_mul(e0, t3, s1);
+	    element_mul(e1, t1, s3);
+	    element_sub(c4, e0, e1);
+	    element_mul(c4, c4, C);
+
+	    element_mul(fi_re(out), fi_re(u), tm1);
+	    element_mul(fi_im(out), fi_im(u), tm1);
+	    element_mul(fi_re(dm1), fi_re(v), sm1);
+	    element_mul(fi_im(dm1), fi_im(v), sm1);
+	    element_sub(dm1, dm1, out);
+
+	    element_mul(fi_re(out), fi_re(u), t0);
+	    element_mul(fi_im(out), fi_im(u), t0);
+	    element_mul(fi_re(d0), fi_re(v), s0);
+	    element_mul(fi_im(d0), fi_im(v), s0);
+	    element_sub(d0, d0, out);
+
+	    element_mul(fi_re(out), fi_re(u), t1);
+	    element_mul(fi_im(out), fi_im(u), t1);
+	    element_mul(fi_re(d1), fi_re(v), s1);
+	    element_mul(fi_im(d1), fi_im(v), s1);
+	    element_sub(d1, d1, out);
+	    element_mul(fi_re(d1), fi_re(d1), A);
+	    element_mul(fi_im(d1), fi_im(d1), A);
+	}
+	if (!m) break;
+	m--;
+    }
+    // since c_k lies base field
+    // it gets killed by the final powering
+    //element_invert(c1, c1);
+    //element_mul(fi_re(d1), fi_re(d1), c1);
+    //element_mul(fi_im(d1), fi_im(d1), c1);
+
+    a_tateexp(out, d1, d0, ainfo->h);
+
+    element_clear(dm1);
+    element_clear(d0);
+    element_clear(d1);
+
+    element_clear(cm3);
+    element_clear(cm2);
+    element_clear(cm1);
+    element_clear(c0);
+    element_clear(c1);
+    element_clear(c2);
+    element_clear(c3);
+    element_clear(c4);
+
+    element_clear(sm2);
+    element_clear(sm1);
+    element_clear(s0);
+    element_clear(s1);
+    element_clear(s2);
+    element_clear(s3);
+
+    element_clear(tm2);
+    element_clear(tm1);
+    element_clear(t0);
+    element_clear(t1);
+    element_clear(t2);
+    element_clear(t3);
+
+    element_clear(e0);
+    element_clear(e1);
+    element_clear(A);
+    element_clear(B);
+    element_clear(C);
+    element_clear(u);
+    element_clear(v);
+}
+
+struct ellnet_pp_st_s {
+    element_t sm1, s0, s1, s2;
+    element_t tm1, t0, t1, t2;
+};
+typedef struct ellnet_pp_st_s ellnet_pp_st_t[1];
+typedef struct ellnet_pp_st_s *ellnet_pp_st_ptr;
+
+struct ellnet_pp_s {
+    element_t x;
+    element_t y;
+    ellnet_pp_st_t *seq;
+};
+typedef struct ellnet_pp_s ellnet_pp_t[1];
+typedef struct ellnet_pp_s *ellnet_pp_ptr;
+
+static void a_pairing_ellnet_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing)
+{
+    element_ptr x = curve_x_coord(in1);
+    element_ptr y = curve_y_coord(in1);
+    int i, rbits = mpz_sizeinbase(pairing->r, 2);
+    ellnet_pp_ptr pp = p->data = pbc_malloc(sizeof(ellnet_pp_t));
+    pp->seq = pbc_malloc(sizeof(ellnet_pp_st_t) * rbits);
+    element_init_same_as(pp->x, x);
+    element_init_same_as(pp->y, y);
+    element_set(pp->x, x);
+    element_set(pp->y, y);
+    for (i=0; i<rbits; i++) {
+	ellnet_pp_st_ptr seq = pp->seq[i];
+	element_init_same_as(seq->sm1, x);
+	element_init_same_as(seq->s0, x);
+	element_init_same_as(seq->s1, x);
+	element_init_same_as(seq->s2, x);
+	element_init_same_as(seq->tm1, x);
+	element_init_same_as(seq->t0, x);
+	element_init_same_as(seq->t1, x);
+	element_init_same_as(seq->t2, x);
+    }
+
+    //we map (x2,y2) to (-x2, i y2) before pairing
+    //notation: cmi means c_{k-i}, ci means c_{k+i}
+    element_t cm3, cm2, cm1, c0, c1, c2, c3, c4;
+    element_t C;
+
+    element_init_same_as(cm3, x);
+    element_init_same_as(cm2, x);
+    element_init_same_as(cm1, x);
+    element_init_same_as(c0, x);
+    element_init_same_as(c1, x);
+    element_init_same_as(c2, x);
+    element_init_same_as(c3, x);
+    element_init_same_as(c4, x);
+    element_init_same_as(C, x);
+
+    // c1 = 2y
+    // c0 = 1
+    // cm2 = -1
+    // cm3 = -2y
+    element_double(c1, y);
+    element_set1(c0);
+    element_neg(cm3, c1);
+    element_neg(cm2, c0);
+
+    // a = 1, b = 0 for Y^2 = X^3 + X
+    //hence c3 = c_{k+3} = c_4 = 4y(x^6 +  5(x^4 - x^2) - 1)
+    //use cm1, C, c2 as temp variables for now
+    element_square(cm1, x);
+    element_square(C, cm1);
+    element_sub(c2, C, cm1);
+    element_double(c3, c2);
+    element_double(c3, c3);
+    element_add(c3, c3, c2);
+    element_mul(c2, C, cm1);
+    element_add(c3, c3, c2);
+    element_add(c3, c3, cm2);
+    element_mul(c3, c3, c1);
+    element_double(c3, c3);
+
+    // c2 = c_3 = 3x^4 + 6x^2 - 1
+    element_double(cm1, cm1);
+    element_add(cm1, cm1, C);
+    element_double(C, cm1);
+    element_add(C, C, cm1);
+    element_add(c2, C, cm2);
+
+    // c4 = c_5 = c_2^3 c_4 - c_3^3 = c1^3 c3 - c2^3
+    element_square(C, c1);
+    element_mul(c4, C, c1);
+    element_mul(c4, c4, c3);
+    element_square(C, c2);
+    element_mul(C, C, c2);
+    element_sub(c4, c4, C);
+
+    // cm1 = 0
+    // C = (2y)^-1
+    element_set0(cm1);
+    element_invert(C, c1);
+
+    int k = 0;
+    element_t sm2, s3;
+    element_t tm2, t3;
+    element_ptr sm1, s0, s1, s2;
+    element_ptr tm1, t0, t1, t2;
+    element_t e0, e1;
+
+    element_init_same_as(sm2, x);
+    element_init_same_as(s3, x);
+
+    element_init_same_as(tm2, x);
+    element_init_same_as(t3, x);
+
+    element_init_same_as(e0, x);
+    element_init_same_as(e1, x);
+
+    int m = rbits - 2;
+    for (;;) {
+	ellnet_pp_st_ptr seq = pp->seq[k];
+	sm1 = seq->sm1;
+	s0 = seq->s0;
+	s1 = seq->s1;
+	s2 = seq->s2;
+	tm1 = seq->tm1;
+	t0 = seq->t0;
+	t1 = seq->t1;
+	t2 = seq->t2;
+
+	element_square(sm2, cm2);
+	element_square(sm1, cm1);
+	element_square(s0, c0);
+	element_square(s1, c1);
+	element_square(s2, c2);
+	element_square(s3, c3);
+
+	element_mul(tm2, cm3, cm1);
+	element_mul(tm1, cm2, c0);
+	element_mul(t0, cm1, c1);
+	element_mul(t1, c0, c2);
+	element_mul(t2, c1, c3);
+	element_mul(t3, c2, c4);
+
+	if (!m) break;
+	k++;
+
+	if (mpz_tstbit(pairing->r, m)) {
+	    //double-and-add
+	    element_mul(e0, t0, sm2);
+	    element_mul(e1, tm2, s0);
+	    element_sub(cm3, e0, e1);
+	    element_mul(cm3, cm3, C);
+
+	    element_mul(e0, t0, sm1);
+	    element_mul(e1, tm1, s0);
+	    element_sub(cm2, e0, e1);
+
+	    element_mul(e0, t1, sm1);
+	    element_mul(e1, tm1, s1);
+	    element_sub(cm1, e0, e1);
+	    element_mul(cm1, cm1, C);
+
+	    element_mul(e0, t1, s0);
+	    element_mul(e1, t0, s1);
+	    element_sub(c0, e0, e1);
+
+	    element_mul(e0, t2, s0);
+	    element_mul(e1, t0, s2);
+	    element_sub(c1, e0, e1);
+	    element_mul(c1, c1, C);
+
+	    element_mul(e0, t2, s1);
+	    element_mul(e1, t1, s2);
+	    element_sub(c2, e0, e1);
+
+	    element_mul(e0, t3, s1);
+	    element_mul(e1, t1, s3);
+	    element_sub(c3, e0, e1);
+	    element_mul(c3, c3, C);
+
+	    element_mul(e0, t3, s2);
+	    element_mul(e1, t2, s3);
+	    element_sub(c4, e0, e1);
+
+	} else {
+	    //double
+	    element_mul(e0, tm1, sm2);
+	    element_mul(e1, tm2, sm1);
+	    element_sub(cm3, e0, e1);
+
+	    element_mul(e0, t0, sm2);
+	    element_mul(e1, tm2, s0);
+	    element_sub(cm2, e0, e1);
+	    element_mul(cm2, cm2, C);
+
+	    element_mul(e0, t0, sm1);
+	    element_mul(e1, tm1, s0);
+	    element_sub(cm1, e0, e1);
+
+	    element_mul(e0, t1, sm1);
+	    element_mul(e1, tm1, s1);
+	    element_sub(c0, e0, e1);
+	    element_mul(c0, c0, C);
+
+	    element_mul(e0, t1, s0);
+	    element_mul(e1, t0, s1);
+	    element_sub(c1, e0, e1);
+
+	    element_mul(e0, t2, s0);
+	    element_mul(e1, t0, s2);
+	    element_sub(c2, e0, e1);
+	    element_mul(c2, c2, C);
+
+	    element_mul(e0, t2, s1);
+	    element_mul(e1, t1, s2);
+	    element_sub(c3, e0, e1);
+
+	    element_mul(e0, t3, s1);
+	    element_mul(e1, t1, s3);
+	    element_sub(c4, e0, e1);
+	    element_mul(c4, c4, C);
+	}
+	m--;
+    }
+
+    element_clear(cm3);
+    element_clear(cm2);
+    element_clear(cm1);
+    element_clear(c0);
+    element_clear(c1);
+    element_clear(c2);
+    element_clear(c3);
+    element_clear(c4);
+
+    element_clear(sm2);
+    element_clear(s3);
+
+    element_clear(tm2);
+    element_clear(t3);
+
+    element_clear(e0);
+    element_clear(e1);
+    element_clear(C);
+}
+
+static void a_pairing_ellnet_pp_clear(pairing_pp_t p)
+{
+    ellnet_pp_ptr pp = p->data;
+    int i, rbits = mpz_sizeinbase(p->pairing->r, 2);
+    for (i=0; i<rbits; i++) {
+	ellnet_pp_st_ptr seq = pp->seq[i];
+	element_clear(seq->sm1);
+	element_clear(seq->s0);
+	element_clear(seq->s1);
+	element_clear(seq->s2);
+	element_clear(seq->tm1);
+	element_clear(seq->t0);
+	element_clear(seq->t1);
+	element_clear(seq->t2);
+    }
+    element_clear(pp->x);
+    element_clear(pp->y);
+    pbc_free(pp->seq);
+    pbc_free(p->data);
+}
+
+static void a_pairing_ellnet_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
+{
+    element_ptr x2 = curve_x_coord(in2);
+    element_ptr y2 = curve_y_coord(in2);
+    ellnet_pp_ptr pp = p->data;
+    a_pairing_data_ptr ainfo = p->pairing->data;
+    int rbits = mpz_sizeinbase(p->pairing->r, 2);
+    int k = 0;
+    int m = rbits - 2;
+    element_t A, B;
+    element_t e0, e1;
+    element_t dm1, d0, d1;
+    element_t u, v;
+
+    element_init_same_as(A, x2);
+    element_init_same_as(B, out);
+    element_init_same_as(e0, x2);
+    element_init_same_as(e1, x2);
+    element_init_same_as(dm1, out);
+    element_init_same_as(d0, out);
+    element_init_same_as(d1, out);
+    element_init_same_as(u, out);
+    element_init_same_as(v, out);
+
+    element_add(A, pp->x, x2);
+    element_double(e0, pp->x);
+    element_sub(e0, e0, x2);
+    element_square(e1, A);
+    element_mul(e1, e0, e1);
+    element_set(fi_re(d1), pp->y);
+    element_set(fi_im(d1), y2);
+    element_square(d1, d1);
+    element_sub(fi_re(d1), fi_re(d1), e1);
+    element_neg(B, d1);
+    element_invert(B, B);
+    element_invert(A, A);
+    element_mul(fi_re(d1), pp->y, A);
+    element_neg(fi_re(d1), fi_re(d1));
+    element_mul(fi_im(d1), y2, A);
+    element_square(d1, d1);
+    element_sub(fi_re(d1), e0, fi_re(d1));
+    element_neg(fi_im(d1), fi_im(d1));
+
+    element_set1(dm1);
+    element_set1(d0);
+    for (;;) {
+	element_ptr sm1, s0, s1, s2;
+	element_ptr tm1, t0, t1, t2;
+	ellnet_pp_st_ptr seq = pp->seq[k];
+	sm1 = seq->sm1;
+	s0 = seq->s0;
+	s1 = seq->s1;
+	s2 = seq->s2;
+	tm1 = seq->tm1;
+	t0 = seq->t0;
+	t1 = seq->t1;
+	t2 = seq->t2;
+	k++;
+
+	element_square(u, d0);
+	element_mul(v, dm1, d1);
+
+	if (mpz_tstbit(p->pairing->r, m)) {
+	    //double-and-add
+	    element_mul(fi_re(out), fi_re(u), t0);
+	    element_mul(fi_im(out), fi_im(u), t0);
+	    element_mul(fi_re(dm1), fi_re(v), s0);
+	    element_mul(fi_im(dm1), fi_im(v), s0);
+	    element_sub(dm1, dm1, out);
+
+	    element_mul(fi_re(out), fi_re(u), t1);
+	    element_mul(fi_im(out), fi_im(u), t1);
+	    element_mul(fi_re(d0), fi_re(v), s1);
+	    element_mul(fi_im(d0), fi_im(v), s1);
+	    element_sub(d0, d0, out);
+	    element_mul(fi_re(d0), fi_re(d0), A);
+	    element_mul(fi_im(d0), fi_im(d0), A);
+
+	    element_mul(fi_re(out), fi_re(u), t2);
+	    element_mul(fi_im(out), fi_im(u), t2);
+	    element_mul(fi_re(d1), fi_re(v), s2);
+	    element_mul(fi_im(d1), fi_im(v), s2);
+	    element_sub(d1, d1, out);
+	    element_mul(d1, d1, B);
+	} else {
+	    //double
+	    element_mul(fi_re(out), fi_re(u), tm1);
+	    element_mul(fi_im(out), fi_im(u), tm1);
+	    element_mul(fi_re(dm1), fi_re(v), sm1);
+	    element_mul(fi_im(dm1), fi_im(v), sm1);
+	    element_sub(dm1, dm1, out);
+
+	    element_mul(fi_re(out), fi_re(u), t0);
+	    element_mul(fi_im(out), fi_im(u), t0);
+	    element_mul(fi_re(d0), fi_re(v), s0);
+	    element_mul(fi_im(d0), fi_im(v), s0);
+	    element_sub(d0, d0, out);
+
+	    element_mul(fi_re(out), fi_re(u), t1);
+	    element_mul(fi_im(out), fi_im(u), t1);
+	    element_mul(fi_re(d1), fi_re(v), s1);
+	    element_mul(fi_im(d1), fi_im(v), s1);
+	    element_sub(d1, d1, out);
+	    element_mul(fi_re(d1), fi_re(d1), A);
+	    element_mul(fi_im(d1), fi_im(d1), A);
+	}
+	if (!m) break;
+	m--;
+    }
+    a_tateexp(out, d1, d0, ainfo->h);
+
+    element_clear(A);
+    element_clear(B);
+    element_clear(e0);
+    element_clear(e1);
+    element_clear(dm1);
+    element_clear(d0);
+    element_clear(d1);
+    element_clear(u);
+    element_clear(v);
+}
+
 static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	pairing_t pairing)
 //in1, in2 are from E(F_q), out from F_q^2
@@ -691,11 +1386,22 @@ static void a_pairing_clear(pairing_t pairing)
 
 static void a_pairing_option_set(pairing_t pairing, char *key, char *value)
 {
-    if (!strcmp(key, "coord")) {
-	if (!strcmp(value, "projective")) {
+    if (!strcmp(key, "method")) {
+	if (!strcmp(value, "miller")) {
 	    pairing->map = a_pairing_proj;
-	} else if (!strcmp(value, "affine")) {
+	    pairing->pp_init = a_pairing_pp_init;
+	    pairing->pp_clear = a_pairing_pp_clear;
+	    pairing->pp_apply = a_pairing_pp_apply;
+	} else if (!strcmp(value, "miller_affine")) {
 	    pairing->map = a_pairing_affine;
+	    pairing->pp_init = a_pairing_pp_init;
+	    pairing->pp_clear = a_pairing_pp_clear;
+	    pairing->pp_apply = a_pairing_pp_apply;
+	} else if (!strcmp(value, "shipsey-stange")) {
+	    pairing->map = a_pairing_ellnet;
+	    pairing->pp_init = a_pairing_ellnet_pp_init;
+	    pairing->pp_clear = a_pairing_ellnet_pp_clear;
+	    pairing->pp_apply = a_pairing_ellnet_pp_apply;
 	}
     }
 }
@@ -1016,6 +1722,10 @@ static void a1_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p
     element_neg(fi_im(f), fi_im(f));
     element_mul(f, f, f0);
     element_pow_mpz(out, f, a1info->h);
+
+    /* We could use this instead but p->h is small so this does not help much
+    a_tateexp(out, f, f0, p->h);
+    */
 
     element_clear(Qx2);
     element_clear(Qy2);
