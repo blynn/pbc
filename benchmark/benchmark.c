@@ -60,6 +60,8 @@ int main(void)
     double t0, t1, ttotal, ttotalpp;
     pairing_pp_t pp;
 
+    //pbc_set_memory_functions(malloc, realloc, free);
+
     pairing_init_inp_str(pairing, stdin);
     element_init_G1(x, pairing);
     element_init_G2(y, pairing);

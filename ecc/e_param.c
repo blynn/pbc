@@ -21,6 +21,7 @@ struct e_pairing_data_s {
     mpz_t tateexp;
     int exp2, exp1;
     int sign1, sign0;
+    element_t R;
 };
 typedef struct e_pairing_data_s e_pairing_data_t[1];
 typedef struct e_pairing_data_s *e_pairing_data_ptr;
@@ -600,14 +601,11 @@ static void e_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 {
     e_pairing_data_ptr p = pairing->data;
     element_ptr Q = in2;
-    element_t R, QR;
-    element_init(R, p->Eq);
+    element_t QR;
     element_init(QR, p->Eq);
-    curve_random_no_cofac(R);
-    element_add(QR, Q, R);
-    e_miller_fn(out, in1, QR, R, p);
+    element_add(QR, Q, p->R);
+    e_miller_fn(out, in1, QR, p->R, p);
     element_pow_mpz(out, out, p->tateexp);
-    element_clear(R);
     element_clear(QR);
 }
 
@@ -620,10 +618,10 @@ static void phi_identity(element_ptr out, element_ptr in, pairing_ptr pairing)
 static void e_pairing_option_set(pairing_t pairing, char *key, char *value)
 {
     UNUSED_VAR(pairing);
-    if (!strcmp(key, "coord")) {
-	if (!strcmp(value, "projective")) {
+    if (!strcmp(key, "method")) {
+	if (!strcmp(value, "miller")) {
 	    e_miller_fn = e_miller_proj;
-	} else if (!strcmp(value, "affine")) {
+	} else if (!strcmp(value, "miller-affine")) {
 	    e_miller_fn = e_miller_affine;
 	}
     }
@@ -635,6 +633,7 @@ void e_pairing_clear(pairing_t pairing)
     field_clear(p->Fq);
     field_clear(p->Eq);
     mpz_clear(p->tateexp);
+    element_clear(p->R);
     pbc_free(p);
 
     mpz_clear(pairing->r);
@@ -674,6 +673,9 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     pairing->phi = phi_identity;
     pairing->option_set = e_pairing_option_set;
     pairing->clear_func = e_pairing_clear;
+
+    element_init(p->R, p->Eq);
+    curve_random_no_cofac(p->R);
 
     element_clear(a);
     element_clear(b);
