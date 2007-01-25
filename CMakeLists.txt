@@ -3,6 +3,8 @@ project(pbc)
 set(CMAKE_MODULE_PATH .)
 include_directories(. ./include)
 
+CONFIGURE_FILE(config.h.cmake config.h)
+
 set(examplebin
 example/bls
 example/bonehfranklin
