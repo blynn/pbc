@@ -928,12 +928,17 @@ static void phi_identity(element_ptr out, element_ptr in, pairing_ptr pairing)
 
 static void e_pairing_option_set(pairing_t pairing, char *key, char *value)
 {
+    //TODO: this affects every type E pairing!
     UNUSED_VAR(pairing);
     if (!strcmp(key, "method")) {
 	if (!strcmp(value, "miller")) {
+	    pairing->map = e_pairing;
 	    e_miller_fn = e_miller_proj;
 	} else if (!strcmp(value, "miller-affine")) {
+	    pairing->map = e_pairing;
 	    e_miller_fn = e_miller_affine;
+	} else if (!strcmp(value, "shipsey-stange")) {
+	    pairing->map = e_pairing_ellnet;
 	}
     }
 }
