@@ -9,14 +9,7 @@
 #include "pbc_curve.h"
 #include "pbc_memory.h"
 #include "pbc_utils.h"
-
-struct curve_data_s {
-    field_ptr field;
-    element_t a, b;
-    mpz_ptr cofac;
-};
-typedef struct curve_data_s curve_data_t[1];
-typedef struct curve_data_s *curve_data_ptr;
+#include "pbc_random.h"
 
 struct point_s {
     int inf_flag;
@@ -25,6 +18,16 @@ struct point_s {
 };
 typedef struct point_s *point_ptr;
 typedef struct point_s point_t[1];
+
+struct curve_data_s {
+    field_ptr field;
+    element_t a, b;
+    element_t gen;
+    element_t gen_no_cofac;
+    mpz_ptr cofac;
+};
+typedef struct curve_data_s curve_data_t[1];
+typedef struct curve_data_s *curve_data_ptr;
 
 static void curve_init(element_ptr e)
 {
@@ -105,11 +108,14 @@ static inline void double_no_check(point_ptr r, point_ptr p, element_ptr a)
     element_square(lambda, p->x);
     element_mul_si(lambda, lambda, 3);
     element_add(lambda, lambda, a);
-    element_add(e0, p->y, p->y);
+
+    element_double(e0, p->y);
+
     element_invert(e0, e0);
     element_mul(lambda, lambda, e0);
     //x1 = lambda^2 - 2x
-    element_add(e1, p->x, p->x);
+    //element_add(e1, p->x, p->x);
+    element_double(e1, p->x);
     element_square(e0, lambda);
     element_sub(e0, e0, e1);
     //y1 = (x - x1)lambda - y
@@ -225,8 +231,9 @@ static int curve_is1(element_ptr x)
     return p->inf_flag;
 }
 
-void curve_random_no_cofac(element_ptr a)
+static void curve_random_no_cofac_solvefory(element_ptr a)
 {
+    //TODO: with 0.5 probability negate y-coord
     curve_data_ptr cdp = a->field->data;
     point_ptr p = a->data;
     element_t t;
@@ -244,11 +251,33 @@ void curve_random_no_cofac(element_ptr a)
     element_clear(t);
 }
 
-static void curve_random(element_ptr a)
+static void curve_random_solvefory(element_ptr a)
 {
     curve_data_ptr cdp = a->field->data;
-    curve_random_no_cofac(a);
+    curve_random_no_cofac_solvefory(a);
     if (cdp->cofac) element_mul_mpz(a, a, cdp->cofac);
+}
+
+static void curve_random_pointmul(element_ptr a)
+{
+    curve_data_ptr cdp = a->field->data;
+    mpz_t x;
+    mpz_init(x);
+
+    pbc_mpz_random(x, a->field->order);
+    element_mul_mpz(a, cdp->gen, x);
+    mpz_clear(x);
+}
+
+void field_curve_use_random_solvefory(field_ptr f)
+{
+    f->random = curve_random_solvefory;
+}
+
+void curve_set_gen_no_cofac(element_ptr a)
+{
+    curve_data_ptr cdp = a->field->data;
+    element_set(a, cdp->gen_no_cofac);
 }
 
 static int curve_sign(element_ptr e)
@@ -374,6 +403,8 @@ static void field_clear_curve(field_t f)
 {
     curve_data_ptr cdp;
     cdp = f->data;
+    element_clear(cdp->gen);
+    element_clear(cdp->gen_no_cofac);
     if (cdp->cofac) {
 	mpz_clear(cdp->cofac);
 	pbc_free(cdp->cofac);
@@ -468,17 +499,6 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     element_set(cdp->a, a);
     element_set(cdp->b, b);
 
-    if (cofac) {
-	cdp->cofac = pbc_malloc(sizeof(mpz_t));
-	mpz_init(cdp->cofac);
-	mpz_set(cdp->cofac, cofac);
-    } else cdp->cofac = NULL;
-
-    if (mpz_odd_p(order)) {
-	f->is_sqr = odd_curve_is_sqr;
-    } else {
-	f->is_sqr = even_curve_is_sqr;
-    }
     f->init = curve_init;
     f->clear = curve_clear;
     f->neg = f->invert = curve_invert;
@@ -490,7 +510,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     f->is0 = f->is1 = curve_is1;
     f->sign = curve_sign;
     f->set = curve_set;
-    f->random = curve_random;
+    f->random = curve_random_pointmul;
     f->from_hash = curve_from_hash;
     f->out_str = curve_out_str;
     f->snprint = curve_snprint;
@@ -504,6 +524,25 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     f->to_bytes = curve_to_bytes;
     f->from_bytes = curve_from_bytes;
     f->out_info = curve_out_info;
+
+    if (mpz_odd_p(order)) {
+	f->is_sqr = odd_curve_is_sqr;
+    } else {
+	f->is_sqr = even_curve_is_sqr;
+    }
+
+    element_init(cdp->gen_no_cofac, f);
+    element_init(cdp->gen, f);
+    curve_random_no_cofac_solvefory(cdp->gen_no_cofac);
+    if (cofac) {
+	cdp->cofac = pbc_malloc(sizeof(mpz_t));
+	mpz_init(cdp->cofac);
+	mpz_set(cdp->cofac, cofac);
+	element_mul_mpz(cdp->gen, cdp->gen_no_cofac, cofac);
+    } else{
+	cdp->cofac = NULL;
+	element_set(cdp->gen, cdp->gen_no_cofac);
+    }
 }
 
 int element_to_bytes_compressed(unsigned char *data, element_ptr e)
@@ -607,6 +646,11 @@ inline element_ptr curve_y_coord(element_t e)
 inline element_ptr curve_a_coeff(element_t e)
 {
     return ((curve_data_ptr) e->field->data)->a;
+}
+
+inline element_ptr curve_b_coeff(element_t e)
+{
+    return ((curve_data_ptr) e->field->data)->b;
 }
 
 inline element_ptr curve_field_a_coeff(field_t f)

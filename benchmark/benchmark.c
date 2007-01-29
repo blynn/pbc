@@ -60,6 +60,7 @@ int main(void)
     double t0, t1, ttotal, ttotalpp;
     pairing_pp_t pp;
 
+    //Cheat for slightly faster times:
     //pbc_set_memory_functions(malloc, realloc, free);
 
     pairing_init_inp_str(pairing, stdin);

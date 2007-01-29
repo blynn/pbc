@@ -20,7 +20,6 @@
 
 struct a_pairing_data_s {
     field_t Fq, Fq2, Eq;
-    mpz_t h;
     int exp2, exp1;
     int sign1;
 };
@@ -443,7 +442,7 @@ static void a_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
 	element_mul(f, f, f0);
     }
 
-    a_tateexp(out, f, f0, ainfo->h);
+    a_tateexp(out, f, f0, p->pairing->phikonr);
 
     element_clear(f);
     element_clear(f0);
@@ -454,7 +453,6 @@ static void a_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
 //in1, in2 are from E(F_q), out from F_q^2
 //uses elliptic nets (see Stange)
 {
-    a_pairing_data_ptr ainfo = pairing->data;
     element_ptr x = curve_x_coord(in1);
     element_ptr y = curve_y_coord(in1);
 
@@ -722,7 +720,7 @@ static void a_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
     //element_mul(fi_re(d1), fi_re(d1), c1);
     //element_mul(fi_im(d1), fi_im(d1), c1);
 
-    a_tateexp(out, d1, d0, ainfo->h);
+    a_tateexp(out, d1, d0, pairing->phikonr);
 
     element_clear(dm1);
     element_clear(d0);
@@ -1027,7 +1025,6 @@ static void a_pairing_ellnet_pp_apply(element_ptr out, element_ptr in2, pairing_
     element_ptr x2 = curve_x_coord(in2);
     element_ptr y2 = curve_y_coord(in2);
     ellnet_pp_ptr pp = p->data;
-    a_pairing_data_ptr ainfo = p->pairing->data;
     int rbits = mpz_sizeinbase(p->pairing->r, 2);
     int k = 0;
     int m = rbits - 2;
@@ -1131,7 +1128,7 @@ static void a_pairing_ellnet_pp_apply(element_ptr out, element_ptr in2, pairing_
 	if (!m) break;
 	m--;
     }
-    a_tateexp(out, d1, d0, ainfo->h);
+    a_tateexp(out, d1, d0, p->pairing->phikonr);
 
     element_clear(A);
     element_clear(B);
@@ -1197,19 +1194,18 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
 	//e1 = 4 x y^2
 	element_square(e2, Vy);
 	element_mul(e1, Vx, e2);
-	////element_mul_si(e1, e1, 4);
+	//element_mul_si(e1, e1, 4);
 	element_double(e1, e1);
 	element_double(e1, e1);
 
 	//x_out = e0^2 - 2 e1
-	////element_mul_si(e3, e1, 2);
 	element_double(e3, e1);
 	element_square(Vx, e0);
 	element_sub(Vx, Vx, e3);
 
 	//e2 = 8y^4
 	element_square(e2, e2);
-	////element_mul_si(e2, e2, 8);
+	//element_mul_si(e2, e2, 8);
 	element_double(e2, e2);
 	element_double(e2, e2);
 	element_double(e2, e2);
@@ -1280,7 +1276,7 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
     point_to_affine();
     do_line();
 
-    a_tateexp(out, f, f0, p->h);
+    a_tateexp(out, f, f0, pairing->phikonr);
 
     element_clear(f);
     element_clear(f0);
@@ -1361,7 +1357,7 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
     element_mul(f, f, f1);
     do_line();
 
-    a_tateexp(out, f, f0, p->h);
+    a_tateexp(out, f, f0, pairing->phikonr);
 
     element_clear(f);
     element_clear(f0);
@@ -1380,10 +1376,10 @@ static void a_pairing_clear(pairing_t pairing)
     field_clear(p->Eq);
     field_clear(p->Fq);
     field_clear(p->Fq2);
-    mpz_clear(p->h);
     pbc_free(p);
 
     mpz_clear(pairing->r);
+    mpz_clear(pairing->phikonr);
     field_clear(pairing->Zr);
 }
 
@@ -1395,7 +1391,7 @@ static void a_pairing_option_set(pairing_t pairing, char *key, char *value)
 	    pairing->pp_init = a_pairing_pp_init;
 	    pairing->pp_clear = a_pairing_pp_clear;
 	    pairing->pp_apply = a_pairing_pp_apply;
-	} else if (!strcmp(value, "miller_affine")) {
+	} else if (!strcmp(value, "miller-affine")) {
 	    pairing->map = a_pairing_affine;
 	    pairing->pp_init = a_pairing_pp_init;
 	    pairing->pp_clear = a_pairing_pp_clear;
@@ -1434,8 +1430,9 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
 
     field_init_fi(p->Fq2, p->Fq);
 
-    mpz_init(p->h);
-    mpz_set(p->h, param->h);
+    //k=2, hence phi_k(q) = q + 1, phikonr = (q+1)/r
+    mpz_init(pairing->phikonr);
+    mpz_set(pairing->phikonr, param->h);
 
     pairing->G1 = p->Eq;
     pairing->G2 = pairing->G1;
@@ -1450,7 +1447,6 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
 
 struct a1_pairing_data_s {
     field_t Fp, Fp2, Ep;
-    mpz_t h;
 };
 typedef struct a1_pairing_data_s a1_pairing_data_t[1];
 typedef struct a1_pairing_data_s *a1_pairing_data_ptr;
@@ -1724,7 +1720,7 @@ static void a1_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p
     element_invert(f0, f);
     element_neg(fi_im(f), fi_im(f));
     element_mul(f, f, f0);
-    element_pow_mpz(out, f, a1info->h);
+    element_pow_mpz(out, f, p->pairing->phikonr);
 
     /* We could use this instead but p->h is small so this does not help much
     a_tateexp(out, f, f0, p->h);
@@ -1805,7 +1801,7 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     element_invert(f0, f);
     element_neg(fi_im(f), fi_im(f));
     element_mul(f, f, f0);
-    element_pow_mpz(out, f, p->h);
+    element_pow_mpz(out, f, pairing->phikonr);
 
     /* We could use this instead but p->h is small so this does not help much
     a_tateexp(out, f, f0, p->h);
@@ -1823,14 +1819,31 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 void a1_pairing_clear(pairing_t pairing)
 {
     a1_pairing_data_ptr p = pairing->data;
-    mpz_clear(p->h);
     field_clear(p->Ep);
     field_clear(p->Fp2);
     field_clear(p->Fp);
     pbc_free(p);
 
+    mpz_clear(pairing->phikonr);
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
+}
+
+static void a1_pairing_option_set(pairing_t pairing, char *key, char *value)
+{
+    if (!strcmp(key, "method")) {
+	if (!strcmp(value, "miller") || !strcmp(value, "miller-affine")) {
+	    pairing->map = a1_pairing;
+	    pairing->pp_init = a1_pairing_pp_init;
+	    pairing->pp_clear = a1_pairing_pp_clear;
+	    pairing->pp_apply = a1_pairing_pp_apply;
+	} else if (!strcmp(value, "shipsey-stange")) {
+	    pairing->map = a_pairing_ellnet;
+	    pairing->pp_init = a_pairing_ellnet_pp_init;
+	    pairing->pp_clear = a_pairing_ellnet_pp_clear;
+	    pairing->pp_apply = a_pairing_ellnet_pp_apply;
+	}
+    }
 }
 
 void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
@@ -1843,22 +1856,27 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
     a1_pairing_data_ptr p;
 
     p =	pairing->data = pbc_malloc(sizeof(a1_pairing_data_t));
-    mpz_init(p->h);
-    mpz_set_ui(p->h, param->l);
+
+    //k=2, hence phi_k(q) = q + 1, phikonr = (q+1)/r
+    mpz_init(pairing->phikonr);
+    mpz_set_ui(pairing->phikonr, param->l);
 
     field_init_fp(p->Fp, param->p);
     element_init(a, p->Fp);
     element_init(b, p->Fp);
     element_set1(a);
     element_set0(b);
-    field_init_curve_ab(p->Ep, a, b, pairing->r, p->h);
+    field_init_curve_ab(p->Ep, a, b, pairing->r, pairing->phikonr);
+
+    //turns out to be faster:
+    field_curve_use_random_solvefory(p->Ep);
+
     element_clear(a);
     element_clear(b);
     field_init_fi(p->Fp2, p->Fp);
 
     pairing->G1 = pbc_malloc(sizeof(field_t));
     pairing->G2 = pairing->G1 = p->Ep;
-    //pairing->phi = phi_identity;
     pairing->GT = p->Fp2;
 
     pairing->map = a1_pairing;
@@ -1869,4 +1887,5 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
     pairing->pp_init = a1_pairing_pp_init;
     pairing->pp_clear = a1_pairing_pp_clear;
     pairing->pp_apply = a1_pairing_pp_apply;
+    pairing->option_set = a1_pairing_option_set;
 }

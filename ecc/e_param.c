@@ -18,7 +18,6 @@
 
 struct e_pairing_data_s {
     field_t Fq, Eq;
-    mpz_t tateexp;
     int exp2, exp1;
     int sign1, sign0;
     element_t R;
@@ -605,8 +604,320 @@ static void e_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     element_init(QR, p->Eq);
     element_add(QR, Q, p->R);
     e_miller_fn(out, in1, QR, p->R, p);
-    element_pow_mpz(out, out, p->tateexp);
+    element_pow_mpz(out, out, pairing->phikonr);
     element_clear(QR);
+}
+
+static void e_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
+	pairing_t pairing)
+//in1, in2 are from E(F_q), out from F_q^2
+//uses elliptic nets (see Stange)
+{
+    const element_ptr a = curve_a_coeff(in1);
+    const element_ptr b = curve_b_coeff(in1);
+
+    //element_set_str(in1, "[64851234,80488623]", 0);
+    //element_set_str(in2, "[61759563,15958753]", 0);
+
+    element_ptr x = curve_x_coord(in1);
+    element_ptr y = curve_y_coord(in1);
+
+    element_ptr x2 = curve_x_coord(in2);
+    element_ptr y2 = curve_y_coord(in2);
+
+    //notation: cmi means c_{k-i}, ci means c_{k+i}
+    element_t cm3, cm2, cm1, c0, c1, c2, c3, c4;
+    element_t dm1, d0, d1;
+    element_t A, B, C;
+
+    element_init_same_as(cm3, x);
+    element_init_same_as(cm2, x);
+    element_init_same_as(cm1, x);
+    element_init_same_as(c0, x);
+    element_init_same_as(c1, x);
+    element_init_same_as(c2, x);
+    element_init_same_as(c3, x);
+    element_init_same_as(c4, x);
+    element_init_same_as(C, x);
+
+    element_init_same_as(dm1, out);
+    element_init_same_as(d0, out);
+    element_init_same_as(d1, out);
+    element_init_same_as(A, x);
+    element_init_same_as(B, out);
+
+    // c1 = 2y
+    // c0 = 1
+    // cm2 = -1
+    // cm3 = -2y
+    element_double(c1, y);
+    element_set1(c0);
+    element_neg(cm3, c1);
+    element_neg(cm2, c0);
+
+    //use A, B, C, cm1, c2, c4 as temp variables for now
+    //compute c3, c2
+    element_square(A, x);
+    element_square(C, A);
+    element_mul(cm1, b, x);
+    element_double(cm1, cm1);
+    element_square(c4, a);
+
+    element_mul(c2, cm1, A);
+    element_double(c2, c2);
+    element_mul(B, a, C);
+    element_add(c2, c2, B);
+    element_mul(B, c4, A);
+    element_sub(c2, c2, B);
+    element_double(B, c2);
+    element_double(B, B);
+    element_add(c2, c2, B);
+
+    element_mul(B, cm1, a);
+    element_square(c3, b);
+    element_double(c3, c3);
+    element_double(c3, c3);
+    element_add(B, B, c3);
+    element_double(B, B);
+    element_mul(c3, a, c4);
+    element_add(B, B, c3);
+    element_sub(c2, c2, B);
+    element_mul(B, A, C);
+    element_add(c3, B, c2);
+    element_mul(c3, c3, c1);
+    element_double(c3, c3);
+
+    element_mul(B, a, A);
+    element_add(B, B, cm1);
+    element_double(B, B);
+    element_add(B, B, C);
+    element_double(c2, B);
+    element_add(B, B, c2);
+    element_sub(c2, B, c4);
+
+    // c4 = c_5 = c_2^3 c_4 - c_3^3 = c1^3 c3 - c2^3
+    element_square(C, c1);
+    element_mul(c4, C, c1);
+    element_mul(c4, c4, c3);
+    element_square(C, c2);
+    element_mul(C, C, c2);
+    element_sub(c4, c4, C);
+
+    //compute A, B, d1 (which is d_2 since k = 1)
+    element_sub(A, x, x2);
+    element_double(C, x);
+    element_add(C, C, x2);
+    element_square(cm1, A);
+    element_mul(cm1, C, cm1);
+    element_add(d1, y, y2);
+    element_square(d1, d1);
+    element_sub(B, cm1, d1);
+    element_invert(B, B);
+    element_invert(A, A);
+
+    element_sub(d1, y, y2);
+    element_mul(d1, d1, A);
+    element_square(d1, d1);
+    element_sub(d1, C, d1);
+
+    // cm1 = 0
+    // C = (2y)^-1
+    element_set0(cm1);
+    element_invert(C, c1);
+
+    element_set1(dm1);
+    element_set1(d0);
+
+    element_t sm2, sm1;
+    element_t s0, s1, s2, s3;
+    element_t tm2, tm1;
+    element_t t0, t1, t2, t3;
+    element_t e0, e1;
+    element_t u, v;
+
+    element_init_same_as(sm2, x);
+    element_init_same_as(sm1, x);
+    element_init_same_as(s0, x);
+    element_init_same_as(s1, x);
+    element_init_same_as(s2, x);
+    element_init_same_as(s3, x);
+
+    element_init_same_as(tm2, x);
+    element_init_same_as(tm1, x);
+    element_init_same_as(t0, x);
+    element_init_same_as(t1, x);
+    element_init_same_as(t2, x);
+    element_init_same_as(t3, x);
+
+    element_init_same_as(e0, x);
+    element_init_same_as(e1, x);
+
+    element_init_same_as(u, d0);
+    element_init_same_as(v, d0);
+
+    int m = mpz_sizeinbase(pairing->r, 2) - 2;
+    for (;;) {
+	element_square(sm2, cm2);
+	element_square(sm1, cm1);
+	element_square(s0, c0);
+	element_square(s1, c1);
+	element_square(s2, c2);
+	element_square(s3, c3);
+
+	element_mul(tm2, cm3, cm1);
+	element_mul(tm1, cm2, c0);
+	element_mul(t0, cm1, c1);
+	element_mul(t1, c0, c2);
+	element_mul(t2, c1, c3);
+	element_mul(t3, c2, c4);
+
+	element_square(u, d0);
+	element_mul(v, dm1, d1);
+
+	if (mpz_tstbit(pairing->r, m)) {
+	    //double-and-add
+	    element_mul(e0, t0, sm2);
+	    element_mul(e1, tm2, s0);
+	    element_sub(cm3, e0, e1);
+	    element_mul(cm3, cm3, C);
+
+	    element_mul(e0, t0, sm1);
+	    element_mul(e1, tm1, s0);
+	    element_sub(cm2, e0, e1);
+
+	    element_mul(e0, t1, sm1);
+	    element_mul(e1, tm1, s1);
+	    element_sub(cm1, e0, e1);
+	    element_mul(cm1, cm1, C);
+
+	    element_mul(e0, t1, s0);
+	    element_mul(e1, t0, s1);
+	    element_sub(c0, e0, e1);
+
+	    element_mul(e0, t2, s0);
+	    element_mul(e1, t0, s2);
+	    element_sub(c1, e0, e1);
+	    element_mul(c1, c1, C);
+
+	    element_mul(e0, t2, s1);
+	    element_mul(e1, t1, s2);
+	    element_sub(c2, e0, e1);
+
+	    element_mul(e0, t3, s1);
+	    element_mul(e1, t1, s3);
+	    element_sub(c3, e0, e1);
+	    element_mul(c3, c3, C);
+
+	    element_mul(e0, t3, s2);
+	    element_mul(e1, t2, s3);
+	    element_sub(c4, e0, e1);
+
+	    element_mul(out, u, t0);
+	    element_mul(dm1, v, s0);
+	    element_sub(dm1, dm1, out);
+
+	    element_mul(out, u, t1);
+	    element_mul(d0, v, s1);
+	    element_sub(d0, d0, out);
+	    element_mul(d0, d0, A);
+
+	    element_mul(out, u, t2);
+	    element_mul(d1, v, s2);
+	    element_sub(d1, d1, out);
+	    element_mul(d1, d1, B);
+	} else {
+	    //double
+	    element_mul(e0, tm1, sm2);
+	    element_mul(e1, tm2, sm1);
+	    element_sub(cm3, e0, e1);
+
+	    element_mul(e0, t0, sm2);
+	    element_mul(e1, tm2, s0);
+	    element_sub(cm2, e0, e1);
+	    element_mul(cm2, cm2, C);
+
+	    element_mul(e0, t0, sm1);
+	    element_mul(e1, tm1, s0);
+	    element_sub(cm1, e0, e1);
+
+	    element_mul(e0, t1, sm1);
+	    element_mul(e1, tm1, s1);
+	    element_sub(c0, e0, e1);
+	    element_mul(c0, c0, C);
+
+	    element_mul(e0, t1, s0);
+	    element_mul(e1, t0, s1);
+	    element_sub(c1, e0, e1);
+
+	    element_mul(e0, t2, s0);
+	    element_mul(e1, t0, s2);
+	    element_sub(c2, e0, e1);
+	    element_mul(c2, c2, C);
+
+	    element_mul(e0, t2, s1);
+	    element_mul(e1, t1, s2);
+	    element_sub(c3, e0, e1);
+
+	    element_mul(e0, t3, s1);
+	    element_mul(e1, t1, s3);
+	    element_sub(c4, e0, e1);
+	    element_mul(c4, c4, C);
+
+	    element_mul(out, u, tm1);
+	    element_mul(dm1, v, sm1);
+	    element_sub(dm1, dm1, out);
+
+	    element_mul(out, u, t0);
+	    element_mul(d0, v, s0);
+	    element_sub(d0, d0, out);
+
+	    element_mul(out, u, t1);
+	    element_mul(d1, v, s1);
+	    element_sub(d1, d1, out);
+	    element_mul(d1, d1, A);
+	}
+	if (!m) break;
+	m--;
+    }
+    element_invert(c1, c1);
+    element_mul(d1, d1, c1);
+
+    element_pow_mpz(out, d1, pairing->phikonr);
+
+    element_clear(dm1);
+    element_clear(d0);
+    element_clear(d1);
+
+    element_clear(cm3);
+    element_clear(cm2);
+    element_clear(cm1);
+    element_clear(c0);
+    element_clear(c1);
+    element_clear(c2);
+    element_clear(c3);
+    element_clear(c4);
+
+    element_clear(sm2);
+    element_clear(sm1);
+    element_clear(s0);
+    element_clear(s1);
+    element_clear(s2);
+    element_clear(s3);
+
+    element_clear(tm2);
+    element_clear(tm1);
+    element_clear(t0);
+    element_clear(t1);
+    element_clear(t2);
+    element_clear(t3);
+
+    element_clear(e0);
+    element_clear(e1);
+    element_clear(A);
+    element_clear(B);
+    element_clear(C);
+    element_clear(u);
+    element_clear(v);
 }
 
 static void phi_identity(element_ptr out, element_ptr in, pairing_ptr pairing)
@@ -632,10 +943,10 @@ void e_pairing_clear(pairing_t pairing)
     e_pairing_data_ptr p = pairing->data;
     field_clear(p->Fq);
     field_clear(p->Eq);
-    mpz_clear(p->tateexp);
     element_clear(p->R);
     pbc_free(p);
 
+    mpz_clear(pairing->phikonr);
     mpz_clear(pairing->r);
     field_clear(pairing->Zr);
 }
@@ -663,9 +974,10 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     element_set_mpz(b, param->b);
     field_init_curve_ab(p->Eq, a, b, pairing->r, param->h);
 
-    mpz_init(p->tateexp);
-    mpz_sub_ui(p->tateexp, p->Fq->order, 1);
-    mpz_divexact(p->tateexp, p->tateexp, pairing->r);
+    //k=1, hence phikonr = (p-1)/r
+    mpz_init(pairing->phikonr);
+    mpz_sub_ui(pairing->phikonr, p->Fq->order, 1);
+    mpz_divexact(pairing->phikonr, pairing->phikonr, pairing->r);
 
     pairing->G2 = pairing->G1 = p->Eq;
 
@@ -675,7 +987,7 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     pairing->clear_func = e_pairing_clear;
 
     element_init(p->R, p->Eq);
-    curve_random_no_cofac(p->R);
+    curve_set_gen_no_cofac(p->R);
 
     element_clear(a);
     element_clear(b);

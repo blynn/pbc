@@ -18,6 +18,10 @@ struct pairing_s {
     field_t Zr; //the field Z_r
     field_ptr G1, G2, GT;
 
+    mpz_t phikonr;
+    //Phi_k(q)/r where Phi_k is the kth cyclotomic polynomial,
+    //q as in F_q, is the base field
+
     void (*phi)(element_ptr out, element_ptr in, struct pairing_s *pairing); //isomorphism G2 --> G1
     void (*map)(element_ptr out, element_ptr in1, element_ptr in2,
 	    struct pairing_s *p);

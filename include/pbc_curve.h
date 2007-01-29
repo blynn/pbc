@@ -31,11 +31,14 @@ void field_init_curve_ab_map(field_t cnew, field_t c,
 element_ptr curve_x_coord(element_t e);
 element_ptr curve_y_coord(element_t e);
 element_ptr curve_a_coeff(element_t e);
+element_ptr curve_b_coeff(element_t e);
 element_ptr curve_field_a_coeff(field_t f);
 element_ptr curve_field_b_coeff(field_t f);
 
 void curve_from_x(element_ptr e, element_t x);
 void curve_set_si(element_t R, long int x, long int y);
-void curve_random_no_cofac(element_ptr a);
+void curve_set_gen_no_cofac(element_ptr a);
+
+void field_curve_use_random_solvefory(field_ptr f);
 
 #endif //__PBC_CURVE_H__

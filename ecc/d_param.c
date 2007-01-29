@@ -692,10 +692,10 @@ static void trace(element_t out, element_t in, pairing_ptr pairing)
 static void d_pairing_option_set(pairing_t pairing, char *key, char *value)
 {
     UNUSED_VAR(pairing);
-    if (!strcmp(key, "coord")) {
-	if (!strcmp(value, "projective")) {
+    if (!strcmp(key, "method")) {
+	if (!strcmp(value, "miller")) {
 	    cc_miller_no_denom_fn = cc_miller_no_denom_proj;
-	} else if (!strcmp(value, "affine")) {
+	} else if (!strcmp(value, "miller-affine")) {
 	    cc_miller_no_denom_fn = cc_miller_no_denom_affine;
 	}
     }
