@@ -67,5 +67,6 @@ benchmark_benchmark_SOURCES = benchmark/benchmark.c
 benchmark_timersa_CPPFLAGS = -I include
 benchmark_timersa_LDADD = libpbc.la
 benchmark_timersa_SOURCES = benchmark/timersa.c
+benchmark_ellnet_CPPFLAGS = -I include
 benchmark_ellnet_LDADD = libpbc.la
 benchmark_ellnet_SOURCES = benchmark/ellnet.c
