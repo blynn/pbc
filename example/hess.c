@@ -13,9 +13,16 @@ int main(void)
     pairing_t pairing;
     double time1, time2;
     pairing_init_inp_str(pairing, stdin);
+
     element_t Qid, P, P1, Ppub, s, k, Did, r, v, u, t1, t3, t4, t5, t6, t7,
 	t8;
     mpz_t t2;
+
+    if (!pairing_is_symmetric(pairing)) {
+	fprintf(stderr, "only works with symmetric pairing\n");
+	exit(1);
+    }
+
     mpz_init(t2);
     element_init_G1(P, pairing);
     element_init_G1(P1, pairing);

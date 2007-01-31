@@ -1,6 +1,6 @@
 /*
   Paterson ID-based signature.
-  Based on papers "K. G. Paterson. ID-Based Signatures from Pairings on Elliptic Curvers. Electron. Lett., Vol. 38". Available at http://eprint.iacr/org/2002/004."
+  Based on papers "K. G. Paterson. ID-Based Signatures from Pairings on Elliptic Curvers. Electron. Lett., Vol. 38". Available at http://eprint.iacr.org/2002/004."
   Contributed by Dmitry Kosolapov.
 */
 
@@ -17,6 +17,11 @@ int main(void)
     mpz_t t3;
     mpz_init(t3);
     pairing_init_inp_str(pairing, stdin);
+
+    if (!pairing_is_symmetric(pairing)) {
+	fprintf(stderr, "only works with symmetric pairing\n");
+	exit(1);
+    }
     element_init_G1(P, pairing);
     element_init_G1(Ppub, pairing);
     element_init_G1(Qid, pairing);

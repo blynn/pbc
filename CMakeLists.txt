@@ -27,6 +27,7 @@ gen/hilbertpoly
 gen/listmnt
 benchmark/benchmark
 benchmark/timersa
+benchmark/ellnet
 )
 
 set(buildbin ${goodbin} ${examplebin})

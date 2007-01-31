@@ -2,6 +2,12 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.5 and 0.4.4
+
+* Symmetric pairing checks for example/hess.c and example/paterson.c
+* Shipsey-Stange algorithm for type E pairing (not used by default)
+* Added benchmark/ellnet.c
+
 Changes between PBC version 0.4.4 and 0.4.3
 
 * Optimizations for most pairings
