@@ -23,8 +23,10 @@ gen/genaparam
 gen/gendparam
 gen/geneparam
 gen/genfparam
+gen/gengparam
 gen/hilbertpoly
 gen/listmnt
+gen/listfreeman
 benchmark/benchmark
 benchmark/timersa
 benchmark/ellnet
@@ -73,7 +75,7 @@ arith/fieldquadratic.c
 arith/indexcalculus.c
 arith/poly.c arith/random.c
 ecc/curve.c ecc/singular.c ecc/pairing.c ecc/param.c
-ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c
+ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c ecc/g_param.c
 ecc/hilbert.c ecc/mnt.c ecc/mpc.c
 misc/pbc_assert.c
 misc/darray.c misc/symtab.c
@@ -135,6 +137,7 @@ include/pbc_fieldquadratic.h
 include/pbc_fops.h
 include/pbc_f_param.h
 include/pbc_fp.h
+include/pbc_g_param.h
 include/pbc.h
 include/pbc_hilbert.h
 include/pbc_memory.h

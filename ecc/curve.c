@@ -511,6 +511,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     f->sign = curve_sign;
     f->set = curve_set;
     f->random = curve_random_pointmul;
+    //f->random = curve_random_solvefory;
     f->from_hash = curve_from_hash;
     f->out_str = curve_out_str;
     f->snprint = curve_snprint;
@@ -692,6 +693,14 @@ void twist_curve(field_ptr c)
     element_mul(cdp->b, cdp->b, nqr);
     element_mul(cdp->b, cdp->b, nqr);
     element_mul(cdp->b, cdp->b, nqr);
+
+    //TODO: yuck!
+    curve_random_no_cofac_solvefory(cdp->gen_no_cofac);
+    if (cdp->cofac) {
+	element_mul_mpz(cdp->gen, cdp->gen_no_cofac, cdp->cofac);
+    } else{
+	element_set(cdp->gen, cdp->gen_no_cofac);
+    }
 }
 
 void field_init_curve_j(field_ptr f, element_ptr j, mpz_t order, mpz_t cofac)

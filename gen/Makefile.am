@@ -5,7 +5,7 @@ maintainer-clean-local:
 AM_CPPFLAGS = -I../include
 LDADD = ../libpbc.la
 
-noinst_PROGRAMS = gena1param genaparam gendparam geneparam genfparam hilbertpoly listmnt
+noinst_PROGRAMS = gena1param genaparam gendparam geneparam genfparam hilbertpoly listmnt listfreeman
 
 gena1param_SOURCES = gena1param.c
 genaparam_SOURCES = genaparam.c
@@ -14,3 +14,4 @@ geneparam_SOURCES = geneparam.c
 genfparam_SOURCES = genfparam.c
 hilbertpoly_SOURCES = hilbertpoly.c
 listmnt_SOURCES = listmnt.c
+listfreeman_SOURCES = listfreeman.c

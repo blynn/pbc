@@ -20,6 +20,7 @@
 #include "pbc_e_param.h"
 #include "pbc_f_param.h"
 #include "pbc_a1_param.h"
+#include "pbc_g_param.h"
 
 #include "pbc_utils.h"
 
@@ -99,6 +100,7 @@ void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
 
     pairing->is_almost_coddh = generic_is_almost_coddh;
     pairing->phi = phi_warning;
+    //TODO: yuck!
     if (!strcmp(s, "a")) {
 	a_param_t ap;
 
@@ -134,6 +136,16 @@ void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
 	a1_param_inp_generic (a1p, fops, ctx);
 	pairing_init_a1_param(pairing, a1p);
 	a1_param_clear(a1p);
+    } else if (!strcmp(s, "g")) {
+	g_param_t gp;
+
+	g_param_init(gp);
+	g_param_inp_generic (gp, fops, ctx);
+	pairing_init_g_param(pairing, gp);
+	g_param_clear(gp);
+    } else {
+	fprintf(stderr, "unknown pairing type!\n");
+	exit(1);
     }
     token_clear(tok);
     pbc_free(s);
