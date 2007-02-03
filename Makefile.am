@@ -24,6 +24,7 @@ include/pbc_fieldmpz.h \
 include/pbc_fieldquadratic.h \
 include/pbc_fops.h \
 include/pbc_f_param.h \
+include/pbc_g_param.h \
 include/pbc_fp.h \
 include/pbc.h \
 include/pbc_hilbert.h \
@@ -54,7 +55,7 @@ libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
 	misc/fops.c ecc/mpc.c ecc/mnt.c ecc/hilbert.c ecc/curve.c ecc/pairing.c \
 	ecc/singular.c \
 	ecc/param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
-	ecc/f_param.c misc/tracker.c misc/extend_printf.c
+	ecc/f_param.c ecc/g_param.c misc/tracker.c misc/extend_printf.c
 libpbc_la_LDFLAGS =  -lgmp -lm
 
 noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa benchmark/ellnet
