@@ -36,6 +36,7 @@
     <!ENTITY cminfo SYSTEM "gen/cminfo.xml">
     <!ENTITY eparam SYSTEM "gen/eparam.xml">
     <!ENTITY fparam SYSTEM "gen/fparam.xml">
+    <!ENTITY gparam SYSTEM "gen/gparam.xml">
 
     <!ENTITY pbcrandom SYSTEM "gen/pbcrandom.xml">
 
@@ -53,7 +54,7 @@
 <preface id="preface"><title>Preface</title>
 <para>
 This manual describes how to install and use the PBC pairing-based
-cryptography library, version 0.4.5.
+cryptography library, version 0.4.6.
 </para>
 <para>
 It is modeled on the GMP manual. GMP is the GNU multiple precision

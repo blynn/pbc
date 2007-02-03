@@ -34,7 +34,7 @@ is symmetric) so their elements can be mixed freely. In this case the
 <function>pairing_is_symmetric</function> function returns 1.
 </para>
 <para>
-A <link linkend="chapter.param">later chapter</a> discusses the different
+A <link linkend="chapter.param">later chapter</link> discusses the different
 pairing types.
 </para>
 <section>

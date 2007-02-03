@@ -689,18 +689,6 @@ static void trace(element_t out, element_t in, pairing_ptr pairing)
     */
 }
 
-static void g_pairing_option_set(pairing_t pairing, char *key, char *value)
-{
-    UNUSED_VAR(pairing);
-    if (!strcmp(key, "method")) {
-	if (!strcmp(value, "miller")) {
-	    cc_miller_no_denom_fn = cc_miller_no_denom_proj;
-	} else if (!strcmp(value, "miller-affine")) {
-	    cc_miller_no_denom_fn = cc_miller_no_denom_affine;
-	}
-    }
-}
-
 struct pp_coeff_s {
     element_t a;
     element_t b;
@@ -882,6 +870,345 @@ static void g_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
     element_clear(v);
 }
 
+static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
+	pairing_t pairing)
+//in1, in2 are from E(F_q), out from F_q^2
+//uses elliptic nets (see Stange)
+{
+    mnt_pairing_data_ptr p = pairing->data;
+
+    const element_ptr a = curve_a_coeff(in1);
+    const element_ptr b = curve_b_coeff(in1);
+
+    element_ptr x = curve_x_coord(in1);
+    element_ptr y = curve_y_coord(in1);
+
+    element_ptr x2 = curve_x_coord(in2);
+    element_ptr y2 = curve_y_coord(in2);
+
+    //we map (x2,y2) to (-x2, i y2) before pairing
+    //notation: cmi means c_{k-i}, ci means c_{k+i}
+    element_t cm3, cm2, cm1, c0, c1, c2, c3, c4;
+    element_t dm1, d0, d1;
+    element_t A, B, C;
+
+    element_init_same_as(cm3, x);
+    element_init_same_as(cm2, x);
+    element_init_same_as(cm1, x);
+    element_init_same_as(c0, x);
+    element_init_same_as(c1, x);
+    element_init_same_as(c2, x);
+    element_init_same_as(c3, x);
+    element_init_same_as(c4, x);
+    element_init_same_as(C, x);
+
+    element_init_same_as(dm1, out);
+    element_init_same_as(d0, out);
+    element_init_same_as(d1, out);
+    element_init_same_as(A, out);
+    element_init_same_as(B, out);
+
+    // c1 = 2y
+    // cm3 = -2y
+    element_double(c1, y);
+    element_neg(cm3, c1);
+
+    //use c0, cm1, cm2, C, c4 as temp variables for now
+    //compute c3, c2
+    element_square(cm2, x);
+    element_square(C, cm2);
+    element_mul(cm1, b, x);
+    element_double(cm1, cm1);
+    element_square(c4, a);
+
+    element_mul(c2, cm1, cm2);
+    element_double(c2, c2);
+    element_mul(c0, a, C);
+    element_add(c2, c2, c0);
+    element_mul(c0, c4, cm2);
+    element_sub(c2, c2, c0);
+    element_double(c0, c2);
+    element_double(c0, c0);
+    element_add(c2, c2, c0);
+
+    element_mul(c0, cm1, a);
+    element_square(c3, b);
+    element_double(c3, c3);
+    element_double(c3, c3);
+    element_add(c0, c0, c3);
+    element_double(c0, c0);
+    element_mul(c3, a, c4);
+    element_add(c0, c0, c3);
+    element_sub(c2, c2, c0);
+    element_mul(c0, cm2, C);
+    element_add(c3, c0, c2);
+    element_mul(c3, c3, c1);
+    element_double(c3, c3);
+
+    element_mul(c0, a, cm2);
+    element_add(c0, c0, cm1);
+    element_double(c0, c0);
+    element_add(c0, c0, C);
+    element_double(c2, c0);
+    element_add(c0, c0, c2);
+    element_sub(c2, c0, c4);
+
+    // c0 = 1
+    // cm2 = -1
+    element_set1(c0);
+    element_neg(cm2, c0);
+
+    // c4 = c_5 = c_2^3 c_4 - c_3^3 = c1^3 c3 - c2^3
+    element_square(C, c1);
+    element_mul(c4, C, c1);
+    element_mul(c4, c4, c3);
+    element_square(C, c2);
+    element_mul(C, C, c2);
+    element_sub(c4, c4, C);
+
+    //compute A, B, d1
+
+    element_mul(fi_re(d0), x2, p->nqrinv);
+    element_neg(A, d0);
+    element_add(polymod_coeff(fi_re(A), 0), polymod_coeff(fi_re(A), 0), x);
+
+    element_double(C, x);
+    element_add(polymod_coeff(fi_re(d0), 0), polymod_coeff(fi_re(d0), 0), C);
+
+    element_square(dm1, A);
+    element_mul(dm1, d0, dm1);
+
+    element_mul(fi_im(d1), y2, p->nqrinv2);
+    element_set(polymod_coeff(fi_re(d1), 0), y);
+
+    element_square(d1, d1);
+    element_sub(d1, dm1, d1);
+    element_invert(B, d1);
+
+    element_invert(A, A);
+
+    element_mul(fi_im(d1), y2, p->nqrinv2);
+    element_set0(fi_re(d1));
+    element_neg(polymod_coeff(fi_re(d1), 0), y);
+    element_mul(d1, d1, A);
+    element_square(d1, d1);
+    element_sub(d1, d0, d1);
+
+    // cm1 = 0
+    // C = (2y)^-1
+    element_set0(cm1);
+    element_invert(C, c1);
+
+    element_set1(dm1);
+    element_set1(d0);
+
+    element_t sm2, sm1;
+    element_t s0, s1, s2, s3;
+    element_t tm2, tm1;
+    element_t t0, t1, t2, t3;
+    element_t e0, e1;
+    element_t u, v;
+
+    element_init_same_as(sm2, x);
+    element_init_same_as(sm1, x);
+    element_init_same_as(s0, x);
+    element_init_same_as(s1, x);
+    element_init_same_as(s2, x);
+    element_init_same_as(s3, x);
+
+    element_init_same_as(tm2, x);
+    element_init_same_as(tm1, x);
+    element_init_same_as(t0, x);
+    element_init_same_as(t1, x);
+    element_init_same_as(t2, x);
+    element_init_same_as(t3, x);
+
+    element_init_same_as(e0, x);
+    element_init_same_as(e1, x);
+
+    element_init_same_as(u, d0);
+    element_init_same_as(v, d0);
+
+    int m = mpz_sizeinbase(pairing->r, 2) - 2;
+    for (;;) {
+	element_square(sm2, cm2);
+	element_square(sm1, cm1);
+	element_square(s0, c0);
+	element_square(s1, c1);
+	element_square(s2, c2);
+	element_square(s3, c3);
+
+	element_mul(tm2, cm3, cm1);
+	element_mul(tm1, cm2, c0);
+	element_mul(t0, cm1, c1);
+	element_mul(t1, c0, c2);
+	element_mul(t2, c1, c3);
+	element_mul(t3, c2, c4);
+
+	element_square(u, d0);
+	element_mul(v, dm1, d1);
+
+	if (mpz_tstbit(pairing->r, m)) {
+	    //double-and-add
+	    element_mul(e0, t0, sm2);
+	    element_mul(e1, tm2, s0);
+	    element_sub(cm3, e0, e1);
+	    element_mul(cm3, cm3, C);
+
+	    element_mul(e0, t0, sm1);
+	    element_mul(e1, tm1, s0);
+	    element_sub(cm2, e0, e1);
+
+	    element_mul(e0, t1, sm1);
+	    element_mul(e1, tm1, s1);
+	    element_sub(cm1, e0, e1);
+	    element_mul(cm1, cm1, C);
+
+	    element_mul(e0, t1, s0);
+	    element_mul(e1, t0, s1);
+	    element_sub(c0, e0, e1);
+
+	    element_mul(e0, t2, s0);
+	    element_mul(e1, t0, s2);
+	    element_sub(c1, e0, e1);
+	    element_mul(c1, c1, C);
+
+	    element_mul(e0, t2, s1);
+	    element_mul(e1, t1, s2);
+	    element_sub(c2, e0, e1);
+
+	    element_mul(e0, t3, s1);
+	    element_mul(e1, t1, s3);
+	    element_sub(c3, e0, e1);
+	    element_mul(c3, c3, C);
+
+	    element_mul(e0, t3, s2);
+	    element_mul(e1, t2, s3);
+	    element_sub(c4, e0, e1);
+
+	    polymod_const_mul(fi_re(out), t0,  fi_re(u));
+	    polymod_const_mul(fi_im(out), t0,  fi_im(u));
+	    polymod_const_mul(fi_re(dm1), s0,  fi_re(v));
+	    polymod_const_mul(fi_im(dm1), s0,  fi_im(v));
+	    element_sub(dm1, dm1, out);
+
+	    polymod_const_mul(fi_re(out), t1, fi_re(u));
+	    polymod_const_mul(fi_im(out), t1, fi_im(u));
+	    polymod_const_mul(fi_re(d0), s1, fi_re(v));
+	    polymod_const_mul(fi_im(d0), s1, fi_im(v));
+	    element_sub(d0, d0, out);
+	    element_mul(d0, d0, A);
+
+	    polymod_const_mul(fi_re(out), t2, fi_re(u));
+	    polymod_const_mul(fi_im(out), t2, fi_im(u));
+	    polymod_const_mul(fi_re(d1), s2, fi_re(v));
+	    polymod_const_mul(fi_im(d1), s2, fi_im(v));
+	    element_sub(d1, d1, out);
+	    element_mul(d1, d1, B);
+	} else {
+	    //double
+	    element_mul(e0, tm1, sm2);
+	    element_mul(e1, tm2, sm1);
+	    element_sub(cm3, e0, e1);
+
+	    element_mul(e0, t0, sm2);
+	    element_mul(e1, tm2, s0);
+	    element_sub(cm2, e0, e1);
+	    element_mul(cm2, cm2, C);
+
+	    element_mul(e0, t0, sm1);
+	    element_mul(e1, tm1, s0);
+	    element_sub(cm1, e0, e1);
+
+	    element_mul(e0, t1, sm1);
+	    element_mul(e1, tm1, s1);
+	    element_sub(c0, e0, e1);
+	    element_mul(c0, c0, C);
+
+	    element_mul(e0, t1, s0);
+	    element_mul(e1, t0, s1);
+	    element_sub(c1, e0, e1);
+
+	    element_mul(e0, t2, s0);
+	    element_mul(e1, t0, s2);
+	    element_sub(c2, e0, e1);
+	    element_mul(c2, c2, C);
+
+	    element_mul(e0, t2, s1);
+	    element_mul(e1, t1, s2);
+	    element_sub(c3, e0, e1);
+
+	    element_mul(e0, t3, s1);
+	    element_mul(e1, t1, s3);
+	    element_sub(c4, e0, e1);
+	    element_mul(c4, c4, C);
+
+	    polymod_const_mul(fi_re(out), tm1, fi_re(u));
+	    polymod_const_mul(fi_im(out), tm1, fi_im(u));
+	    polymod_const_mul(fi_re(dm1), sm1, fi_re(v));
+	    polymod_const_mul(fi_im(dm1), sm1, fi_im(v));
+	    element_sub(dm1, dm1, out);
+
+	    polymod_const_mul(fi_re(out), t0, fi_re(u));
+	    polymod_const_mul(fi_im(out), t0, fi_im(u));
+	    polymod_const_mul(fi_re(d0), s0, fi_re(v));
+	    polymod_const_mul(fi_im(d0), s0, fi_im(v));
+	    element_sub(d0, d0, out);
+
+	    polymod_const_mul(fi_re(out), t1, fi_re(u));
+	    polymod_const_mul(fi_im(out), t1, fi_im(u));
+	    polymod_const_mul(fi_re(d1), s1, fi_re(v));
+	    polymod_const_mul(fi_im(d1), s1, fi_im(v));
+	    element_sub(d1, d1, out);
+	    element_mul(d1, d1, A);
+	}
+	if (!m) break;
+	m--;
+    }
+    // since c_k lies base field
+    // it gets killed by the final powering
+    //element_invert(c1, c1);
+    //element_mul(fi_re(d1), fi_re(d1), c1);
+    //element_mul(fi_im(d1), fi_im(d1), c1);
+
+    cc_tatepower(out, d1, pairing);
+
+    element_clear(dm1);
+    element_clear(d0);
+    element_clear(d1);
+
+    element_clear(cm3);
+    element_clear(cm2);
+    element_clear(cm1);
+    element_clear(c0);
+    element_clear(c1);
+    element_clear(c2);
+    element_clear(c3);
+    element_clear(c4);
+
+    element_clear(sm2);
+    element_clear(sm1);
+    element_clear(s0);
+    element_clear(s1);
+    element_clear(s2);
+    element_clear(s3);
+
+    element_clear(tm2);
+    element_clear(tm1);
+    element_clear(t0);
+    element_clear(t1);
+    element_clear(t2);
+    element_clear(t3);
+
+    element_clear(e0);
+    element_clear(e1);
+    element_clear(A);
+    element_clear(B);
+    element_clear(C);
+    element_clear(u);
+    element_clear(v);
+}
+
 void g_pairing_clear(pairing_t pairing)
 {
     mnt_pairing_data_ptr p = pairing->data;
@@ -907,6 +1234,20 @@ void g_pairing_clear(pairing_t pairing)
     field_clear(pairing->Zr);
     mpz_clear(pairing->r);
     pbc_free(p);
+}
+
+static void g_pairing_option_set(pairing_t pairing, char *key, char *value)
+{
+    UNUSED_VAR(pairing);
+    if (!strcmp(key, "method")) {
+	if (!strcmp(value, "miller")) {
+	    cc_miller_no_denom_fn = cc_miller_no_denom_proj;
+	} else if (!strcmp(value, "miller-affine")) {
+	    cc_miller_no_denom_fn = cc_miller_no_denom_affine;
+	} else if (!strcmp(value, "shipsey-stange")) {
+	    pairing->map = g_pairing_ellnet;
+	}
+    }
 }
 
 void pairing_init_g_param(pairing_t pairing, g_param_t param)

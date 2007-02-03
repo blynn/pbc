@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 	int m;
 	D = atoi(argv[1]);
 	m = D % 120;
-	if (D <= 0 || (m != 43 || m != 67)) {
+	if (D <= 0 || (m != 43 && m != 67)) {
 	    fprintf(stderr, "D must be 43 or 67 mod 120 and positive\n");
 	    exit(1);
 	}

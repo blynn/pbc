@@ -616,9 +616,6 @@ static void e_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
     const element_ptr a = curve_a_coeff(in1);
     const element_ptr b = curve_b_coeff(in1);
 
-    //element_set_str(in1, "[64851234,80488623]", 0);
-    //element_set_str(in2, "[61759563,15958753]", 0);
-
     element_ptr x = curve_x_coord(in1);
     element_ptr y = curve_y_coord(in1);
 
@@ -647,53 +644,54 @@ static void e_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
     element_init_same_as(B, out);
 
     // c1 = 2y
-    // c0 = 1
-    // cm2 = -1
     // cm3 = -2y
     element_double(c1, y);
-    element_set1(c0);
     element_neg(cm3, c1);
-    element_neg(cm2, c0);
 
-    //use A, B, C, cm1, c2, c4 as temp variables for now
+    //use c0, cm1, cm2, C, c4 as temp variables for now
     //compute c3, c2
-    element_square(A, x);
-    element_square(C, A);
+    element_square(cm2, x);
+    element_square(C, cm2);
     element_mul(cm1, b, x);
     element_double(cm1, cm1);
     element_square(c4, a);
 
-    element_mul(c2, cm1, A);
+    element_mul(c2, cm1, cm2);
     element_double(c2, c2);
-    element_mul(B, a, C);
-    element_add(c2, c2, B);
-    element_mul(B, c4, A);
-    element_sub(c2, c2, B);
-    element_double(B, c2);
-    element_double(B, B);
-    element_add(c2, c2, B);
+    element_mul(c0, a, C);
+    element_add(c2, c2, c0);
+    element_mul(c0, c4, cm2);
+    element_sub(c2, c2, c0);
+    element_double(c0, c2);
+    element_double(c0, c0);
+    element_add(c2, c2, c0);
 
-    element_mul(B, cm1, a);
+    element_mul(c0, cm1, a);
     element_square(c3, b);
     element_double(c3, c3);
     element_double(c3, c3);
-    element_add(B, B, c3);
-    element_double(B, B);
+    element_add(c0, c0, c3);
+    element_double(c0, c0);
     element_mul(c3, a, c4);
-    element_add(B, B, c3);
-    element_sub(c2, c2, B);
-    element_mul(B, A, C);
-    element_add(c3, B, c2);
+    element_add(c0, c0, c3);
+    element_sub(c2, c2, c0);
+    element_mul(c0, cm2, C);
+    element_add(c3, c0, c2);
     element_mul(c3, c3, c1);
     element_double(c3, c3);
 
-    element_mul(B, a, A);
-    element_add(B, B, cm1);
-    element_double(B, B);
-    element_add(B, B, C);
-    element_double(c2, B);
-    element_add(B, B, c2);
-    element_sub(c2, B, c4);
+    element_mul(c0, a, cm2);
+    element_add(c0, c0, cm1);
+    element_double(c0, c0);
+    element_add(c0, c0, C);
+    element_double(c2, c0);
+    element_add(c0, c0, c2);
+    element_sub(c2, c0, c4);
+
+    // c0 = 1
+    // cm2 = -1
+    element_set1(c0);
+    element_neg(cm2, c0);
 
     // c4 = c_5 = c_2^3 c_4 - c_3^3 = c1^3 c3 - c2^3
     element_square(C, c1);
