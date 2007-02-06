@@ -5,6 +5,8 @@ Ben Lynn
 Changes between PBC version 0.4.7 and 0.4.6
 
 * Bugfix: element_cmp for zero case in prime field
+* Symmetric pairing checks for other examples
+* Faster D, G pairings
 
 Changes between PBC version 0.4.6 and 0.4.5
 

@@ -25,8 +25,7 @@ struct mnt_pairing_data_s {
     field_t Eq, Etwist;
     element_t nqrinv, nqrinv2;
     mpz_t tateexp;
-    int k;
-    element_ptr *xpowq;
+    element_t xpowq, xpowq2, xpowq3, xpowq4;
 };
 typedef struct mnt_pairing_data_s mnt_pairing_data_t[1];
 typedef struct mnt_pairing_data_s *mnt_pairing_data_ptr;
@@ -41,14 +40,12 @@ void g_param_init(g_param_ptr param)
     mpz_init(param->b);
     mpz_init(param->nk);
     mpz_init(param->hk);
-    param->k = 0;
     param->coeff = NULL;
     mpz_init(param->nqr);
 }
 
 void g_param_clear(g_param_ptr param)
 {
-    int d = param->k / 2;
     int i;
     mpz_clear(param->q);
     mpz_clear(param->n);
@@ -59,7 +56,7 @@ void g_param_clear(g_param_ptr param)
     mpz_clear(param->nk);
     mpz_clear(param->hk);
     mpz_clear(param->nqr);
-    for (i=0; i<d; i++) {
+    for (i=0; i<5; i++) {
 	mpz_clear(param->coeff[i]);
     }
     pbc_free(param->coeff);
@@ -67,7 +64,6 @@ void g_param_clear(g_param_ptr param)
 
 void g_param_out_str(FILE *stream, g_param_ptr p)
 {
-    int d = p->k / 2;
     int i;
     char s[80];
     param_out_type(stream, "g");
@@ -77,10 +73,9 @@ void g_param_out_str(FILE *stream, g_param_ptr p)
     param_out_mpz(stream, "r", p->r);
     param_out_mpz(stream, "a", p->a);
     param_out_mpz(stream, "b", p->b);
-    param_out_int(stream, "k", p->k);
     param_out_mpz(stream, "nk", p->nk);
     param_out_mpz(stream, "hk", p->hk);
-    for (i=0; i<d; i++) {
+    for (i=0; i<5; i++) {
 	sprintf(s, "coeff%d", i);
 	param_out_mpz(stream, s, p->coeff[i]);
     }
@@ -93,7 +88,7 @@ void g_param_inp_generic (g_param_ptr p, fetch_ops_t fops, void *ctx)
     assert (ctx);
     symtab_t tab;
     char s[80];
-    int i, d;
+    int i;
 
     symtab_init(tab);
     param_read_generic (tab, fops, ctx);
@@ -104,14 +99,12 @@ void g_param_inp_generic (g_param_ptr p, fetch_ops_t fops, void *ctx)
     lookup_mpz(p->r, tab, "r");
     lookup_mpz(p->a, tab, "a");
     lookup_mpz(p->b, tab, "b");
-    p->k = lookup_int(tab, "k");
     lookup_mpz(p->nk, tab, "nk");
     lookup_mpz(p->hk, tab, "hk");
     lookup_mpz(p->nqr, tab, "nqr");
 
-    d = p->k / 2;
-    p->coeff = pbc_realloc(p->coeff, sizeof(mpz_t) * d);
-    for (i=0; i<d; i++) {
+    p->coeff = pbc_realloc(p->coeff, sizeof(mpz_t) * 5);
+    for (i=0; i<5; i++) {
 	sprintf(s, "coeff%d", i);
 	mpz_init(p->coeff[i]);
 	lookup_mpz(p->coeff[i], tab, s);
@@ -512,56 +505,68 @@ static void lucas_even(element_ptr out, element_ptr in, mpz_t cofactor)
 static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing)
 {
     mnt_pairing_data_ptr p = pairing->data;
-    if (p->k == 6) {
-	element_t e0, e1, e2, e3;
-	element_init(e0, p->Fqk);
-	element_init(e1, p->Fqd);
-	element_init(e2, p->Fqd);
-	element_init(e3, p->Fqk);
-	element_ptr e0re = fi_re(e0);
-	element_ptr e0im = fi_im(e0);
-	element_t *inre = fi_re(in)->data;
-	element_t *inim = fi_im(in)->data;
-	//if beta is quadratic nonresidue in F_q^d, note that
-	//beta^q = -beta
-	//hence for x^q, x^{q^3} we have to negate the beta part of e0
-	//as the following routine does not do this
-	void qpower(element_ptr e) {
-	    element_set0(e0);
-	    element_set(((element_t *) e0re->data)[0], inre[0]);
-	    element_set(((element_t *) e0im->data)[0], inim[0]);
-	    polymod_const_mul(e2, inre[1], e);
-	    element_add(e0re, e0re, e2);
-	    polymod_const_mul(e2, inim[1], e);
+    element_t e0, e1, e2, e3;
+    element_init(e0, p->Fqk);
+    element_init(e1, p->Fqd);
+    element_init(e2, p->Fqd);
+    element_init(e3, p->Fqk);
+    element_ptr e0re = fi_re(e0);
+    element_ptr e0im = fi_im(e0);
+    element_ptr e0re0 = ((element_t *) e0re->data)[0];
+    element_ptr e0im0 = ((element_t *) e0im->data)[0];
+    element_t *inre = fi_re(in)->data;
+    element_t *inim = fi_im(in)->data;
+    //see thesis
+    void qpower(int sign) {
+	polymod_const_mul(e2, inre[1], p->xpowq);
+	element_set(e0re, e2);
+	polymod_const_mul(e2, inre[2], p->xpowq2);
+	element_add(e0re, e0re, e2);
+	polymod_const_mul(e2, inre[3], p->xpowq3);
+	element_add(e0re, e0re, e2);
+	polymod_const_mul(e2, inre[4], p->xpowq4);
+	element_add(e0re, e0re, e2);
+	element_add(e0re0, e0re0, inre[0]);
+
+	if (sign > 0) {
+	    polymod_const_mul(e2, inim[1], p->xpowq);
+	    element_set(e0im, e2);
+	    polymod_const_mul(e2, inim[2], p->xpowq2);
 	    element_add(e0im, e0im, e2);
-	    element_square(e1, e);
-	    polymod_const_mul(e2, inre[2], e1);
-	    element_add(e0re, e0re, e2);
-	    polymod_const_mul(e2, inim[2], e1);
+	    polymod_const_mul(e2, inim[3], p->xpowq3);
 	    element_add(e0im, e0im, e2);
+	    polymod_const_mul(e2, inim[4], p->xpowq4);
+	    element_add(e0im, e0im, e2);
+	    element_add(e0im0, e0im0, inim[0]);
+	} else {
+	    polymod_const_mul(e2, inim[1], p->xpowq);
+	    element_neg(e0im, e2);
+	    polymod_const_mul(e2, inim[2], p->xpowq2);
+	    element_sub(e0im, e0im, e2);
+	    polymod_const_mul(e2, inim[3], p->xpowq3);
+	    element_sub(e0im, e0im, e2);
+	    polymod_const_mul(e2, inim[4], p->xpowq4);
+	    element_sub(e0im, e0im, e2);
+	    element_sub(e0im0, e0im0, inim[0]);
 	}
-	qpower(p->xpowq[4]);
-	element_set(e3, e0);
-	qpower(p->xpowq[3]);
-	element_neg(e0im, e0im);
-	element_mul(e3, e3, e0);
-	qpower(p->xpowq[1]);
-	element_neg(e0im, e0im);
-	element_mul(e0, e0, in);
-	element_invert(e0, e0);
-	element_mul(in, e3, e0);
-
-	element_set(e0, in);
-	lucas_even(out, e0, p->tateexp);
-	//element_pow_mpz(out, in, p->tateexp);
-
-	element_clear(e0);
-	element_clear(e1);
-	element_clear(e2);
-	element_clear(e3);
-    } else {
-	element_pow_mpz(out, in, p->tateexp);
     }
+    qpower(1);
+    element_set(e3, e0);
+    element_set(e0re, fi_re(in));
+    element_neg(e0im, fi_im(in));
+    element_mul(e3, e3, e0);
+    qpower(-1);
+    element_mul(e0, e0, in);
+    element_invert(e0, e0);
+    element_mul(in, e3, e0);
+
+    element_set(e0, in);
+    lucas_even(out, e0, pairing->phikonr);
+
+    element_clear(e0);
+    element_clear(e1);
+    element_clear(e2);
+    element_clear(e3);
 }
 
 static void (*cc_miller_no_denom_fn)(element_t res, mpz_t q, element_t P,
@@ -637,56 +642,6 @@ static int cc_is_almost_coddh(element_ptr a, element_ptr b,
     element_clear(t1);
     element_clear(t2);
     return res;
-}
-
-static void trace(element_t out, element_t in, pairing_ptr pairing)
-{
-    UNUSED_VAR(out); UNUSED_VAR(in); UNUSED_VAR(pairing);
-    /* TODO: broken
-    int i;
-    element_ptr p = in;
-    element_t r;
-    element_t q;
-    element_ptr outp = out;
-    mnt_pairing_data_ptr pdp = pairing->data;
-
-    element_init(q, pdp->Eqk);
-    element_init(r, pdp->Eqk);
-
-    q->inf_flag = 0;
-    //map from twist: (x, y) --> (v^-1 x, v^-(3/2) y)
-    //where v is the quadratic nonresidue used to construct the twist
-    element_mul(fi_re(q->x), p->x, pdp->nqrinv);
-    //v^-3/2 = v^-2 * v^1/2
-    element_mul(fi_im(q->y), p->y, pdp->nqrinv2);
-    point_set(r, q);
-
-    printf("r is ");
-    point_out_str(stdout, 0, r);
-    printf("\n");
-
-    for (i=1; i<pdp->k; i++) {
-	cc_frobenius(q, q, pdp->Fq->order);
-    printf("q is ");
-    point_out_str(stdout, 0, q);
-    printf("\n");
-
-	point_add(r, r, q);
-    printf("r is ");
-    point_out_str(stdout, 0, r);
-    printf("\n");
-    }
-    point_clear(q);
-
-    printf("r is \n");
-    point_out_str(stdout, 0, r);
-    printf("\n");
-    exit(1);
-    element_set(outp->x, polymod_coeff(fi_re(r->x), 0));
-    element_set(outp->y, polymod_coeff(fi_re(r->y), 0));
-    //may have to multiply to ensure order is correct
-    point_clear(r);
-    */
 }
 
 struct pp_coeff_s {
@@ -1213,15 +1168,12 @@ void g_pairing_clear(pairing_t pairing)
 {
     mnt_pairing_data_ptr p = pairing->data;
 
+    element_clear(p->xpowq);
+    element_clear(p->xpowq2);
+    element_clear(p->xpowq3);
+    element_clear(p->xpowq4);
     mpz_clear(p->tateexp);
-    if (p->k == 6) {
-	int i;
-	for (i=1; i<=4; i++) {
-	    element_clear(p->xpowq[i]);
-	    pbc_free(p->xpowq[i]);
-	}
-	pbc_free(p->xpowq);
-    }
+    mpz_clear(pairing->phikonr);
 
     field_clear(p->Etwist);
     field_clear(p->Eq);
@@ -1255,13 +1207,7 @@ void pairing_init_g_param(pairing_t pairing, g_param_t param)
     mnt_pairing_data_ptr p;
     element_t a, b;
     element_t irred;
-    int d = param->k / 2;
     int i;
-
-    if (param->k % 2) {
-	fprintf(stderr, "odd k not implemented anymore\n");
-	exit(2);
-    }
 
     mpz_init(pairing->r);
     mpz_set(pairing->r, param->r);
@@ -1279,11 +1225,11 @@ void pairing_init_g_param(pairing_t pairing, g_param_t param)
 
     field_init_poly(p->Fqx, p->Fq);
     element_init(irred, p->Fqx);
-    poly_alloc(irred, d + 1);
-    for (i=0; i<d; i++) {
+    poly_alloc(irred, 5 + 1);
+    for (i=0; i<5; i++) {
 	element_set_mpz(poly_coeff(irred, i), param->coeff[i]);
     }
-    element_set1(poly_coeff(irred, d));
+    element_set1(poly_coeff(irred, 5));
 
     field_init_polymod(p->Fqd, irred);
     element_clear(irred);
@@ -1294,34 +1240,38 @@ void pairing_init_g_param(pairing_t pairing, g_param_t param)
 
     field_init_quadratic(p->Fqk, p->Fqd);
 
-    if (param->k == 6) {
-	/*
-	element_t e0;
+    { //compute phi(k)/r = (q^4 - q^3 + ... + 1)/r 
+	element_ptr e = p->xpowq;
+	mpz_t z0;
 	mpz_ptr q = param->q;
-	mpz_ptr z = p->tateexp;
+	mpz_ptr z = pairing->phikonr;
 	mpz_init(z);
-	mpz_mul(z, q, q);
+	mpz_init(z0);
+	mpz_set_ui(z, 1);
 	mpz_sub(z, z, q);
-	mpz_add_ui(z, z, 1);
+	mpz_mul(z0, q, q);
+	mpz_add(z, z, z0);
+	mpz_mul(z0, z0, q);
+	mpz_sub(z, z, z0);
+	mpz_mul(z0, z0, q);
+	mpz_add(z, z, z0);
+	mpz_clear(z0);
 	mpz_divexact(z, z, pairing->r);
 
-	p->xpowq = pbc_malloc(sizeof(element_ptr) * 5);
-	element_init(e0, p->Fqd);
-	element_set1(((element_t *) e0->data)[1]);
-	for (i=1; i<=4; i++) {
-	    element_ptr e = p->xpowq[i] = pbc_malloc(sizeof(element_t));
-	    element_init(e, p->Fqd);
-	    element_pow_mpz(e0, e0, q);
-	    element_set(e, e0);
-	}
-	element_clear(e0);
-	*/
-	exit(1);
-    } else {
-	mpz_init(p->tateexp);
-	mpz_sub_ui(p->tateexp, p->Fqk->order, 1);
-	mpz_divexact(p->tateexp, p->tateexp, pairing->r);
+	element_init(e, p->Fqd);
+	element_init(p->xpowq2, p->Fqd);
+	element_init(p->xpowq3, p->Fqd);
+	element_init(p->xpowq4, p->Fqd);
+	element_set1(((element_t *) e->data)[1]);
+	element_pow_mpz(e, e, q);
+
+	element_square(p->xpowq2, p->xpowq);
+	element_square(p->xpowq4, p->xpowq2);
+	element_mul(p->xpowq3, p->xpowq2, p->xpowq);
     }
+    mpz_init(p->tateexp);
+    mpz_sub_ui(p->tateexp, p->Fqk->order, 1);
+    mpz_divexact(p->tateexp, p->tateexp, pairing->r);
 
     field_init_curve_ab_map(p->Etwist, p->Eq, element_field_to_polymod, p->Fqd, pairing->r, NULL);
 
@@ -1335,9 +1285,7 @@ void pairing_init_g_param(pairing_t pairing, g_param_t param)
     pairing->G1 = p->Eq;
     pairing->G2 = p->Etwist;
 
-    p->k = param->k;
     pairing->GT = p->Fqk;
-    pairing->phi = trace;
 
     cc_miller_no_denom_fn = cc_miller_no_denom_affine;
     pairing->option_set = g_pairing_option_set;
@@ -1419,7 +1367,6 @@ static void compute_cm_curve(g_param_ptr param, cm_info_ptr cm)
     mpz_set(param->r, cm->r);
     element_to_mpz(param->a, curve_field_a_coeff(cc));
     element_to_mpz(param->b, curve_field_b_coeff(cc));
-    param->k = cm->k;
     {
 	mpz_t z;
 	mpz_init(z);
@@ -1427,8 +1374,8 @@ static void compute_cm_curve(g_param_ptr param, cm_info_ptr cm)
 	//n = q - t + 1 hence t = q - n + 1
 	mpz_sub(z, param->q, param->n);
 	mpz_add_ui(z, z, 1);
-	compute_trace_n(z, param->q, z, param->k);
-	mpz_pow_ui(param->nk, param->q, param->k);
+	compute_trace_n(z, param->q, z, 10);
+	mpz_pow_ui(param->nk, param->q, 10);
 	mpz_sub_ui(z, z, 1);
 	mpz_sub(param->nk, param->nk, z);
 	mpz_mul(z, param->r, param->r);
@@ -1443,7 +1390,6 @@ void g_param_from_cm(g_param_t param, cm_info_ptr cm)
 {
     field_t Fq, Fqx, Fqd;
     element_t irred, nqr;
-    int d = cm->k / 2;
     int i;
 
     compute_cm_curve(param, cm);
@@ -1452,7 +1398,7 @@ void g_param_from_cm(g_param_t param, cm_info_ptr cm)
     field_init_poly(Fqx, Fq);
     element_init(irred, Fqx);
     do {
-	poly_random_monic(irred, d);
+	poly_random_monic(irred, 5);
     } while (!poly_is_irred(irred));
     field_init_polymod(Fqd, irred);
 
@@ -1462,9 +1408,9 @@ void g_param_from_cm(g_param_t param, cm_info_ptr cm)
 	element_random(((element_t *) nqr->data)[0]);
     } while (element_is_sqr(nqr));
 
-    param->coeff = pbc_realloc(param->coeff, sizeof(mpz_t) * d);
+    param->coeff = pbc_realloc(param->coeff, sizeof(mpz_t) * 5);
 
-    for (i=0; i<d; i++) {
+    for (i=0; i<5; i++) {
 	mpz_init(param->coeff[i]);
 	element_to_mpz(param->coeff[i], poly_coeff(irred, i));
     }

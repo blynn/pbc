@@ -26,7 +26,7 @@ struct mnt_pairing_data_s {
     element_t nqrinv, nqrinv2;
     mpz_t tateexp;
     int k;
-    element_ptr *xpowq;
+    element_t xpowq, xpowq2;
 };
 typedef struct mnt_pairing_data_s mnt_pairing_data_t[1];
 typedef struct mnt_pairing_data_s *mnt_pairing_data_ptr;
@@ -513,50 +513,52 @@ static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing)
 {
     mnt_pairing_data_ptr p = pairing->data;
     if (p->k == 6) {
-	element_t e0, e1, e2, e3;
+	element_t e0, e2, e3;
 	element_init(e0, p->Fqk);
-	element_init(e1, p->Fqd);
 	element_init(e2, p->Fqd);
 	element_init(e3, p->Fqk);
 	element_ptr e0re = fi_re(e0);
 	element_ptr e0im = fi_im(e0);
+	element_ptr e0re0 = ((element_t *) e0re->data)[0];
+	element_ptr e0im0 = ((element_t *) e0im->data)[0];
 	element_t *inre = fi_re(in)->data;
 	element_t *inim = fi_im(in)->data;
-	//if beta is quadratic nonresidue in F_q^d, note that
-	//beta^q = -beta
-	//hence for x^q, x^{q^3} we have to negate the beta part of e0
-	//as the following routine does not do this
-	void qpower(element_ptr e) {
-	    element_set0(e0);
-	    element_set(((element_t *) e0re->data)[0], inre[0]);
-	    element_set(((element_t *) e0im->data)[0], inim[0]);
-	    polymod_const_mul(e2, inre[1], e);
+	//see thesis
+	void qpower(int sign) {
+	    polymod_const_mul(e2, inre[1], p->xpowq);
+	    element_set(e0re, e2);
+	    polymod_const_mul(e2, inre[2], p->xpowq2);
 	    element_add(e0re, e0re, e2);
-	    polymod_const_mul(e2, inim[1], e);
-	    element_add(e0im, e0im, e2);
-	    element_square(e1, e);
-	    polymod_const_mul(e2, inre[2], e1);
-	    element_add(e0re, e0re, e2);
-	    polymod_const_mul(e2, inim[2], e1);
-	    element_add(e0im, e0im, e2);
+	    element_add(e0re0, e0re0, inre[0]);
+
+	    if (sign > 0) {
+		polymod_const_mul(e2, inim[1], p->xpowq);
+		element_set(e0im, e2);
+		polymod_const_mul(e2, inim[2], p->xpowq2);
+		element_add(e0im, e0im, e2);
+		element_add(e0im0, e0im0, inim[0]);
+	    } else {
+		polymod_const_mul(e2, inim[1], p->xpowq);
+		element_neg(e0im, e2);
+		polymod_const_mul(e2, inim[2], p->xpowq2);
+		element_sub(e0im, e0im, e2);
+		element_sub(e0im0, e0im0, inim[0]);
+	    }
 	}
-	qpower(p->xpowq[4]);
+	qpower(1);
 	element_set(e3, e0);
-	qpower(p->xpowq[3]);
-	element_neg(e0im, e0im);
+	element_set(e0re, fi_re(in));
+	element_neg(e0im, fi_im(in));
 	element_mul(e3, e3, e0);
-	qpower(p->xpowq[1]);
-	element_neg(e0im, e0im);
+	qpower(-1);
 	element_mul(e0, e0, in);
 	element_invert(e0, e0);
 	element_mul(in, e3, e0);
 
 	element_set(e0, in);
-	lucas_even(out, e0, p->tateexp);
-	//element_pow_mpz(out, in, p->tateexp);
+	lucas_even(out, e0, pairing->phikonr);
 
 	element_clear(e0);
-	element_clear(e1);
 	element_clear(e2);
 	element_clear(e3);
     } else {
@@ -637,56 +639,6 @@ static int cc_is_almost_coddh(element_ptr a, element_ptr b,
     element_clear(t1);
     element_clear(t2);
     return res;
-}
-
-static void trace(element_t out, element_t in, pairing_ptr pairing)
-{
-    UNUSED_VAR(out); UNUSED_VAR(in); UNUSED_VAR(pairing);
-    /* TODO: broken
-    int i;
-    element_ptr p = in;
-    element_t r;
-    element_t q;
-    element_ptr outp = out;
-    mnt_pairing_data_ptr pdp = pairing->data;
-
-    element_init(q, pdp->Eqk);
-    element_init(r, pdp->Eqk);
-
-    q->inf_flag = 0;
-    //map from twist: (x, y) --> (v^-1 x, v^-(3/2) y)
-    //where v is the quadratic nonresidue used to construct the twist
-    element_mul(fi_re(q->x), p->x, pdp->nqrinv);
-    //v^-3/2 = v^-2 * v^1/2
-    element_mul(fi_im(q->y), p->y, pdp->nqrinv2);
-    point_set(r, q);
-
-    printf("r is ");
-    point_out_str(stdout, 0, r);
-    printf("\n");
-
-    for (i=1; i<pdp->k; i++) {
-	cc_frobenius(q, q, pdp->Fq->order);
-    printf("q is ");
-    point_out_str(stdout, 0, q);
-    printf("\n");
-
-	point_add(r, r, q);
-    printf("r is ");
-    point_out_str(stdout, 0, r);
-    printf("\n");
-    }
-    point_clear(q);
-
-    printf("r is \n");
-    point_out_str(stdout, 0, r);
-    printf("\n");
-    exit(1);
-    element_set(outp->x, polymod_coeff(fi_re(r->x), 0));
-    element_set(outp->y, polymod_coeff(fi_re(r->y), 0));
-    //may have to multiply to ensure order is correct
-    point_clear(r);
-    */
 }
 
 static void d_pairing_option_set(pairing_t pairing, char *key, char *value)
@@ -886,14 +838,12 @@ void d_pairing_clear(pairing_t pairing)
 {
     mnt_pairing_data_ptr p = pairing->data;
 
-    mpz_clear(p->tateexp);
     if (p->k == 6) {
-	int i;
-	for (i=1; i<=4; i++) {
-	    element_clear(p->xpowq[i]);
-	    pbc_free(p->xpowq[i]);
-	}
-	pbc_free(p->xpowq);
+	element_clear(p->xpowq);
+	element_clear(p->xpowq2);
+	mpz_clear(pairing->phikonr);
+    } else {
+	mpz_clear(p->tateexp);
     }
 
     field_clear(p->Etwist);
@@ -954,25 +904,21 @@ void pairing_init_d_param(pairing_t pairing, d_param_t param)
     field_init_quadratic(p->Fqk, p->Fqd);
 
     if (param->k == 6) {
-	element_t e0;
 	mpz_ptr q = param->q;
-	mpz_ptr z = p->tateexp;
+	mpz_ptr z = pairing->phikonr;
 	mpz_init(z);
 	mpz_mul(z, q, q);
 	mpz_sub(z, z, q);
 	mpz_add_ui(z, z, 1);
 	mpz_divexact(z, z, pairing->r);
 
-	p->xpowq = pbc_malloc(sizeof(element_ptr) * 5);
-	element_init(e0, p->Fqd);
-	element_set1(((element_t *) e0->data)[1]);
-	for (i=1; i<=4; i++) {
-	    element_ptr e = p->xpowq[i] = pbc_malloc(sizeof(element_t));
-	    element_init(e, p->Fqd);
-	    element_pow_mpz(e0, e0, q);
-	    element_set(e, e0);
-	}
-	element_clear(e0);
+	element_ptr e = p->xpowq;
+	element_init(e, p->Fqd);
+	element_set1(((element_t *) e->data)[1]);
+	element_pow_mpz(e, e, q);
+
+	element_init(p->xpowq2, p->Fqd);
+	element_square(p->xpowq2, e);
     } else {
 	mpz_init(p->tateexp);
 	mpz_sub_ui(p->tateexp, p->Fqk->order, 1);
@@ -993,7 +939,6 @@ void pairing_init_d_param(pairing_t pairing, d_param_t param)
 
     p->k = param->k;
     pairing->GT = p->Fqk;
-    pairing->phi = trace;
 
     cc_miller_no_denom_fn = cc_miller_no_denom_affine;
     pairing->option_set = d_pairing_option_set;
