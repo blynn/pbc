@@ -31,6 +31,11 @@ int main(void)
     element_init_GT(Kb, pairing);
     element_init_GT(Kc, pairing);
 
+    if (!pairing_is_symmetric(pairing)) {
+	fprintf(stderr, "only works with symmetric pairing\n");
+	exit(1);
+    }
+
     time1 = get_time();
     printf("Joux key agreement between A, B and C.\n");
     element_random(P);

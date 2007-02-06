@@ -26,6 +26,10 @@ int main(void)
     element_init_GT(t3, pairing);
     element_init_GT(t4, pairing);
 
+    if (!pairing_is_symmetric(pairing)) {
+	fprintf(stderr, "only works with symmetric pairing\n");
+	exit(1);
+    }
 
     printf("ZSS short signature schema\n");
     printf("KEYGEN\n");

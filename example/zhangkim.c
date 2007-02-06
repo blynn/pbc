@@ -45,6 +45,11 @@ int main(void)
     element_init_GT(t11, pairing);
     element_init_GT(t12, pairing);
 
+    if (!pairing_is_symmetric(pairing)) {
+	fprintf(stderr, "only works with symmetric pairing\n");
+	exit(1);
+    }
+
     time1 = get_time();
     printf("Zhang and Kim ID-based Blind Signature scheme\n");
     printf("SETUP\n");

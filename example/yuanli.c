@@ -64,6 +64,11 @@ int main(void)
     element_init_GT(temp4, pairing);
     element_init_GT(temp5, pairing);
 
+    if (!pairing_is_symmetric(pairing)) {
+	fprintf(stderr, "only works with symmetric pairing\n");
+	exit(1);
+    }
+
     printf("Yuan-Li key agreement protocol\n");
 
     t0 = get_time();
