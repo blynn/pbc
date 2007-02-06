@@ -467,7 +467,7 @@ static int fp_cmp(element_ptr a, element_ptr b)
 {
     dataptr ad = a->data, bd = b->data;
     if (!ad->flag) {
-	return !bd->flag;
+	return bd->flag;
     } else {
 	fp_field_data_ptr p = a->field->data;
 	return mpn_cmp(ad->d, bd->d, p->limbs);

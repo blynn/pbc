@@ -165,6 +165,8 @@ static void run_check(field_ptr f1, field_ptr f2)
     element_init(y2, f2);
     element_init(z2, f2);
 
+    check_p(!element_cmp(x1, y1), "cmp0-1");
+    check_p(!element_cmp(x2, y2), "cmp0-2");
     check_match(z1, z2, "init");
     check_onearg(element_set0, "set0");
     check_onearg(element_set1, "set1");

@@ -136,6 +136,7 @@ short, up to a point.
 <variablelist>
 &fparam;
 </variablelist>
+</section>
 <section><title>Type G</title>
 <para>
 Type G curves have embedding degree 10. They are quite slow at the moment
@@ -151,6 +152,5 @@ The <type>g_param_t</type> data type holds parameters for a type G pairing.
 <variablelist>
 &gparam;
 </variablelist>
-</section>
 </section>
 </chapter>
