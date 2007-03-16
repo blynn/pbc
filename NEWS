@@ -2,6 +2,11 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.8 and 0.4.7
+
+* configure.ac fixes (Joe Cooley)
+* example/zss.c fixes (Joe Cooley)
+
 Changes between PBC version 0.4.7 and 0.4.6
 
 * Bugfix: element_cmp for zero case in prime field
