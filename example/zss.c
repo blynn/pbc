@@ -42,7 +42,7 @@ int main(void)
     element_printf("Ppub = %B\n", Ppub);
 
     printf("SIGN\n");
-    element_from_hash(H, "Message", 13);
+    element_from_hash(H, "Message", 7);
     element_add(t1, H, x);
     element_invert(t1, t1);
     element_mul_zn(S, P, t1);
@@ -50,7 +50,7 @@ int main(void)
     element_printf("S = %B\n", S);
 
     printf("VERIFY\n");
-    element_from_hash(H, "Message", 13);
+    element_from_hash(H, "Message", 7);
     element_mul_zn(t2, P, H);
     element_add(t2, t2, Ppub);
     pairing_apply(t3, t2, S, pairing);

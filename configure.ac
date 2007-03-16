@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.5)
-AC_INIT([pbc], [0.4.7], [blynn@cs.stanford.edu])
-AM_INIT_AUTOMAKE(pbc,0.4.7)
+AC_INIT([pbc], [0.4.8], [blynn@cs.stanford.edu])
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR([./])
 AC_PROG_LIBTOOL
@@ -70,16 +70,17 @@ AC_TYPE_SIZE_T
 AC_HEADER_TIME
 
 dnl setup CFLAGS
+with_enable_optimized="no"
 AC_ARG_ENABLE( optimized, 
 	       [AC_HELP_STRING([--enable-optimized],
 			[Enable optimized build])],
          [with_enable_optimized="$withval"],
 	 [with_enable_optimized="no"])
 
-CFLAGS="$CFLAGS -O2 -Wall -W -Wfloat-equal -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wredundant-decls \
+CFLAGS="$CFLAGS -Wall -W -Wfloat-equal -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wredundant-decls \
 -Wendif-labels -Wshadow -pipe -ffast-math -U__STRICT_ANSI__ -std=c99"
 if test "x$with_enable_optimized" != "no"; then
-   	CFLAGS="$CFLAGS -g"
+   	CFLAGS="$CFLAGS -g -O2"
 else
 	CFLAGS="$CFLAGS -fomit-frame-pointer -O3"
 fi
@@ -100,6 +101,6 @@ echo "host info:        $host"
 echo "optimized build:  $with_enable_optimized"
 echo "LDFLAGS:          $LDFLAGS"
 echo "CPPFLAGS:         $CPPFLAGS"
-echo "CFPLAGS:          $CFLAGS"
+echo "CFLAGS:           $CFLAGS"
 echo "-----------------------------------------"
 echo -ne "\n"

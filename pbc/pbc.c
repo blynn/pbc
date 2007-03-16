@@ -775,17 +775,12 @@ static pairing_ptr current_pairing;
 static val_ptr f_pairing(darray_ptr arg)
 {
     val_ptr res;
-    if (arg->count < 2) {
-	printf("expect at least two arguments\n");
-	return newruntimeerror(re_badargcount);
-    }
-    if (arg->count > 3) {
-	printf("expect at most three arguments\n");
+    if (arg->count != 2) {
+	printf("expect two arguments\n");
 	return newruntimeerror(re_badargcount);
     }
     val_ptr a0 = arg->item[0];
     val_ptr a1 = arg->item[1];
-    val_ptr a2 = arg->item[2];
     if (a0->type != t_element) {
 	printf("arg 1 not element!\n");
 	return newruntimeerror(re_badarg);
@@ -795,18 +790,9 @@ static val_ptr f_pairing(darray_ptr arg)
 	return newruntimeerror(re_badarg);
     }
     pairing_ptr p;
-    if (arg->count == 3) {
-	if (a2->type != t_pairing) {
-	    printf("arg 3 not pairing!\n");
-	    return newruntimeerror(re_badarg);
-	} else {
-	    p = a2->data;
-	}
-    } else {
-	p = current_pairing;
-    }
     element_ptr e0 = a0->data;
     element_ptr e1 = a1->data;
+    p = e0->field->pairing;
     if (e0->field != p->G1) {
 	printf("arg 1 not from G1!\n");
 	return newruntimeerror(re_badarg);

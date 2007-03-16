@@ -149,6 +149,9 @@ void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
     }
     token_clear(tok);
     pbc_free(s);
+    pairing->G1->pairing = pairing;
+    pairing->G2->pairing = pairing;
+    pairing->GT->pairing = pairing;
 }
 
 void pairing_init_inp_buf (pairing_t pairing, const char *buf, size_t len)

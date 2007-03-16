@@ -29,6 +29,8 @@ void pbc_assert(int expr, char *msg, const char *func);
 void pbc_assert_match2(element_ptr a, element_ptr b, const char *func);
 void pbc_assert_match3(element_ptr a, element_ptr b, element_ptr c, const char *func);
 
+struct pairing_s;
+
 struct field_s {
     void (*field_clear)(struct field_s *f);
     void (*init)(element_ptr);
@@ -73,6 +75,7 @@ struct field_s {
     void (*pp_pow)(element_t out, mpz_ptr power, element_pp_t p);
     int (*snprint)(char *s, size_t n, element_ptr e);
     int (*set_str)(element_ptr e, char *s, int base);
+    struct pairing_s *pairing;
     void *data;
 };
 typedef struct field_s *field_ptr;

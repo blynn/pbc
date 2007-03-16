@@ -502,7 +502,7 @@ static void lucas_even(element_ptr out, element_ptr in, mpz_t cofactor)
     element_mul(v1, v1, in1);
 }
 
-static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing)
+static void tatepower10(element_ptr out, element_ptr in, pairing_t pairing)
 {
     mnt_pairing_data_ptr p = pairing->data;
     element_t e0, e1, e2, e3;
@@ -587,7 +587,7 @@ static void cc_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     //v^-3/2 = v^-2 * v^1/2
     element_mul(Qy, curve_y_coord(Qbase), p->nqrinv2);
     cc_miller_no_denom_fn(out, pairing->r, in1, Qx, Qy);
-    cc_tatepower(out, out, pairing);
+    tatepower10(out, out, pairing);
     element_clear(Qx);
     element_clear(Qy);
 }
@@ -620,8 +620,8 @@ static int cc_is_almost_coddh(element_ptr a, element_ptr b,
 
     cc_miller_no_denom_fn(t0, pairing->r, a->data, dx, dy);
     cc_miller_no_denom_fn(t1, pairing->r, b->data, cx, cy);
-    cc_tatepower(t0, t0, pairing);
-    cc_tatepower(t1, t1, pairing);
+    tatepower10(t0, t0, pairing);
+    tatepower10(t1, t1, pairing);
     element_mul(t2, t0, t1);
     if (element_is1(t2)) {
 	//g, g^x, h, h^-x case
@@ -817,7 +817,7 @@ static void g_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
 	m--;
 	element_square(out, out);
     }
-    cc_tatepower(out, out, p->pairing);
+    tatepower10(out, out, p->pairing);
 
     element_clear(e0);
     element_clear(Qx);
@@ -1126,7 +1126,7 @@ static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
     //element_mul(fi_re(d1), fi_re(d1), c1);
     //element_mul(fi_im(d1), fi_im(d1), c1);
 
-    cc_tatepower(out, d1, pairing);
+    tatepower10(out, d1, pairing);
 
     element_clear(dm1);
     element_clear(d0);
