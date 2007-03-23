@@ -500,6 +500,7 @@ static void lucas_even(element_ptr out, element_ptr in, mpz_t cofactor)
     element_halve(v0, v1);
     element_div(v1, in0, t1);
     element_mul(v1, v1, in1);
+    element_clear(temp);
 }
 
 static void tatepower10(element_ptr out, element_ptr in, pairing_t pairing)
