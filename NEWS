@@ -2,6 +2,10 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.9 and 0.4.8
+
+* Patched memory leak for D, G pairings (reported by Michael Cheng)
+
 Changes between PBC version 0.4.8 and 0.4.7
 
 * configure.ac fixes (Joe Cooley)
