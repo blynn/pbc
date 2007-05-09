@@ -58,7 +58,8 @@ static void do_tangent(element_ptr z, element_ptr V, element_ptr Q)
     //a = -(3 Vx^2 + cc->a)
     //b = 2 * Vy
     //c = -(2 Vy^2 + a Vx);
-    //(but we don't)
+    //
+    //actually no, since fasterweil won't work if we do this
     */
     element_square(a, Vx);
     //element_mul_si(a, a, 3);
@@ -123,6 +124,8 @@ static void do_line(element_ptr z, element_ptr V, element_ptr P, element_ptr Q)
     element_mul(c, Vx, Py);
     element_mul(e0, Vy, Px);
     element_sub(c, c, e0);
+    //
+    //actually no, since fasterweil won't work if we do this
     */
 
     element_printf("line at %B: %B %B %B\n", V, a, b, c);
@@ -593,6 +596,14 @@ void weil(element_t w, element_t g, element_t h)
     element_printf("denom: %B\n", w);
 
     element_div(w, z1, w);
+
+    element_clear(gr);
+    element_clear(r);
+    element_clear(hs);
+    element_clear(s);
+    element_clear(z);
+    element_clear(z0);
+    element_clear(z1);
 }
 
 void fasterweil(element_t w, element_t g, element_t h)
@@ -627,6 +638,52 @@ void fasterweil(element_t w, element_t g, element_t h)
     element_printf("denom: %B\n", w);
 
     element_div(w, z1, w);
+
+    element_clear(z);
+    element_clear(z0);
+    element_clear(z1);
+    element_clear(hs);
+    element_clear(s);
+}
+
+void fasterweil2(element_t w, element_t g, element_t h)
+{
+    element_t gr;
+    element_t r;
+    element_t z, z0, z1;
+
+    element_init(z, Fq2);
+    element_init(z0, Fq2);
+    element_init(z1, Fq2);
+
+    element_init_same_as(gr, g);
+    element_init_same_as(r, g);
+
+    element_random(r);
+    //point_random always takes the same square root
+    //why not take the other one for once?
+    element_set_str(r, "[[48,55],[28,51]]", 0);
+
+    element_printf("chose R = %B\n", r);
+    element_add(gr, g, r);
+
+    element_printf("P+R = %B\n", gr);
+
+    miller(w, gr, r, g, h);
+    element_printf("num: %B\n", w);
+
+    millertate(z, h, gr);
+    millertate(z0, h, r);
+    element_div(z1, z, z0);
+    element_printf("denom: %B\n", z1);
+
+    element_div(w, w, z1);
+
+    element_clear(z);
+    element_clear(z0);
+    element_clear(z1);
+    element_clear(gr);
+    element_clear(r);
 }
 
 int main(void)
@@ -702,6 +759,9 @@ int main(void)
 	element_mul(w1, w1, w0);
 	element_printf("%d: %B\n", i, w1);
     }
+
+    fasterweil2(w0, g, h);
+    element_printf("fasterweil2: %B\n", w0);
 
     tate(w0, g, h);
     element_printf("tate: %B\n", w0);
