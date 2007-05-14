@@ -467,5 +467,5 @@ void pairing_init_singular_with_node(pairing_t pairing, mpz_t q)
 
     pairing->G2 = pairing->G1 = p->Eq;
 
-    pairing->GT = p->Fq;
+    GT_init_finite_field(pairing, p->Fq);
 }

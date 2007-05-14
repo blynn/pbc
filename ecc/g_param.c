@@ -24,7 +24,6 @@ struct mnt_pairing_data_s {
     field_t Fq, Fqx, Fqd, Fqk;
     field_t Eq, Etwist;
     element_t nqrinv, nqrinv2;
-    mpz_t tateexp;
     element_t xpowq, xpowq2, xpowq3, xpowq4;
 };
 typedef struct mnt_pairing_data_s mnt_pairing_data_t[1];
@@ -608,9 +607,9 @@ static int cc_is_almost_coddh(element_ptr a, element_ptr b,
     element_init(dx, p->Fqd);
     element_init(dy, p->Fqd);
 
-    element_init(t0, pairing->GT);
-    element_init(t1, pairing->GT);
-    element_init(t2, pairing->GT);
+    element_init(t0, p->Fqk);
+    element_init(t1, p->Fqk);
+    element_init(t2, p->Fqk);
     //map from twist: (x, y) --> (v^-1 x, v^-(3/2) y)
     //where v is the quadratic nonresidue used to construct the twist
     element_mul(cx, curve_x_coord(c), p->nqrinv);
@@ -791,8 +790,8 @@ static void g_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
     element_t e0;
     element_t Qx, Qy;
     element_t v;
-    element_init_GT(e0, p->pairing);
-    element_init_GT(v, p->pairing);
+    element_init_same_as(e0, out);
+    element_init_same_as(v, out);
     element_init(Qx, info->Fqd);
     element_init(Qy, info->Fqd);
 
@@ -1173,7 +1172,6 @@ void g_pairing_clear(pairing_t pairing)
     element_clear(p->xpowq2);
     element_clear(p->xpowq3);
     element_clear(p->xpowq4);
-    mpz_clear(p->tateexp);
     mpz_clear(pairing->phikonr);
 
     field_clear(p->Etwist);
@@ -1201,6 +1199,15 @@ static void g_pairing_option_set(pairing_t pairing, char *key, char *value)
 	    pairing->map = g_pairing_ellnet;
 	}
     }
+}
+
+static void g_finalpow(element_ptr e)
+{
+    element_t t0;
+    element_init_same_as(t0, e->data);
+    tatepower10(t0, e->data, e->field->pairing);
+    element_set(e->data, t0);
+    element_clear(t0);
 }
 
 void pairing_init_g_param(pairing_t pairing, g_param_t param)
@@ -1270,9 +1277,6 @@ void pairing_init_g_param(pairing_t pairing, g_param_t param)
 	element_square(p->xpowq4, p->xpowq2);
 	element_mul(p->xpowq3, p->xpowq2, p->xpowq);
     }
-    mpz_init(p->tateexp);
-    mpz_sub_ui(p->tateexp, p->Fqk->order, 1);
-    mpz_divexact(p->tateexp, p->tateexp, pairing->r);
 
     field_init_curve_ab_map(p->Etwist, p->Eq, element_field_to_polymod, p->Fqd, pairing->r, NULL);
 
@@ -1285,8 +1289,8 @@ void pairing_init_g_param(pairing_t pairing, g_param_t param)
 
     pairing->G1 = p->Eq;
     pairing->G2 = p->Etwist;
-
-    pairing->GT = p->Fqk;
+    GT_init_finite_field(pairing, p->Fqk);
+    pairing->finalpow = g_finalpow;
 
     cc_miller_no_denom_fn = cc_miller_no_denom_affine;
     pairing->option_set = g_pairing_option_set;

@@ -954,6 +954,11 @@ void e_pairing_clear(pairing_t pairing)
     field_clear(pairing->Zr);
 }
 
+static void e_finalpow(element_ptr e)
+{
+    element_pow_mpz(e->data, e->data, e->field->pairing->phikonr);
+}
+
 void pairing_init_e_param(pairing_t pairing, e_param_t param)
 {
     e_pairing_data_ptr p;
@@ -983,8 +988,8 @@ void pairing_init_e_param(pairing_t pairing, e_param_t param)
     mpz_divexact(pairing->phikonr, pairing->phikonr, pairing->r);
 
     pairing->G2 = pairing->G1 = p->Eq;
-
-    pairing->GT = p->Fq;
+    GT_init_finite_field(pairing, p->Fq);
+    pairing->finalpow = e_finalpow;
     pairing->phi = phi_identity;
     pairing->option_set = e_pairing_option_set;
     pairing->clear_func = e_pairing_clear;

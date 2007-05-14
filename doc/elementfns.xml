@@ -26,8 +26,7 @@ PBC_DEBUG is defined before the PBC header file is included:
 #include &lt;pbc.h&gt;
 </programlisting>
 <para>
-Note performance will be impaired, so this debugging features should be
-disabled in the final build.
+This feature impairs performance so should be disabled in the final build.
 </para>
 <section>
 <title>Initializing Elements</title>

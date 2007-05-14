@@ -14,20 +14,21 @@ typedef struct pairing_pp_s pairing_pp_t[1];
 typedef struct pairing_pp_s *pairing_pp_ptr;
 
 struct pairing_s {
-    mpz_t r; //order of G1, G2, GT
-    field_t Zr; //the field Z_r
-    field_ptr G1, G2, GT;
+    mpz_t r; // order of G1, G2, GT
+    field_t Zr; // the field Z_r
+    field_ptr G1, G2;
+    field_t GT; // group of rth roots of unity
 
     mpz_t phikonr;
-    //Phi_k(q)/r where Phi_k is the kth cyclotomic polynomial,
-    //q as in F_q, is the base field
+    // Phi_k(q)/r where Phi_k is the kth cyclotomic polynomial,
+    // q as in F_q, is the base field
 
     void (*phi)(element_ptr out, element_ptr in, struct pairing_s *pairing); //isomorphism G2 --> G1
     void (*map)(element_ptr out, element_ptr in1, element_ptr in2,
 	    struct pairing_s *p);
-    //is_almost coddh returns 1 given (g, g^x, h, h^x) or (g, g^x, h, h^-x)
-    //0 otherwise
-    //order is important: a, b are from G1, c, d are from G2
+    // is_almost coddh returns 1 given (g, g^x, h, h^x) or (g, g^x, h, h^-x)
+    // 0 otherwise
+    // order is important: a, b are from G1, c, d are from G2
     int (*is_almost_coddh)(element_ptr a, element_ptr b,
 	    element_ptr c, element_ptr d,
 	    struct pairing_s *p);
@@ -35,6 +36,7 @@ struct pairing_s {
     void (*pp_init)(pairing_pp_t p, element_t in1, struct pairing_s *);
     void (*pp_clear)(pairing_pp_t p);
     void (*pp_apply)(element_t out, element_t in2, pairing_pp_t p);
+    void (*finalpow)(element_t e);
     void (*option_set)(struct pairing_s *, char *key, char *value);
     void *data;
 };
@@ -67,7 +69,9 @@ previously used to initialize ''p'' and the element ''in2''.
 */
 static inline void pairing_pp_apply(element_t out, element_t in2, pairing_pp_t p)
 {
-    p->pairing->pp_apply(out, in2, p);
+    // pairing routines need to use the finite field that GT lies in
+    // data is stored in the same way, only the functions on them change
+    p->pairing->pp_apply(out->data, in2, p);
 }
 /*@manual pairing_init
 TODO
@@ -95,11 +99,6 @@ structure.
 */
 void pairing_clear(pairing_t pairing);
 
-static inline void bilinear_map(element_t out, element_t in1, element_t in2,
-    pairing_t pairing) {
-    pairing->map(out, in1, in2, pairing);
-}
-
 /*@manual pairing_apply
 Apply the bilinear map described by ''pairing''. The element ''out''
 will be set to the map applied to ''in1'' and ''in2'', that is
@@ -111,6 +110,21 @@ will be set to the map applied to ''in1'' and ''in2'', that is
 static inline void pairing_apply(element_t out, element_t in1, element_t in2,
     pairing_t pairing)
 {
+    PBC_ASSERT(pairing->GT == out->field, "pairing output mismatch");
+    PBC_ASSERT(pairing->G1 == in1->field, "pairing 1st input mismatch");
+    PBC_ASSERT(pairing->G2 == in2->field, "pairing 2nd input mismatch");
+    // pairing routines need to use the finite field that GT lies in
+    // data is stored in the same way, only the functions on them change
+    pairing->map(out->data, in1, in2, pairing);
+}
+
+// TODO: future versions will use API like this: rename following to
+// pairing_apply, remove original, also change pairing_pp_init
+// and update docs, bump minor version number
+static inline void bilinear_map(element_t out, element_t in1, element_t in2)
+{
+    pairing_ptr pairing = out->field->pairing;
+    PBC_ASSERT(pairing != NULL, "pairing output mismatch");
     pairing->map(out, in1, in2, pairing);
 }
 
@@ -233,4 +247,9 @@ static inline void pairing_option_set(pairing_t pairing, char *key, char *value)
 {
     pairing->option_set(pairing, key, value);
 }
+
+// initialize GT = group of rth roots of unity in f
+// assumes pairing->r has been set
+void GT_init_finite_field(pairing_ptr pairing, field_t f);
+
 #endif //__PBC_PAIRING_H__

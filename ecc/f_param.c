@@ -17,6 +17,8 @@
 #include "pbc_memory.h"
 #include "pbc_utils.h"
 
+// TODO: we never use phikonr so don't bother computing it,
+// but one day other routines might need it
 struct f_pairing_data_s {
     field_t Fq, Fq2, Fq2x, Fq12;
     field_t Eq, Etwist;
@@ -389,6 +391,45 @@ static void cc_miller_no_denom(element_t res, mpz_t q, element_t P,
     element_clear(e1);
 }
 
+static void f_tateexp(element_t out)
+{
+    element_t x, y, epow;
+    f_pairing_data_ptr p = out->field->pairing->data;
+    element_init(x, p->Fq12);
+    element_init(y, p->Fq12);
+    element_init(epow, p->Fq2);
+    void qpower(element_ptr e1, element_ptr e) {
+	element_set(polymod_coeff(e1, 0), polymod_coeff(out, 0));
+	element_mul(polymod_coeff(e1, 1), polymod_coeff(out, 1), e);
+	element_square(epow, e);
+	element_mul(polymod_coeff(e1, 2), polymod_coeff(out, 2), epow);
+	element_mul(epow, epow, e);
+	element_mul(polymod_coeff(e1, 3), polymod_coeff(out, 3), epow);
+	element_mul(epow, epow, e);
+	element_mul(polymod_coeff(e1, 4), polymod_coeff(out, 4), epow);
+	element_mul(epow, epow, e);
+	element_mul(polymod_coeff(e1, 5), polymod_coeff(out, 5), epow);
+    }
+
+    qpower(y, p->xpowq8);
+    qpower(x, p->xpowq6);
+    element_mul(y, y, x);
+    qpower(x, p->xpowq2);
+    element_mul(x, x, out);
+    element_invert(x, x);
+    element_mul(out, y, x);
+
+    element_clear(epow);
+    element_clear(x);
+    element_clear(y);
+    element_pow_mpz(out, out, p->tateexp);
+}
+
+static void f_finalpow(element_t out)
+{
+    f_tateexp(out->data);
+}
+
 static void f_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	pairing_t pairing)
 {
@@ -410,38 +451,8 @@ static void f_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 
     element_clear(x);
     element_clear(y);
-{
-    //x, y now Fq12 temp variables
-    element_init(x, p->Fq12);
-    element_init(y, p->Fq12);
-    element_t epow;
-    void qpower(element_ptr e1, element_ptr e) {
-	element_set(polymod_coeff(e1, 0), polymod_coeff(out, 0));
-	element_mul(polymod_coeff(e1, 1), polymod_coeff(out, 1), e);
-	element_square(epow, e);
-	element_mul(polymod_coeff(e1, 2), polymod_coeff(out, 2), epow);
-	element_mul(epow, epow, e);
-	element_mul(polymod_coeff(e1, 3), polymod_coeff(out, 3), epow);
-	element_mul(epow, epow, e);
-	element_mul(polymod_coeff(e1, 4), polymod_coeff(out, 4), epow);
-	element_mul(epow, epow, e);
-	element_mul(polymod_coeff(e1, 5), polymod_coeff(out, 5), epow);
-    }
-    element_init(epow, p->Fq2);
 
-    qpower(y, p->xpowq8);
-    qpower(x, p->xpowq6);
-    element_mul(y, y, x);
-    qpower(x, p->xpowq2);
-    element_mul(x, x, out);
-    element_invert(x, x);
-    element_mul(out, y, x);
-
-    element_clear(epow);
-    element_clear(x);
-    element_clear(y);
-}
-    element_pow_mpz(out, out, p->tateexp);
+    f_tateexp(out);
 }
 
 void f_pairing_clear(pairing_t pairing)
@@ -519,7 +530,8 @@ void pairing_init_f_param(pairing_t pairing, f_param_t param)
 
     pairing->G1 = p->Eq;
     pairing->G2 = p->Etwist;
-    pairing->GT = p->Fq12;
+    GT_init_finite_field(pairing, p->Fq12);
+    pairing->finalpow = f_finalpow;
     pairing->map = f_pairing;
     pairing->clear_func = f_pairing_clear;
     

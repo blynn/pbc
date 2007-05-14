@@ -35,24 +35,30 @@ struct field_s {
     void (*field_clear)(struct field_s *f);
     void (*init)(element_ptr);
     void (*clear)(element_ptr);
-    void (*set_si)(element_ptr, signed long int);
+
     void (*set_mpz)(element_ptr, mpz_ptr);
     void (*set)(element_ptr, element_ptr);
     void (*set0)(element_ptr);
     void (*set1)(element_ptr);
+    int (*set_str)(element_ptr e, char *s, int base);
     size_t (*out_str)(FILE *stream, int base, element_ptr);
     void (*add)(element_ptr, element_ptr, element_ptr);
-    void (*add_ui)(element_ptr, element_ptr, unsigned long int);
     void (*sub)(element_ptr, element_ptr, element_ptr);
     void (*mul)(element_ptr, element_ptr, element_ptr);
+
+    int (*is_sqr)(element_ptr);
+    void (*sqrt)(element_ptr, element_ptr);
+
+    //defaults exist for these
+    void (*set_si)(element_ptr, signed long int);
+    void (*add_ui)(element_ptr, element_ptr, unsigned long int);
     void (*mul_mpz)(element_ptr, element_ptr, mpz_ptr);
     void (*mul_si)(element_ptr, element_ptr, signed long int);
     void (*div)(element_ptr, element_ptr, element_ptr);
-    void (*square)(element_ptr, element_ptr);
-    int (*is_sqr)(element_ptr);
-    void (*sqrt)(element_ptr, element_ptr);
     void (*doub)(element_ptr, element_ptr); //can't call it "double"!
     void (*halve)(element_ptr, element_ptr);
+    void (*square)(element_ptr, element_ptr);
+
     void (*pow_mpz)(element_ptr, element_ptr, mpz_ptr);
     void (*invert)(element_ptr, element_ptr);
     void (*neg)(element_ptr, element_ptr);
@@ -66,16 +72,18 @@ struct field_s {
     int (*from_bytes)(element_ptr, unsigned char *data);
     int (*length_in_bytes)(element_ptr);
     int fixed_length_in_bytes; //length of an element in bytes; -1 for variable
-    mpz_t order; //0 for infinite order
-    element_ptr nqr; //nonquadratic residue
+    int (*snprint)(char *s, size_t n, element_ptr e);
     void (*to_mpz)(mpz_ptr, element_ptr);
     void (*out_info)(FILE *, struct field_s *);
     void (*pp_init)(element_pp_t p, element_t in);
     void (*pp_clear)(element_pp_t p);
     void (*pp_pow)(element_t out, mpz_ptr power, element_pp_t p);
-    int (*snprint)(char *s, size_t n, element_ptr e);
-    int (*set_str)(element_ptr e, char *s, int base);
+
     struct pairing_s *pairing;
+
+    mpz_t order; //0 for infinite order
+    element_ptr nqr; //nonquadratic residue
+
     void *data;
 };
 typedef struct field_s *field_ptr;

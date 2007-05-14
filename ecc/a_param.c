@@ -309,6 +309,7 @@ static void lucas_odd(element_ptr out, element_ptr in, element_ptr temp, mpz_t c
 //assumes cofactor is odd
 //overwrites in and temp, out must not be in
 //luckily this touchy routine is only used internally
+//TODO: rewrite to allow (out == in)? would simplify a_finalpow()
 {
     element_ptr in0 = fi_re(in);
     element_ptr in1 = fi_im(in);
@@ -1405,6 +1406,18 @@ static void a_pairing_option_set(pairing_t pairing, char *key, char *value)
     }
 }
 
+static void a_finalpow(element_t e)
+{
+    pairing_ptr pairing = e->field->pairing;
+    element_t t0, t1;
+    element_init_same_as(t0, e->data);
+    element_init_same_as(t1, e->data);
+    a_tateexp(t0, e->data, t1, pairing->phikonr);
+    element_set(e->data, t0);
+    element_clear(t0);
+    element_clear(t1);
+}
+
 void pairing_init_a_param(pairing_t pairing, a_param_t param)
 {
     element_t a, b;
@@ -1437,7 +1450,9 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param)
     pairing->G1 = p->Eq;
     pairing->G2 = pairing->G1;
     pairing->phi = phi_identity;
-    pairing->GT = p->Fq2;
+    GT_init_finite_field(pairing, p->Fq2);
+    pairing->finalpow = a_finalpow;
+
     pairing->clear_func = a_pairing_clear;
     pairing->option_set = a_pairing_option_set;
     pairing->pp_init = a_pairing_pp_init;
@@ -1877,7 +1892,7 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
 
     pairing->G1 = pbc_malloc(sizeof(field_t));
     pairing->G2 = pairing->G1 = p->Ep;
-    pairing->GT = p->Fp2;
+    GT_init_finite_field(pairing, p->Fp2);
 
     pairing->map = a1_pairing;
     pairing->phi = phi_identity;

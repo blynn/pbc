@@ -84,6 +84,7 @@ int main(void)
 	pairing_pp_clear(pp);
 
 	t0 = get_time();
+
 	pairing_apply(r2, x, y, pairing);
 	t1 = get_time();
 	ttotal += t1 - t0;

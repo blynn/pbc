@@ -604,12 +604,13 @@ void field_init(field_ptr f)
 
     //these are fast, thanks to Hovav
     f->pow_mpz = generic_pow_mpz;
-
     f->pp_init = default_element_pp_init;
     f->pp_clear = default_element_pp_clear;
     f->pp_pow = default_element_pp_pow;
+
     f->snprint = default_element_snprint;
     f->set_str = default_element_set_str;
+    f->pairing = NULL;
 }
 
 void field_clear(field_ptr f)

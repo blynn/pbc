@@ -32,8 +32,8 @@ int generic_is_almost_coddh(element_ptr a, element_ptr b,
 
     element_init(t0, pairing->GT);
     element_init(t1, pairing->GT);
-    bilinear_map(t0, a, d, pairing);
-    bilinear_map(t1, b, c, pairing);
+    pairing_apply(t0, a, d, pairing);
+    pairing_apply(t1, b, c, pairing);
     if (!element_cmp(t0, t1)) {
 	res = 1;
     } else {
@@ -67,7 +67,7 @@ static void default_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing) 
 
 static void default_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
 {
-    pairing_apply(out, p->data, in2, p->pairing);
+    p->pairing->map(out, p->data, in2, p->pairing);
 }
 
 static void default_pp_clear(pairing_pp_t p)
@@ -171,4 +171,190 @@ void pairing_init_inp_str(pairing_t pairing, FILE *stream)
 void pairing_clear(pairing_t pairing)
 {
     pairing->clear_func(pairing);
+}
+
+// TODO: it's most likely better to add extra stuff to field_t
+// so no new data structures are needed to create mulitplicative subgroups.
+// Additionally the same code could be used with curve_t
+// Will consider it later, especially if timings turn out bad
+
+static void gt_out_info(FILE *out, field_ptr f)
+{
+    gmp_fprintf(out, "GT: order %Zd roots of unity in:\n", f->order);
+    field_out_info(out, f->data);
+}
+
+static void gt_from_hash(element_ptr e, void *data, int len)
+{
+    pairing_ptr pairing = e->field->pairing;
+    element_from_hash(e->data, data, len);
+    pairing->finalpow(e);
+}
+
+static void gt_random(element_ptr e)
+{
+    pairing_ptr pairing = e->field->pairing;
+    element_random(e->data);
+    pairing->finalpow(e);
+}
+
+// multiplicative subgroup of a field
+static void mulg_field_clear(field_t f)
+{
+    UNUSED_VAR(f);
+}
+
+static void mulg_init(element_ptr e)
+{
+    e->data = pbc_malloc(sizeof(element_t));
+    field_ptr f = e->field->data;
+    element_init(e->data, f);
+    element_set1(e->data);
+}
+
+static void mulg_clear(element_ptr e)
+{
+    element_clear(e->data);
+}
+
+static void mulg_set(element_ptr x, element_t a)
+{
+    element_set(x->data, a->data);
+}
+
+static int mulg_cmp(element_ptr x, element_t a)
+{
+    return element_cmp(x->data, a->data);
+}
+
+static size_t mulg_out_str(FILE *stream, int base, element_ptr e)
+{
+    return element_out_str(stream, base, e->data);
+}
+
+static int mulg_set_str(element_ptr e, char *s, int base)
+{
+    return element_set_str(e->data, s, base);
+}
+
+static int mulg_to_bytes(unsigned char *data, element_ptr e)
+{
+    return element_to_bytes(data, e->data);
+}
+
+static int mulg_from_bytes(element_ptr e, unsigned char *data)
+{
+    return element_from_bytes(e->data, data);
+}
+
+static int mulg_length_in_bytes(element_ptr e)
+{
+    return element_length_in_bytes(e->data);
+}
+
+static int mulg_snprint(char *s, size_t n, element_ptr e)
+{
+    return element_snprint(s, n, e->data);
+}
+
+static void mulg_to_mpz(mpz_ptr z, element_ptr e)
+{
+    element_to_mpz(z, e->data);
+}
+
+static void mulg_set1(element_t e)
+{
+    element_set1(e->data);
+}
+
+static void mulg_mul(element_ptr x, element_t a, element_t b)
+{
+    element_mul(x->data, a->data, b->data);
+}
+
+static void mulg_div(element_ptr x, element_t a, element_t b)
+{
+    element_div(x->data, a->data, b->data);
+}
+
+static void mulg_invert(element_ptr x, element_t a)
+{
+    element_invert(x->data, a->data);
+}
+
+static int mulg_is1(element_ptr x)
+{
+    return element_is1(x->data);
+}
+
+static void mulg_pow_mpz(element_t x, element_t a, mpz_t n)
+{
+    element_pow_mpz(x->data, a->data, n);
+}
+
+static void mulg_pp_init(element_pp_t p, element_t in)
+{
+    element_pp_init(p, in->data);
+}
+
+static void mulg_pp_clear(element_pp_t p)
+{
+    element_pp_clear(p);
+}
+
+static void mulg_pp_pow(element_t out, mpz_ptr power, element_pp_t p)
+{
+    element_pp_pow(out->data, power, p);
+}
+
+void GT_init_finite_field(pairing_ptr pairing, field_t f)
+{
+    field_ptr gt = pairing->GT;
+
+    field_init(gt);
+    gt->data = f;
+    f->pairing = pairing;
+
+    mpz_set(gt->order, pairing->r);
+    gt->field_clear = mulg_field_clear;
+    gt->out_info = gt_out_info;
+
+    gt->init = mulg_init;
+    gt->clear = mulg_clear;
+    gt->set = mulg_set;
+    gt->cmp = mulg_cmp;
+
+    gt->out_str = mulg_out_str;
+    gt->set_str = mulg_set_str;
+    gt->to_bytes = mulg_to_bytes;
+    gt->from_bytes = mulg_from_bytes;
+    gt->length_in_bytes = mulg_length_in_bytes;
+    gt->fixed_length_in_bytes = f->fixed_length_in_bytes;
+    gt->to_mpz = mulg_to_mpz;
+    gt->snprint = mulg_snprint;
+
+    // TODO: set gt->nqr to something?
+    // set is_sqr, sqrt to something?
+
+    // additive notation
+    gt->set0 = mulg_set1;
+    gt->add = mulg_mul;
+    gt->sub = mulg_div;
+    gt->mul_mpz = mulg_pow_mpz;
+    gt->neg = mulg_invert;
+    gt->is0 = mulg_is1;
+
+    // multiplicative notation
+    gt->set1 = mulg_set1;
+    gt->mul = mulg_mul;
+    gt->div = mulg_div;
+    gt->pow_mpz = mulg_pow_mpz;
+    gt->invert = mulg_invert;
+    gt->is1 = mulg_is1;
+    gt->pp_init = mulg_pp_init;
+    gt->pp_clear = mulg_pp_clear;
+    gt->pp_pow = mulg_pp_pow;
+
+    gt->random = gt_random;
+    gt->from_hash = gt_from_hash;
 }

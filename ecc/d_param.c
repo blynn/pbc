@@ -568,6 +568,11 @@ static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing)
     }
 }
 
+static void cc_finalpow(element_t e)
+{
+    cc_tatepower(e->data, e->data, e->field->pairing);
+}
+
 static void (*cc_miller_no_denom_fn)(element_t res, mpz_t q, element_t P,
 	element_ptr Qx, element_ptr Qy);
 
@@ -606,9 +611,9 @@ static int cc_is_almost_coddh(element_ptr a, element_ptr b,
     element_init(dx, p->Fqd);
     element_init(dy, p->Fqd);
 
-    element_init(t0, pairing->GT);
-    element_init(t1, pairing->GT);
-    element_init(t2, pairing->GT);
+    element_init(t0, p->Fqk);
+    element_init(t1, p->Fqk);
+    element_init(t2, p->Fqk);
     //map from twist: (x, y) --> (v^-1 x, v^-(3/2) y)
     //where v is the quadratic nonresidue used to construct the twist
     element_mul(cx, curve_x_coord(c), p->nqrinv);
@@ -801,8 +806,8 @@ static void d_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
     element_t e0;
     element_t Qx, Qy;
     element_t v;
-    element_init_GT(e0, p->pairing);
-    element_init_GT(v, p->pairing);
+    element_init_same_as(e0, out);
+    element_init_same_as(v, out);
     element_init(Qx, info->Fqd);
     element_init(Qy, info->Fqd);
 
@@ -940,7 +945,8 @@ void pairing_init_d_param(pairing_t pairing, d_param_t param)
     pairing->G2 = p->Etwist;
 
     p->k = param->k;
-    pairing->GT = p->Fqk;
+    GT_init_finite_field(pairing, p->Fqk);
+    pairing->finalpow = cc_finalpow;
 
     cc_miller_no_denom_fn = cc_miller_no_denom_affine;
     pairing->option_set = d_pairing_option_set;
