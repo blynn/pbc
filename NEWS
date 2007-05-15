@@ -2,6 +2,11 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.10 and 0.4.9
+
+* Multiplicative subgroups: can now generate random elements and
+  hash to output group of pairing 
+
 Changes between PBC version 0.4.9 and 0.4.8
 
 * Patched memory leak for D, G pairings (reported by Michael Cheng)
