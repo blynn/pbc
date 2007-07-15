@@ -843,6 +843,7 @@ static void d_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p)
 
 void d_pairing_clear(pairing_t pairing)
 {
+    field_clear(pairing->GT);
     mnt_pairing_data_ptr p = pairing->data;
 
     if (p->k == 6) {

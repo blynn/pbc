@@ -215,6 +215,7 @@ static void mulg_init(element_ptr e)
 static void mulg_clear(element_ptr e)
 {
     element_clear(e->data);
+    pbc_free(e->data);
 }
 
 static void mulg_set(element_ptr x, element_t a)

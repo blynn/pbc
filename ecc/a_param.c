@@ -1373,6 +1373,8 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 
 static void a_pairing_clear(pairing_t pairing)
 {
+    field_clear(pairing->GT);
+
     a_pairing_data_ptr p = pairing->data;
     field_clear(p->Eq);
     field_clear(p->Fq);
@@ -1833,6 +1835,8 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 
 void a1_pairing_clear(pairing_t pairing)
 {
+    field_clear(pairing->GT);
+
     a1_pairing_data_ptr p = pairing->data;
     field_clear(p->Ep);
     field_clear(p->Fp2);

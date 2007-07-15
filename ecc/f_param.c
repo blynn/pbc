@@ -457,6 +457,7 @@ static void f_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 
 void f_pairing_clear(pairing_t pairing)
 {
+    field_clear(pairing->GT);
     f_pairing_data_ptr p = pairing->data;
     element_clear(p->negalpha);
     element_clear(p->negalphainv);

@@ -943,6 +943,7 @@ static void e_pairing_option_set(pairing_t pairing, char *key, char *value)
 
 void e_pairing_clear(pairing_t pairing)
 {
+    field_clear(pairing->GT);
     e_pairing_data_ptr p = pairing->data;
     field_clear(p->Fq);
     field_clear(p->Eq);

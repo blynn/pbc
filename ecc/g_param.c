@@ -1166,6 +1166,7 @@ static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
 
 void g_pairing_clear(pairing_t pairing)
 {
+    field_clear(pairing->GT);
     mnt_pairing_data_ptr p = pairing->data;
 
     element_clear(p->xpowq);
