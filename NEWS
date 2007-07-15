@@ -2,6 +2,10 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.11 and 0.4.10
+
+* Plugged memory leaks introduced in the last version
+
 Changes between PBC version 0.4.10 and 0.4.9
 
 * Multiplicative subgroups: can now generate random elements and
