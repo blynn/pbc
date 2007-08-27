@@ -7,11 +7,11 @@ if [[ $1 == "test" ]]; then
     echo test run
     TESTRUN=1
 fi
-echo cg-diff: ideally should do nothing...
-cg-diff
-cg-log > ChangeLog
+echo git-diff: ideally should do nothing...
+git-diff
+git-log > ChangeLog
 cat ChangeLog | head -20 | grep pbc-$GREPVER > /dev/null || {
-    echo cg-log does not mention release 
+    echo git-log does not mention release 
     if [[ $TESTRUN ]]; then
 	echo test run: continuing anyway...
     else
@@ -24,7 +24,7 @@ TMPDIR=`mktemp -d` || {
 }
 PBCDIR=$TMPDIR/pbc-$VER
 echo Running setup...
-cg-export $PBCDIR
+git-archive --format=tar --prefix=pbc-$VER/ HEAD | tar xvC $TMPDIR
 HERE=`pwd`
 cp ChangeLog $PBCDIR
 cd $PBCDIR
