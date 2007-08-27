@@ -295,17 +295,19 @@ static void mulg_pow_mpz(element_t x, element_t a, mpz_t n)
 
 static void mulg_pp_init(element_pp_t p, element_t in)
 {
-    element_pp_init(p, in->data);
+    p->data = pbc_malloc(sizeof(element_pp_t));
+    element_pp_init(p->data, in->data);
 }
 
 static void mulg_pp_clear(element_pp_t p)
 {
-    element_pp_clear(p);
+    element_pp_clear(p->data);
+    pbc_free(p->data);
 }
 
 static void mulg_pp_pow(element_t out, mpz_ptr power, element_pp_t p)
 {
-    element_pp_pow(out->data, power, p);
+    element_pp_pow(out->data, power, p->data);
 }
 
 void GT_init_finite_field(pairing_ptr pairing, field_t f)
