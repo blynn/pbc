@@ -2,6 +2,11 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.12 and 0.4.11
+
+* Fixed preprocessed exponentiation bug introduced in 0.4.10 (reported by
+  Ian Goldberg)
+
 Changes between PBC version 0.4.11 and 0.4.10
 
 * Plugged memory leaks introduced in the last version
