@@ -1,9 +1,9 @@
 #!/bin/bash -x
 
 libtoolize --force --copy 
-aclocal-1.9 
+aclocal
 autoheader
-automake-1.9 --add-missing --copy --gnu 
+automake --add-missing --copy --gnu 
 autoconf 
 
 if test -f config.status; then
