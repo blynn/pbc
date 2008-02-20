@@ -618,8 +618,8 @@ static int cc_is_almost_coddh(element_ptr a, element_ptr b,
     element_mul(cy, curve_y_coord(c), p->nqrinv2);
     element_mul(dy, curve_y_coord(d), p->nqrinv2);
 
-    cc_miller_no_denom_fn(t0, pairing->r, a->data, dx, dy);
-    cc_miller_no_denom_fn(t1, pairing->r, b->data, cx, cy);
+    cc_miller_no_denom_fn(t0, pairing->r, a, dx, dy);
+    cc_miller_no_denom_fn(t1, pairing->r, b, cx, cy);
     tatepower10(t0, t0, pairing);
     tatepower10(t1, t1, pairing);
     element_mul(t2, t0, t1);
