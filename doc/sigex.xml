@@ -32,7 +32,7 @@ To verify a signature sigma, one checks that e(h,g^x) = e(sigma, g).
 <section>
 <title>BLS Signatures</title>
 <para>
-First we include <filename>pbc.h</filename>:
+First we include <filename>pbc/pbc.h</filename>:
 </para>
 <screen>
 #include &lt;pbc.h&gt;

@@ -71,7 +71,7 @@ static inline void pairing_pp_apply(element_t out, element_t in2, pairing_pp_t p
 {
     // pairing routines need to use the finite field that GT lies in
     // data is stored in the same way, only the functions on them change
-    p->pairing->pp_apply(out->data, in2, p);
+    p->pairing->pp_apply((element_ptr) out->data, in2, p);
 }
 /*@manual pairing_init
 TODO
@@ -115,7 +115,7 @@ static inline void pairing_apply(element_t out, element_t in1, element_t in2,
     PBC_ASSERT(pairing->G2 == in2->field, "pairing 2nd input mismatch");
     // pairing routines need to use the finite field that GT lies in
     // data is stored in the same way, only the functions on them change
-    pairing->map(out->data, in1, in2, pairing);
+    pairing->map((element_ptr) out->data, in1, in2, pairing);
 }
 
 // TODO: future versions will use API like this: rename following to

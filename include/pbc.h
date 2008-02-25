@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
+
+extern "C" {
+
 #include "pbc_fops.h"
 #include "pbc_darray.h"
 #include "pbc_symtab.h"
@@ -20,5 +23,7 @@
 #include "pbc_g_param.h"
 #include "pbc_random.h"
 #include "pbc_memory.h"
+
+}  // extern "C"
 
 #endif //__PBC_H__
