@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <gmp.h>
 
+#if defined (__cplusplus)
 extern "C" {
+#endif
 
 #include "pbc_fops.h"
 #include "pbc_darray.h"
@@ -24,6 +26,8 @@ extern "C" {
 #include "pbc_random.h"
 #include "pbc_memory.h"
 
+#if defined (__cplusplus)
 }  // extern "C"
+#endif
 
 #endif //__PBC_H__
