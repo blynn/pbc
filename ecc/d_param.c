@@ -453,6 +453,10 @@ static void lucas_even(element_ptr out, element_ptr in, mpz_t cofactor)
 //mangles in
 //in cannot be out
 {
+    if (element_is1(in)) {
+      element_set(out, in);
+      return;
+    }
     element_t temp;
     element_init_same_as(temp, out);
     element_ptr in0 = fi_re(in);
