@@ -7,7 +7,6 @@ CONFIGURE_FILE(config.h.cmake config.h)
 
 set(examplebin
 example/bls
-example/bonehfranklin
 example/hess
 example/joux
 example/paterson
