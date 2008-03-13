@@ -54,7 +54,7 @@
 <preface id="preface"><title>Preface</title>
 <para>
 This manual describes how to install and use the PBC pairing-based
-cryptography library, version 0.4.15.
+cryptography library, version 0.4.16.
 </para>
 <para>
 It is modeled on the GMP manual. GMP is the GNU multiple precision

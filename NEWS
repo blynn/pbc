@@ -2,6 +2,11 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.16 and 0.4.15
+
+* Removed bonehfranklin.c example
+* Upgraded GPL to version 3
+
 Changes between PBC version 0.4.15 and 0.4.14
 
 * Stop element_from_hash crashing on GT for D curves (reported by Paul Miller)
