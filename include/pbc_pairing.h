@@ -50,6 +50,10 @@ and store the results of time-saving precomputation in ''p''.
 */
 static inline void pairing_pp_init(pairing_pp_t p, element_t in1, pairing_t pairing)
 {
+    if (element_is0(in1)) {
+      p->pairing = NULL;
+      return;
+    }
     p->pairing = pairing;
     pairing->pp_init(p, in1, pairing);
 }
@@ -59,6 +63,10 @@ Clear ''p''. This should be called after ''p'' is no longer needed.
 */
 static inline void pairing_pp_clear(pairing_pp_t p)
 {
+    if (!p->pairing) {
+      // happens when p was initialized with identity
+      return;
+    }
     p->pairing->pp_clear(p);
 }
 
@@ -69,13 +77,17 @@ previously used to initialize ''p'' and the element ''in2''.
 */
 static inline void pairing_pp_apply(element_t out, element_t in2, pairing_pp_t p)
 {
-    // pairing routines need to use the finite field that GT lies in
-    // data is stored in the same way, only the functions on them change
+    if (!p->pairing) {
+      element_set0(out);
+      return;
+    }
+    if (element_is0(in2)) {
+      element_set0(out);
+      return;
+    }
     p->pairing->pp_apply((element_ptr) out->data, in2, p);
 }
-/*@manual pairing_init
-TODO
-*/
+
 void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx);
 
 /*@manual pairing_init
@@ -113,8 +125,14 @@ static inline void pairing_apply(element_t out, element_t in1, element_t in2,
     PBC_ASSERT(pairing->GT == out->field, "pairing output mismatch");
     PBC_ASSERT(pairing->G1 == in1->field, "pairing 1st input mismatch");
     PBC_ASSERT(pairing->G2 == in2->field, "pairing 2nd input mismatch");
-    // pairing routines need to use the finite field that GT lies in
-    // data is stored in the same way, only the functions on them change
+    if (element_is0(in1)) {
+      element_set0(out);
+      return;
+    }
+    if (element_is0(in2)) {
+      element_set0(out);
+      return;
+    }
     pairing->map((element_ptr) out->data, in1, in2, pairing);
 }
 
