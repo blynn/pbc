@@ -1,6 +1,5 @@
 //requires
 // * gmp.h
-// * darray.h
 #ifndef __PBC_MNT_H__
 #define __PBC_MNT_H__
 
@@ -29,29 +28,21 @@ void cm_info_clear(cm_info_t cm);
 For a given discriminant D, searches for MNT curves of embedding degree 6
 suitable for cryptography (type D pairings) where the group order
 is at most ''bitlimit'' bits. For each suitable set of CM parameters found,
-a <type>cm_info_t</type> is created and appended to the dynamic array ''L''.
+call supplied callback with <type>cm_info_t</type> and given void pointer.
 Returns the number of CM parameters found.
-</para>
-<para>
-When no longer needed, <command>cm_info_clear</command> should be
-called on each appended element in ''L''. (And of course, when ''L'' is
-no longer needed <command>darray_clear</command> should be called on ''L''.)
 */
-int find_mnt6_curve(darray_t L, unsigned int D, unsigned int bitlimit);
+int find_mnt6_curve(void (*callback)(cm_info_ptr, void *), void *data,
+    unsigned int D, unsigned int bitlimit);
 
 /*@manual cminfo
 For a given discriminant D, searches for a Freeman curve of embedding
 degree 10
 suitable for cryptography (type D pairings) where the group order
 is at most ''bitlimit'' bits. For each suitable set of CM parameters found,
-a <type>cm_info_t</type> is created and appended to the dynamic array ''L''.
+call supplied callback with <type>cm_info_t</type> and given void pointer.
 Returns the number of CM parameters found.
-</para>
-<para>
-When no longer needed, <command>cm_info_clear</command> should be
-called on each appended element in ''L''. (And of course, when ''L'' is
-no longer needed <command>darray_clear</command> should be called on ''L''.)
 */
-int find_freeman_curve(darray_t L, unsigned int D, unsigned int bitlimit);
+int find_freeman_curve(void (*callback)(cm_info_ptr, void *), void *data,
+    unsigned int D, unsigned int bitlimit);
 
 #endif //__PBC_MNT_H__

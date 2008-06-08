@@ -195,13 +195,14 @@ void cm_info_clear(cm_info_t cm)
     mpz_clear(cm->n);
 }
 
-static int mnt_step2(darray_ptr L, unsigned int D, mpz_t U)
+static int mnt_step2(void (*callback)(cm_info_t, void *), void *data,
+	unsigned int D, mpz_t U)
 {
     int d;
     mpz_t n, l, q;
     mpz_t p;
     mpz_t r, cofac;
-    cm_info_ptr cm;
+    cm_info_t cm;
 
     mpz_init(l);
     mpz_mod_ui(l, U, 6);
@@ -263,7 +264,6 @@ static int mnt_step2(darray_ptr L, unsigned int D, mpz_t U)
     }
 }
 
-    cm = pbc_malloc(sizeof(cm_info_t));
     cm_info_init(cm);
     cm->k = 6;
     cm->D = D;
@@ -271,7 +271,8 @@ static int mnt_step2(darray_ptr L, unsigned int D, mpz_t U)
     mpz_set(cm->r, r);
     mpz_set(cm->h, cofac);
     mpz_set(cm->n, n);
-    darray_append(L, cm);
+    callback(cm, data);
+    cm_info_clear(cm);
 
     mpz_clear(cofac);
     mpz_clear(r);
@@ -282,7 +283,8 @@ static int mnt_step2(darray_ptr L, unsigned int D, mpz_t U)
     return 0;
 }
 
-int find_mnt6_curve(darray_t L, unsigned int D, unsigned int bitlimit)
+int find_mnt6_curve(void (*callback)(cm_info_t, void *), void *data,
+	unsigned int D, unsigned int bitlimit)
 {
     mpz_t D3;
     mpz_t t0, t1, t2;
@@ -312,7 +314,7 @@ int find_mnt6_curve(darray_t L, unsigned int D, unsigned int bitlimit)
     if (n) for (;;) {
 	for (i=0; i<n; i++) {
 	    //element_printf("%Zd, %Zd\n", ps->x[i], ps->y[i]);
-	    if (!mnt_step2(L, D, ps->x[i])) found_count++;
+	    if (!mnt_step2(callback, data, D, ps->x[i])) found_count++;
 	    //compute next solution as follows
 	    //if p, q is current solution
 	    //compute new solution p', q' via
@@ -340,12 +342,13 @@ toobig:
     return found_count;
 }
 
-static int freeman_step2(darray_ptr L, unsigned int D, mpz_t U)
+static int freeman_step2(void (*callback)(cm_info_t, void *), void *data,
+	unsigned int D, mpz_t U)
 {
     mpz_t n, x, q;
     mpz_t p;
     mpz_t r, cofac;
-    cm_info_ptr cm;
+    cm_info_t cm;
 
     mpz_init(x);
     mpz_mod_ui(x, U, 15);
@@ -420,7 +423,6 @@ static int freeman_step2(darray_ptr L, unsigned int D, mpz_t U)
     }
 }
 
-    cm = pbc_malloc(sizeof(cm_info_t));
     cm_info_init(cm);
     cm->k = 10;
     cm->D = D;
@@ -428,7 +430,8 @@ static int freeman_step2(darray_ptr L, unsigned int D, mpz_t U)
     mpz_set(cm->r, r);
     mpz_set(cm->h, cofac);
     mpz_set(cm->n, n);
-    darray_append(L, cm);
+    callback(cm, data);
+    cm_info_clear(cm);
 
     mpz_clear(cofac);
     mpz_clear(r);
@@ -439,7 +442,8 @@ static int freeman_step2(darray_ptr L, unsigned int D, mpz_t U)
     return 0;
 }
 
-int find_freeman_curve(darray_t L, unsigned int D, unsigned int bitlimit)
+int find_freeman_curve(void (*callback)(cm_info_t, void *), void *data,
+	unsigned int D, unsigned int bitlimit)
 {
     mpz_t D15;
     mpz_t t0, t1, t2;
@@ -447,7 +451,6 @@ int find_freeman_curve(darray_t L, unsigned int D, unsigned int bitlimit)
     int found_count = 0;
 
     mpz_init(D15);
-    //mpz_set_ui(D15, D * 15);
     mpz_set_ui(D15, D);
     mpz_mul_ui(D15, D15, 15);
 
@@ -467,13 +470,12 @@ int find_freeman_curve(darray_t L, unsigned int D, unsigned int bitlimit)
     n = ps->count;
     if (n) for (;;) {
 	for (i=0; i<n; i++) {
-	    //gmp_printf("%Zd, %Zd\n", ps->x[i], ps->y[i]);
-	    if (!freeman_step2(L, D, ps->x[i])) found_count++;
-	    //compute next solution as follows
-	    //if p, q is current solution
-	    //compute new solution p', q' via
-	    //(p + q sqrt{15D})(t + u sqrt{15D}) = p' + q' sqrt(15D)
-	    //where t, u is min. solution to Pell equation
+	    if (!freeman_step2(callback, data, D, ps->x[i])) found_count++;
+	    // Compute next solution as follows:
+	    // If p, q is current solution
+	    // then compute new solution p', q' via
+	    //   (p + q sqrt{15D})(t + u sqrt{15D}) = p' + q' sqrt(15D)
+	    // where t, u is min. solution to Pell equation
 	    mpz_mul(t0, ps->minx, ps->x[i]);
 	    mpz_mul(t1, ps->miny, ps->y[i]);
 	    mpz_mul(t1, t1, D15);

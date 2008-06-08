@@ -1,11 +1,24 @@
+// For different discriminants D, list group size and representation size
+// of resulting MNT curves.
+
 #include "pbc.h"
+
+void consider(cm_info_t cm, void *data) {
+    unsigned int D = (unsigned int) data;
+    int qbits, rbits;
+    qbits = mpz_sizeinbase(cm->q, 2);
+    rbits = mpz_sizeinbase(cm->r, 2);
+    printf("%d, %d, %d\n", D, qbits, rbits);
+    fflush(stdout);
+}
+
+void try(unsigned int D) {
+    find_mnt6_curve(consider, (void *) D, D, 500);
+}
 
 int main(int argc, char **argv)
 {
-    darray_t L;
     unsigned int D = 7;
-    cm_info_ptr cm;
-    darray_init(L);
 
     if (argc > 1) {
 	D = atoi(argv[1]);
@@ -15,27 +28,12 @@ int main(int argc, char **argv)
 	}
     }
 
-    void try(void) {
-	int qbits, rbits;
-
-	if (find_mnt6_curve(L, D, 500)) {
-	    while (darray_count(L)) {
-		cm = darray_at(L, 0);
-		qbits = mpz_sizeinbase(cm->q, 2);
-		rbits = mpz_sizeinbase(cm->r, 2);
-		printf("%d, %d, %d\n", D, qbits, rbits);
-		fflush(stdout);
-		darray_remove_index(L, 0);
-		cm_info_clear(cm);
-	    }
-	}
-    }
-
-    printf("D < %u, bits in q, bits in r\n", 1000000000);
-    while (D < 50) {
-	try();
+    const unsigned int maxD = 1000000000;
+    printf("D < %u, bits in q, bits in r\n", maxD);
+    while (D < maxD) {
+	try(D);
 	D++;
-	try();
+	try(D);
 	D+=3;
     }
 

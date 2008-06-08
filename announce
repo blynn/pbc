@@ -1,0 +1,8 @@
+#!/bin/bash
+VER=`grep AC_INIT configure.ac | sed 's/.*\[\([0-9]*\.[0-9]*\.[0-9]*\)\].*/\1/'`
+echo PBC $VER Released
+echo 'The new release is available at
+  http://crypto.stanford.edu/pbc/
+'
+sed -n '/^Changes between PBC version '$VER'/,/^Changes/p' < NEWS | sed '$c \
+-Ben'
