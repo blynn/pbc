@@ -133,6 +133,7 @@ static inline void pairing_apply(element_t out, element_t in1, element_t in2,
       element_set0(out);
       return;
     }
+    // TODO: Needing to access out->data here is awful. Can I fix this?
     pairing->map((element_ptr) out->data, in1, in2, pairing);
 }
 
@@ -143,7 +144,7 @@ static inline void bilinear_map(element_t out, element_t in1, element_t in2)
 {
     pairing_ptr pairing = out->field->pairing;
     PBC_ASSERT(pairing != NULL, "pairing output mismatch");
-    pairing->map(out, in1, in2, pairing);
+    pairing_apply(out, in1, in2, pairing);
 }
 
 /*@manual pairing_op

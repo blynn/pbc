@@ -1,8 +1,10 @@
 // Generate Freeman curves with a given discriminant.
 #include "pbc.h"
+#include "pbc_utils.h"
 
 void generate(cm_info_t cm, void *data)
 {
+    (void) data;
     g_param_t param;
     g_param_init(param);
 

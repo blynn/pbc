@@ -1887,7 +1887,7 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
     element_set0(b);
     field_init_curve_ab(p->Ep, a, b, pairing->r, pairing->phikonr);
 
-    //turns out to be faster:
+    // Turns out to be faster.
     field_curve_use_random_solvefory(p->Ep);
 
     element_clear(a);

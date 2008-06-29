@@ -75,7 +75,7 @@ static void default_pp_clear(pairing_pp_t p)
     UNUSED_VAR(p);
 }
 
-void pairing_init_inp_generic (pairing_t pairing, fetch_ops_t fops, void *ctx)
+void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx)
 {
     assert (fops);
     assert (ctx);
