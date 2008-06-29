@@ -1,9 +1,7 @@
 <chapter>
 <title>Auxiliary Functions</title>
 <para>
-There are a number of abstract data types mostly only used internally by PBC.
-A notable exception is the function <command>find_mnt6_curve()</command>
-which appends its results to a <type>darray_t</type>.
+Information on data types internally used by the library.
 </para>
 <section><title>Dynamic Arrays</title>
 <para>

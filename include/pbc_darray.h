@@ -36,7 +36,6 @@ static inline void *darray_at(darray_t a, int i)
     return a->item[i];
 }
 
-
 int darray_index_of(darray_ptr a, void *p);
 void darray_remove(darray_ptr a, void *p);
 void darray_remove_last(darray_ptr a);
