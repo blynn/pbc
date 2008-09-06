@@ -19,28 +19,28 @@ typedef struct a_param_s a_param_t[1];
 typedef struct a_param_s *a_param_ptr;
 
 /*@manual aparam
-Initialize ''p''. This must be called before ''p'' can be used.
+Initialize 'p'. This must be called before 'p' can be used.
 */
 void a_param_init(a_param_t p);
 
 /*@manual aparam
-Clear ''p''. This should be called after ''p'' is no longer needed.
+Clear 'p'. This should be called after 'p' is no longer needed.
 */
 void a_param_clear(a_param_t p);
 
 /*@manual aparam
-Generate type A pairing parameters and store them in ''p'',
-where the group order r is ''rbits'' long, and the order of the base field q
-is ''qbits'' long.
-To be secure, generic discrete log algorithms must
-be infeasible in groups of order r, and finite field discrete log algorithms
-must be infeasible in finite fields of order q^2.
-Typical values: ''rbits'' = 160, ''qbits'' = 512.
+Generate type A pairing parameters and store them in 'p', where the group order
+r is 'rbits' long, and the order of the base field q is 'qbits' long.  To be
+secure, generic discrete log algorithms must be infeasible in groups of order
+r, and finite field discrete log algorithms must be infeasible in finite fields
+of order q^2^.
+
+Typical values: 'rbits' = 160, 'qbits' = 512.
 */
 void a_param_gen(a_param_t p, int rbits, int qbits);
 
 /*@manual aparam
-Write the parameters in ''p'' in a text format onto ''stream''.
+Write the parameters in 'p' in a text format onto 'stream'.
 */
 void a_param_out_str(FILE *stream, a_param_ptr p);
 

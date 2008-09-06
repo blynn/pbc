@@ -1,38 +1,35 @@
-<appendix><title>Contributors</title>
-<para>
+== Appendix A: Contributors ==
+
 Ben Lynn wrote the original PBC library and documentation and is still
 maintaining and developing it.
-</para>
-<para>
+
 Hovav Shacham wrote the multiexponentiation, sliding windows and preprocessed
 exponentiation routines, Makefile improvements, and other enhancements.
 He also helps administer the mailing list.
-</para>
-<para>
+
+
 Joseph Cooley wrote the GNU build system files,
 tested the library on Mac OS X, and added miscellaneous improvements.
 Among other things,
 pairings can be read from memory buffer and
 most compile-time warnings were removed.
-</para>
-<para>
+
+
 Rob Figueiredo and Roger Khazan wrote changes which allow the PBC library
 to be compiled on Windows (via mingw).
-</para>
-<para>
+
+
 Dmitry Kosolapov sent in manual corrections, and wrote
 several cryptosystem demos.
-</para>
-<para>
+
+
 John Bethencourt sent in many helpful patches, e.g. fixes that allow PBC to
 work on 64-bit platforms.
-</para>
-<para>
+
+
 Paul Miller reported bugs, manual corrections and also wrote
 the Gentoo portage overlay for PBC.
-</para>
-<para>
+
+
 If you're not mentioned here but should be, please let me know!
 (blynn at cs dot stanford dot edu).
-</para>
-</appendix>

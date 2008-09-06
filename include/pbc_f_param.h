@@ -22,28 +22,28 @@ typedef struct f_param_s f_param_t[1];
 typedef struct f_param_s *f_param_ptr;
 
 /*@manual fparam
-Initialize ''p''. This must be called before ''p'' can be used.
+Initialize 'p'. This must be called before 'p' can be used.
 */
 void f_param_init(f_param_t fp);
 
 /*@manual fparam
-Clear ''p''. This should be called after ''p'' is no longer needed.
+Clear 'p'. This should be called after 'p' is no longer needed.
 */
 void f_param_clear(f_param_t fp);
 
 /*@manual fparam
-Generate type F pairing parameters and store them in ''p''.
+Generate type F pairing parameters and store them in 'p'.
 Both the group order r and the order of the base field q will be roughly
-''bits''-bit numbers.
+'bits'-bit numbers.
 To be secure, generic discrete log algorithms must
 be infeasible in groups of order r, and finite field discrete log algorithms
 must be infeasible in finite fields of order q^12.
-Typical value: ''bits'' = 160.
+Typical value: 'bits' = 160.
 */
 void f_param_gen(f_param_t fp, int bits);
 
 /*@manual fparam
-Write the parameters in ''p'' in a text format onto ''stream''.
+Write the parameters in 'p' in a text format onto 'stream'.
 */
 void f_param_out_str(FILE *stream, f_param_ptr p);
 void f_param_inp_generic (f_param_ptr p, fetch_ops_t fops, void *ctx);

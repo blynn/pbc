@@ -92,7 +92,7 @@ typedef struct field_s field_t[1];
 typedef void (*fieldmap)(element_t dst, element_t src);
 
 /*@manual internal
-Initialize ''e'' to be an element of the algebraic structure ''f''
+Initialize 'e' to be an element of the algebraic structure 'f'
 and set it to be the zero element.
 */
 static inline void element_init(element_t e, field_ptr f)
@@ -102,7 +102,7 @@ static inline void element_init(element_t e, field_ptr f)
 }
 
 /*@manual einit
-Initialize ''e'' to be an element of the algebraic structure that ''e2''
+Initialize 'e' to be an element of the algebraic structure that 'e2'
 lies in.
 */
 static inline void element_init_same_as(element_t e, element_t e2)
@@ -111,8 +111,8 @@ static inline void element_init_same_as(element_t e, element_t e2)
 }
 
 /*@manual einit
-Free the space occupied by ''e''. Call this when
-the variable ''e'' is no longer needed.
+Free the space occupied by 'e'. Call this when
+the variable 'e' is no longer needed.
 */
 static inline void element_clear(element_t e)
 {
@@ -120,7 +120,7 @@ static inline void element_clear(element_t e)
 }
 
 /*@manual eio
-Output ''e'' on ''stream'' in base ''base''. The base must be between
+Output 'e' on 'stream' in base 'base'. The base must be between
 2 and 36.
 */
 static inline size_t element_out_str(FILE *stream, int base, element_t e)
@@ -139,19 +139,19 @@ int element_fprintf(FILE *stream, const char *format, ...);
 /*@manual eio
 Same as printf family
 except also has the 'B' conversion specifier for types
-of <function>element_t</function>, and 'Y', 'Z' conversion specifiers for
-<type>mpz_t</type>. For example if ''e'' is of type
-<type>element_t</type> then
-<screen>
-element_printf("%B\n", e);
-</screen>
-will print the value of ''e'' in a human-readable form on standard output.
+of *element_t*, and 'Y', 'Z' conversion specifiers for
++mpz_t+. For example if 'e' is of type
++element_t+ then
+
+  element_printf("%B\n", e);
+
+will print the value of 'e' in a human-readable form on standard output.
 */
 int element_snprintf (char *buf, size_t size, const char *fmt, ...);
 
 /*@manual eio
 Convert an element to a human-friendly string.
-Behaves as <function>snprintf</function> but only on one element at a time.
+Behaves as *snprintf* but only on one element at a time.
 */
 static inline int element_snprint(char *s, size_t n, element_t e)
 {
@@ -159,9 +159,9 @@ static inline int element_snprint(char *s, size_t n, element_t e)
 }
 
 /*@manual eio
-Set the element ''e'' from ''s'', a null-terminated C string in base 'base'.
-Whitespace is ignored. Points have the form "[''x,y'']" or "''O''",
-while polynomials have the form "[''a0,...,an'']".
+Set the element 'e' from 's', a null-terminated C string in base 'base'.
+Whitespace is ignored. Points have the form "['x,y']" or "'O'",
+while polynomials have the form "['a0,...,an']".
 Returns number of characters read (unlike GMP's mpz_set_str).
 A return code of zero means PBC could not find a well-formed string
 describing an element.
@@ -172,7 +172,7 @@ static inline int element_set_str(element_t e, char *s, int base)
 }
 
 /*@manual eassign
-Set ''e'' to zero.
+Set 'e' to zero.
 */
 static inline void element_set0(element_t e)
 {
@@ -180,7 +180,7 @@ static inline void element_set0(element_t e)
 }
 
 /*@manual eassign
-Set ''e'' to one.
+Set 'e' to one.
 */
 static inline void element_set1(element_t e)
 {
@@ -188,7 +188,7 @@ static inline void element_set1(element_t e)
 }
 
 /*@manual eassign
-Set ''e'' to ''i''.
+Set 'e' to 'i'.
 */
 static inline void element_set_si(element_t e, signed long int i)
 {
@@ -196,7 +196,7 @@ static inline void element_set_si(element_t e, signed long int i)
 }
 
 /*@manual eassign
-Set ''e'' to ''z''.
+Set 'e' to 'z'.
 */
 static inline void element_set_mpz(element_t e, mpz_t z)
 {
@@ -204,7 +204,7 @@ static inline void element_set_mpz(element_t e, mpz_t z)
 }
 
 /*@manual eassign
-Set ''e'' to ''a''.
+Set 'e' to 'a'.
 */
 static inline void element_set(element_t e, element_t a)
 {
@@ -218,7 +218,7 @@ static inline void element_add_ui(element_t n, element_t a, unsigned long int b)
 }
 
 /*@manual econvert
-Converts ''e'' to a GMP integer ''z''
+Converts 'e' to a GMP integer 'z'
 if such an operation makes sense
 */
 static inline void element_to_mpz(mpz_t z, element_t e)
@@ -227,15 +227,15 @@ static inline void element_to_mpz(mpz_t z, element_t e)
 }
 
 /*@manual econvert
-Generate an element ''e'' deterministically from
-the ''len'' bytes stored in the buffer ''data''.
+Generate an element 'e' deterministically from
+the 'len' bytes stored in the buffer 'data'.
 */
 static inline void element_from_hash(element_t e, void *data, int len)
 {
     e->field->from_hash(e, data, len);
 }
 /*@manual earith
-Set ''n'' to ''a'' + ''b''.
+Set 'n' to 'a' + 'b'.
 */
 static inline void element_add(element_t n, element_t a, element_t b)
 {
@@ -244,7 +244,7 @@ static inline void element_add(element_t n, element_t a, element_t b)
 }
 
 /*@manual earith
-Set ''n'' to ''a'' - ''b''.
+Set 'n' to 'a' - 'b'.
 */
 static inline void element_sub(element_t n, element_t a, element_t b)
 {
@@ -253,7 +253,7 @@ static inline void element_sub(element_t n, element_t a, element_t b)
 }
 
 /*@manual earith
-Set ''n'' to ''a'' times ''b''.
+Set 'n' = 'a' 'b'.
 */
 static inline void element_mul(element_t n, element_t a, element_t b)
 {
@@ -270,20 +270,18 @@ static inline void element_mul_mpz(element_t n, element_t a, mpz_t z)
 }
 
 /*@manual earith
-''z'' must be a mpz_t/signed long int.
-Set ''n'' to ''a'' times ''z'', that is ''a'' + ''a'' + ... + ''a''
-where there are ''z'' ''a'''s.
+Set 'n' = 'a' 'z', that is 'a' \+ 'a' \+ ... \+ 'a' where there are 'z' 'a'#'s#.
 */
-static inline void element_mul_si(element_t n, element_t a, signed long int z) 
+static inline void element_mul_si(element_t n, element_t a, signed long int z)
 {
     PBC_ASSERT_MATCH2(n, a);
     n->field->mul_si(n, a, z);
 }
 
 /*@manual earith
-''z'' must be an element of a integer mod ring (i.e. Z_n for some n).
-Set ''c'' to ''a'' times ''z'', that is ''a'' + ''a'' + ... + ''a''
-where there are ''z'' ''a'''s.
+'z' must be an element of a integer mod ring (i.e. *Z*~n~ for some n).
+Set 'c' = 'a' 'z', that is 'a' \+ 'a' \+ ... \+ 'a'
+where there are 'z' 'a''s.
 */
 static inline void element_mul_zn(element_t c, element_t a, element_t z)
 {
@@ -297,7 +295,7 @@ static inline void element_mul_zn(element_t c, element_t a, element_t z)
 }
 
 /*@manual earith
-Set ''n'' to ''a'' / ''b''.
+Set 'n' = 'a' / 'b'.
 */
 static inline void element_div(element_t n, element_t a, element_t b)
 {
@@ -306,7 +304,7 @@ static inline void element_div(element_t n, element_t a, element_t b)
 }
 
 /*@manual earith
-Set ''n'' to ''a'' + ''a''.
+Set 'n' = 'a' + 'a'.
 */
 static inline void element_double(element_t n, element_t a)
 {
@@ -315,7 +313,7 @@ static inline void element_double(element_t n, element_t a)
 }
 
 /*@manual earith
-Set ''n'' to ''a/2''
+Set 'n' = 'a/2'
 */
 static inline void element_halve(element_t n, element_t a)
 {
@@ -324,7 +322,7 @@ static inline void element_halve(element_t n, element_t a)
 }
 
 /*@manual earith
-Set ''n'' to ''a'' times ''a''.
+Set 'n' = 'a'^2^
 */
 static inline void element_square(element_t n, element_t a)
 {
@@ -333,8 +331,8 @@ static inline void element_square(element_t n, element_t a)
 }
 
 /*@manual epow
-Set ''x'' to ''a'' raised to the power ''n'', that is
-''a'' times ''a'' times ... times ''a'' where there are ''n'' ''a'''s
+Set 'x' = 'a'^'n'^, that is
+'a' times 'a' times ... times 'a' where there are 'n' 'a'#'s#.
 */
 static inline void element_pow_mpz(element_t x, element_t a, mpz_t n)
 {
@@ -343,9 +341,8 @@ static inline void element_pow_mpz(element_t x, element_t a, mpz_t n)
 }
 
 /*@manual epow
-Set ''x'' to ''a'' raised to the power ''n'', where ''n'' is
-an element of a ring Z_n for some n (typically the order
-of the algebraic structure ''x'' lies in).
+Set 'x' = 'a'^'n'^, where 'n' is an element of a ring *Z*~N~
+for some 'N' (typically the order of the algebraic structure 'x' lies in).
 */
 static inline void element_pow_zn(element_t x, element_t a, element_t n)
 {
@@ -358,7 +355,7 @@ static inline void element_pow_zn(element_t x, element_t a, element_t n)
 }
 
 /*@manual earith
-Set ''n'' to -''a''.
+Set 'n' = -'a'.
 */
 static inline void element_neg(element_t n, element_t a)
 {
@@ -367,7 +364,7 @@ static inline void element_neg(element_t n, element_t a)
 }
 
 /*@manual earith
-Set ''n'' to the inverse of ''a''.
+Set 'n' to the inverse of 'a'.
 */
 static inline void element_invert(element_t n, element_t a)
 {
@@ -376,8 +373,8 @@ static inline void element_invert(element_t n, element_t a)
 }
 
 /*@manual erandom
-If the ''e'' lies in a finite algebraic structure,
-this function assigns a uniformly random element to ''e''.
+If the 'e' lies in a finite algebraic structure,
+assigns a uniformly random element to 'e'.
 */
 static inline void element_random(element_t e)
 {
@@ -385,7 +382,7 @@ static inline void element_random(element_t e)
 }
 
 /*@manual ecmp
-Returns nonzero if ''n'' is 1, zero otherwise.
+Returns true if 'n' is 1.
 */
 static inline int element_is1(element_t n)
 {
@@ -393,7 +390,7 @@ static inline int element_is1(element_t n)
 }
 
 /*@manual ecmp
-Returns nonzero if ''n'' is 0, zero otherwise.
+Returns true if 'n' is 0.
 */
 static inline int element_is0(element_t n)
 {
@@ -401,7 +398,7 @@ static inline int element_is0(element_t n)
 }
 
 /*@manual ecmp
-Returns 0 if ''a'' and ''b'' are the same, nonzero otherwise.
+Returns 0 if 'a' and 'b' are the same, nonzero otherwise.
 */
 static inline int element_cmp(element_t a, element_t b)
 {
@@ -410,7 +407,7 @@ static inline int element_cmp(element_t a, element_t b)
 }
 
 /*@manual ecmp
-Returns nonzero if ''a'' is a perfect square (quadratic residue),
+Returns nonzero if 'a' is a perfect square (quadratic residue),
 zero otherwise.
 */
 static inline int element_is_sqr(element_t a)
@@ -426,11 +423,11 @@ static inline int element_sgn(element_t a)
 }
 
 /*@manual ecmp
-If ''a'' is zero, returns 0. For nozero ''a'' the behaviour depends on
+If 'a' is zero, returns 0. For nozero 'a' the behaviour depends on
 the algebraic structure, but has the property that
-element_sgn(''a'') = -element_sgn(-''a'')
+element_sgn('a') = -element_sgn(-'a')
 and
-element_sgn(''a'') = 0 implies ''a'' = 0 with overwhelming probability.
+element_sgn('a') = 0 implies 'a' = 0 with overwhelming probability.
 */
 static inline int element_sign(element_t a)
 {
@@ -444,7 +441,7 @@ static inline void element_sqrt(element_t a, element_t b)
 }
 
 /*@manual etrade
-Returns the length in bytes the element ''e'' will take to represent
+Returns the length in bytes the element 'e' will take to represent
 */
 static inline int element_length_in_bytes(element_t e)
 {
@@ -456,10 +453,9 @@ static inline int element_length_in_bytes(element_t e)
 }
 
 /*@manual etrade
-Converts ''e'' to byte, writing the result in the buffer ''data''.
+Converts 'e' to byte, writing the result in the buffer 'data'.
 The number of bytes it will write can be determined from calling
-<function>element_length_in_bytes()</function>.
-Returns number of bytes written.
+*element_length_in_bytes()*. Returns number of bytes written.
 */
 static inline int element_to_bytes(unsigned char *data, element_t e)
 {
@@ -467,8 +463,7 @@ static inline int element_to_bytes(unsigned char *data, element_t e)
 }
 
 /*@manual etrade
-Reads ''e'' from the buffer ''data'', and returns
-the number of bytes read.
+Reads 'e' from the buffer 'data', and returns the number of bytes read.
 */
 static inline int element_from_bytes(element_t e, unsigned char *data)
 {
@@ -476,14 +471,13 @@ static inline int element_from_bytes(element_t e, unsigned char *data)
 }
 
 /*@manual epow
-Sets ''x'' = ''a1''^''n1'' times ''a2''^''n2'', and is generally faster than
+Sets 'x' = 'a1'^'n1'^ 'a2'^'n2'^, and is generally faster than
 performing two separate exponentiations.
 */
-void element_pow2_mpz(element_t x, element_t a1, mpz_t n1,
-                                 element_t a2, mpz_t n2);
+void element_pow2_mpz(element_t x, element_t a1, mpz_t n1, element_t a2, mpz_t n2);
 /*@manual epow
-Also sets ''x'' = ''a1''^''n1'' times ''a2''^''n2'',
-but ''n1'', ''n2'' must be elements of a ring Z_n for some integer n.
+Also sets 'x' = 'a1'^'n1'^ 'a2'^'n2'^,
+but 'n1', 'n2' must be elements of a ring *Z*~n~ for some integer n.
 */
 static inline void element_pow2_zn(element_t x, element_t a1, element_t n1,
                                  element_t a2, element_t n2)
@@ -499,17 +493,16 @@ static inline void element_pow2_zn(element_t x, element_t a1, element_t n1,
 }
 
 /*@manual epow
-Sets ''x'' = ''a1''^''n1'' times ''a2^n2'' times ''a3''^''n3'',
-and is generally faster than
-performing three separate exponentiations.
+Sets 'x' = 'a1'^'n1'^ 'a2'^'n2'^ 'a3'^'n3'^,
+generally faster than performing three separate exponentiations.
 */
 void element_pow3_mpz(element_t x, element_t a1, mpz_t n1,
                                  element_t a2, mpz_t n2,
                                  element_t a3, mpz_t n3);
 
 /*@manual epow
-Also sets ''x'' = ''a1''^''n1'' times ''a2^n2'' times ''a3''^''n3'',
-but ''n1'', ''n2'', ''n3'' must be elements of a ring Z_n for some integer n.
+Also sets 'x' = 'a1'^'n1'^ 'a2'^'n2'^ 'a3'^'n3'^,
+but 'n1', 'n2', 'n3' must be elements of a ring *Z*~n~ for some integer n.
 */
 static inline void element_pow3_zn(element_t x, element_t a1, element_t n1,
                                  element_t a2, element_t n2,
@@ -543,40 +536,40 @@ static inline int mpz_is0(mpz_t z)
 }
 
 /*@manual etrade
-Assumes ''e'' is a point on an elliptic curve.
-Writes the x-coordinate of ''e'' to the buffer ''data''
+Assumes 'e' is a point on an elliptic curve.
+Writes the x-coordinate of 'e' to the buffer 'data'
 */
 int element_to_bytes_x_only(unsigned char *data, element_t e);
 /*@manual etrade
-Assumes ''e'' is a point on an elliptic curve.
-Sets ''e'' to a point with
-x-coordinate represented by the buffer ''data''. This is not unique.
-For each ''x''-coordinate, there exist two different points, at least
+Assumes 'e' is a point on an elliptic curve.
+Sets 'e' to a point with
+x-coordinate represented by the buffer 'data'. This is not unique.
+For each 'x'-coordinate, there exist two different points, at least
 for the elliptic curves in PBC. (They are inverses of each other.)
 */
 int element_from_bytes_x_only(element_t e, unsigned char *data);
 /*@manual etrade
-Assumes ''e'' is a point on an elliptic curve.
-Returns the length in bytes needed to hold the x-coordinate of ''e''.
+Assumes 'e' is a point on an elliptic curve.
+Returns the length in bytes needed to hold the x-coordinate of 'e'.
 */
 int element_length_in_bytes_x_only(element_t e);
 
 /*@manual etrade
-If possible, outputs a compressed form of the element ''e'' to
-the buffer of bytes ''data''.
+If possible, outputs a compressed form of the element 'e' to
+the buffer of bytes 'data'.
 Currently only implemented for points on an elliptic curve.
 */
 int element_to_bytes_compressed(unsigned char *data, element_t e);
 
 /*@manual etrade
-Sets element ''e'' to the element in compressed form in the buffer of bytes
-''data''.
+Sets element 'e' to the element in compressed form in the buffer of bytes
+'data'.
 Currently only implemented for points on an elliptic curve.
 */
 int element_from_bytes_compressed(element_t e, unsigned char *data);
 
 /*@manual etrade
-Returns the number of bytes needed to hold ''e'' in compressed form.
+Returns the number of bytes needed to hold 'e' in compressed form.
 Currently only implemented for points on an elliptic curve.
 */
 int element_length_in_bytes_compressed(element_t e);
@@ -584,8 +577,8 @@ int element_length_in_bytes_compressed(element_t e);
 void field_out_info(FILE *out, field_ptr f);
 
 /*@manual epow
-Prepare to exponentiate an element ''in'', and store preprocessing information
-in ''p''.
+Prepare to exponentiate an element 'in', and store preprocessing information
+in 'p'.
 */
 static inline void element_pp_init(element_pp_t p, element_t in) {
     p->field = in->field;
@@ -593,7 +586,7 @@ static inline void element_pp_init(element_pp_t p, element_t in) {
 }
 
 /*@manual epow
-Clear ''p''. Should be called after ''p'' is no longer needed.
+Clear 'p'. Should be called after 'p' is no longer needed.
 */
 static inline void element_pp_clear(element_pp_t p)
 {
@@ -601,9 +594,9 @@ static inline void element_pp_clear(element_pp_t p)
 }
 
 /*@manual epow
-Raise ''in'' to ''power'' and store the result in ''out'', where ''in''
+Raise 'in' to 'power' and store the result in 'out', where 'in'
 is a previously preprocessed element, that is, the second argument
-passed to a previous <function>element_pp_init</function> call.
+passed to a previous *element_pp_init* call.
 */
 static inline void element_pp_pow(element_t out, mpz_ptr power, element_pp_t p)
 {

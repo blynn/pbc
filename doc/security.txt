@@ -1,54 +1,46 @@
-<chapter>
-<title>Security Issues</title>
-<para>
+== Security Issues ==
+
 There are potential security issues that may cause concern for some
 programmers.
-</para>
-<section>
-<title>Truncated Hashes</title>
-<para>
+
+=== Truncated Hashes ===
+
 For points on an elliptic curve over the base field,
-<function>element_from_hash()</function> will truncate the input hash
++element_from_hash()+ will truncate the input hash
 until it can represent an x-coordinate in that field.
 (PBC then computes a corresponding y-coordinate.)
 Ideally the hash length should be smaller
 than size of the base field and also the size of the elliptic curve group.
-</para>
-<para>
+
+
 Hashing to elements in field extensions does not take advantage of the fact
 that the extension has more elements than the base field. I intend to rewrite
 the code so that for a degree n extension code, PBC splits the hash into n parts
 and determine each polynomial coefficient from one ofthe pieces.
 At the moment every coefficient is the same and depends on the whole hash.
-</para>
-<para>
+
+
 This is not a problem because all the pairing types use an integer mod ring
 as the base field, rather than an extension of some low characteristic field.
-</para>
-</section>
-<section>
-<title>Zeroed Memory</title>
-<para>
+
+=== Zeroed Memory ===
+
 Unlike OpenSSL, there are no functions to zero memory locations used
 in sensitive computations, though to some extent, one can use
-<function>element_random()</function> to overwrite data.
++element_random()+ to overwrite data.
 I have no immediate plans to implement this, but could
 be convinced to do so if I hear enough reasons.
-</para>
-</section>
-<section>
-<title>PRNG Determinism</title>
-<para>
-On platforms without <filename>/dev/urandom</filename> PBC falls back on
+
+=== PRNG Determinism ===
+
+On platforms without `/dev/urandom` PBC falls back on
 a deterministic pseudo-random number generator, which needless to say is
 useless for any security applications.
-</para>
-<para>
-One should note how <filename>/dev/urandom</filename> differs from
-<filename>/dev/random</filename>. A quote from its manpage:
-</para>
-<para>
-<quote>
+
+One should note how `/dev/urandom` differs from
+`/dev/random`. A quote from its manpage:
+
+____
 A  read  from  the  /dev/urandom device will not block waiting for more
 entropy.  As a result, if  there  is  not  sufficient  entropy  in  the
 entropy  pool,  the  returned  values are theoretically vulnerable to a
@@ -56,7 +48,4 @@ cryptographic attack on the algorithms used by the  driver.   Knowledge
 of how to do this is not available in the current non-classified literature,
 but it is theoretically possible that such an attack may  exist.
 If this is a concern in your application, use /dev/random instead.
-</quote>
-</para>
-</section>
-</chapter>
+____

@@ -24,17 +24,17 @@ typedef struct g_param_s g_param_t[1];
 typedef struct g_param_s *g_param_ptr;
 
 /*@manual gparam
-Initialize ''p''. This must be called before ''p'' can be used.
+Initialize 'p'. This must be called before 'p' can be used.
 */
 void g_param_init(g_param_ptr p);
 
 /*@manual gparam
-Clear ''p''. This should be called after ''p'' is no longer needed.
+Clear 'p'. This should be called after 'p' is no longer needed.
 */
 void g_param_clear(g_param_ptr p);
 
 /*@manual gparam
-Write the parameters in ''p'' in a text format onto ''stream''.
+Write the parameters in 'p' in a text format onto 'stream'.
 */
 void g_param_out_str(FILE *stream, g_param_ptr p);
 
@@ -48,19 +48,15 @@ static inline void g_param_init_inp_str(g_param_ptr p, FILE *stream)
 }
 
 /*@manual gparam
-Type G curves are generated using the
-complex multiplication (CM) method.
-This function sets ''p'' to
-a type G pairing parameters from CM parameters ''cm''.
-Another part of the library searches for
-appropriate CM parameters (see below)
+Type G curves are generated using the complex multiplication (CM) method.  This
+function sets 'p' to a type G pairing parameters from CM parameters 'cm'.
+Another part of the library searches for appropriate CM parameters (see below)
 and the results can be passed to this function.
-</para>
-<para>
-To be secure, generic discrete log algorithms must
-be infeasible in groups of order r, and finite field discrete log algorithms
-must be infeasible in finite fields of order q^6.
-For usual CM parameters, r is a few bits smaller than q.
+
+To be secure, generic discrete log algorithms must be infeasible in groups of
+order r, and finite field discrete log algorithms must be infeasible in finite
+fields of order q^6^.  For usual CM parameters, r is a few bits smaller than q.
 */
 void g_param_from_cm(g_param_t p, cm_info_ptr cm);
+
 #endif //__PBC_G_PARAM_H__

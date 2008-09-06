@@ -26,8 +26,7 @@ struct pairing_s {
     void (*phi)(element_ptr out, element_ptr in, struct pairing_s *pairing); //isomorphism G2 --> G1
     void (*map)(element_ptr out, element_ptr in1, element_ptr in2,
 	    struct pairing_s *p);
-    // is_almost coddh returns 1 given (g, g^x, h, h^x) or (g, g^x, h, h^-x)
-    // 0 otherwise
+    // is_almost coddh returns true given (g, g^x, h, h^x) or (g, g^x, h, h^-x)
     // order is important: a, b are from G1, c, d are from G2
     int (*is_almost_coddh)(element_ptr a, element_ptr b,
 	    element_ptr c, element_ptr d,
@@ -45,8 +44,8 @@ typedef struct pairing_s pairing_t[1];
 typedef struct pairing_s *pairing_ptr;
 
 /*@manual pairing_apply
-Get ready to perform a pairing whose first input is ''in1'',
-and store the results of time-saving precomputation in ''p''.
+Get ready to perform a pairing whose first input is 'in1',
+and store the results of time-saving precomputation in 'p'.
 */
 static inline void pairing_pp_init(pairing_pp_t p, element_t in1, pairing_t pairing)
 {
@@ -59,7 +58,7 @@ static inline void pairing_pp_init(pairing_pp_t p, element_t in1, pairing_t pair
 }
 
 /*@manual pairing_apply
-Clear ''p''. This should be called after ''p'' is no longer needed.
+Clear 'p'. This should be called after 'p' is no longer needed.
 */
 static inline void pairing_pp_clear(pairing_pp_t p)
 {
@@ -71,9 +70,9 @@ static inline void pairing_pp_clear(pairing_pp_t p)
 }
 
 /*@manual pairing_apply
-Compute a pairing using ''in2'' and the preprocessed information stored in ''p''
-and store the output in ''out''. The inputs to the pairing are the element
-previously used to initialize ''p'' and the element ''in2''.
+Compute a pairing using 'in2' and the preprocessed information stored in 'p'
+and store the output in 'out'. The inputs to the pairing are the element
+previously used to initialize 'p' and the element 'in2'.
 */
 static inline void pairing_pp_apply(element_t out, element_t in2, pairing_pp_t p)
 {
@@ -91,33 +90,33 @@ static inline void pairing_pp_apply(element_t out, element_t in2, pairing_pp_t p
 void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx);
 
 /*@manual pairing_init
-Read in pairing parameters from array of characters ''buf'' of length ''len''
-and use them to initialize ''pairing''.
+Read in pairing parameters from array of characters 'buf' of length 'len'
+and use them to initialize 'pairing'.
 */
 void pairing_init_inp_buf(pairing_t pairing, const char *buf, size_t len);
 
 /*@manual pairing_init
-Read in pairing parameters from ''stream''
-and use them to initialize ''pairing''.
+Read in pairing parameters from 'stream'
+and use them to initialize 'pairing'.
 */
 void pairing_init_inp_str(pairing_t pairing, FILE *stream);
 
 /*@manual pairing_init
-Free the space occupied by ''pairing''. Call
-whenever a <type>pairing_t</type> variable is no longer needed.
-IMPORTANT: only call this after all elements associated with ''pairing''
-have been cleared, as they need information stored in the ''pairing''
+Free the space occupied by 'pairing'. Call
+whenever a +pairing_t+ variable is no longer needed.
+Only call this after all elements associated with 'pairing'
+have been cleared, as they need information stored in the 'pairing'
 structure.
 */
 void pairing_clear(pairing_t pairing);
 
 /*@manual pairing_apply
-Apply the bilinear map described by ''pairing''. The element ''out''
-will be set to the map applied to ''in1'' and ''in2'', that is
-''out'' = e(''in1'', ''in2'').
-''in1'' must be in the group G1,
-''in2'' must be in the group G2, and
-''out'' must be in the group GT.
+Apply the bilinear map described by 'pairing'. The element 'out'
+will be set to the map applied to 'in1' and 'in2', that is
+'out' = 'e'('in1', 'in2').
+'in1' must be in the group G1,
+'in2' must be in the group G2, and
+'out' must be in the group GT.
 */
 static inline void pairing_apply(element_t out, element_t in1, element_t in2,
     pairing_t pairing)
@@ -148,7 +147,7 @@ static inline void bilinear_map(element_t out, element_t in1, element_t in2)
 }
 
 /*@manual pairing_op
-Returns 1 if G1 and G2 are the same group, 0 otherwise
+Returns true if G1 and G2 are the same group.
 */
 static inline int pairing_is_symmetric(pairing_t pairing)
 {
@@ -246,7 +245,7 @@ static inline void element_init_G2(element_t e, pairing_t pairing)
 }
 
 /*@manual einit.1
-Initialize ''e'' to be an element of the group G1, G2 or GT of ''pairing''.
+Initialize 'e' to be an element of the group G1, G2 or GT of 'pairing'.
 */
 static inline void element_init_GT(element_t e, pairing_t pairing)
 {
@@ -254,7 +253,7 @@ static inline void element_init_GT(element_t e, pairing_t pairing)
 }
 
 /*@manual einit.1
-Initialize ''e'' to be an element of the ring Z_r of ''pairing''.
+Initialize 'e' to be an element of the ring Z_r of 'pairing'.
 r is the order of the groups G1, G2 and GT that are involved in the pairing.
 */
 static inline void element_init_Zr(element_t e, pairing_t pairing)

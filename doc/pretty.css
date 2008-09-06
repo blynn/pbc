@@ -75,15 +75,11 @@ div.toc a:hover {
     background-color: #f9f9aa;
 }
 
-.programlisting, .screen {
+.literallayout {
     margin: 0;
     border: 1px solid #aaaaaa;
     background-color: #f9f9f9;
     padding: 0.17em;
     margin: 1em;
     margin-right: 3em;
-}
-
-.parameter {
-    font-style: italic;
 }

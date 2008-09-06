@@ -1,19 +1,13 @@
-<chapter>
-<title>Randomness Functions</title>
-<para>
+== Randomness Functions ==
+
 The first time PBC is asked to generate a random number,
-the library will try to open the file <filename>/dev/urandom</filename> as a
+the library will try to open the file `/dev/urandom` as a
 source of random bits. If this fails, PBC falls back to a deterministic
 random number generator (which is of course completely useless for
 cryptography).
-</para>
-<para>
+
 It is possible to change the file used for random bits. Also, explicitly
 selecting the deterministic random number generator will
 suppress the warning.
-</para>
-<variablelist>
-&pbcrandom;
-</variablelist>
 
-</chapter>
+include::gen/pbcrandom.txt[]

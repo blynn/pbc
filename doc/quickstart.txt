@@ -1,0 +1,49 @@
+== Quick Start ==
+
+One can experiment with the PBC library without writing a single line of C.
+The binary `pbc/pbc` should be present after PBC successfully compiles.
+
+The `pbc` program is an interactive calculator that can be used to test the PBC
+library, and also experiment with pairings in general.
+
+[[pbcintro]]
+=== Playing with Pairings ===
+
+We shall use the following notation. For our purposes, the pairing is a
+bilinear map from two cyclic groups, G1 and G2 to a third group GT, where each
+group has prime order r.
+
+Run `pbc/pbc` and type:
+
+  g=rnd(G1)
+  g
+
+The first line generates a random element g of the group G1,
+while the second prints out the value of g. (The syntax was influenced
+by `bc`, an arbitrary precision calculator.)
+Next, enter:
+
+  h=rnd(G2)
+  h
+
+This assigns h to a random element of the group G2. Actually, the default
+pairing `pbc` uses is symmetric so G1 and G2 are in fact the same group, but in
+general they are distinct. To compute the pairing applied to g and h, type:
+
+  pairing(g,h)
+
+The order of both g and h is r. Let's generate two random numbers between
+1 and r:
+
+  a=rnd(Zr)
+  b=rnd(Zr)
+
+By bilinearity, the resulting output of both of these lines should be
+identical:
+
+  pairing(g^a,h^b)
+  pairing(g,h)^(a*b)
+
+This program has <<pbcref, other features>> but the commands shown here should
+be enough to quickly and interactively experiment with many pairing-based
+cryptosystems using real numbers.

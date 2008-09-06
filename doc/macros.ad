@@ -1,0 +1,9 @@
+[miscellaneous]
+newline=\n
+
+[blockdef-passthrough]
+delimiter=^@{4,}$
+subs=none
+
+[replacements]
+sigma=&sigma;

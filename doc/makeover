@@ -13,10 +13,10 @@ gawk '
     print "</div>"
     exit
 }
-' < pretty/index.html > toc.tmp
-for a in pretty/*.html
+' < manual/index.html > toc.tmp
+for a in manual/*.html
 do
-    if [ $a != "pretty/index.html" ]
+    if [ $a != "manual/index.html" ]
     then
 #add " - PBC" to titles of all pages
     sed '/<\/title>/ s/<\/title>/ - PBC&/' -i $a
@@ -41,10 +41,10 @@ gawk '
     sub("</div>","")
 }
 { print }
-' < pretty/index.html | sed '/<body/{n; r toc.tmp
+' < manual/index.html | sed '/<body/{n; r toc.tmp
 a <div class="content">
 r index.html
 a </div>
 } ' > tmp.tmp
-mv tmp.tmp pretty/index.html
+mv tmp.tmp manual/index.html
 rm toc.tmp

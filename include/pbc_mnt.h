@@ -16,19 +16,19 @@ typedef struct cm_info_s *cm_info_ptr;
 typedef struct cm_info_s cm_info_t[1];
 
 /*@manual cminfo
-Initializes ''cm''.
+Initializes 'cm'.
 */
 void cm_info_init(cm_info_t cm);
 /*@manual cminfo
-Clears ''cm''.
+Clears 'cm'.
 */
 void cm_info_clear(cm_info_t cm);
 
 /*@manual cminfo
 For a given discriminant D, searches for MNT curves of embedding degree 6
 suitable for cryptography (type D pairings) where the group order
-is at most ''bitlimit'' bits. For each suitable set of CM parameters found,
-call supplied callback with <type>cm_info_t</type> and given void pointer.
+is at most 'bitlimit' bits. For each suitable set of CM parameters found,
+call supplied callback with +cm_info_t+ and given void pointer.
 Returns the number of CM parameters found.
 */
 int find_mnt6_curve(void (*callback)(cm_info_ptr, void *), void *data,
@@ -38,8 +38,8 @@ int find_mnt6_curve(void (*callback)(cm_info_ptr, void *), void *data,
 For a given discriminant D, searches for a Freeman curve of embedding
 degree 10
 suitable for cryptography (type D pairings) where the group order
-is at most ''bitlimit'' bits. For each suitable set of CM parameters found,
-call supplied callback with <type>cm_info_t</type> and given void pointer.
+is at most 'bitlimit' bits. For each suitable set of CM parameters found,
+call supplied callback with +cm_info_t+ and given void pointer.
 Returns the number of CM parameters found.
 */
 int find_freeman_curve(void (*callback)(cm_info_ptr, void *), void *data,

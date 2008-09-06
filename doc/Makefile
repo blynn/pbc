@@ -1,40 +1,45 @@
-# Makefile for generating manual in various formats from DocBook sources
-.PHONY: target genxml
+.PHONY: target clean sync gendoc
 
-target : pretty/index.html
+target: manual.html
 
-GENFILES:=gen/*.xml
-SRCFILES:=*.xml $(GENFILES)
+TXTFILES:=preface.txt quickstart.txt basics.txt sigex.txt \
+  pairingfns.txt elementfns.txt paramfns.txt randomfns.txt \
+  auxfns.txt alloc.txt bundle.txt internal.txt security.txt \
+  contributors.txt
 
-genxml $(GENFILES) : ../include/*.h extract
+GENFILES:=gen/*.txt
+
+gendoc $(GENFILES) : ../include/*.h extract
 	-rm $(GENFILES)
 	-mkdir gen
 	cat ../include/*.h | ./extract
-	for a in gen/*.*.xml; do b=$${a%.*.xml}.xml; cat $$a $$b > tmp; mv tmp $$b ; rm $$a; done
+	for a in gen/*.*.txt; do b=$${a%.*.txt}.txt; cat $$a $$b > tmp; mv tmp $$b ; rm $$a; done
 
-chunked/index.html : $(SRCFILES) custom.xsl
+manual.xml: $(TXTFILES) $(GENFILES)
+	( for FILE in $(TXTFILES) ; do cat $$FILE ; echo ; done ) | asciidoc -f macros.ad -d book -b docbook - > $@
+
+chunked/index.html : manual.xml custom.xsl
 	xmlto -o chunked -m custom.xsl html manual.xml
 
-pretty/index.html : $(SRCFILES) custom-pretty.xsl makeover index.html
-	xmlto -o pretty -m custom-pretty.xsl html manual.xml
-	-ls pretty/*.html | xargs -n 1 tidy -utf8 -m -i -q
+manual: manual.xml custom-pretty.xsl pretty.css
+	xmlto -m custom-pretty.xsl -o manual html manual.xml
+	sed -i 's/xmlns:fo[^ ]*//g' manual/*.html
+	ls manual/*.html | xargs -n 1 tidy -utf8 -m -i -q
 	./makeover
+	cp pretty.css manual/
 
-manual.html : $(SRCFILES) custom-nochunks.xsl
+manual.html : manual.xml custom-nochunks.xsl
 	xmlto -m custom-nochunks.xsl html-nochunks manual.xml
-	-tidy -utf8 -imq manual.html
+	-tidy -utf8 -imq $@
 
 manual.txt : manual.html
 	html2text -nobs -style pretty manual.html > manual.txt
 
-manual.pdf : $(SRCFILES)
+manual.pdf: manual.xml
 	docbook2pdf manual.xml
 
-pdf : $(SRCFILES)
-	docbook2pdf manual.xml
+clean:
+	-rm -rf manual.xml manual.html manual
 
-clean :
-	-rm -rf pretty/*.html chunked manual.html manual.txt gen forsite.tar.bz2 manual.pdf manual.tex
-
-forsite: pretty/* manual.html manual.txt chunked/* manual.pdf
-	tar cvfj forsite.tar.bz2 $^
+sync: manual/* manual.html manual.txt chunked/* manual.pdf
+	#rsync -r $^ blynn@tl1.stanford.edu:pbc/doc/

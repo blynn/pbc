@@ -1,0 +1,111 @@
+== Bundled Programs ==
+
+Several binaries and curve parameters are bundled with the PBC library,
+such as <<pbcintro, the `pbc` program>>.
+
+The `param` subdirectory contains pairing parameters one might use in
+a real cryptosystem. Many of the test programs read the parameters
+from files such as these on standard input, for example:
+
+  $ benchmark/benchmark < param/c159.param
+  $ example/bls < param/e.param
+
+[[pbcref]]
+=== Pairing-Based Calculator ===
+
+The `pbc` subdirectory contains a program also named
+`pbc` which allows interactive testing of the PBC library.
+
+Its syntax is loosely based on that of `bc`, a well-known arbitrary precision
+calculator language. I do not intend for `pbc` to be a fully-fledged scripting
+language. If this were the aim I would add a module to an extant popular
+language.  Instead, pbc is meant to be a test program.  (Nonetheless, it
+possesses enough functionality to be used to implement cryptosystems in shell
+scripts.)
+
+Four pairings named A, D, E and F are initialized during startup, and
+furthermore, the variables G1, G2, GT and Zr are setup to represent groups
+associated with the A pairing. To use a different pairing, call the
+init_pairing funciton.
+
+Assignments have a C-like syntax "variable = expression", and return the value
+of the variable.  Function calls and expressions also resemble C.  The
+arithmetic operators +, -, /, *, ^ have the standard precedence.  Perhaps the
+only significant difference is that no terminating semicolon is required.
+
+Comments begin with "#" and end at a newline.  Double quotes are used to denote
+strings.  On error, pbc prints the error code which I have yet to translate to
+English.
+
+Some of the pbc functions:
+
++init_pairing(pairing)+::
+Set the variables G1, G2, GT and Zr to the groups in +pairing+, e.g:
++
+  init_pairing(D)
+
++rnd(G)+::
+Returns a random element of the group G, e.g:
++
+  g = rnd(Zr)
++
+Has synonyms `rand` and `random`.
+
++pairing(g, h)+::
+
+Returns the pairing applied to +g+ and +h+.
+The element +g+ must be an element of G1 and +h+ of G2, e.g:
++
+  pairing(rnd(G1), rnd(G2))
+
++fromstr(string, G)+::
+Returns +string+ converted to an element of +G+, e.g.
++
+  x = fromstr("[123,456]", GT)
+
+=== Parameter Generation ===
+
+Programs that generate pairing parameters are located in the `gen`
+subdirectory. Some of the programs are already functional enough to be used to
+find parameters for real applications.  I need to write more documentation
+first; for now, read the source!
+
+*listmnt*::
+  Searches for discriminants D that lead to MNT curves with subgroups
+  of prime order.
+
+*genaparam*, *gena1param*, *gendparam*, *geneparam*, *genfparam*::
+  Prints parameters for a curve suitable for computing pairings of a given type.
+  The output can be fed to some of the other test programs.  The program
+  `gendparam` should be given a discriminant as the first argument.
+
+*hilbertpoly*::
+  Prints the Hilbert polynomial for a given discriminant (the first argument).
+  Computing the Hilbert polynomial is an intermediate step when generating
+  type D parameters.
+
+=== Example Cryptosystems ===
+
+In the `example` subdirectory there are various programs that read curve
+parameters on standard input and perform computations that would be required in
+a typical implementation of a pairing-based cryptosystem. Sample schemes
+include:
+
+-   Boneh-Lynn-Shacham short signatures
+-   Hess identity-based signatures
+-   Joux tripartite Diffie-Hellman
+-   Paterson identity-based signatures
+-   Yuan-Li identity-based authenticated key agreement
+-   Zhang-Kim identity-based blind/ring signatures
+-   Zhang-Safavi-Naini-Susilo signatures
+
+More work would be required to turn these programs into real applications.
+
+=== Benchmarks ===
+
+I use the programs in the `benchmark` subdirectory to measure running times of
+pairings, and also RSA decryptions.
+
+The `benchmark` program takes pairing parameters on standard input and reports
+the average running time of the pairing over 10 runs, while `timersa` estimates
+the time required to perform one 1024-bit RSA decryption.
