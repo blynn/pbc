@@ -164,11 +164,6 @@ cryptosystem. Sample schemes include:
 <itemizedlist>
     <listitem>
     <para>
-    Boneh-Franklin identity-based encryption
-    </para>
-    </listitem>
-    <listitem>
-    <para>
     Boneh-Lynn-Shacham short signatures
     </para>
     </listitem>

@@ -1811,10 +1811,10 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 	element_square(f, f);
     }
 
-    //Tate exponentiation
-    //simpler but slower:
-    //element_pow_mpz(out, f, p->tateexp);
-    //use this trick instead:
+    // Tate exponentiation.
+    // Simpler but slower:
+    //   element_pow_mpz(out, f, p->tateexp);
+    // Use this trick instead:
     element_invert(f0, f);
     element_neg(fi_im(f), fi_im(f));
     element_mul(f, f, f0);
@@ -1894,6 +1894,7 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param)
     element_clear(b);
     field_init_fi(p->Fp2, p->Fp);
 
+    pairing->finalpow = a_finalpow;
     pairing->G1 = pbc_malloc(sizeof(field_t));
     pairing->G2 = pairing->G1 = p->Ep;
     GT_init_finite_field(pairing, p->Fp2);
