@@ -1,0 +1,13 @@
+== PBC Library Manual ==
+
+Other editions:
+
+- link:../chunked/[Chunked HTML]: One HTML file per section, with no attempts
+  to make it easier to read.
+ 
+- link:../manual.html[Single HTML]: One big HTML file. I attemped to improve
+  its appearance.
+  
+- link:../manual.pdf[PDF file]: Portable Document Format.
+
+- link:../manual.txt[text file]

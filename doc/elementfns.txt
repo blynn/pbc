@@ -68,13 +68,10 @@ that a particular element will be exponentiated several times in the future,
 time can be saved in the long run by first calling the preprocessing function:
 
     element_pp_t g_pp;
-
     element_pp_init(g_pp, g);
-
     element_pp_pow(h, pow1, g_pp); // h = g^pow1
     element_pp_pow(h, pow2, g_pp); // h = g^pow2
     element_pp_pow(h, pow3, g_pp); // h = g^pow3
-
     element_pp_clear(g_pp);
 
 include::gen/epow.txt[]

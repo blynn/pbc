@@ -1,9 +1,8 @@
 == PBC Internals ==
 
-Algebraic structures are represented in the
-+field_t+ data type, which mostly contains pointers to functions
-written to perform operations such as addition and multiplication
-on elements of that particular group, ring or field:
+Algebraic structures are represented in the +field_t+ data type, which mostly
+contains pointers to functions written to perform operations such as addition
+and multiplication on elements of that particular group, ring or field:
 
   struct field_s {
     ...
@@ -19,18 +18,16 @@ on elements of that particular group, ring or field:
   typedef struct field_s field_t[1];
 
 The name +algebraic_structure_t+ is arguably more accurate, but far too
-cumbersome.  If my naming choice causes discomfort, it may help if groups and
-rings are simply viewed as fields where certain things don't work!
+cumbersome.  It may help if one views groups and rings as handicapped fields.
 
-The last two lines of the above code excerpt show how GMP, and PBC, define data
-types: they are actually arrays of length one so that when a variable is
+The last two lines of the above code excerpt show how GMP and PBC define data
+types: they are arrays of length one so that when a variable is
 declared, space is automatically allocated for it.  Yet when used as a argument
 to a function, a pointer is passed, thus there is no need to explicitly
 allocate and deallocate memory, nor reference and dereference variables.
 
-Each +element_t+ contains a field named +field+
-to such a +field_t+ variable. The only other field
-is +data+, which stores any data needed for the
+Each +element_t+ contains a field named +field+ to such a +field_t+ variable.
+The only other field is +data+, which stores any data needed for the
 implementation of the particular algebraic structure the element resides in.
 
   struct element_s {
@@ -38,11 +35,9 @@ implementation of the particular algebraic structure the element resides in.
       void *data;
   };
 
-When an +element_t+ variable is initialized,
-+field+ is set appropriately, and then the
-initialization specific
-to that field is called to complete the initialization. Here, a line of
-code is worth a thousand words:
+When an +element_t+ variable is initialized, +field+ is set appropriately, and
+then the initialization specific to that field is called to complete the
+initialization. Here, a line of code is worth a thousand words:
 
   void element_init(element_t e, field_ptr f)
   {
@@ -50,12 +45,11 @@ code is worth a thousand words:
       f->init(e);
   }
 
-Thus when a call to one of the `element_` functions,
-the +field+ pointer is followed to see which
-version of the function should be called, so that for example modular
-addition is performed if the input element is an element of a finite field,
-while polynomial addition is performed for elements of a polynomial ring
-and so on.
+Thus when a call to one of the `element_` functions, the +field+ pointer is
+followed to see which version of the function should be called, so that for
+example modular addition is performed if the input element is an element of a
+finite field, while polynomial addition is performed for elements of a
+polynomial ring and so on.
 
   void element_add(element_t n, element_t a, element_t b)
   {
@@ -69,8 +63,7 @@ to add a polynomial and a point on an elliptic curve, say, the code
 will compile without warnings since they have the same data type,
 but the results are undefined and the library will mostly cause a crash.
 
-However I settled on having a catch-all
-``glorified +void *+'' +element_t+
+However I settled on having a catch-all ``glorified +void *+'' +element_t+
 because I wanted to
 
 - extend a field an arbitrary number of times (though in practice, currently I

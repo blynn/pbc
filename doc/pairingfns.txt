@@ -68,12 +68,9 @@ repeating many calculations saving time in the long run.  A variable of type
 then used to compute pairings:
 
   pairing_pp_t pp;
-
   pairing_pp_init(pp, x, pairing); // x is some element of G1
-
   pairing_pp_apply(r1, y1, pp); // r1 = e(x, y1)
   pairing_pp_apply(r2, y2, pp); // r2 = e(x, y2)
-
   pairing_pp_clear(pp); // don't need pp anymore
 
 include::gen/pairing_apply.txt[]

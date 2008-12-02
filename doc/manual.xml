@@ -3,7 +3,7 @@
 
 <book lang="en">
 <bookinfo>
-    <title>PBC Library Manual</title>
+    <title>PBC Library Manual 0.4.18</title>
     <date>2006</date>
     <author>
         <firstname>Ben</firstname>
@@ -15,32 +15,20 @@
 </bookinfo>
 <preface>
 <title>Preface</title>
-<simpara>This manual describes how to install and use the PBC pairing-based
-cryptography library, version 0.4.18.</simpara>
+<simpara>The PBC library is a free portable C library allowing the rapid prototyping of
+pairing-based cryptosystems. It provides an abstract interface to a cyclic
+group with a bilinear pairing, insulating the programmer from mathematical
+details. Knowledge of elliptic curves is optional.</simpara>
 
-<simpara>It is modeled on the GMP manual. GMP is the GNU multiple precision
-arithmetic library, and PBC is built on top of GMP. The PBC API
-is strongly influenced by the GMP API, so it is appropriate that
-this manual imitates the look and feel of the GMP manual.</simpara>
-
-</preface>
-<chapter>
-<title>Overview</title>
-<simpara>The PBC library is a free portable C library designed to make it easy
-to implement
-pairing-based cryptosystems. It provides an abstract interface to a
-cyclic group with a bilinear pairing, and the programmer does not need
-to worry about, or even know about elliptic curves.</simpara>
-
-<simpara>It is built on top of GMP, another C library which performs arbitrary
-precision arithmetic on integers, rationals and floats with strong emphasis on
-portability and speed.</simpara>
+<simpara>The PBC library is built on top of the GMP library, and the PBC API is strongly
+influenced by the GMP API. Accordingly, this manual tries to imitate the look
+and feel of the GMP manual.</simpara>
 
 <simpara>The PBC library homepage: <ulink url="http://crypto.stanford.edu/pbc/">http://crypto.stanford.edu/pbc/</ulink></simpara>
 
 <simpara>The GMP library homepage: <ulink url="http://www.swox.com/gmp/">http://www.swox.com/gmp/</ulink></simpara>
 
-</chapter>
+</preface>
 <chapter>
 <title>Installing PBC</title>
 <simpara>The PBC library needs <ulink url="http://www.swox.com/gmp/">the GMP library</ulink>.
@@ -59,10 +47,9 @@ GNU Build System (autotools)
 <literallayout class="monospaced">$ ./configure
 $ make
 $ make install</literallayout>
-<simpara>By default the library is installed in <literal>/usr/local/lib</literal>.
-On some systems, this may not be in the library
-path. One way to fix this is to edit <literal>/etc/ld.so.conf</literal> and
-run <literal>ldconfig</literal>.</simpara>
+<simpara>By default the library is installed in <literal>/usr/local/lib</literal>.  On some systems, this
+may not be in the library path. One way to fix this is to edit
+<literal>/etc/ld.so.conf</literal> and run <literal>ldconfig</literal>.</simpara>
 
 </listitem>
 </varlistentry>
@@ -80,10 +67,9 @@ $ make</literallayout>
 </listitem>
 </varlistentry>
 </variablelist>
-<simpara>PBC uses some GNU C extensions, notably nested functions.
-For efficiency, some of the lower-level PBC code relies on some GMP internals,
-which may change in future releases. In that case, the PBC code will also
-have to be updated.</simpara>
+<simpara>PBC uses some GNU C extensions, notably nested functions.  For efficiency, some
+of the lower-level PBC code relies on some GMP internals, which may change in
+future releases. In that case, the PBC code will also have to be updated.</simpara>
 
 </chapter>
 <chapter>
@@ -184,35 +170,27 @@ precision floats.</simpara>
 <itemizedlist>
 <listitem>
 <simpara>
-Functions for dealing with bilinear pairing parameters begin with
+Functions involving pairings; these begin with
 <literal>pairing_</literal>.
 </simpara>
 </listitem>
 <listitem>
 <simpara>
-Functions for operating on elements of groups, rings and fields begin
+Functions operating on elements of groups, rings and fields; these begin
 with <literal>element_</literal>.
 </simpara>
 </listitem>
 <listitem>
 <simpara>
-Functions that generate pairing parameters, that is, find elliptic curves
-where efficiently computable bilinear pairings exist.  The sample parameters
-bundled are adequate for many cryptosystems, but there may be a need to
-generate more.
+Functions generating pairings, that is, find elliptic curves
+where efficiently computable bilinear pairings exist; useful if the
+bundled pairings are inadequate.
 </simpara>
 </listitem>
 <listitem>
 <simpara>
 Miscellaneous functions, such as ones controlling how random bits are
 generated.
-</simpara>
-</listitem>
-<listitem>
-<simpara>
-Auxiliary functions that work on abstract data types such dynamic
-arrays and symbol tables mostly used internally by PBC, but may have some use
-in applications.
 </simpara>
 </listitem>
 </itemizedlist>
@@ -284,24 +262,22 @@ an initialization call.</simpara>
 Boneh-Lynn-Shacham (BLS) signature scheme using the PBC library.
 It is based on the file <literal>example/bls.c</literal>.</simpara>
 
-<simpara>Recall the scheme works as follows. We have three groups
-G1, G2, GT of prime order r, and have some
-bilinear map e that takes two elements as input,
-one from G1 and one from G2,
-and outputs an element of GT.</simpara>
+<simpara>We have three groups <emphasis>G1</emphasis>, <emphasis>G2</emphasis>, <emphasis>GT</emphasis> of prime order <emphasis>r</emphasis>, and a bilinear map
+<emphasis>e</emphasis> that takes an element from <emphasis>G1</emphasis> and an element from <emphasis>G2</emphasis>, and outputs an
+element of <emphasis>GT</emphasis>. We publish these along with the system parameter <emphasis>g</emphasis>, which is
+a randomly chosen element of <emphasis>G2</emphasis>.</simpara>
 
-<simpara>First we publish the system parameter g which is a randomly
-chosen element of G2.</simpara>
-
-<simpara>Now suppose Alice wishes to use the system.
-We generate her public and private keys as follows.
-A private key is a random element x of Zr, and
-the corresponding public key is g<superscript>x</superscript>.</simpara>
+<simpara>Alice wishes to sign a message.  She generates her public and private keys as
+follows.  Her private key is a random element <emphasis>x</emphasis> of <emphasis>Zr</emphasis>, and her corresponding
+public key is <emphasis>g</emphasis><superscript><emphasis>x</emphasis></superscript>.</simpara>
 
 <simpara>To sign a message, Alice hashes the message to some element
-h of G1, and then outputs the signature h<superscript>x</superscript>.</simpara>
+<emphasis>h</emphasis> of <emphasis>G1</emphasis>, and then outputs the signature <emphasis>h</emphasis><superscript><emphasis>x</emphasis></superscript>.</simpara>
 
-<simpara>To verify a signature &sigma;, one checks that e(h,g<superscript>x</superscript>) = e(&sigma;, g).</simpara>
+<simpara>To verify a signature &sigma;, Bob checks that
+<emphasis>e</emphasis>(<emphasis>h</emphasis>,<emphasis>g</emphasis><superscript><emphasis>x</emphasis></superscript>) = <emphasis>e</emphasis>(&sigma;, <emphasis>g</emphasis>).</simpara>
+
+<simpara>We now translate the above to C code using the PBC library.</simpara>
 
 <section>
 <title>BLS Signatures</title>
@@ -312,20 +288,19 @@ h of G1, and then outputs the signature h<superscript>x</superscript>.</simpara>
 
 <literallayout class="monospaced">pairing_t pairing;
 pairing_init_inp_str(pairing, stdin);</literallayout>
-<simpara>Later we give pairing parameters to our program
-on standard input. Any file in the <literal>param</literal> subdirectory
-will suffice, for example:</simpara>
+<simpara>Later we give pairing parameters to our program on standard input. Any file in
+the <literal>param</literal> subdirectory will suffice, for example:</simpara>
 
 <literallayout class="monospaced">$ bls &lt; param/a.param</literallayout>
-<simpara>We shall need several <literal>element_t</literal> variables to
-hold the system parameters, keys and other quantities. We declare
-them and initialize them,</simpara>
+<simpara>We shall need several <literal>element_t</literal> variables to hold the system parameters, keys
+and other quantities. We declare them and initialize them,</simpara>
 
 <literallayout class="monospaced">element_t g, h;
 element_t public_key, secret_key;
 element_t sig;
-element_t temp1, temp2;</literallayout>
-<literallayout class="monospaced">element_init_G2(g, pairing);
+element_t temp1, temp2;
+
+element_init_G2(g, pairing);
 element_init_G2(public_key, pairing);
 element_init_G1(h, pairing);
 element_init_G1(sig, pairing);
@@ -360,8 +335,8 @@ and the pairing applied to the message hash and public key.
 If the pairing outputs match then the signature is valid.</simpara>
 
 <literallayout class="monospaced">pairing_apply(temp1, sig, g, pairing);
-pairing_apply(temp2, h, public_key, pairing);</literallayout>
-<literallayout class="monospaced">if (!element_cmp(temp1, temp2)) {
+pairing_apply(temp2, h, public_key, pairing);
+if (!element_cmp(temp1, temp2)) {
     printf("signature verifies\n");
 } else {
     printf("signature does not verify\n");
@@ -373,17 +348,17 @@ pairing_apply(temp2, h, public_key, pairing);</literallayout>
 to bytes for storage or transmission:</simpara>
 
 <literallayout class="monospaced">int n = pairing_length_in_bytes_compressed_G1(pairing);
-//alternative:
-//int n = element_length_in_bytes_compressed(sig);
+// Alternatively:
+// int n = element_length_in_bytes_compressed(sig);
 unsigned char *data = malloc(n);
 element_to_bytes_compressed(data, sig);</literallayout>
 <simpara>On the other end, the signature must be decompressed:</simpara>
 
 <literallayout class="monospaced">element_from_bytes_compressed(sig, data);</literallayout>
 <simpara>Eliding <literal>_compressed</literal> in the above code
-will also work but the buffer <emphasis>'data</emphasis>' will be roughly twice as large.</simpara>
+will also work but the buffer <emphasis>data</emphasis> will be roughly twice as large.</simpara>
 
-<simpara>We can save more space by using the x-coordinate of the signature only</simpara>
+<simpara>We can save more space by using the <emphasis>x</emphasis>-coordinate of the signature only</simpara>
 
 <literallayout class="monospaced">int n = pairing_length_in_bytes_x_only_G1(pairing);
 //alternative:
@@ -391,20 +366,24 @@ will also work but the buffer <emphasis>'data</emphasis>' will be roughly twice 
 unsigned char *data = malloc(n);
 element_to_bytes_compressed(data, sig);</literallayout>
 <simpara>but then there is a complication during verification since two different
-points have the same x-coordinate. One way to solve this problem is to
+points have the same <emphasis>x</emphasis>-coordinate. One way to solve this problem is to
 guess one point and try to verify. If that fails, we try the other.
 It can be shown that the pairing outputs of the two points are inverses
 of each other, avoiding the need to compute a pairing the second time.
-(Actually, there are better ways to handle this.)</simpara>
+(In fact, there are even better ways to handle this.)</simpara>
 
 <literallayout class="monospaced">int n = pairing_length_in_bytes_x_only_G1(pairing);
 //int n = element_length_in_bytes_x_only(sig);
-unsigned char *data = malloc(n);</literallayout>
-<literallayout class="monospaced">element_to_bytes_x_only(data, sig);</literallayout>
-<literallayout class="monospaced">element_from_bytes_x_only(sig, data)</literallayout>
-<literallayout class="monospaced">pairing_apply(temp1, sig, g, pairing);
-pairing_apply(temp2, h, public_key, pairing);</literallayout>
-<literallayout class="monospaced">if (!element_cmp(temp1, temp2)) {
+unsigned char *data = malloc(n);
+
+element_to_bytes_x_only(data, sig);
+
+element_from_bytes_x_only(sig, data)
+
+pairing_apply(temp1, sig, g, pairing);
+pairing_apply(temp2, h, public_key, pairing);
+
+if (!element_cmp(temp1, temp2)) {
     printf("signature verifies on first guess\n");
 } else {
     element_invert(temp1, temp1);
@@ -503,11 +482,11 @@ repeating many calculations saving time in the long run.  A variable of type
 <literal>pairing_pp_t</literal> should be declared, initialized with the fixed G1 element, and
 then used to compute pairings:</simpara>
 
-<literallayout class="monospaced">pairing_pp_t pp;</literallayout>
-<literallayout class="monospaced">pairing_pp_init(pp, x, pairing); // x is some element of G1</literallayout>
-<literallayout class="monospaced">pairing_pp_apply(r1, y1, pp); // r1 = e(x, y1)
-pairing_pp_apply(r2, y2, pp); // r2 = e(x, y2)</literallayout>
-<literallayout class="monospaced">pairing_pp_clear(pp); // don't need pp anymore</literallayout>
+<literallayout class="monospaced">pairing_pp_t pp;
+pairing_pp_init(pp, x, pairing); // x is some element of G1
+pairing_pp_apply(r1, y1, pp); // r1 = e(x, y1)
+pairing_pp_apply(r2, y2, pp); // r2 = e(x, y2)
+pairing_pp_clear(pp); // don't need pp anymore</literallayout>
 <simpara>void  <emphasis role="strong">pairing_pp_init</emphasis>(<emphasis>pairing_pp_t p</emphasis>, <emphasis>element_t in1</emphasis>, <emphasis>pairing_t pairing</emphasis>)</simpara>
 
 <blockquote>
@@ -812,12 +791,12 @@ where there are <emphasis>z</emphasis> <emphasis>a</emphasis>'s.</simpara>
 that a particular element will be exponentiated several times in the future,
 time can be saved in the long run by first calling the preprocessing function:</simpara>
 
-<literallayout class="monospaced">element_pp_t g_pp;</literallayout>
-<literallayout class="monospaced">element_pp_init(g_pp, g);</literallayout>
-<literallayout class="monospaced">element_pp_pow(h, pow1, g_pp); // h = g^pow1
+<literallayout class="monospaced">element_pp_t g_pp;
+element_pp_init(g_pp, g);
+element_pp_pow(h, pow1, g_pp); // h = g^pow1
 element_pp_pow(h, pow2, g_pp); // h = g^pow2
-element_pp_pow(h, pow3, g_pp); // h = g^pow3</literallayout>
-<literallayout class="monospaced">element_pp_clear(g_pp);</literallayout>
+element_pp_pow(h, pow3, g_pp); // h = g^pow3
+element_pp_clear(g_pp);</literallayout>
 <simpara>void  <emphasis role="strong">element_pow_mpz</emphasis>(<emphasis>element_t x</emphasis>, <emphasis>element_t a</emphasis>, <emphasis>mpz_t n</emphasis>)</simpara>
 
 <blockquote>
@@ -1430,92 +1409,6 @@ a random <emphasis>bits</emphasis>-bit integer <emphasis>z</emphasis>.</simpara>
 </blockquote>
 </chapter>
 <chapter>
-<title>Auxiliary Functions</title>
-<simpara>Information on data types internally used by the library.</simpara>
-
-<section>
-<title>Dynamic Arrays</title>
-<simpara>The <literal>darray_t</literal> data type manages an array of pointers of type <literal>void *</literal>,
-allocating more memory when necessary.</simpara>
-
-<simpara>void  <emphasis role="strong">darray_init</emphasis>(<emphasis>darray_t a</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Initialize a dynamic array <emphasis>a</emphasis>. Must be called before <emphasis>a</emphasis> is used.</simpara>
-
-</blockquote>
-<simpara>void  <emphasis role="strong">darray_clear</emphasis>(<emphasis>darray_t a</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Clears a dynamic array <emphasis>a</emphasis>. Should be called after <emphasis>a</emphasis> is no longer needed.</simpara>
-
-</blockquote>
-<simpara>void  <emphasis role="strong">darray_append</emphasis>(<emphasis>darray_t a</emphasis>, <emphasis>void *p</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Appends <emphasis>p</emphasis> to the dynamic array <emphasis>a</emphasis>.</simpara>
-
-</blockquote>
-<simpara>void <emphasis role="strong"> *darray_at</emphasis>(<emphasis>darray_t a</emphasis>, <emphasis>int i</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Returns the pointer at index <emphasis>i</emphasis> in the dynamic array <emphasis>a</emphasis>.</simpara>
-
-</blockquote>
-<simpara>void  <emphasis role="strong">darray_remove_index</emphasis>(<emphasis>darray_t a</emphasis>, <emphasis>int n</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Removes the pointer at index <emphasis>i</emphasis> in the dynamic array <emphasis>a</emphasis>.</simpara>
-
-</blockquote>
-<simpara>int  <emphasis role="strong">darray_count</emphasis>(<emphasis>darray_t a</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Returns the number of pointers held in <emphasis>a</emphasis>.</simpara>
-
-</blockquote>
-</section>
-<section>
-<title>Symbol Tables</title>
-<simpara>The <literal>symtab_t</literal> data type manages symbol tables where the keys are strings of
-type <literal>char *</literal> and the values are pointers of type <literal>void *</literal>.</simpara>
-
-<simpara>At present, they are implemented inefficiently using dynamic arrays, but this
-will change if the need arises.</simpara>
-
-<simpara>void  <emphasis role="strong">symtab_init</emphasis>(<emphasis>symtab_t t</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Initialize symbol table <emphasis>t</emphasis>. Must be called before <emphasis>t</emphasis> is used.</simpara>
-
-</blockquote>
-<simpara>void  <emphasis role="strong">symtab_clear</emphasis>(<emphasis>symtab_t t</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Clears symbol table <emphasis>t</emphasis>. Should be called after <emphasis>t</emphasis> is no longer needed.</simpara>
-
-</blockquote>
-<simpara>void  <emphasis role="strong">symtab_put</emphasis>(<emphasis>symtab_t t</emphasis>, <emphasis>void *value</emphasis>, <emphasis>char *key</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Puts <emphasis>value</emphasis> at <emphasis>key</emphasis> in <emphasis>t</emphasis>.</simpara>
-
-</blockquote>
-<simpara>int  <emphasis role="strong">symtab_has</emphasis>(<emphasis>symtab_t t</emphasis>, <emphasis>char *key</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Returns true if <emphasis>t</emphasis> contains key <emphasis>key</emphasis>.</simpara>
-
-</blockquote>
-<simpara>void <emphasis role="strong"> *symtab_at</emphasis>(<emphasis>symtab_t t</emphasis>, <emphasis>char *key</emphasis>)</simpara>
-
-<blockquote>
-<simpara>Returns pointer at key <emphasis>key</emphasis> in <emphasis>t</emphasis>.</simpara>
-
-</blockquote>
-</section>
-</chapter>
-<chapter>
 <title>Custom Allocation</title>
 <simpara>Like GMP, PBC can be instructed to use custom memory allocation functions.
 This must be done before any memory allocation is performed,
@@ -1735,10 +1628,9 @@ the time required to perform one 1024-bit RSA decryption.</simpara>
 </chapter>
 <chapter>
 <title>PBC Internals</title>
-<simpara>Algebraic structures are represented in the
-<literal>field_t</literal> data type, which mostly contains pointers to functions
-written to perform operations such as addition and multiplication
-on elements of that particular group, ring or field:</simpara>
+<simpara>Algebraic structures are represented in the <literal>field_t</literal> data type, which mostly
+contains pointers to functions written to perform operations such as addition
+and multiplication on elements of that particular group, ring or field:</simpara>
 
 <literallayout class="monospaced">struct field_s {
   ...
@@ -1753,41 +1645,36 @@ on elements of that particular group, ring or field:</simpara>
 typedef struct field_s *field_ptr;
 typedef struct field_s field_t[1];</literallayout>
 <simpara>The name <literal>algebraic_structure_t</literal> is arguably more accurate, but far too
-cumbersome.  If my naming choice causes discomfort, it may help if groups and
-rings are simply viewed as fields where certain things don't work!</simpara>
+cumbersome.  It may help if one views groups and rings as handicapped fields.</simpara>
 
-<simpara>The last two lines of the above code excerpt show how GMP, and PBC, define data
-types: they are actually arrays of length one so that when a variable is
+<simpara>The last two lines of the above code excerpt show how GMP and PBC define data
+types: they are arrays of length one so that when a variable is
 declared, space is automatically allocated for it.  Yet when used as a argument
 to a function, a pointer is passed, thus there is no need to explicitly
 allocate and deallocate memory, nor reference and dereference variables.</simpara>
 
-<simpara>Each <literal>element_t</literal> contains a field named <literal>field</literal>
-to such a <literal>field_t</literal> variable. The only other field
-is <literal>data</literal>, which stores any data needed for the
+<simpara>Each <literal>element_t</literal> contains a field named <literal>field</literal> to such a <literal>field_t</literal> variable.
+The only other field is <literal>data</literal>, which stores any data needed for the
 implementation of the particular algebraic structure the element resides in.</simpara>
 
 <literallayout class="monospaced">struct element_s {
     struct field_s *field;
     void *data;
 };</literallayout>
-<simpara>When an <literal>element_t</literal> variable is initialized,
-<literal>field</literal> is set appropriately, and then the
-initialization specific
-to that field is called to complete the initialization. Here, a line of
-code is worth a thousand words:</simpara>
+<simpara>When an <literal>element_t</literal> variable is initialized, <literal>field</literal> is set appropriately, and
+then the initialization specific to that field is called to complete the
+initialization. Here, a line of code is worth a thousand words:</simpara>
 
 <literallayout class="monospaced">void element_init(element_t e, field_ptr f)
 {
     e-&gt;field = f;
     f-&gt;init(e);
 }</literallayout>
-<simpara>Thus when a call to one of the <literal>element_</literal> functions,
-the <literal>field</literal> pointer is followed to see which
-version of the function should be called, so that for example modular
-addition is performed if the input element is an element of a finite field,
-while polynomial addition is performed for elements of a polynomial ring
-and so on.</simpara>
+<simpara>Thus when a call to one of the <literal>element_</literal> functions, the <literal>field</literal> pointer is
+followed to see which version of the function should be called, so that for
+example modular addition is performed if the input element is an element of a
+finite field, while polynomial addition is performed for elements of a
+polynomial ring and so on.</simpara>
 
 <literallayout class="monospaced">void element_add(element_t n, element_t a, element_t b)
 {
@@ -1800,8 +1687,7 @@ to add a polynomial and a point on an elliptic curve, say, the code
 will compile without warnings since they have the same data type,
 but the results are undefined and the library will mostly cause a crash.</simpara>
 
-<simpara>However I settled on having a catch-all
-&#8220;glorified <literal>void *</literal>&#8221; <literal>element_t</literal>
+<simpara>However I settled on having a catch-all &#8220;glorified <literal>void *</literal>&#8221; <literal>element_t</literal>
 because I wanted to</simpara>
 
 <itemizedlist>
@@ -2071,17 +1957,15 @@ for PBC's debugging features.</simpara>
 </chapter>
 <chapter>
 <title>Security Issues</title>
-<simpara>There are potential security issues that may cause concern for some
-programmers.</simpara>
+<simpara>We list potential security issues.</simpara>
 
 <section>
 <title>Truncated Hashes</title>
-<simpara>For points on an elliptic curve over the base field,
-<literal>element_from_hash()</literal> will truncate the input hash
-until it can represent an x-coordinate in that field.
-(PBC then computes a corresponding y-coordinate.)
-Ideally the hash length should be smaller
-than size of the base field and also the size of the elliptic curve group.</simpara>
+<simpara>For points on an elliptic curve over the base field, <literal>element_from_hash()</literal> will
+truncate the input hash until it can represent an x-coordinate in that field.
+(PBC then computes a corresponding y-coordinate.) Ideally the hash length
+should be smaller than size of the base field and also the size of the elliptic
+curve group.</simpara>
 
 <simpara>Hashing to elements in field extensions does not take advantage of the fact
 that the extension has more elements than the base field. I intend to rewrite
@@ -2089,27 +1973,26 @@ the code so that for a degree n extension code, PBC splits the hash into n parts
 and determine each polynomial coefficient from one ofthe pieces.
 At the moment every coefficient is the same and depends on the whole hash.</simpara>
 
-<simpara>This is not a problem because all the pairing types use an integer mod ring
-as the base field, rather than an extension of some low characteristic field.</simpara>
+<simpara>This is harmless for the base field, because all the pairing types implemented
+so far use an integer mod ring as the base field, rather than an extension of
+some low characteristic field.</simpara>
 
 </section>
 <section>
 <title>Zeroed Memory</title>
-<simpara>Unlike OpenSSL, there are no functions to zero memory locations used
-in sensitive computations, though to some extent, one can use
-<literal>element_random()</literal> to overwrite data.
-I have no immediate plans to implement this, but could
-be convinced to do so if I hear enough reasons.</simpara>
+<simpara>Unlike OpenSSL, there are no functions to zero memory locations used in
+sensitive computations. To some extent, one can use <literal>element_random()</literal> to
+overwrite data.  I have no immediate plans to implement this, but could be
+convinced to do so if I hear enough reasons.</simpara>
 
 </section>
 <section>
 <title>PRNG Determinism</title>
-<simpara>On platforms without <literal>/dev/urandom</literal> PBC falls back on
-a deterministic pseudo-random number generator, which needless to say is
-useless for any security applications.</simpara>
+<simpara>On platforms without <literal>/dev/urandom</literal> PBC falls back on a deterministic
+pseudo-random number generator.</simpara>
 
-<simpara>One should note how <literal>/dev/urandom</literal> differs from
-<literal>/dev/random</literal>. A quote from its manpage:</simpara>
+<simpara>Also, <literal>/dev/urandom</literal> differs from <literal>/dev/random</literal>, the device of choice for the
+paranoid. A quote from its manpage:</simpara>
 
 <blockquote>
 <simpara>A  read  from  the  /dev/urandom device will not block waiting for more

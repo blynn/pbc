@@ -4,24 +4,22 @@ This chapter walks through how one might implement the
 Boneh-Lynn-Shacham (BLS) signature scheme using the PBC library.
 It is based on the file `example/bls.c`.
 
-Recall the scheme works as follows. We have three groups
-G1, G2, GT of prime order r, and have some
-bilinear map e that takes two elements as input,
-one from G1 and one from G2,
-and outputs an element of GT.
+We have three groups 'G1', 'G2', 'GT' of prime order 'r', and a bilinear map
+'e' that takes an element from 'G1' and an element from 'G2', and outputs an
+element of 'GT'. We publish these along with the system parameter 'g', which is
+a randomly chosen element of 'G2'.
 
-First we publish the system parameter g which is a randomly
-chosen element of G2.
-
-Now suppose Alice wishes to use the system.
-We generate her public and private keys as follows.
-A private key is a random element x of Zr, and
-the corresponding public key is g^x^.
+Alice wishes to sign a message.  She generates her public and private keys as
+follows.  Her private key is a random element 'x' of 'Zr', and her corresponding
+public key is 'g'^'x'^.
 
 To sign a message, Alice hashes the message to some element
-h of G1, and then outputs the signature h^x^.
+'h' of 'G1', and then outputs the signature 'h'^'x'^.
 
-To verify a signature sigma, one checks that e(h,g^x^) = e(sigma, g).
+To verify a signature sigma, Bob checks that
+'e'('h','g'^'x'^) = 'e'(sigma, 'g').
+
+We now translate the above to C code using the PBC library.
 
 === BLS Signatures ===
 
@@ -34,29 +32,27 @@ Next we initialize a pairing:
     pairing_t pairing;
     pairing_init_inp_str(pairing, stdin);
 
-Later we give pairing parameters to our program
-on standard input. Any file in the `param` subdirectory
-will suffice, for example:
+Later we give pairing parameters to our program on standard input. Any file in
+the `param` subdirectory will suffice, for example:
 
  $ bls < param/a.param
 
-We shall need several +element_t+ variables to
-hold the system parameters, keys and other quantities. We declare
-them and initialize them,
+We shall need several +element_t+ variables to hold the system parameters, keys
+and other quantities. We declare them and initialize them,
+....
+element_t g, h;
+element_t public_key, secret_key;
+element_t sig;
+element_t temp1, temp2;
 
-    element_t g, h;
-    element_t public_key, secret_key;
-    element_t sig;
-    element_t temp1, temp2;
-
-    element_init_G2(g, pairing);
-    element_init_G2(public_key, pairing);
-    element_init_G1(h, pairing);
-    element_init_G1(sig, pairing);
-    element_init_GT(temp1, pairing);
-    element_init_GT(temp2, pairing);
-    element_init_Zr(secret_key, pairing);
-
+element_init_G2(g, pairing);
+element_init_G2(public_key, pairing);
+element_init_G1(h, pairing);
+element_init_G1(sig, pairing);
+element_init_GT(temp1, pairing);
+element_init_GT(temp2, pairing);
+element_init_Zr(secret_key, pairing);
+....
 generate system parameters,
 
     element_random(g);
@@ -89,14 +85,15 @@ outputs of the pairing applied to the signature and system parameter,
 and the pairing applied to the message hash and public key.
 If the pairing outputs match then the signature is valid.
 
-    pairing_apply(temp1, sig, g, pairing);
-    pairing_apply(temp2, h, public_key, pairing);
-
-    if (!element_cmp(temp1, temp2)) {
-	printf("signature verifies\n");
-    } else {
-	printf("signature does not verify\n");
-    }
+....
+pairing_apply(temp1, sig, g, pairing);
+pairing_apply(temp2, h, public_key, pairing);
+if (!element_cmp(temp1, temp2)) {
+    printf("signature verifies\n");
+} else {
+    printf("signature does not verify\n");
+}
+....
 
 === Import/Export ===
 
@@ -104,8 +101,8 @@ To be useful, at some stage the signature must be converted
 to bytes for storage or transmission:
 
     int n = pairing_length_in_bytes_compressed_G1(pairing);
-    //alternative:
-    //int n = element_length_in_bytes_compressed(sig);
+    // Alternatively:
+    // int n = element_length_in_bytes_compressed(sig);
     unsigned char *data = malloc(n);
     element_to_bytes_compressed(data, sig);
 
@@ -114,10 +111,9 @@ On the other end, the signature must be decompressed:
     element_from_bytes_compressed(sig, data);
 
 Eliding +_compressed+ in the above code
-will also work but the buffer ''data'' will be roughly twice as large.
+will also work but the buffer 'data' will be roughly twice as large.
 
-
-We can save more space by using the x-coordinate of the signature only
+We can save more space by using the 'x'-coordinate of the signature only
 
     int n = pairing_length_in_bytes_x_only_G1(pairing);
     //alternative:
@@ -126,30 +122,31 @@ We can save more space by using the x-coordinate of the signature only
     element_to_bytes_compressed(data, sig);
 
 but then there is a complication during verification since two different
-points have the same x-coordinate. One way to solve this problem is to
+points have the same 'x'-coordinate. One way to solve this problem is to
 guess one point and try to verify. If that fails, we try the other.
 It can be shown that the pairing outputs of the two points are inverses
 of each other, avoiding the need to compute a pairing the second time.
-(Actually, there are better ways to handle this.)
+(In fact, there are even better ways to handle this.)
+....
+int n = pairing_length_in_bytes_x_only_G1(pairing);
+//int n = element_length_in_bytes_x_only(sig);
+unsigned char *data = malloc(n);
 
-    int n = pairing_length_in_bytes_x_only_G1(pairing);
-    //int n = element_length_in_bytes_x_only(sig);
-    unsigned char *data = malloc(n);
+element_to_bytes_x_only(data, sig);
 
-    element_to_bytes_x_only(data, sig);
+element_from_bytes_x_only(sig, data)
 
-    element_from_bytes_x_only(sig, data)
+pairing_apply(temp1, sig, g, pairing);
+pairing_apply(temp2, h, public_key, pairing);
 
-    pairing_apply(temp1, sig, g, pairing);
-    pairing_apply(temp2, h, public_key, pairing);
-
+if (!element_cmp(temp1, temp2)) {
+    printf("signature verifies on first guess\n");
+} else {
+    element_invert(temp1, temp1);
     if (!element_cmp(temp1, temp2)) {
-	printf("signature verifies on first guess\n");
+	printf("signature verifies on second guess\n");
     } else {
-	element_invert(temp1, temp1);
-	if (!element_cmp(temp1, temp2)) {
-	    printf("signature verifies on second guess\n");
-	} else {
-	    printf("signature does not verify\n");
-	}
+	printf("signature does not verify\n");
     }
+}
+....

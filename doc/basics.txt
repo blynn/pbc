@@ -49,23 +49,18 @@ precision floats.
 
 PBC contains several classes of functions.
 
-* Functions for dealing with bilinear pairing parameters begin with
+* Functions involving pairings; these begin with
 +pairing_+.
 
-* Functions for operating on elements of groups, rings and fields begin
+* Functions operating on elements of groups, rings and fields; these begin
 with +element_+.
 
-* Functions that generate pairing parameters, that is, find elliptic curves
-where efficiently computable bilinear pairings exist.  The sample parameters
-bundled are adequate for many cryptosystems, but there may be a need to
-generate more.
+* Functions generating pairings, that is, find elliptic curves
+where efficiently computable bilinear pairings exist; useful if the
+bundled pairings are inadequate.
 
 * Miscellaneous functions, such as ones controlling how random bits are
 generated.
-
-* Auxiliary functions that work on abstract data types such dynamic
-arrays and symbol tables mostly used internally by PBC, but may have some use
-in applications.
 
 === Conventions ===
 
