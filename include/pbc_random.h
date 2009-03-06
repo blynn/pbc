@@ -26,4 +26,6 @@ a random 'bits'-bit integer 'z'.
 */
 void pbc_mpz_randomb(mpz_t z, unsigned int bits);
 
+void set_random_function(void (*fun)(mpz_t, mpz_t, void *), void *data);
+
 #endif //__PBC_RANDOM_H__

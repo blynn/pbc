@@ -48,10 +48,12 @@ if(crossmingw)
     set(CMAKE_SKIP_RPATH ON)
     set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
     set(get_time_src "misc/get_time.win32.c")
+    set(init_random_src "arith/init_random.win32.c")
 else(crossmingw)
     find_package(GMP REQUIRED)
     find_package(Readline)
     set(get_time_src "misc/get_time.c")
+    set(init_random_src "arith/init_random.c")
 endif(crossmingw)
 
 if (READLINE_FOUND)
@@ -73,6 +75,7 @@ arith/fp.c
 arith/fieldquadratic.c
 arith/indexcalculus.c
 arith/poly.c arith/random.c
+${init_random_src}
 ecc/curve.c ecc/singular.c ecc/pairing.c ecc/param.c
 ecc/a_param.c ecc/d_param.c ecc/e_param.c ecc/f_param.c ecc/g_param.c
 ecc/hilbert.c ecc/mnt.c ecc/mpc.c
@@ -92,9 +95,9 @@ endforeach(bin)
 
 target_link_libraries(pbc/pbc pbc ${GMP_LIBRARY} m)
 
-set(warnflags "-Wall -W -Wfloat-equal -Wendif-labels -Wshadow  \\
-    -Wpointer-arith -Wcast-align -Wstrict-prototypes \\
-    -Wredundant-decls"
+# Newer CMake don't like me breaking up long strings. Linking fails with
+# "gcc: no input files."
+set(warnflags "-Wall -W -Wfloat-equal -Wendif-labels -Wshadow -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wredundant-decls"
 )
 
 set(excessivewarnflags "-std=c99 -pedantic")
