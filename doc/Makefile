@@ -29,7 +29,7 @@ index.html : index.txt
 manual/index.html: manual.xml custom-pretty.xsl pretty.css index.html
 	xmlto -m custom-pretty.xsl -o manual html manual.xml
 	sed -i 's/xmlns:fo[^ ]*//g' manual/*.html
-	ls manual/*.html | xargs -n 1 tidy -utf8 -m -i -q
+	-ls manual/*.html | xargs -n 1 tidy -utf8 -m -i -q
 	./makeover
 	cp find_selflink.js pretty.css manual/
 

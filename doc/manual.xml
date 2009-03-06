@@ -3,7 +3,7 @@
 
 <book lang="en">
 <bookinfo>
-    <title>PBC Library Manual 0.4.18</title>
+    <title>PBC Library Manual 0.4.19</title>
     <date>2006</date>
     <author>
         <firstname>Ben</firstname>
@@ -13,7 +13,7 @@
 
 
 </bookinfo>
-<preface>
+<preface id="_preface">
 <title>Preface</title>
 <simpara>The PBC library is a free portable C library allowing the rapid prototyping of
 pairing-based cryptosystems. It provides an abstract interface to a cyclic
@@ -29,7 +29,7 @@ and feel of the GMP manual.</simpara>
 <simpara>The GMP library homepage: <ulink url="http://www.swox.com/gmp/">http://www.swox.com/gmp/</ulink></simpara>
 
 </preface>
-<chapter>
+<chapter id="_installing_pbc">
 <title>Installing PBC</title>
 <simpara>The PBC library needs <ulink url="http://www.swox.com/gmp/">the GMP library</ulink>.
 Multiple ways to install PBC are provided.</simpara>
@@ -72,7 +72,7 @@ of the lower-level PBC code relies on some GMP internals, which may change in
 future releases. In that case, the PBC code will also have to be updated.</simpara>
 
 </chapter>
-<chapter>
+<chapter id="_quick_start">
 <title>Quick Start</title>
 <simpara>One can experiment with the PBC library without writing a single line of C.
 The binary <literal>pbc/pbc</literal> should be present after PBC successfully compiles.</simpara>
@@ -118,12 +118,12 @@ cryptosystems using real numbers.</simpara>
 
 </section>
 </chapter>
-<chapter>
+<chapter id="_pbc_basics">
 <title>PBC Basics</title>
 <simpara>This chapter gives a high-level view of the library, and explains
 various design choices and conventions.</simpara>
 
-<section>
+<section id="_headers_and_libraries">
 <title>Headers and Libraries</title>
 <simpara>Programs using the PBC library should include the file <literal>pbc.h</literal>:</simpara>
 
@@ -144,7 +144,7 @@ performed at runtime, so this feature should be disabled for production
 builds.</simpara>
 
 </section>
-<section>
+<section id="_types">
 <title>Types</title>
 <simpara>Since the PBC library is built on top of GMP, the GMP types
 are available. PBC types are similar to GMP types.
@@ -163,7 +163,7 @@ for rings and fields and <literal>mpc_t</literal> for complex arbitrary
 precision floats.</simpara>
 
 </section>
-<section>
+<section id="_function_classes">
 <title>Function Classes</title>
 <simpara>PBC contains several classes of functions.</simpara>
 
@@ -195,7 +195,7 @@ generated.
 </listitem>
 </itemizedlist>
 </section>
-<section>
+<section id="_conventions">
 <title>Conventions</title>
 <simpara>PBC follows GMP in several respects:</simpara>
 
@@ -256,7 +256,7 @@ an initialization call.</simpara>
 
 </section>
 </chapter>
-<chapter>
+<chapter id="_tutorial">
 <title>Tutorial</title>
 <simpara>This chapter walks through how one might implement the
 Boneh-Lynn-Shacham (BLS) signature scheme using the PBC library.
@@ -279,7 +279,7 @@ public key is <emphasis>g</emphasis><superscript><emphasis>x</emphasis></supersc
 
 <simpara>We now translate the above to C code using the PBC library.</simpara>
 
-<section>
+<section id="_bls_signatures">
 <title>BLS Signatures</title>
 <simpara>First we include <literal>pbc/pbc.h</literal>:</simpara>
 
@@ -342,7 +342,7 @@ if (!element_cmp(temp1, temp2)) {
     printf("signature does not verify\n");
 }</literallayout>
 </section>
-<section>
+<section id="_import_export">
 <title>Import/Export</title>
 <simpara>To be useful, at some stage the signature must be converted
 to bytes for storage or transmission:</simpara>
@@ -395,7 +395,7 @@ if (!element_cmp(temp1, temp2)) {
 }</literallayout>
 </section>
 </chapter>
-<chapter>
+<chapter id="_pairing_functions">
 <title>Pairing Functions</title>
 <simpara>An application will most likely need to instantiate a bilinear pairing
 before performing any other operations.
@@ -427,7 +427,7 @@ is symmetric) so their elements can be mixed freely. In this case the
 
 <simpara>A later chapter discusses <link linkend="paramchap">the different pairing types</link>.</simpara>
 
-<section>
+<section id="_initializing_pairings">
 <title>Initializing Pairings</title>
 <simpara>The only way to initialize a pairing
 is to provide pairing parameters to a <literal>pairing_t</literal>
@@ -468,7 +468,7 @@ structure.</simpara>
 
 </blockquote>
 </section>
-<section>
+<section id="_applying_pairings">
 <title>Applying Pairings</title>
 <simpara>The function <literal>pairing_apply</literal> can be called to apply a bilinear map.  The order
 of the inputs is important. The first, which holds the output, must be from the
@@ -520,7 +520,7 @@ will be set to the map applied to <emphasis>in1</emphasis> and <emphasis>in2</em
 
 </blockquote>
 </section>
-<section>
+<section id="_other_pairing_functions">
 <title>Other Pairing Functions</title>
 <simpara>int  <emphasis role="strong">pairing_is_symmetric</emphasis>(<emphasis>pairing_t pairing</emphasis>)</simpara>
 
@@ -581,7 +581,7 @@ an element of G2.</simpara>
 
 </blockquote>
 </section>
-<section>
+<section id="_element_functions">
 <title>Element Functions</title>
 <simpara>Elements of groups, rings and fields are stored in the <literal>element_t</literal> data type.
 Variables of this type must be initialized before use, and should be cleared
@@ -605,7 +605,7 @@ before the PBC header file is included:</simpara>
 <simpara>This feature impairs performance so should be disabled in the final build.</simpara>
 
 </section>
-<section>
+<section id="_initializing_elements">
 <title>Initializing Elements</title>
 <simpara>When an element is initialized it is associated with an algebraic structure,
 such as a particular finite field or elliptic curve group.</simpara>
@@ -642,7 +642,7 @@ the variable <emphasis>e</emphasis> is no longer needed.</simpara>
 
 </blockquote>
 </section>
-<section>
+<section id="_assigning_elements">
 <title>Assigning Elements</title>
 <simpara>These functions assign values to elements. When integers are assigned,
 they are mapped to algebraic structures canonically if it makes sense
@@ -679,7 +679,7 @@ they are mapped to algebraic structures canonically if it makes sense
 
 </blockquote>
 </section>
-<section>
+<section id="_converting_elements">
 <title>Converting Elements</title>
 <simpara>void  <emphasis role="strong">element_to_mpz</emphasis>(<emphasis>mpz_t z</emphasis>, <emphasis>element_t e</emphasis>)</simpara>
 
@@ -696,7 +696,7 @@ the <emphasis>len</emphasis> bytes stored in the buffer <emphasis>data</emphasis
 
 </blockquote>
 </section>
-<section>
+<section id="_element_arithmetic">
 <title>Element Arithmetic</title>
 <simpara>Unless otherwise stated, all <literal>element_t</literal> arguments to these functions must have
 been initialized to be from the same algebraic structure.  When one of these
@@ -785,7 +785,7 @@ where there are <emphasis>z</emphasis> <emphasis>a</emphasis>'s.</simpara>
 
 </blockquote>
 </section>
-<section>
+<section id="_exponentiating_elements">
 <title>Exponentiating Elements</title>
 <simpara>Exponentiation and multiexponentiation functions.  If it is known in advance
 that a particular element will be exponentiated several times in the future,
@@ -861,7 +861,7 @@ passed to a previous <emphasis role="strong">element_pp_init</emphasis> call.</s
 
 </blockquote>
 </section>
-<section>
+<section id="_comparing_elements">
 <title>Comparing Elements</title>
 <simpara>These functions compare elements from the same algebraic structure.</simpara>
 
@@ -903,7 +903,7 @@ element_sgn(<emphasis>a</emphasis>) = 0 implies <emphasis>a</emphasis> = 0 with 
 
 </blockquote>
 </section>
-<section>
+<section id="_i_o_of_elements">
 <title>I/O of Elements</title>
 <simpara>Functions for producing human-readable outputs for elements.
 Converting elements to and from bytes are discussed later.</simpara>
@@ -951,7 +951,7 @@ describing an element.</simpara>
 
 </blockquote>
 </section>
-<section>
+<section id="_random_elements">
 <title>Random Elements</title>
 <simpara>Only works for finite algebraic structures. Effect on polynomial rings, fields
 of characteristic zero, etc. undefined.</simpara>
@@ -967,7 +967,7 @@ assigns a uniformly random element to <emphasis>e</emphasis>.</simpara>
 
 </blockquote>
 </section>
-<section>
+<section id="_element_import_export">
 <title>Element Import/Export</title>
 <simpara>Functions for serializing and deserializing elements.</simpara>
 
@@ -1064,7 +1064,7 @@ and also change when preprocessing is used.</simpara>
 <simpara>PBC uses G1 to denote the group with the shorter representation (G1 is
 the group of points over the ground field) when G1 and G2 differ.</simpara>
 
-<section>
+<section id="_type_a">
 <title>Type A</title>
 <simpara>Pairings on type A curves are the fast and ought to be used where the
 main concern is efficiency. Typically, r should be about 160 bits long
@@ -1107,7 +1107,7 @@ of order q<superscript>2</superscript>.</simpara>
 
 </blockquote>
 </section>
-<section>
+<section id="_type_a1">
 <title>Type A1</title>
 <simpara>Some pairing-based cryptosystems require the group order to be a particular
 composite number. Fortunately, it is easy to find type A pairings with
@@ -1150,7 +1150,7 @@ order roughly <emphasis>n</emphasis><superscript>2</superscript>.  Additionally,
 
 </blockquote>
 </section>
-<section>
+<section id="_type_d">
 <title>Type D</title>
 <simpara>Using type D pairings allows elements of group G1 to be quite short, typically
 170-bits. Because of a certain trick, elements of group G2 need only be 3 times
@@ -1242,7 +1242,7 @@ Returns the number of CM parameters found.</simpara>
 
 </blockquote>
 </section>
-<section>
+<section id="_type_e">
 <title>Type E</title>
 <simpara>This pairing is not very useful at present. It can be implemented entirely
 in a field of prime order, that is, only arithmetic modulo a prime is needed
@@ -1285,7 +1285,7 @@ must be infeasible in finite fields of order q.</simpara>
 
 </blockquote>
 </section>
-<section>
+<section id="_type_f">
 <title>Type F</title>
 <simpara>Type F should be used when the top priority is to minimize bandwidth (e.g.
 short signatures). The pairing is slower than the other types.</simpara>
@@ -1325,7 +1325,7 @@ Typical value: <emphasis>bits</emphasis> = 160.</simpara>
 
 </blockquote>
 </section>
-<section>
+<section id="_type_g">
 <title>Type G</title>
 <simpara>Type G curves have embedding degree 10. They are quite slow at the moment
 so for now type F is a better choice.</simpara>
@@ -1368,7 +1368,7 @@ fields of order q<superscript>6</superscript>.  For usual CM parameters, r is a 
 </blockquote>
 </section>
 </chapter>
-<chapter>
+<chapter id="_randomness_functions">
 <title>Randomness Functions</title>
 <simpara>The first time PBC is asked to generate a random number,
 the library will try to open the file <literal>/dev/urandom</literal> as a
@@ -1379,6 +1379,9 @@ cryptography).</simpara>
 <simpara>It is possible to change the file used for random bits. Also, explicitly
 selecting the deterministic random number generator will
 suppress the warning.</simpara>
+
+<simpara>On Windows, by default, PBC uses the Microsoft Crypto API to generate random
+bits.</simpara>
 
 <simpara>void  <emphasis role="strong">random_set_file</emphasis>(<emphasis>char *filename</emphasis>)</simpara>
 
@@ -1408,7 +1411,7 @@ a random <emphasis>bits</emphasis>-bit integer <emphasis>z</emphasis>.</simpara>
 
 </blockquote>
 </chapter>
-<chapter>
+<chapter id="_custom_allocation">
 <title>Custom Allocation</title>
 <simpara>Like GMP, PBC can be instructed to use custom memory allocation functions.
 This must be done before any memory allocation is performed,
@@ -1434,7 +1437,7 @@ case.</simpara>
 
 </blockquote>
 </chapter>
-<chapter>
+<chapter id="_bundled_programs">
 <title>Bundled Programs</title>
 <simpara>Several binaries and curve parameters are bundled with the PBC library,
 such as <link linkend="pbcintro">the <literal>pbc</literal> program</link>.</simpara>
@@ -1523,7 +1526,7 @@ Returns <literal>string</literal> converted to an element of <literal>G</literal
 </varlistentry>
 </variablelist>
 </section>
-<section>
+<section id="_parameter_generation">
 <title>Parameter Generation</title>
 <simpara>Programs that generate pairing parameters are located in the <literal>gen</literal>
 subdirectory. Some of the programs are already functional enough to be used to
@@ -1568,7 +1571,7 @@ first; for now, read the source!</simpara>
 </varlistentry>
 </variablelist>
 </section>
-<section>
+<section id="_example_cryptosystems">
 <title>Example Cryptosystems</title>
 <simpara>In the <literal>example</literal> subdirectory there are various programs that read curve
 parameters on standard input and perform computations that would be required in
@@ -1615,7 +1618,7 @@ Zhang-Safavi-Naini-Susilo signatures
 <simpara>More work would be required to turn these programs into real applications.</simpara>
 
 </section>
-<section>
+<section id="_benchmarks">
 <title>Benchmarks</title>
 <simpara>I use the programs in the <literal>benchmark</literal> subdirectory to measure running times of
 pairings, and also RSA decryptions.</simpara>
@@ -1626,7 +1629,7 @@ the time required to perform one 1024-bit RSA decryption.</simpara>
 
 </section>
 </chapter>
-<chapter>
+<chapter id="_pbc_internals">
 <title>PBC Internals</title>
 <simpara>Algebraic structures are represented in the <literal>field_t</literal> data type, which mostly
 contains pointers to functions written to perform operations such as addition
@@ -1680,7 +1683,7 @@ polynomial ring and so on.</simpara>
 {
     n-&gt;field-&gt;add(n, a, b);
 }</literallayout>
-<section>
+<section id="_design">
 <title>Design</title>
 <simpara>My design may seem dangerous because if a programmer inadvertently attempts
 to add a polynomial and a point on an elliptic curve, say, the code
@@ -1753,7 +1756,7 @@ reserved for future additions to C or POSIX.  On the other hand, I want to stay
 consistent with GMP, and I hear ending data types with <literal>_t</literal> is common practice.</simpara>
 
 </section>
-<section>
+<section id="_internal_randomness">
 <title>Internal Randomness</title>
 <simpara>Some algorithms require a quadratic nonresidue in a given field. The first
 time a quadratic nonresidue is requested, one is generated at random, using
@@ -1780,7 +1783,7 @@ construction is later required.</simpara>
 <simpara>This happens behind the scenes in PBC.</simpara>
 
 </section>
-<section>
+<section id="_type_a_internals">
 <title>Type A Internals</title>
 <simpara>Type A pairings are constructed on the curve y<superscript>2</superscript> = x<superscript>3</superscript> + x over the field F_q
 for some prime q.  Both G1 and G2 are the group of points E(F_q), so this
@@ -1805,7 +1808,7 @@ q, h:
   r * h = q + 1
   q is a prime, h is a multiple of 12 (thus q = -1 mod 12)</literallayout>
 </section>
-<section>
+<section id="_type_d_internals">
 <title>Type D Internals</title>
 <simpara>These are ordinary curves of with embedding degree 6, whose orders are prime
 or a prime multiplied by a small constant. These are constructed using the
@@ -1829,7 +1832,7 @@ b
 nk  # of points in E(F_q^k)
 hk  nk = hk * r * r</literallayout>
 </section>
-<section>
+<section id="_type_e_internals">
 <title>Type E Internals</title>
 <simpara>The CM (Complex Multiplication) method of constructing elliptic curves
 starts with the Diophantine equation</simpara>
@@ -1852,7 +1855,7 @@ pairing.</simpara>
 <simpara>TODO: describe fields</simpara>
 
 </section>
-<section>
+<section id="_type_f_internals">
 <title>Type F Internals</title>
 <simpara>Using carefully crafted polynomials, k = 12 pairings can be constructed.
 Only 160 bits are needed to represent elements of one group, and 320 bits
@@ -1866,7 +1869,7 @@ field attacks are subexponential.)</simpara>
 <simpara>TODO: describe fields</simpara>
 
 </section>
-<section>
+<section id="_source_code">
 <title>Source Code</title>
 <simpara>The source code is organized into several subdirectories.</simpara>
 
@@ -1891,7 +1894,7 @@ symbol tables, parsing, benchmarking, debugging and so on.</simpara>
 were used to generate the files in the <literal>param</literal> directory.</simpara>
 
 </section>
-<section>
+<section id="_religious_stances">
 <title>Religious Stances</title>
 <simpara>I chose C because:</simpara>
 
@@ -1955,11 +1958,11 @@ for PBC's debugging features.</simpara>
 
 </section>
 </chapter>
-<chapter>
+<chapter id="_security_issues">
 <title>Security Issues</title>
 <simpara>We list potential security issues.</simpara>
 
-<section>
+<section id="_truncated_hashes">
 <title>Truncated Hashes</title>
 <simpara>For points on an elliptic curve over the base field, <literal>element_from_hash()</literal> will
 truncate the input hash until it can represent an x-coordinate in that field.
@@ -1978,7 +1981,7 @@ so far use an integer mod ring as the base field, rather than an extension of
 some low characteristic field.</simpara>
 
 </section>
-<section>
+<section id="_zeroed_memory">
 <title>Zeroed Memory</title>
 <simpara>Unlike OpenSSL, there are no functions to zero memory locations used in
 sensitive computations. To some extent, one can use <literal>element_random()</literal> to
@@ -1986,7 +1989,7 @@ overwrite data.  I have no immediate plans to implement this, but could be
 convinced to do so if I hear enough reasons.</simpara>
 
 </section>
-<section>
+<section id="_prng_determinism">
 <title>PRNG Determinism</title>
 <simpara>On platforms without <literal>/dev/urandom</literal> PBC falls back on a deterministic
 pseudo-random number generator.</simpara>
@@ -2006,7 +2009,7 @@ If this is a concern in your application, use /dev/random instead.</simpara>
 </blockquote>
 </section>
 </chapter>
-<appendix>
+<appendix id="_contributors">
 <title>Contributors</title>
 <simpara>Ben Lynn wrote the original PBC library and documentation and is still
 maintaining and developing it.</simpara>

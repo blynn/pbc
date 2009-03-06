@@ -49,7 +49,7 @@ libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
 	arith/fp.c arith/fasterfp.c arith/montfp.c \
 	arith/indexcalculus.c \
 	arith/fieldquadratic.c arith/poly.c \
-	arith/random.c arith/random_init.c misc/parse.c misc/darray.c misc/symtab.c misc/get_time.c \
+	arith/random.c arith/init_random.c misc/parse.c misc/darray.c misc/symtab.c misc/get_time.c \
 	misc/pbc_assert.c \
 	misc/memory.c \
 	misc/fops.c ecc/mpc.c ecc/mnt.c ecc/hilbert.c ecc/curve.c ecc/pairing.c \

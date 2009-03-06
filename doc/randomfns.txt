@@ -10,4 +10,7 @@ It is possible to change the file used for random bits. Also, explicitly
 selecting the deterministic random number generator will
 suppress the warning.
 
+On Windows, by default, PBC uses the Microsoft Crypto API to generate random
+bits.
+
 include::gen/pbcrandom.txt[]
