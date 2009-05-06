@@ -1,0 +1,19 @@
+This package was debianized by Paul Miller <jettero@gmail.com> on
+Wed, 02 Jan 2008 07:00:03 -0500.
+
+It was downloaded from <http://crypto.stanford.edu/pbc/>
+
+Upstream Author(s): 
+
+    Ben Lynn <http://crypto.stanford.edu/~blynn/>
+
+Copyright: 
+
+    <Copyright (C) 2008 Ben Lynn of Stanford>
+
+License:
+
+    GPL
+
+The Debian packaging is (C) 2008, Paul Miller <jettero@gmail.com> and
+is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
