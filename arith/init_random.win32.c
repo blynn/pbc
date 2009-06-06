@@ -1,4 +1,4 @@
-// Win32 Compatibility Code added by Yulian Kalev.
+// Win32 Compatibility Code added by Yulian Kalev and Stefan Georg Weber.
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
@@ -12,10 +12,18 @@ static void win32_mpz_random(mpz_t r, mpz_t limit, void *data)
 {
     UNUSED_VAR (data);
     HCRYPTPROV phProv;
-    if (!CryptAcquireContext(&phProv,NULL,NULL,PROV_RSA_FULL,0))
-    {
-	fprintf(stderr,"Couldn't create CryptContext: %x\n",(int)GetLastError());
-	return;
+    int error;
+    if (!CryptAcquireContext(&phProv,NULL,NULL,PROV_RSA_FULL,0)) {
+	error = GetLastError();
+	if (error == 0x80090016) { //need to create a new keyset
+	    if (!CryptAcquireContext(&phProv,NULL,NULL,PROV_RSA_FULL,CRYPT_NEWKEYSET)) {
+		fprintf(stderr,"Couldn't create CryptContext: %x\n",(int)GetLastError());
+		return;
+	    }
+	} else {
+	    fprintf(stderr,"Couldn't create CryptContext: %x\n",error);
+	    return;
+	}
     }
     int n, bytecount, leftover;
     unsigned char *bytes;
