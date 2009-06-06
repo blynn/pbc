@@ -2,6 +2,10 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.20 and 0.4.19
+
+* Win32 random number generator fix thanks to Stefan Weber.
+
 Changes between PBC version 0.4.19 and 0.4.18
 
 * Win32 random number generator thanks to Yulian Kalev.

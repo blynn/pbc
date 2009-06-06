@@ -7,11 +7,11 @@ if [[ $1 == "test" ]]; then
     echo test run
     TESTRUN=1
 fi
-echo git-diff: ideally should do nothing...
-git-diff
-git-log > ChangeLog
+echo git diff: ideally should do nothing...
+git diff
+git log > ChangeLog
 cat ChangeLog | head -20 | grep pbc-$GREPVER > /dev/null || {
-    echo git-log does not mention release 
+    echo git log does not mention release 
     if [[ $TESTRUN ]]; then
 	echo test run: continuing anyway...
     else
@@ -24,7 +24,7 @@ TMPDIR=`mktemp -d` || {
 }
 PBCDIR=$TMPDIR/pbc-$VER
 echo Running setup...
-git-archive --format=tar --prefix=pbc-$VER/ HEAD | tar xvC $TMPDIR
+git archive --format=tar --prefix=pbc-$VER/ HEAD | tar xvC $TMPDIR
 HERE=`pwd`
 cp ChangeLog $PBCDIR
 cd $PBCDIR
@@ -38,7 +38,7 @@ grep $GREPVER NEWS > /dev/null || {
 	exit 1
     fi
 }
-grep $GREPVER doc/manual.xml > /dev/null || {
+grep $GREPVER doc/preface.txt > /dev/null || {
     echo Error: doc/manual.xml version number mismatch
     if [[ $TESTRUN ]]; then
 	echo test run: continuing anyway...
