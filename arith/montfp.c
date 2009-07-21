@@ -7,13 +7,13 @@
 #include "pbc_random.h"
 #include "pbc_fp.h"
 #include "pbc_memory.h"
-// F_p using Montgomery representation
-// Let b = 256^sizeof(mp_limb_t)
-// Let R = b^t be the smallest power of b greater than the modulus p
-// Then x is stored as xR (mod p)
-// Additive operations are identical
-// Multipicative ones use Montgomery reduction
-// only works with odd modulus
+// F_p using Montgomery representation.
+// Let b = 256^sizeof(mp_limb_t).
+// Let R = b^t be the smallest power of b greater than the modulus p.
+// Then x is stored as xR (mod p).
+// Addition: same as naive implementation.
+// Multipication: Montgomery reduction.
+// Code assumes the modulus p is odd.
 //
 // TODO: mul_2exp(x, p->bytes * 8) could be replaced with
 // faster code that messes with GMP internals
@@ -22,9 +22,9 @@ struct fp_field_data_s {
     size_t limbs;
     size_t bytes;
     mp_limb_t *primelimbs;
-    mp_limb_t negpinv;  //-p^-1 mod b
-    mp_limb_t *R; //R mod p
-    mp_limb_t *R3; //R^3 mod p
+    mp_limb_t negpinv;  // -p^-1 mod b
+    mp_limb_t *R;       // R mod p
+    mp_limb_t *R3;      // R^3 mod p
 };
 typedef struct fp_field_data_s fp_field_data_t[1];
 typedef struct fp_field_data_s *fp_field_data_ptr;
@@ -35,9 +35,9 @@ struct data_s {
 };
 typedef struct data_s *dataptr;
 
-static void mont_reduce(mp_limb_t *x, mp_limb_t *y, fp_field_data_ptr p)
-{
-    //Algorithm II.4 from Blake, Seroussi and Smart
+// Montgomery reduction.
+// Algorithm II.4 from Blake, Seroussi and Smart.
+static void mont_reduce(mp_limb_t *x, mp_limb_t *y, fp_field_data_ptr p) {
     size_t t = p->limbs;
     size_t i;
     mp_limb_t flag = 0;
@@ -55,7 +55,7 @@ static void mont_reduce(mp_limb_t *x, mp_limb_t *y, fp_field_data_ptr p)
     }
 }
 
-//assumes z != 0 and is already given in xR form
+// assumes z != 0 and is already given in xR form
 static inline void from_mpz(element_t e, mpz_t z)
 {
     fp_field_data_ptr p = e->field->data;

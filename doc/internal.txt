@@ -39,8 +39,7 @@ When an +element_t+ variable is initialized, +field+ is set appropriately, and
 then the initialization specific to that field is called to complete the
 initialization. Here, a line of code is worth a thousand words:
 
-  void element_init(element_t e, field_ptr f)
-  {
+  void element_init(element_t e, field_ptr f) {
       e->field = f;
       f->init(e);
   }
@@ -51,8 +50,7 @@ example modular addition is performed if the input element is an element of a
 finite field, while polynomial addition is performed for elements of a
 polynomial ring and so on.
 
-  void element_add(element_t n, element_t a, element_t b)
-  {
+  void element_add(element_t n, element_t a, element_t b) {
       n->field->add(n, a, b);
   }
 
@@ -180,7 +178,7 @@ Typically the order of the curve E is around 170 bits, as is F_q, the base
 field, thus q^k^ is around the 1024-bit mark which is commonly considered
 good enough.
 
-  c_param struct fields:
+  d_param struct fields:
   q   F_q is the base field
   n   # of points in E(F_q)
   r   large prime dividing n
@@ -189,6 +187,10 @@ good enough.
   b
   nk  # of points in E(F_q^k)
   hk  nk = hk * r * r
+  coeff0 coefficients of a monic cubic irreducible over F_q
+  coeff1
+  coeff2
+  nqr quadratic nonresidue in F_q
 
 === Type E Internals ===
 
