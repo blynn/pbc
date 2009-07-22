@@ -443,6 +443,9 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, element_t P,
   element_clear(e0);
 }
 
+static void (*cc_miller_no_denom_fn)(element_t res, mpz_t q, element_t P,
+    element_ptr Qx, element_ptr Qy);
+
 static void d_pairing_option_set(pairing_t pairing, char *key, char *value) {
   UNUSED_VAR(pairing);
   if (!strcmp(key, "method")) {
@@ -580,9 +583,6 @@ static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing) {
 static void cc_finalpow(element_t e) {
   cc_tatepower(e->data, e->data, e->field->pairing);
 }
-
-static void (*cc_miller_no_denom_fn)(element_t res, mpz_t q, element_t P,
-    element_ptr Qx, element_ptr Qy);
 
 static void cc_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     pairing_t pairing) {

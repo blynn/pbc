@@ -2,6 +2,11 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.4.21 and 0.4.20
+
+* Added element_pp_pow_zn().
+* More comments in the source.
+
 Changes between PBC version 0.4.20 and 0.4.19
 
 * Win32 random number generator fix thanks to Stefan Weber.
