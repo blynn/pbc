@@ -1,5 +1,5 @@
 /*
- * quadratic extension of any field
+ * Quadratic field extensions.
  */
 
 //requires
@@ -7,31 +7,23 @@
 #ifndef __PBC_FIELDQUADRATIC_H__
 #define __PBC_FIELDQUADRATIC_H__
 
-void field_init_quadratic(field_ptr f, field_ptr fbase);
-void field_init_fi(field_ptr f, field_ptr fbase);
+// Initialize L as K[sqrt(a)], where a is a quadratic nonresidue of K. We
+// automatically randomly generate a if necessary (see field_get_nqr() in
+// field.c).
+void field_init_quadratic(field_ptr L, field_ptr K);
 
-//naturally map an element from a field K to K[a]
+// Initialize L as K[i], where i = sqrt(-1). Faster than the generic version.
+// Requires -1 to be a quadratic nonresidue in K.
+void field_init_fi(field_ptr L, field_ptr K);
+
+// Naturally map an element from a field K to K[a].
 void element_field_to_quadratic(element_ptr out, element_ptr in);
 
-struct fq_data_s {
-    //elements have the form x + ya
-    //where a is the square root of some quadratic nonresidue in base field
-    element_t x;
-    element_t y;
-};
-typedef struct fq_data_s *fq_data_ptr;
-typedef struct fq_data_s fq_data_t[1];
-
-static inline element_ptr fi_re(element_ptr a)
-{
-    return ((fq_data_ptr) a->data)->x;
-}
-
-static inline element_ptr fi_im(element_ptr a)
-{
-    return ((fq_data_ptr) a->data)->y;
-}
-
 void element_field_to_fi(element_ptr a, element_ptr b);
+
+// In K[a], each element has the form x + ya.
+element_ptr fi_re(element_ptr a);  // Return x.
+element_ptr fi_im(element_ptr a);  // Return y.
+// When a = sqrt(-1) these are the real and imaginary parts.
 
 #endif //__PBC_FIELDQUADRATIC_H__
