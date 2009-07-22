@@ -563,6 +563,7 @@ static inline void element_pp_pow(element_t out, mpz_ptr power,
 }
 
 /*@manual epow
+Same except 'power' is an element of *Z*~n~ for some integer n.
 */
 static inline void element_pp_pow_zn(element_t out, element_t power,
                                      element_pp_t p) {
