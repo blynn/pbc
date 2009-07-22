@@ -364,8 +364,7 @@ void field_gen_nqr(field_ptr f) {
 }
 
 element_ptr field_get_nqr(field_ptr f) {
-  if (!f->nqr)
-    field_gen_nqr(f);
+  if (!f->nqr) field_gen_nqr(f);
   return f->nqr;
 }
 
@@ -466,11 +465,9 @@ static int generic_cmp(element_ptr a, element_ptr b) {
   int result;
   unsigned char *buf1, *buf2;
   int len;
-  if (a == b)
-    return 0;
+  if (a == b) return 0;
   len = element_length_in_bytes(a);
-  if (len != element_length_in_bytes(b))
-    return 1;
+  if (len != element_length_in_bytes(b)) return 1;
   buf1 = pbc_malloc(len);
   buf2 = pbc_malloc(len);
   element_to_bytes(buf1, a);
@@ -608,17 +605,14 @@ void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
     if (len >= count - i) {
       n = count - i;
       done = 1;
-    } else
-      n = len;
+    } else n = len;
     memcpy(buf + i, data, n);
     i += n;
-    if (done)
-      break;
+    if (done) break;
     buf[i] = counter;
     counter++;
     i++;
-    if (i == count)
-      break;
+    if (i == count) break;
   }
   assert(i == count);
   mpz_import(z, count, 1, 1, 1, 0, buf);

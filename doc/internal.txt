@@ -31,8 +31,8 @@ The only other field is +data+, which stores any data needed for the
 implementation of the particular algebraic structure the element resides in.
 
   struct element_s {
-      struct field_s *field;
-      void *data;
+    struct field_s *field;
+    void *data;
   };
 
 When an +element_t+ variable is initialized, +field+ is set appropriately, and
@@ -40,18 +40,17 @@ then the initialization specific to that field is called to complete the
 initialization. Here, a line of code is worth a thousand words:
 
   void element_init(element_t e, field_ptr f) {
-      e->field = f;
-      f->init(e);
+    e->field = f;
+    f->init(e);
   }
 
-Thus when a call to one of the `element_` functions, the +field+ pointer is
-followed to see which version of the function should be called, so that for
-example modular addition is performed if the input element is an element of a
-finite field, while polynomial addition is performed for elements of a
-polynomial ring and so on.
+Thus during a call to one of the `element_` functions, the +field+ pointer is
+followed then the appropriate routine is executed. For example, modular addition
+results when the input element is an element of a finite field, while
+polynomial addition is performed for elements of a polynomial ring and so on.
 
   void element_add(element_t n, element_t a, element_t b) {
-      n->field->add(n, a, b);
+    n->field->add(n, a, b);
   }
 
 === Design ===
@@ -73,13 +72,11 @@ because I wanted to
   example, when I was comparing Montgomery representation versus a naive
   implementation of modular arithmetic.
 
-I could have separate data types to distinguish between groups, rings and
-fields. It is important to label them differently in mathematics, but here it
-makes more sense to lump them together under the same heading, and just treat
-some kinds as handicapped.  Distinct data types may lead to a false sense of
-security.  For example, fields of prime order with different moduli would still
-fall under the same data type, with unpleasant results if their elements are
-mistakenly mixed.
+In mathematics, groups, rings and fields should be distinguished, but for
+implmentation, it is simplest lump them together under the same heading.
+In any event, distinct data types may lead to a false sense of security.
+Fields of prime order with different moduli would still fall under the same
+data type, with unpleasant results if their elements are mistakenly mixed.
 
 I have vague plans to add flags to +field_t+ describing the capabilities of a
 particular +field_t+.  These flags would be set during initialization, and
@@ -111,7 +108,7 @@ The
 http://www.gnu.org/software/libc/manual/html_node/Reserved-Names.html[GNU libc manual]
 states that data types ending in +_t+ should not be used because they are
 reserved for future additions to C or POSIX.  On the other hand, I want to stay
-consistent with GMP, and I hear ending data types with +_t+ is common practice.
+consistent with GMP, and ending data types with +_t+ is common practice.
 
 === Internal Randomness ===
 
@@ -266,7 +263,11 @@ I chose C because:
   (I also agree with his statement that OO languages conceptually provide
   little extra over judicious use of function pointers in C.)
 
-I use the One True Brace Style.
+With respect to indentation, I'm migrating the code to follow
+http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml[Google C++
+Style Guide] to avoid having to switch styles all the time.
+The code was originally written using my old style: 4-space indent with 1TBS
+(One True Brace Style).
 
 I'd like to have no library dependencies (except standard C libraries),
 but then I'd have to write a large integer library. Not only that, it'd
