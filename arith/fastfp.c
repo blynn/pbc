@@ -6,7 +6,7 @@
 // Its size is fixed and determined by the number of limbs in the modulus.
 // This simplifies code but is inefficient for storing values like 0 and 1.
 
-#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -335,7 +335,7 @@ static void fp_field_clear(field_t f) {
 }
 
 void field_init_fast_fp(field_ptr f, mpz_t prime) {
-  assert(!mpz_fits_ulong_p(prime));
+  PBC_ASSERT(!mpz_fits_ulong_p(prime), "modulus too small");
   fp_field_data_ptr p;
   field_init(f);
   f->init = fp_init;

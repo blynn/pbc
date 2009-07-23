@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h> //for rand, pbc_malloc, pbc_free
 #include <string.h> //for strcmp
@@ -113,8 +113,8 @@ void a_param_out_str(FILE *stream, a_param_ptr p)
 
 void a_param_inp_generic (a_param_ptr p, fetch_ops_t fops, void *ctx)
 {
-    assert (fops);
-    assert (ctx);
+    PBC_ASSERT(fops, "NULL fops");
+    PBC_ASSERT(ctx, "NULL ctx");
     symtab_t tab;
 
     symtab_init(tab);
@@ -1490,8 +1490,8 @@ void a1_param_out_str(FILE *stream, a1_param_ptr p)
 
 void a1_param_inp_generic (a1_param_ptr p, fetch_ops_t fops, void *ctx)
 {
-    assert (fops);
-    assert (ctx);
+    PBC_ASSERT(fops, "NULL fops");
+    PBC_ASSERT(ctx, "NULL ctx");
     symtab_t tab;
 
     symtab_init(tab);

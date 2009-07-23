@@ -2,6 +2,7 @@
 // i.e. R[x]_{f(x)}.
 
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
@@ -393,10 +394,7 @@ void poly_div(element_ptr quot, element_ptr rem,
   int m, n;
   int i, k;
 
-  if (element_is0(b)) {
-    fprintf(stderr, "BUG! division by zero!\n");
-    exit(1);
-  }
+  if (element_is0(b)) pbc_die("division by zero");
   n = poly_degree(b);
   m = poly_degree(a);
   if (n > m) {

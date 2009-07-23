@@ -6,6 +6,7 @@
 // show off the modularity of the code.
 
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <gmp.h>
 #include <string.h>
@@ -28,7 +29,7 @@ void pbc_tweak_use_fp(char *s) {
   } else if (!strcmp(s, "mont")) {
     option_fpinit = field_init_mont_fp;
   } else {
-    fprintf(stderr, "no such Fp implementation: %s\n", s);
+    pbc_error("no such Fp implementation: %s", s);
   }
 }
 

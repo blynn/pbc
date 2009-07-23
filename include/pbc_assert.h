@@ -15,4 +15,23 @@
 
 #endif
 
+// Based on Git code.
+
+// Print error message to standard error and exit with code 128.
+void pbc_die(const char *err, ...)
+    __attribute__((__noreturn__))
+    __attribute__((format (printf, 1, 2)));
+
+// Print info message to standard error.
+void pbc_info(const char *err, ...)
+    __attribute__((format (printf, 1, 2)));
+
+// Print warning message to standard error.
+void pbc_warn(const char *err, ...)
+    __attribute__((format (printf, 1, 2)));
+
+// Print error message to standard error.
+void pbc_error(const char *err, ...)
+    __attribute__((format (printf, 1, 2)));
+
 #endif //__PBC_ASSERT_H__

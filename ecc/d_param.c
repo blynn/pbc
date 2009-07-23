@@ -1,6 +1,6 @@
 // Type D pairings, aka MNT curves.
 
-#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -90,8 +90,8 @@ void d_param_out_str(FILE *stream, d_param_ptr p) {
 }
 
 void d_param_inp_generic(d_param_ptr p, fetch_ops_t fops, void *ctx) {
-  assert (fops);
-  assert (ctx);
+  PBC_ASSERT(fops, "NULL fops");
+  PBC_ASSERT(ctx, "NULL ctx");
   symtab_t tab;
   char s[80];
   int i, d;
@@ -858,10 +858,7 @@ void pairing_init_d_param(pairing_t pairing, d_param_t param) {
   int d = param->k / 2;
   int i;
 
-  if (param->k % 2) {
-    fprintf(stderr, "odd k not implemented anymore\n");
-    exit(2);
-  }
+  if (param->k % 2) pbc_die("k must be even");
 
   mpz_init(pairing->r);
   mpz_set(pairing->r, param->r);

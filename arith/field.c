@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> // for memcmp()
@@ -251,7 +251,7 @@ static void *element_build_base_table(element_ptr a, int bits, int k) {
 
   element_t *lookup;
 
-  // fprintf(stderr, "building %d bits %d k\n", bits, k);
+  // pbc_info("building %d bits %d k", bits, k);
   lookup_size = 1 << k;
 
   base_table = pbc_malloc(sizeof(struct element_base_table));
@@ -520,7 +520,7 @@ int default_element_set_str(element_t e, char *s, int base) {
 }
 
 static void warn_field_clear(field_ptr f) {
-  fprintf(stderr, "field %p has no clear function\n", f);
+  pbc_warn("field %p has no clear function", f);
 }
 
 void field_out_info(FILE * out, field_ptr f) {
@@ -613,7 +613,7 @@ void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
     i++;
     if (i == count) break;
   }
-  assert(i == count);
+  PBC_ASSERT(i == count, "did not read whole buffer");
   mpz_import(z, count, 1, 1, 1, 0, buf);
   while (mpz_cmp(z, limit) > 0) {
     mpz_tdiv_q_2exp(z, z, 1);

@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -279,7 +279,7 @@ void field_init_tiny_fp(field_ptr f, mpz_t prime)
 {
     unsigned long *p;
 
-    assert (mpz_fits_ulong_p(prime));
+    PBC_ASSERT(mpz_fits_ulong_p(prime), "modulus too big");
 
     field_init(f);
     f->init = fp_init;

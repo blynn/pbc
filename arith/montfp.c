@@ -10,7 +10,7 @@
 // TODO: mul_2exp(x, p->bytes * 8) could be replaced with
 // faster code that messes with GMP internals
 
-#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -520,7 +520,7 @@ void fp_out_info(FILE * out, field_ptr f) {
 }
 
 void field_init_mont_fp(field_ptr f, mpz_t prime) {
-  assert(!mpz_fits_ulong_p(prime));
+  PBC_ASSERT(!mpz_fits_ulong_p(prime), "modulus too small");
   fptr p;
   field_init(f);
   f->init = fp_init;

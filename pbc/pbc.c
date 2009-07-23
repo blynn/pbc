@@ -12,8 +12,6 @@
 #include "pbc_fp.h"
 #include "pbc_utils.h"
 
-#include "config.h"
-
 char *pbc_getline(void);
 
 enum {
@@ -1253,7 +1251,7 @@ int main(int argc, char **argv)
 
     field_init_z(Z);
 
-    fprintf(stderr, "%s\n", PACKAGE_STRING);
+    fprintf(stderr, "pbc\n");
 
     for (;;) {
 	currentline = pbc_getline();

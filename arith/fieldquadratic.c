@@ -7,6 +7,7 @@
 // we can use sqrt(base field nqr) as the nqr of the extension.
 
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>

@@ -45,9 +45,13 @@ libpbc_srcs := \
 
 libpbc_objs := $(libpbc_srcs:.c=.o)
 
-example_srcs := \
+bin_srcs := \
   $(addsuffix .c,$(addprefix example/, \
-    bls hess joux paterson yuanli zhangkim zss))
+    bls hess joux paterson yuanli zhangkim zss)) \
+  $(addsuffix .c,$(addprefix gen/, \
+    gena1param genaparam gendparam geneparam genfparam \
+    hilbertpoly listmnt listfreeman)) \
+  benchmark/benchmark.c benchmark/timersa.c benchmark/ellnet.c
 
 define demo_tmpl
   examples += out/$(basename $(notdir $(1)))$(exe_suffix)
@@ -55,9 +59,14 @@ define demo_tmpl
     $(CC) -o $$@ $(LDFLAGS) $$^ $(LOADLIBES) $(LDLIBS)
 endef
 
-$(foreach x,$(example_srcs:.c=.o),$(eval $(call demo_tmpl,$(x))))
+$(foreach x,$(bin_srcs:.c=.o),$(eval $(call demo_tmpl,$(x))))
 
-binaries : $(examples)
+pbc_objs := pbc/pbc.o pbc/pbc_getline.readline.o
+
+pbc/pbc : $(pbc_objs) libpbc.a
+	$(CC) -o $@ $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -lreadline
+
+binaries : $(examples) pbc/pbc
 
 test_srcs := \
   $(addsuffix .c,$(addprefix guru/, \
@@ -78,8 +87,8 @@ test : $(tests)
 
 out: ; mkdir out
 
-srcs := $(libpbc_srcs) $(example_srcs) $(test_srcs)
-objs := $(srcs:.c=.o)
+srcs := $(libpbc_srcs) $(bin_srcs) $(test_srcs)
+objs := $(srcs:.c=.o) $(pbc_objs)
 
 clean: ; -rm -r out $(objs)
 

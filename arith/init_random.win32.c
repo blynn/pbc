@@ -16,11 +16,11 @@ static void win32_mpz_random(mpz_t r, mpz_t limit, void *data) {
     error = GetLastError();
     if (error == 0x80090016) { //need to create a new keyset
       if (!CryptAcquireContext(&phProv,NULL,NULL,PROV_RSA_FULL,CRYPT_NEWKEYSET)) {
-        fprintf(stderr,"Couldn't create CryptContext: %x\n",(int)GetLastError());
+        pbc_error("Couldn't create CryptContext: %x", (int)GetLastError());
         return;
       }
     } else {
-      fprintf(stderr,"Couldn't create CryptContext: %x\n",error);
+      pbc_error("Couldn't create CryptContext: %x", error);
       return;
     }
   }

@@ -136,7 +136,7 @@ int element_printf(const char *format, ...)
     return status;
 }
 
-int element_vsnprintf (char *buf, size_t size, const char *fmt, va_list ap)
+int element_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap)
 {
     struct sninfo_s {
 	char *s;

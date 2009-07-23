@@ -1,6 +1,7 @@
 // Naive implementation of F_p.
 // Little more than wrappers around GMP mpz functions.
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

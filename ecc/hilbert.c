@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h> //for pbc_malloc, pbc_free
 #include <gmp.h>
@@ -389,7 +390,7 @@ step535_4:
     //printf("modulus: %f\n", exp(3.14159265358979 * sqrt(D)) * d * 0.5);
     d *= sqrt(D) * 3.14159265358979 / log(2);
     precision_init(d + 34);
-    fprintf(stderr, "class number %d, %d bit precision\n", h, (int) d + 34);
+    pbc_info("class number %d, %d bit precision", h, (int) d + 34);
 
     darray_init(Pz);
     mpc_init(alpha);
@@ -420,7 +421,7 @@ step4:
 	    //primitive reduced positive definite form
 	    //compute j((-b + sqrt{-D})/(2a))
 	    h++;
-	    fprintf(stderr, "[%d/%d] a b c = %d %d %d\n", h, jcount, a, b, t/a);
+	    pbc_info("[%d/%d] a b c = %d %d %d", h, jcount, a, b, t/a);
 	    mpf_set_ui(f0, 1);
 	    mpf_div_ui(f0, f0, 2 * a);
 	    mpf_mul(mpc_im(alpha), sqrtD, f0);
@@ -570,12 +571,7 @@ int findroot(element_ptr root, element_ptr poly)
     element_init(x, fpxmod);
     element_init(g, poly->field);
     element_set1(((element_t *) x->data)[1]);
-    /*
-    printf("q = ");
-    mpz_out_str(stdout, 10, q);
-    printf("\n");
-    */
-fprintf(stderr, "findroot: degree %d...\n", poly_degree(poly));
+pbc_info("findroot: degree %d...", poly_degree(poly));
     element_pow_mpz(p, x, q);
     element_sub(p, p, x);
 
@@ -617,7 +613,7 @@ step_random:
 	    element_init(p, fpxmod);
 
 	    element_poly_to_polymod_truncate(p, r);
-fprintf(stderr, "findroot: degree %d...\n", poly_degree(g));
+pbc_info("findroot: degree %d...", poly_degree(g));
 	    element_pow_mpz(p, p, q);
 
 	    element_polymod_to_poly(r, p);
@@ -634,7 +630,7 @@ fprintf(stderr, "findroot: degree %d...\n", poly_degree(g));
 	    field_clear(fpxmod);
 	}
     }
-fprintf(stderr, "findroot: found root\n");
+pbc_info("findroot: found root");
     element_neg(root, poly_coeff(g, 0));
     element_clear(r);
     mpz_clear(q);

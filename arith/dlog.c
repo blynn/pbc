@@ -1,5 +1,6 @@
 // Brute force and Pollard rho discrete log algorithms.
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <gmp.h>
 #include "pbc_darray.h"

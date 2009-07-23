@@ -12,7 +12,7 @@
 // See comments in add, double code.
 // (This kind of integer mod ring deserves its own implementation anyway.)
 
-#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -486,7 +486,7 @@ static int fp_from_bytes(element_t a, unsigned char *data) {
   return n;
 }
 
-static void fp_out_info(FILE * str, field_ptr f) {
+static void fp_out_info(FILE* str, field_ptr f) {
   fprintf(str, "F_p: zero flag + mpn,\n");
   element_fprintf(str, "modulus = %Zd\n", f->order);
 }
@@ -498,7 +498,7 @@ static void fp_field_clear(field_t f) {
 }
 
 void field_init_faster_fp(field_ptr f, mpz_t prime) {
-  assert(!mpz_fits_ulong_p(prime));
+  PBC_ASSERT(!mpz_fits_ulong_p(prime), "modulus too small");
   fp_field_data_ptr p;
   field_init(f);
   f->init = fp_init;

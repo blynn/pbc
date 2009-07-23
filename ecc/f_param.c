@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
@@ -66,8 +66,8 @@ void f_param_out_str(FILE *stream, f_param_ptr p)
 
 void f_param_inp_generic (f_param_ptr p, fetch_ops_t fops, void *ctx)
 {
-    assert (fops);
-    assert (ctx);
+    PBC_ASSERT(fops, "NULL fops");
+    PBC_ASSERT(ctx, "NULL ctx");
     symtab_t tab;
 
     symtab_init(tab);

@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -77,8 +77,8 @@ static void default_pp_clear(pairing_pp_t p)
 
 void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx)
 {
-    assert (fops);
-    assert (ctx);
+    PBC_ASSERT(fops, "NULL fetch_ops");
+    PBC_ASSERT(ctx, "NULL ctx");
     char *s;
     token_t tok;
 
@@ -144,8 +144,7 @@ void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx)
 	pairing_init_g_param(pairing, gp);
 	g_param_clear(gp);
     } else {
-	fprintf(stderr, "unknown pairing type!\n");
-	exit(1);
+	pbc_die("unknown pairing type!");
     }
     token_clear(tok);
     pbc_free(s);
@@ -156,7 +155,7 @@ void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx)
 
 void pairing_init_inp_buf (pairing_t pairing, const char *buf, size_t len)
 {
-    assert (buf);
+    PBC_ASSERT(buf, "NULL buf");
     tracker_t t;
     tracker_init (&t, buf, len);
     pairing_init_inp_generic (pairing, &fops_buf, &t);
@@ -164,7 +163,7 @@ void pairing_init_inp_buf (pairing_t pairing, const char *buf, size_t len)
 
 void pairing_init_inp_str(pairing_t pairing, FILE *stream)
 {
-    assert (stream);
+    PBC_ASSERT(stream, "NULL stream");
     pairing_init_inp_generic (pairing, &fops_str, stream);
 }
 

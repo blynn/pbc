@@ -3,6 +3,7 @@
  * element_t: represents an element of a field_t.
  */
 //requires
+// * stdarg.h
 // * stdio.h
 // * gmp.h
 #ifndef __PBC_FIELD_H__
@@ -132,6 +133,10 @@ int element_printf(const char *format, ...);
 int element_fprintf(FILE * stream, const char *format, ...);
 
 /*@manual eio
+*/
+int element_snprintf(char *buf, size_t size, const char *fmt, ...);
+
+/*@manual eio
 Same as printf family
 except also has the 'B' conversion specifier for types
 of *element_t*, and 'Y', 'Z' conversion specifiers for
@@ -142,7 +147,7 @@ of *element_t*, and 'Y', 'Z' conversion specifiers for
 
 will print the value of 'e' in a human-readable form on standard output.
 */
-int element_snprintf(char *buf, size_t size, const char *fmt, ...);
+int element_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
 
 /*@manual eio
 Convert an element to a human-friendly string.

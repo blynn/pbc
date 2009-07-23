@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
+#include "pbc_assert.h"
 #include "pbc_symtab.h"
 #include "pbc_fops.h"
 #include "pbc_parse.h"
@@ -80,7 +81,7 @@ void param_clear_tab(symtab_t tab)
 void lookup_mpz(mpz_t z, symtab_t tab, char *key)
 {
     if (!symtab_has(tab, key)) {
-	fprintf(stderr, "missing param: `%s'\n", key);
+	pbc_error("missing param: `%s'", key);
 	return;
     }
 
@@ -94,7 +95,7 @@ int lookup_int(symtab_t tab, char *key)
     int res;
     mpz_t z;
     if (!symtab_has(tab, key)) {
-	fprintf(stderr, "missing param: `%s'\n", key);
+	pbc_error("missing param: `%s'", key);
 	return 0;
     }
 

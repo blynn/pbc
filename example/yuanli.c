@@ -34,138 +34,134 @@ I've defined it as H(A, B, h, Kab)=e(h,H1(A)+H1(B))+Kab.
 
 int main(void)
 {
-    pairing_t pairing;
-    double t0, t1;
-    element_t s, a, b, P, Ppub, Qa, Qb, Sa, Sb, Ta, Tb, Kab, Kba, K, temp1,
-	temp2, temp3, temp4, temp5, h;
+  pairing_t pairing;
+  double t0, t1;
+  element_t s, a, b, P, Ppub, Qa, Qb, Sa, Sb, Ta, Tb, Kab, Kba, K, temp1,
+    temp2, temp3, temp4, temp5, h;
 
-    pairing_init_inp_str(pairing, stdin);
+  pairing_init_inp_str(pairing, stdin);
+  if (!pairing_is_symmetric(pairing)) pbc_die("pairing must be symmetric");
 
-    element_init_Zr(s, pairing);
-    element_init_Zr(a, pairing);
-    element_init_Zr(b, pairing);
+  element_init_Zr(s, pairing);
+  element_init_Zr(a, pairing);
+  element_init_Zr(b, pairing);
 
-    element_init_G1(P, pairing);
-    element_init_G1(Ppub, pairing);
-    element_init_G1(Qa, pairing);
-    element_init_G1(Qb, pairing);
-    element_init_G1(Sa, pairing);
-    element_init_G1(Sb, pairing);
-    element_init_G1(Ta, pairing);
-    element_init_G1(Tb, pairing);
-    element_init_G1(temp1, pairing);
-    element_init_G1(temp2, pairing);
-    element_init_G1(temp3, pairing);
-    element_init_G1(h, pairing);
+  element_init_G1(P, pairing);
+  element_init_G1(Ppub, pairing);
+  element_init_G1(Qa, pairing);
+  element_init_G1(Qb, pairing);
+  element_init_G1(Sa, pairing);
+  element_init_G1(Sb, pairing);
+  element_init_G1(Ta, pairing);
+  element_init_G1(Tb, pairing);
+  element_init_G1(temp1, pairing);
+  element_init_G1(temp2, pairing);
+  element_init_G1(temp3, pairing);
+  element_init_G1(h, pairing);
 
-    element_init_GT(Kab, pairing);
-    element_init_GT(Kba, pairing);
-    element_init_GT(K, pairing);
-    element_init_GT(temp4, pairing);
-    element_init_GT(temp5, pairing);
+  element_init_GT(Kab, pairing);
+  element_init_GT(Kba, pairing);
+  element_init_GT(K, pairing);
+  element_init_GT(temp4, pairing);
+  element_init_GT(temp5, pairing);
 
-    if (!pairing_is_symmetric(pairing)) {
-	fprintf(stderr, "only works with symmetric pairing\n");
-	exit(1);
-    }
+  printf("Yuan-Li key agreement protocol\n");
 
-    printf("Yuan-Li key agreement protocol\n");
-
-    t0 = get_time();
+  t0 = get_time();
 
 //Setup, system parameters generation
-    printf("SETUP STAGE\n");
-    element_random(P);
-    element_printf("P = %B\n", P);
-    element_random(s);
-    element_mul_zn(Ppub, P, s);
-    element_printf("Ppub = %B\n", Ppub);
+  printf("SETUP STAGE\n");
+  element_random(P);
+  element_printf("P = %B\n", P);
+  element_random(s);
+  element_mul_zn(Ppub, P, s);
+  element_printf("Ppub = %B\n", Ppub);
 
 //Extract, key calculation
-    printf("EXTRACT STAGE\n");
-    element_from_hash(Qa, "A", 1);
-    element_from_hash(Qb, "B", 1);
-    element_mul_zn(Sa, Qa, s);
-    element_mul_zn(Sb, Qb, s);
-    element_printf("Sa = %B\n", Sa);
-    element_printf("Sb = %B\n", Sb);
+  printf("EXTRACT STAGE\n");
+  element_from_hash(Qa, "A", 1);
+  element_from_hash(Qb, "B", 1);
+  element_mul_zn(Sa, Qa, s);
+  element_mul_zn(Sb, Qb, s);
+  element_printf("Sa = %B\n", Sa);
+  element_printf("Sb = %B\n", Sb);
 
-    printf("-----1-----\n");
+  printf("-----1-----\n");
 
-    element_random(a);
-    element_mul_zn(Ta, P, a);
-    element_printf("A sends B Ta = %B\n", Ta);
+  element_random(a);
+  element_mul_zn(Ta, P, a);
+  element_printf("A sends B Ta = %B\n", Ta);
 
-    printf("-----2-----\n");
+  printf("-----2-----\n");
 
-    element_random(b);
-    element_mul_zn(Tb, P, b);
-    element_printf("B sends A Tb = %B\n", Tb);
+  element_random(b);
+  element_mul_zn(Tb, P, b);
+  element_printf("B sends A Tb = %B\n", Tb);
 
-    printf("-----3-----\n");
+  printf("-----3-----\n");
 
-    printf("A calculates h and Kab\n");
-    element_mul_zn(h, Tb, a);
-    element_printf("h = %B\n", h);
-    element_mul_zn(temp1, Ppub, a);
-    element_add(temp1, temp1, Sa);
-    element_add(temp2, Tb, Qb);
-    pairing_apply(Kab, temp1, temp2, pairing);
-    element_printf("Kab = %B\n", Kab);
+  printf("A calculates h and Kab\n");
+  element_mul_zn(h, Tb, a);
+  element_printf("h = %B\n", h);
+  element_mul_zn(temp1, Ppub, a);
+  element_add(temp1, temp1, Sa);
+  element_add(temp2, Tb, Qb);
+  pairing_apply(Kab, temp1, temp2, pairing);
+  element_printf("Kab = %B\n", Kab);
 
-    printf("-----4-----\n");
+  printf("-----4-----\n");
 
-    printf("B calculates h and Kba\n");
-    element_mul_zn(h, Ta, b);
-    element_printf("h = %B\n", h);
-    element_add(temp1, Ta, Qa);
-    element_mul_zn(temp2, Ppub, b);
-    element_add(temp2, temp2, Sb);
-    pairing_apply(Kba, temp1, temp2, pairing);
-    element_printf("Kba = %B\n", Kba);
+  printf("B calculates h and Kba\n");
+  element_mul_zn(h, Ta, b);
+  element_printf("h = %B\n", h);
+  element_add(temp1, Ta, Qa);
+  element_mul_zn(temp2, Ppub, b);
+  element_add(temp2, temp2, Sb);
+  pairing_apply(Kba, temp1, temp2, pairing);
+  element_printf("Kba = %B\n", Kba);
 
-    printf("-----FINAL-----\n");
+  printf("-----FINAL-----\n");
 
-    element_add(temp3, Qa, Qb);
-    pairing_apply(temp4, h, temp3, pairing);
+  element_add(temp3, Qa, Qb);
+  pairing_apply(temp4, h, temp3, pairing);
 
-    element_add(K, temp4, Kab);
-    element_printf("A has the key K = %B\n", K);
-    element_set(temp5, K);
+  element_add(K, temp4, Kab);
+  element_printf("A has the key K = %B\n", K);
+  element_set(temp5, K);
 
-    element_add(K, temp4, Kba);
-    element_printf("B has the key K = %B\n", K);
+  element_add(K, temp4, Kba);
+  element_printf("B has the key K = %B\n", K);
 
-    if (!element_cmp(temp5, K))
-	printf("The keys are the same. Start session...\n");
-    else
-	printf("The keys aren't the same. Try again, please.\n");
+  if (!element_cmp(temp5, K))
+    printf("The keys are the same. Start session...\n");
+  else
+    printf("The keys aren't the same. Try again, please.\n");
 
-    element_clear(K);
-    element_clear(Kab);
-    element_clear(Kba);
-    element_clear(h);
-    element_clear(temp1);
-    element_clear(temp2);
-    element_clear(temp3);
-    element_clear(temp4);
-    element_clear(temp5);
-    element_clear(s);
-    element_clear(a);
-    element_clear(b);
-    element_clear(P);
-    element_clear(Ppub);
-    element_clear(Qa);
-    element_clear(Qb);
-    element_clear(Sa);
-    element_clear(Sb);
-    element_clear(Ta);
-    element_clear(Tb);
+  element_clear(K);
+  element_clear(Kab);
+  element_clear(Kba);
+  element_clear(h);
+  element_clear(temp1);
+  element_clear(temp2);
+  element_clear(temp3);
+  element_clear(temp4);
+  element_clear(temp5);
+  element_clear(s);
+  element_clear(a);
+  element_clear(b);
+  element_clear(P);
+  element_clear(Ppub);
+  element_clear(Qa);
+  element_clear(Qb);
+  element_clear(Sa);
+  element_clear(Sb);
+  element_clear(Ta);
+  element_clear(Tb);
 
-    t1 = get_time();
+  t1 = get_time();
 
-    printf("All time = %fs\n", t1 - t0);
-    printf("Have a good day!\n");
+  printf("All time = %fs\n", t1 - t0);
+  printf("Have a good day!\n");
 
-    return 0;
+  return 0;
 }

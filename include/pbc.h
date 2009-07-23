@@ -1,6 +1,7 @@
 #ifndef __PBC_H__
 #define __PBC_H__
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
@@ -25,6 +26,7 @@ extern "C" {
 #include "pbc_g_param.h"
 #include "pbc_random.h"
 #include "pbc_memory.h"
+#include "pbc_assert.h"
 
 #if defined (__cplusplus)
 }  // extern "C"
