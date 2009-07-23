@@ -73,6 +73,7 @@ arith/tinyfp.c arith/fastfp.c arith/fasterfp.c
 arith/field.c
 arith/fp.c
 arith/fieldquadratic.c
+arith/dlog.c
 arith/indexcalculus.c
 arith/poly.c arith/random.c
 ${init_random_src}

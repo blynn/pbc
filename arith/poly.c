@@ -1472,10 +1472,8 @@ void poly_gcd(element_ptr d, element_ptr f, element_ptr g) {
 // only if f(x) | x^{q^n} - x and for all d | n, gcd(f(x), x^{q^d} - x) = 1.
 // factor: list of factors of deg f.
 int poly_is_irred(element_ptr f) {
-  mpz_t deg;
   int res = 0;
   element_t xpow, x, g;
-  mpz_t z;
   field_ptr basef = poly_base_field(f);
   field_t rxmod;
 
@@ -1489,7 +1487,9 @@ int poly_is_irred(element_ptr f) {
 
   // The degree fits in an unsigned int but I'm lazy and want to use my
   // mpz trial division code.
+  mpz_t deg, z;
   mpz_init(deg);
+  mpz_init(z);
   mpz_set_ui(deg, poly_degree(f));
   int checkgcd(mpz_ptr fac, unsigned int mul) {
     UNUSED_VAR(mul);
