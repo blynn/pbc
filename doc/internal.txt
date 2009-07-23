@@ -257,7 +257,7 @@ I chose C because:
 - PBC is intended to be a low-level portable cryptographic library.  C is the
   least common denominator. It should not be difficult to wrap PBC for other
   languages.
-- Despite its drawbacks (I could really use operator overloading and
+- Despite its drawbacks (I would appreciate operator overloading and
   genericity, and to a lesser extent garbage collection), I've found few
   languages I like better.  To quote Rob Pike, C is the desert island language.
   (I also agree with his statement that OO languages conceptually provide
@@ -270,13 +270,13 @@ The code was originally written using my old style: 4-space indent with 1TBS
 (One True Brace Style).
 
 I'd like to have no library dependencies (except standard C libraries),
-but then I'd have to write a large integer library. Not only that, it'd
-have to be in assembly, and then I'd need to port it. To avoid this,
-I use an existing library instead.
+but then I'd have to write a large integer library. Furthermore, I'd have to
+write it in assembly, and then port it.
 
-I selected GMP because the library's focus is on multiprecision arithmetic and
-nothing else, and it aims to be as fast as possible on many platforms.  Another
-important factor is that GMP is released under a free license.
+To avoid this, I use an existing library. I selected GMP because the library's
+focus is on multiprecision arithmetic and nothing else, and it aims to be as
+fast as possible on many platforms.  Another important factor is that GMP is
+released under a free license.
 
 On the other hand, GMP is written to deal with extremely large numbers, while I
 mostly only need integers that are roughly between 160 and 2048 bits. It is

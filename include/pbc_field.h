@@ -582,4 +582,11 @@ void brute_force_dlog(element_t x, element_t g, element_t h);
 void pollard_rho(element_t x, element_t g, element_t h);
 void index_calculus_dlog(mpz_t x, mpz_t g, mpz_t h, mpz_t q);
 
+// Trial division up to a given limit. If limit == NULL, then there is no limit.
+// Call the callback for each factor found, abort and return 1 if the callback
+// returns nonzero, otherwise return 0.
+int pbc_trial_divide(int (*fun)(mpz_t factor, unsigned int multiplicity),
+    mpz_t n, mpz_ptr limit);
+
+
 #endif  // __PBC_FIELD_H__

@@ -57,8 +57,6 @@ void poly_div(element_ptr quot, element_ptr rem,
 void field_init_poly(field_ptr f, field_ptr base_field);
 void field_init_polymod(field_ptr f, element_ptr poly);
 
-void trial_divide(darray_ptr factor, darray_ptr mult, mpz_t n, mpz_ptr limit);
-
 static inline field_ptr poly_base_field(element_t f)
 {
     return ((poly_field_data_ptr) f->field->data)->field;
