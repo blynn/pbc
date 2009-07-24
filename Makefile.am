@@ -1,7 +1,7 @@
 SUBDIRS = . example gen
 
 ChangeLog :
-	cg-log > ChangeLog
+	git log > ChangeLog
 
 CLEANFILES = *~
 maintainer-clean-local:

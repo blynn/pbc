@@ -11,11 +11,8 @@ extern "C" {
 #endif
 
 #include "pbc_fops.h"
-#include "pbc_darray.h"
-#include "pbc_symtab.h"
 #include "pbc_field.h"
 #include "pbc_pairing.h"
-#include "pbc_poly.h"
 #include "pbc_curve.h"
 #include "pbc_mnt.h"
 #include "pbc_a1_param.h"

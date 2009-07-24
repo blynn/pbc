@@ -1,6 +1,9 @@
+// Test quadratic field extensions.
+
 #include "pbc.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
+#include "test.h"
 
 int main(void) {
   field_t fp, fp2;
@@ -8,8 +11,8 @@ int main(void) {
   element_t a, b, c;
 
   mpz_init(prime);
-  mpz_set_ui(prime, 83); // 83 is 3 mod 4
-
+  // Prime is 3 mod 4 so that -1 is a quadratic nonresidue.
+  // For smaller tests, try the prime 83.
   mpz_setbit(prime, 256);
   do {
     mpz_nextprime(prime, prime);

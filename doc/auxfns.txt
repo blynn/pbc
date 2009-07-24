@@ -1,6 +1,7 @@
 == Auxiliary Functions ==
 
-Information on data types internally used by the library.
+The PBC internally maintains homebrew data structures. In earlier versions they
+were exposed in the library interface. Users no longer need this section.
 
 === Dynamic Arrays ===
 

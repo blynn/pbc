@@ -35,8 +35,14 @@ int main(void) {
   EXPECT(a == element_to_si(x));
   element_set_si(y, b);
   EXPECT(b == element_to_si(y));
-  element_add(z, x, y);
+  // Assignment, comparison.
+  EXPECT(!element_cmp(x, x));
+  EXPECT(element_cmp(x, y));
+  EXPECT(element_cmp(z, x));
+  element_set(z, x);
+  EXPECT(!element_cmp(z, x));
   // Arithmetic operations.
+  element_add(z, x, y);
   EXPECT(a + b == element_to_si(z));
   element_mul(z, x, y);
   EXPECT(a * b == element_to_si(z));

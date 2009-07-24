@@ -70,7 +70,7 @@ binaries : $(examples) pbc/pbc
 
 test_srcs := \
   $(addsuffix .c,$(addprefix guru/, \
-    fp_test testexp testfi testpairing testpoly))
+    fp_test quadratic_test testexp testpairing testpoly))
 
 tests := $(test_srcs:.c=)
 
@@ -82,7 +82,7 @@ guru/testexp: guru/testexp.o libpbc.a
 guru/testpairing: guru/testpairing.o libpbc.a
 guru/fp_test: guru/fp_test.o $(fp_objs)
 guru/testpoly: guru/testpoly.o $(fp_objs) arith/poly.o misc/darray.o
-guru/testfi: guru/testfi.o $(fp_objs) arith/fieldquadratic.o
+guru/quadratic_test: guru/quadratic_test.o $(fp_objs) arith/fieldquadratic.o
 
 test : $(tests)
 
@@ -91,7 +91,7 @@ out: ; mkdir out
 srcs := $(libpbc_srcs) $(bin_srcs) $(test_srcs)
 objs := $(srcs:.c=.o) $(pbc_objs)
 
-clean: ; -rm -r out $(objs)
+clean: ; -rm -r out $(objs) libpbc.a
 
 # File dependencies for library-making.
 # See GNU Make manual, sect. 11.2.
