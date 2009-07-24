@@ -70,7 +70,7 @@ binaries : $(examples) pbc/pbc
 
 test_srcs := \
   $(addsuffix .c,$(addprefix guru/, \
-    fp_test quadratic_test testexp testpairing testpoly))
+    fp_test quadratic_test poly_test testexp testpairing))
 
 tests := $(test_srcs:.c=)
 
@@ -81,7 +81,7 @@ fp_objs := $(addsuffix .o, \
 guru/testexp: guru/testexp.o libpbc.a
 guru/testpairing: guru/testpairing.o libpbc.a
 guru/fp_test: guru/fp_test.o $(fp_objs)
-guru/testpoly: guru/testpoly.o $(fp_objs) arith/poly.o misc/darray.o
+guru/poly_test: guru/poly_test.o $(fp_objs) arith/poly.o misc/darray.o
 guru/quadratic_test: guru/quadratic_test.o $(fp_objs) arith/fieldquadratic.o
 
 test : $(tests)

@@ -128,14 +128,12 @@ void darray_forall(darray_t a, void (*func)(void *))
     }
 }
 
-/* TODO: uncomment, may be useful?
-void *darray_exists(darray_t a, int (*func)(void *))
+void *darray_at_test(darray_ptr a, int (*test)(void *))
 {
-    int i, n = a->count;
-    for (i=0; i<n; i++) {
+    int i;
+    for (i = 0; i < a->count; i++) {
 	void *p = a->item[i];
-	if (func(p)) return p;
+	if (test(p)) return p;
     }
     return NULL;
 }
-*/

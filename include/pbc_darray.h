@@ -49,6 +49,8 @@ void darray_copy(darray_ptr dst, darray_ptr src);
 void darray_remove_all(darray_ptr d);
 void darray_forall(darray_t a, void (*func)(void *));
 
+void *darray_at_test(darray_ptr a, int (*test)(void *));
+
 /*@manual darray
 Returns the number of pointers held in 'a'.
 */

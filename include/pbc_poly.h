@@ -8,32 +8,52 @@
 #ifndef __PBC_POLY_H__
 #define __PBC_POLY_H__
 
-int poly_coeff_count(element_ptr e);
-element_ptr poly_coeff(element_ptr e, int i);
+// Returns deg f + 1.
+int poly_coeff_count(element_ptr f);
 
-static inline int poly_degree(element_ptr e) {
-  return poly_coeff_count(e) - 1;
+// Returns coefficient of x^n in f.
+// Assumes deg f >= n.
+element_ptr poly_coeff(element_ptr f, int n);
+
+// Returns deg f.
+static inline int poly_degree(element_ptr f) {
+  return poly_coeff_count(f) - 1;
 }
 
+// Returns base field of f (where the coefficients live).
 field_ptr poly_base_field(element_t f);
 
 void poly_alloc(element_ptr e, int n);
-void poly_remove_leading_zeroes(element_ptr e);
-void poly_set_coeff(element_ptr e, element_ptr a, int n);
+
+// Sets the coefficient of x^n to a.
+void poly_set_coeff(element_ptr f, element_ptr a, int n);
+
+// Sets f = x.
 void poly_setx(element_ptr f);
 void poly_const_mul(element_ptr res, element_ptr a, element_ptr poly);
-void poly_div(element_ptr quot, element_ptr rem,
-    element_ptr a, element_ptr b);
 
+// Initializes a polynomial ring.
 void field_init_poly(field_ptr f, field_ptr base_field);
+
+// Initializes a polynomial modulo ring.
+// Requires poly to be monic.
 void field_init_polymod(field_ptr f, element_ptr poly);
 
+// TODO: Move findroot to poly.c and expose that instead of these functions:
+// Sets d = gcd(f, g).
+// Exposed because ecc/hilbert.c uses it in findroot.
 void poly_gcd(element_ptr d, element_ptr f, element_ptr g);
-// Return 1 if polynomial is irreducible, 0 otherwise.
-int poly_is_irred(element_ptr f);
-void poly_invert(element_ptr res, element_ptr f, element_ptr m);
-void poly_random_monic(element_ptr f, int deg);
+
+// Sets f = c g for some constant c and is monic.
+// Requires the leading coefficient of g to be a unit.
+// Exposed because ecc/hilbert.c uses it in findroot.
 void poly_make_monic(element_t f, element_t g);
+
+// Returns 1 if polynomial is irreducible, 0 otherwise.
+// Requires the polynomial to be monic.
+int poly_is_irred(element_ptr f);
+void poly_random_monic(element_ptr f, int deg);
+
 void element_field_to_poly(element_t poly, element_t constant);
 
 void element_polymod_to_poly(element_ptr f, element_ptr e);
