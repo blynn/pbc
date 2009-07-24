@@ -1,49 +1,37 @@
-//requires
+// Polynomial rings R[x], and polynomial rings modulo polynomials,
+// i.e. R[x]_{f(x)}.
+
+// Requires:
 // * gmp.h
 // * field.h
 // * darray.h
 #ifndef __PBC_POLY_H__
 #define __PBC_POLY_H__
 
-//implements R[x] for a given ring R
-//also R[x]_{f(x)}
 struct poly_field_data_s {
-    field_ptr field;
-    fieldmap mapbase; //map element from underlying field to constant term
+  field_ptr field;
+  fieldmap mapbase; //map element from underlying field to constant term
 };
 typedef struct poly_field_data_s poly_field_data_t[1];
 typedef struct poly_field_data_s *poly_field_data_ptr;
 
 //TODO: having this structure is unnecessary? what else could be needed besides coeff?
 struct poly_element_s {
-    darray_t coeff;
+  darray_t coeff;
 };
 typedef struct poly_element_s poly_element_t[1];
 typedef struct poly_element_s *poly_element_ptr;
 
-struct polymod_field_data_s {
-    field_ptr field;
-    fieldmap mapbase;
-    int n; //degree of extension
-    element_t poly; //polynomial of degree n
-    element_t *xpwr; //holds x^n,...,x^{2n-2} mod poly
-};
-typedef struct polymod_field_data_s polymod_field_data_t[1];
-typedef struct polymod_field_data_s *polymod_field_data_ptr;
-
-static inline int poly_coeff_count(element_ptr e)
-{
-    return ((poly_element_ptr) e->data)->coeff->count;
+static inline int poly_coeff_count(element_ptr e) {
+  return ((poly_element_ptr) e->data)->coeff->count;
 }
 
-static inline int poly_degree(element_ptr e)
-{
-    return poly_coeff_count(e) - 1;
+static inline int poly_degree(element_ptr e) {
+  return poly_coeff_count(e) - 1;
 }
 
-static inline element_ptr poly_coeff(element_ptr e, int i)
-{
-    return (element_ptr) ((poly_element_ptr) e->data)->coeff->item[i];
+static inline element_ptr poly_coeff(element_ptr e, int i) {
+  return (element_ptr) ((poly_element_ptr) e->data)->coeff->item[i];
 }
 
 void poly_alloc(element_ptr e, int n);
@@ -52,14 +40,13 @@ void poly_set_coeff(element_ptr e, element_ptr a, int n);
 void poly_setx(element_ptr f);
 void poly_const_mul(element_ptr res, element_ptr a, element_ptr poly);
 void poly_div(element_ptr quot, element_ptr rem,
-	element_ptr a, element_ptr b);
+    element_ptr a, element_ptr b);
 
 void field_init_poly(field_ptr f, field_ptr base_field);
 void field_init_polymod(field_ptr f, element_ptr poly);
 
-static inline field_ptr poly_base_field(element_t f)
-{
-    return ((poly_field_data_ptr) f->field->data)->field;
+static inline field_ptr poly_base_field(element_t f) {
+  return ((poly_field_data_ptr) f->field->data)->field;
 }
 
 void poly_gcd(element_ptr d, element_ptr f, element_ptr g);

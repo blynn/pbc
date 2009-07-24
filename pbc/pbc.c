@@ -1158,6 +1158,7 @@ static val_ptr f_fromstr(darray_ptr arg)
     return res;
 }
 
+/* I'll probably never finish this :(
 static val_ptr f_index_calculus(darray_ptr arg)
 {
     val_ptr res;
@@ -1190,6 +1191,7 @@ static val_ptr f_index_calculus(darray_ptr arg)
     mpz_clear(q1);
     return res;
 }
+*/
 
 int main(int argc, char **argv)
 {
@@ -1245,7 +1247,7 @@ int main(int argc, char **argv)
     symtab_put(builtin, f_nextprime, "nextprime");
     symtab_put(builtin, f_brute_force_dlog, "brute_force_dlog");
     symtab_put(builtin, f_pollard_rho, "pollard_rho");
-    symtab_put(builtin, f_index_calculus, "index_calculus");
+    //symtab_put(builtin, f_index_calculus, "index_calculus");
     symtab_put(builtin, f_zz, "ZZ");
     symtab_put(builtin, f_gen_A, "gen_A");
     symtab_put(builtin, f_fromZZ, "fromZZ");

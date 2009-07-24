@@ -31,7 +31,7 @@ endif
 libpbc_srcs := \
   $(addsuffix .c,$(addprefix arith/, \
     field fp montfp naivefp fastfp fasterfp fieldmpz fieldquadratic poly \
-    random dlog indexcalculus)) \
+    random dlog)) \
   $(addsuffix .c,$(addprefix ecc/, \
     curve singular pairing param \
     a_param d_param e_param f_param g_param \

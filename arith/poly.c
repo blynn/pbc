@@ -1,6 +1,3 @@
-// Polynomial rings R[x], and polynomial rings modulo polynomials,
-// i.e. R[x]_{f(x)}.
-
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -11,6 +8,16 @@
 #include "pbc_poly.h"
 #include "pbc_utils.h"
 #include "pbc_memory.h"
+
+struct polymod_field_data_s {
+  field_ptr field;   // Base field.
+  fieldmap mapbase;  // TODO: I've forgotten what this does. Find out!
+  int n;             // Degree of extension.
+  element_t poly;    // Polynomial of degree n.
+  element_t *xpwr;   // x^n,...,x^{2n-2} mod poly
+};
+typedef struct polymod_field_data_s polymod_field_data_t[1];
+typedef struct polymod_field_data_s *polymod_field_data_ptr;
 
 void poly_alloc(element_ptr e, int n) {
   poly_field_data_ptr pdp = e->field->data;
