@@ -880,11 +880,10 @@ void pairing_init_d_param(pairing_t pairing, d_param_t param) {
 
   field_init_poly(p->Fqx, p->Fq);
   element_init(irred, p->Fqx);
-  poly_alloc(irred, d + 1);
+  poly_set_coeff1(irred, d);
   for (i = 0; i < d; i++) {
     element_set_mpz(poly_coeff(irred, i), param->coeff[i]);
   }
-  element_set1(poly_coeff(irred, d));
 
   field_init_polymod(p->Fqd, irred);
   element_clear(irred);
@@ -965,8 +964,10 @@ static void compute_cm_curve(d_param_ptr param, cm_info_ptr cm) {
   hilbert_poly(coefflist, cm->D);
 
   n = coefflist->count;
-  poly_alloc(hp, n);
-  for (i=0; i<n; i++) {
+  // Temporarily set the coefficient of x^{n-1} to 1 so hp has degree n - 1,
+  // allowing us to use poly_coeff().
+  poly_set_coeff1(hp, n - 1);
+  for (i = 0; i < n; i++) {
     element_set_mpz(poly_coeff(hp, i), coefflist->item[i]);
   }
 

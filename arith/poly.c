@@ -40,6 +40,31 @@ typedef struct {
 // Per-element data: just a pointer to an array of element_t. This array always
 // has size n.
 
+// Add or remove coefficients until there are exactly n of them. Any new
+// coefficients are initialized to zero, which violates the invariant that the
+// leading coefficient must be nonzero. Thus routines calling this function
+// must check for this and fix the polynomial if necessary, e.g. by calling
+// poly_remove_leading_zeroes().
+static void poly_alloc(element_ptr e, int n) {
+  pfptr pdp = e->field->data;
+  peptr p = e->data;
+  element_ptr e0;
+  int k = p->coeff->count;
+  while (k < n) {
+    e0 = pbc_malloc(sizeof(element_t));
+    element_init(e0, pdp->field);
+    darray_append(p->coeff, e0);
+    k++;
+  }
+  while (k > n) {
+    k--;
+    e0 = darray_at(p->coeff, k);
+    element_clear(e0);
+    pbc_free(e0);
+    darray_remove_last(p->coeff);
+  }
+}
+
 static void poly_init(element_ptr e) {
   peptr p = e->data = pbc_malloc(sizeof(*p));
   darray_init(p->coeff);
@@ -1268,19 +1293,34 @@ void field_init_poly(field_ptr f, field_ptr base_field) {
 
 void poly_set_coeff(element_ptr e, element_ptr a, int n) {
   peptr p = e->data;
-  element_ptr e0;
   if (p->coeff->count < n + 1) {
     poly_alloc(e, n + 1);
   }
-  e0 = p->coeff->item[n];
+  element_ptr e0 = p->coeff->item[n];
   element_set(e0, a);
   if (p->coeff->count == n + 1 && element_is0(a)) poly_remove_leading_zeroes(e);
 }
 
+void poly_set_coeff0(element_ptr e, int n) {
+  peptr p = e->data;
+  if (n < p->coeff->count) {
+    element_set0(p->coeff->item[n]);
+    if (n == p->coeff->count - 1) poly_remove_leading_zeroes(e);
+  }
+}
+
+void poly_set_coeff1(element_ptr e, int n) {
+  peptr p = e->data;
+  if (p->coeff->count < n + 1) {
+    poly_alloc(e, n + 1);
+  }
+  element_set1(p->coeff->item[n]);
+}
+
 void poly_setx(element_ptr f) {
   poly_alloc(f, 2);
-  element_set0(poly_coeff(f, 0));
   element_set1(poly_coeff(f, 1));
+  element_set0(poly_coeff(f, 0));
 }
 
 void poly_const_mul(element_ptr res, element_ptr a, element_ptr poly) {
@@ -1406,26 +1446,6 @@ element_ptr poly_coeff(element_ptr e, int n) {
 
 field_ptr poly_base_field(element_t f) {
   return ((pfptr) f->field->data)->field;
-}
-
-void poly_alloc(element_ptr e, int n) {
-  pfptr pdp = e->field->data;
-  peptr p = e->data;
-  element_ptr e0;
-  int k = p->coeff->count;
-  while (k < n) {
-    e0 = pbc_malloc(sizeof(element_t));
-    element_init(e0, pdp->field);
-    darray_append(p->coeff, e0);
-    k++;
-  }
-  while (k > n) {
-    k--;
-    e0 = darray_at(p->coeff, k);
-    element_clear(e0);
-    pbc_free(e0);
-    darray_remove_last(p->coeff);
-  }
 }
 
 void polymod_const_mul(element_ptr res, element_ptr a, element_ptr e) {

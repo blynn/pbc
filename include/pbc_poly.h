@@ -12,7 +12,11 @@
 int poly_coeff_count(element_ptr f);
 
 // Returns coefficient of x^n in f.
-// Assumes deg f >= n.
+// Requires deg f >= n.
+// The element the return value points to may be modified. Take care never
+// to zero the leading coefficient, e.g. never write:
+//   element_set0(poly_coeff(f, poly_degree(f)));
+// Use poly_set_coeff0() to zero the leading coefficient.
 element_ptr poly_coeff(element_ptr f, int n);
 
 // Returns deg f.
@@ -23,7 +27,11 @@ static inline int poly_degree(element_ptr f) {
 // Returns base field of f (where the coefficients live).
 field_ptr poly_base_field(element_t f);
 
-void poly_alloc(element_ptr e, int n);
+// Sets the coefficient of x^n to 0.
+void poly_set_coeff0(element_ptr f, int n);
+
+// Sets the coefficient of x^n to 1.
+void poly_set_coeff1(element_ptr f, int n);
 
 // Sets the coefficient of x^n to a.
 void poly_set_coeff(element_ptr f, element_ptr a, int n);
