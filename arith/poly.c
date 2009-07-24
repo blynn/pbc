@@ -9,19 +9,47 @@
 #include "pbc_utils.h"
 #include "pbc_memory.h"
 
-struct polymod_field_data_s {
+// == Polynomial rings ==
+//
+// Per-field data:
+typedef struct {
+  field_ptr field;  // Ring where coefficients live.
+  fieldmap mapbase; // Map element from underlying field to constant term.
+} *pfptr;
+
+// Per-element data:
+//TODO: Would we ever need any field besides coeff?
+typedef struct {
+  darray_t coeff;   // The coefficients.
+} *peptr;
+
+// == Polynomial modulo rings ==
+//
+// Per-field data:
+typedef struct {
   field_ptr field;   // Base field.
-  fieldmap mapbase;  // TODO: I've forgotten what this does. Find out!
+  fieldmap mapbase;  // Similar to mapbase above.
   int n;             // Degree of extension.
   element_t poly;    // Polynomial of degree n.
   element_t *xpwr;   // x^n,...,x^{2n-2} mod poly
-};
-typedef struct polymod_field_data_s polymod_field_data_t[1];
-typedef struct polymod_field_data_s *polymod_field_data_ptr;
+} *mfptr;
+// Per-element data: just a pointer to an array of element_t.
+
+int poly_coeff_count(element_ptr e) {
+  return ((peptr) e->data)->coeff->count;
+}
+
+element_ptr poly_coeff(element_ptr e, int i) {
+  return (element_ptr) ((peptr) e->data)->coeff->item[i];
+}
+
+field_ptr poly_base_field(element_t f) {
+  return ((pfptr) f->field->data)->field;
+}
 
 void poly_alloc(element_ptr e, int n) {
-  poly_field_data_ptr pdp = e->field->data;
-  poly_element_ptr p = e->data;
+  pfptr pdp = e->field->data;
+  peptr p = e->data;
   element_ptr e0;
   int k;
   k = p->coeff->count;
@@ -41,14 +69,12 @@ void poly_alloc(element_ptr e, int n) {
 }
 
 static void poly_init(element_ptr e) {
-  poly_element_ptr p;
-  e->data = pbc_malloc(sizeof(poly_element_t));
-  p = e->data;
+  peptr p = e->data = pbc_malloc(sizeof(*p));
   darray_init(p->coeff);
 }
 
 static void poly_clear(element_ptr e) {
-  poly_element_ptr p = e->data;
+  peptr p = e->data;
 
   poly_alloc(e, 0);
   darray_clear(p->coeff);
@@ -56,7 +82,7 @@ static void poly_clear(element_ptr e) {
 }
 
 void poly_remove_leading_zeroes(element_ptr e) {
-  poly_element_ptr p = e->data;
+  peptr p = e->data;
   int n = p->coeff->count - 1;
   while (n >= 0) {
     element_ptr e0 = p->coeff->item[n];
@@ -69,7 +95,7 @@ void poly_remove_leading_zeroes(element_ptr e) {
 }
 
 static void poly_set_si(element_ptr e, signed long int op) {
-  poly_element_ptr p = e->data;
+  peptr p = e->data;
   element_ptr e0;
 
   poly_alloc(e, 1);
@@ -79,7 +105,7 @@ static void poly_set_si(element_ptr e, signed long int op) {
 }
 
 static void poly_set_mpz(element_ptr e, mpz_ptr op) {
-  poly_element_ptr p = e->data;
+  peptr p = e->data;
   element_ptr e0;
 
   poly_alloc(e, 1);
@@ -89,7 +115,7 @@ static void poly_set_mpz(element_ptr e, mpz_ptr op) {
 }
 
 void poly_set_coeff(element_ptr e, element_ptr a, int n) {
-  poly_element_ptr p = e->data;
+  peptr p = e->data;
   element_ptr e0;
   if (p->coeff->count < n + 1) {
     poly_alloc(e, n + 1);
@@ -105,8 +131,8 @@ void poly_setx(element_ptr f) {
 }
 
 static void poly_set(element_ptr dst, element_ptr src) {
-  poly_element_ptr psrc = src->data;
-  poly_element_ptr pdst = dst->data;
+  peptr psrc = src->data;
+  peptr pdst = dst->data;
   int i;
 
   poly_alloc(dst, psrc->coeff->count);
@@ -179,8 +205,8 @@ static void poly_sub(element_ptr diff, element_ptr f, element_ptr g) {
 }
 
 static void poly_neg(element_ptr f, element_ptr g) {
-  poly_element_ptr pf = f->data;
-  poly_element_ptr pg = g->data;
+  peptr pf = f->data;
+  peptr pg = g->data;
   int i, n;
 
   n = pg->coeff->count;
@@ -191,8 +217,8 @@ static void poly_neg(element_ptr f, element_ptr g) {
 }
 
 static void poly_double(element_ptr f, element_ptr g) {
-  poly_element_ptr pf = f->data;
-  poly_element_ptr pg = g->data;
+  peptr pf = f->data;
+  peptr pg = g->data;
   int i, n;
 
   n = pg->coeff->count;
@@ -203,8 +229,8 @@ static void poly_double(element_ptr f, element_ptr g) {
 }
 
 static void poly_mul_mpz(element_ptr f, element_ptr g, mpz_ptr z) {
-  poly_element_ptr pf = f->data;
-  poly_element_ptr pg = g->data;
+  peptr pf = f->data;
+  peptr pg = g->data;
   int i, n;
 
   n = pg->coeff->count;
@@ -215,8 +241,8 @@ static void poly_mul_mpz(element_ptr f, element_ptr g, mpz_ptr z) {
 }
 
 static void poly_mul_si(element_ptr f, element_ptr g, signed long int z) {
-  poly_element_ptr pf = f->data;
-  poly_element_ptr pg = g->data;
+  peptr pf = f->data;
+  peptr pg = g->data;
   int i, n;
 
   n = pg->coeff->count;
@@ -227,10 +253,10 @@ static void poly_mul_si(element_ptr f, element_ptr g, signed long int z) {
 }
 
 static void poly_mul(element_ptr r, element_ptr f, element_ptr g) {
-  poly_element_ptr pprod;
-  poly_element_ptr pf = f->data;
-  poly_element_ptr pg = g->data;
-  poly_field_data_ptr pdp = r->field->data;
+  peptr pprod;
+  peptr pf = f->data;
+  peptr pg = g->data;
+  pfptr pdp = r->field->data;
   int fcount = pf->coeff->count;
   int gcount = pg->coeff->count;
   int i, j, n;
@@ -278,7 +304,7 @@ element_ptr polymod_coeff(element_ptr e, int i) {
 }
 
 inline int polymod_field_degree(field_t f) {
-  polymod_field_data_ptr p = f->data;
+  mfptr p = f->data;
   return p->n;
 }
 
@@ -315,7 +341,7 @@ static void poly_set0(element_ptr e) {
 }
 
 static void poly_set1(element_ptr e) {
-  poly_element_ptr p = e->data;
+  peptr p = e->data;
   element_ptr e0;
 
   poly_alloc(e, 1);
@@ -324,12 +350,12 @@ static void poly_set1(element_ptr e) {
 }
 
 static int poly_is0(element_ptr e) {
-  poly_element_ptr p = e->data;
+  peptr p = e->data;
   return !p->coeff->count;
 }
 
 static int poly_is1(element_ptr e) {
-  poly_element_ptr p = e->data;
+  peptr p = e->data;
   if (p->coeff->count == 1) {
     return element_is1(p->coeff->item[0]);
   }
@@ -393,8 +419,8 @@ static int poly_snprint(char *s, size_t size, element_ptr e) {
 
 void poly_div(element_ptr quot, element_ptr rem,
     element_ptr a, element_ptr b) {
-  poly_element_ptr pq, pr;
-  poly_field_data_ptr pdp = a->field->data;
+  peptr pq, pr;
+  pfptr pdp = a->field->data;
   element_t q, r;
   element_t binv, e0;
   element_ptr qe;
@@ -489,7 +515,7 @@ void poly_invert(element_ptr res, element_ptr f, element_ptr m) {
 }
 
 void element_polymod_to_poly(element_ptr f, element_ptr e) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
   poly_alloc(f, n);
@@ -500,7 +526,7 @@ void element_polymod_to_poly(element_ptr f, element_ptr e) {
 }
 
 void element_poly_to_polymod_truncate(element_ptr e, element_ptr f) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i;
   int n;
@@ -516,7 +542,7 @@ void element_poly_to_polymod_truncate(element_ptr e, element_ptr f) {
 }
 
 static void polymod_invert(element_ptr r, element_ptr e) {
-  polymod_field_data_ptr p = r->field->data;
+  mfptr p = r->field->data;
   element_ptr minpoly = p->poly;
   element_t f, r1;
 
@@ -539,7 +565,7 @@ void element_field_to_poly(element_ptr f, element_ptr g) {
 }
 
 void element_field_to_polymod(element_ptr f, element_ptr g) {
-  polymod_field_data_ptr p = f->field->data;
+  mfptr p = f->field->data;
   element_t *coeff = f->data;
   int i, n = p->n;
   element_set(coeff[0], g);
@@ -560,7 +586,7 @@ static int poly_cmp(element_ptr f, element_ptr g) {
 }
 
 static void field_clear_poly(field_ptr f) {
-  poly_field_data_ptr p = f->data;
+  pfptr p = f->data;
   pbc_free(p);
 }
 
@@ -609,17 +635,14 @@ static void poly_to_mpz(mpz_t z, element_ptr e) {
 }
 
 void poly_out_info(FILE *str, field_ptr f) {
-  poly_field_data_ptr p = f->data;
+  pfptr p = f->data;
   fprintf(str, "Polynomial ring. Base field:\n");
   field_out_info(str, p->field);
 }
 
 void field_init_poly(field_ptr f, field_ptr base_field) {
-  poly_field_data_ptr p;
-
   field_init(f);
-  f->data = pbc_malloc(sizeof(poly_field_data_t));
-  p = f->data;
+  pfptr p = f->data = pbc_malloc(sizeof(*p));
   p->field = base_field;
   p->mapbase = element_field_to_poly;
   f->field_clear = field_clear_poly;
@@ -653,7 +676,7 @@ void field_init_poly(field_ptr f, field_ptr base_field) {
 }
 
 static void field_clear_polymod(field_ptr f) {
-  polymod_field_data_ptr p = f->data;
+  mfptr p = f->data;
   int i, n = p->n;
 
   for (i=0; i<n; i++) {
@@ -782,7 +805,7 @@ void poly_make_monic(element_t f, element_t g) {
 }
 
 static int polymod_to_bytes(unsigned char *data, element_t f) {
-  polymod_field_data_ptr p = f->field->data;
+  mfptr p = f->field->data;
   element_t *coeff = f->data;
   int i, n = p->n;
   int len = 0;
@@ -793,7 +816,7 @@ static int polymod_to_bytes(unsigned char *data, element_t f) {
 }
 
 static int polymod_length_in_bytes(element_t f) {
-  polymod_field_data_ptr p = f->field->data;
+  mfptr p = f->field->data;
   element_t *coeff = f->data;
   int i, n = p->n;
   int res = 0;
@@ -806,7 +829,7 @@ static int polymod_length_in_bytes(element_t f) {
 }
 
 static int polymod_from_bytes(element_t f, unsigned char *data) {
-  polymod_field_data_ptr p = f->field->data;
+  mfptr p = f->field->data;
   element_t *coeff = f->data;
   int i, n = p->n;
   int len = 0;
@@ -819,7 +842,7 @@ static int polymod_from_bytes(element_t f, unsigned char *data) {
 
 static void polymod_init(element_t e) {
   int i;
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   int n = p->n;
   element_t *coeff;
   coeff = e->data = pbc_malloc(sizeof(element_t) * n);
@@ -830,7 +853,7 @@ static void polymod_init(element_t e) {
 }
 
 static void polymod_clear(element_t e) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
   for (i=0; i<n; i++) {
@@ -840,7 +863,7 @@ static void polymod_clear(element_t e) {
 }
 
 static void polymod_set_si(element_t e, signed long int x) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
   element_set_si(coeff[0], x);
@@ -850,7 +873,7 @@ static void polymod_set_si(element_t e, signed long int x) {
 }
 
 static void polymod_set_mpz(element_t e, mpz_t z) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
   element_set_mpz(coeff[0], z);
@@ -860,7 +883,7 @@ static void polymod_set_mpz(element_t e, mpz_t z) {
 }
 
 static void polymod_set(element_t e, element_t f) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *dst = e->data, *src = f->data;
   int i, n = p->n;
   for (i=0; i<n; i++) {
@@ -869,7 +892,7 @@ static void polymod_set(element_t e, element_t f) {
 }
 
 static void polymod_neg(element_t e, element_t f) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *dst = e->data, *src = f->data;
   int i, n = p->n;
   for (i=0; i<n; i++) {
@@ -878,7 +901,7 @@ static void polymod_neg(element_t e, element_t f) {
 }
 
 static int polymod_cmp(element_ptr f, element_ptr g) {
-  polymod_field_data_ptr p = f->field->data;
+  mfptr p = f->field->data;
   element_t *c1 = f->data, *c2 = g->data;
   int i, n = p->n;
   for (i=0; i<n; i++) {
@@ -888,7 +911,7 @@ static int polymod_cmp(element_ptr f, element_ptr g) {
 }
 
 static void polymod_add(element_t r, element_t e, element_t f) {
-  polymod_field_data_ptr p = r->field->data;
+  mfptr p = r->field->data;
   element_t *dst = r->data, *s1 = e->data, *s2 = f->data;
   int i, n = p->n;
   for (i=0; i<n; i++) {
@@ -897,7 +920,7 @@ static void polymod_add(element_t r, element_t e, element_t f) {
 }
 
 static void polymod_double(element_t r, element_t f) {
-  polymod_field_data_ptr p = r->field->data;
+  mfptr p = r->field->data;
   element_t *dst = r->data, *s1 = f->data;
   int i, n = p->n;
   for (i=0; i<n; i++) {
@@ -906,7 +929,7 @@ static void polymod_double(element_t r, element_t f) {
 }
 
 static void polymod_sub(element_t r, element_t e, element_t f) {
-  polymod_field_data_ptr p = r->field->data;
+  mfptr p = r->field->data;
   element_t *dst = r->data, *s1 = e->data, *s2 = f->data;
   int i, n = p->n;
   for (i=0; i<n; i++) {
@@ -915,7 +938,7 @@ static void polymod_sub(element_t r, element_t e, element_t f) {
 }
 
 static void polymod_mul_mpz(element_t e, element_t f, mpz_ptr z) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *dst = e->data, *src = f->data;
   int i, n = p->n;
   for (i=0; i<n; i++) {
@@ -924,7 +947,7 @@ static void polymod_mul_mpz(element_t e, element_t f, mpz_ptr z) {
 }
 
 static void polymod_mul_si(element_t e, element_t f, signed long int z) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *dst = e->data, *src = f->data;
   int i, n = p->n;
   for (i=0; i<n; i++) {
@@ -974,7 +997,7 @@ static void kar_poly_2(element_t *dst, element_t c3, element_t c4, element_t *s1
 
 // Degree 3, 6 polynomial moduli have dedicated routines for multiplication.
 static void polymod_mul_degree3(element_ptr res, element_ptr e, element_ptr f) {
-  polymod_field_data_ptr p = res->field->data;
+  mfptr p = res->field->data;
   element_t *dst = res->data, *s1 = e->data, *s2 = f->data;
   element_t c3, c4;
   element_t p0;
@@ -996,7 +1019,7 @@ static void polymod_mul_degree3(element_ptr res, element_ptr e, element_ptr f) {
 }
 
 static void polymod_mul_degree6(element_ptr res, element_ptr e, element_ptr f) {
-  polymod_field_data_ptr p = res->field->data;
+  mfptr p = res->field->data;
   element_t *dst = res->data, *s0, *s1 = e->data, *s2 = f->data;
   element_t *a0, *a1, *b0, *b1;
   element_t p0, p1, p2, p3;
@@ -1069,7 +1092,7 @@ static void polymod_mul_degree6(element_ptr res, element_ptr e, element_ptr f) {
 
 // General polynomial modulo ring multiplication.
 static void polymod_mul(element_ptr res, element_ptr e, element_ptr f) {
-  polymod_field_data_ptr p = res->field->data;
+  mfptr p = res->field->data;
   int n = p->n;
   element_t *dst;
   element_t *s1 = e->data, *s2 = f->data;
@@ -1117,7 +1140,7 @@ static void polymod_square_degree3(element_ptr res, element_ptr e) {
   // multiplication. If so convert to Karatsuba.
   element_t *dst = res->data;
   element_t *src = e->data;
-  polymod_field_data_ptr p = res->field->data;
+  mfptr p = res->field->data;
   element_t p0;
   element_t c0, c2;
   element_ptr c1, c3;
@@ -1157,7 +1180,7 @@ static void polymod_square_degree3(element_ptr res, element_ptr e) {
 static void polymod_square(element_ptr res, element_ptr e) {
   element_t *dst;
   element_t *src = e->data;
-  polymod_field_data_ptr p = res->field->data;
+  mfptr p = res->field->data;
   int n = p->n;
   element_t prod, p0, c0;
   int i, j;
@@ -1209,7 +1232,7 @@ static void polymod_square(element_ptr res, element_ptr e) {
 }
 
 static int polymod_is0(element_ptr e) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
 
@@ -1220,7 +1243,7 @@ static int polymod_is0(element_ptr e) {
 }
 
 static int polymod_is1(element_ptr e) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
 
@@ -1232,7 +1255,7 @@ static int polymod_is1(element_ptr e) {
 }
 
 static void polymod_set0(element_ptr e) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
 
@@ -1242,7 +1265,7 @@ static void polymod_set0(element_ptr e) {
 }
 
 static void polymod_set1(element_ptr e) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
 
@@ -1253,7 +1276,7 @@ static void polymod_set1(element_ptr e) {
 }
 
 static int polymod_sgn(element_ptr e) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int res = 0;
   int i, n = p->n;
@@ -1266,7 +1289,7 @@ static int polymod_sgn(element_ptr e) {
 
 static size_t polymod_out_str(FILE *stream, int base, element_ptr e) {
   size_t result = 2, status;
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
 
@@ -1285,7 +1308,7 @@ static size_t polymod_out_str(FILE *stream, int base, element_ptr e) {
 }
 
 static int polymod_snprint(char *s, size_t size, element_ptr e) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
   size_t result = 0, left;
@@ -1316,7 +1339,7 @@ static int polymod_snprint(char *s, size_t size, element_ptr e) {
 }
 
 static int polymod_set_str(element_ptr e, char *s, int base) {
-  polymod_field_data_ptr p = e->field->data;
+  mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
   char *cp = s;
@@ -1338,7 +1361,7 @@ static void polymod_to_mpz(mpz_t z, element_ptr e) {
 
 // Compute x^n,...,x^{2n-2} mod poly.
 static void compute_x_powers(field_ptr field, element_ptr poly) {
-  polymod_field_data_ptr p = field->data;
+  mfptr p = field->data;
   element_t p0;
   element_ptr pwrn;
   element_t *coeff, *coeff1;
@@ -1371,7 +1394,7 @@ static void compute_x_powers(field_ptr field, element_ptr poly) {
 }
 
 static void polymod_out_info(FILE *str, field_ptr f) {
-  polymod_field_data_ptr p = f->data;
+  mfptr p = f->data;
   element_fprintf(str, "Field extension. Min poly = %B\n", p->poly);
   fprintf(str, "Base field:\n");
   field_out_info(str, p->field);
@@ -1379,18 +1402,14 @@ static void polymod_out_info(FILE *str, field_ptr f) {
 
 // Requires poly to be monic.
 void field_init_polymod(field_ptr f, element_ptr poly) {
-  poly_field_data_ptr pdp = poly->field->data;
-  polymod_field_data_ptr p;
-  int n;
-
+  pfptr pdp = poly->field->data;
   field_init(f);
-  f->data = pbc_malloc(sizeof(polymod_field_data_t));
-  p = f->data;
+  mfptr p = f->data = pbc_malloc(sizeof(*p));
   p->field = pdp->field;
   p->mapbase = element_field_to_poly;
   element_init(p->poly, poly->field);
   element_set(p->poly, poly);
-  n = p->n = poly_degree(p->poly);
+  int n = p->n = poly_degree(p->poly);
   f->field_clear = field_clear_polymod;
   f->init = polymod_init;
   f->clear = polymod_clear;
@@ -1516,83 +1535,5 @@ int poly_is_irred(element_ptr f) {
   }
 
   mpz_clear(deg);
-
   return res;
 }
-
-/*
-int poly_is_irred_degfac(element_ptr f, darray_t factor) {
-  int res;
-  element_t xpow, x, g;
-  mpz_t deg, z;
-  int i, n;
-  field_ptr basef = poly_base_field(f);
-  field_t rxmod;
-
-  mpz_init(deg);
-  mpz_init(z);
-
-  field_init_polymod(rxmod, f);
-
-  mpz_set_ui(deg, poly_degree(f));
-  element_init(xpow, rxmod);
-  element_init(x, rxmod);
-  element_init(g, f->field);
-  n = factor->count;
-  element_set1(polymod_coeff(x, 1));
-
-  res = 0;
-  for (i = 0; i < n; i++) {
-    mpz_divexact(z, deg, factor->item[i]);
-    mpz_pow_ui(z, basef->order, mpz_get_ui(z));
-    element_pow_mpz(xpow, x, z);
-    element_sub(xpow, xpow, x);
-    if (element_is0(xpow)) goto done;
-    element_polymod_to_poly(g, xpow);
-    poly_gcd(g, f, g);
-    if (poly_degree(g) != 0) goto done;
-  }
-
-  mpz_pow_ui(z, basef->order, poly_degree(f));
-  element_pow_mpz(xpow, x, z);
-  element_sub(xpow, xpow, x);
-  if (element_is0(xpow)) res = 1;
-
-done:
-  element_clear(g);
-  element_clear(xpow);
-  element_clear(x);
-  mpz_clear(deg);
-  mpz_clear(z);
-  field_clear(rxmod);
-  return res;
-}
-
-int poly_is_irred(element_ptr f) {
-  darray_t fac, mul;
-  mpz_t deg;
-  int res;
-  void clear(void *p) {
-    mpz_clear(p);
-    pbc_free(p);
-  }
-
-  if (poly_degree(f) <= 1) return 1;
-
-  darray_init(fac);
-  darray_init(mul);
-  mpz_init(deg);
-
-  mpz_set_ui(deg, poly_degree(f));
-
-  trial_divide(fac, mul, deg, NULL);
-  res = poly_is_irred_degfac(f, fac);
-
-  darray_forall(fac, clear);
-
-  darray_clear(fac);
-  darray_clear(mul);
-  mpz_clear(deg);
-  return res;
-}
-*/

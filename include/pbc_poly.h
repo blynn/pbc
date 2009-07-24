@@ -8,31 +8,14 @@
 #ifndef __PBC_POLY_H__
 #define __PBC_POLY_H__
 
-struct poly_field_data_s {
-  field_ptr field;
-  fieldmap mapbase; //map element from underlying field to constant term
-};
-typedef struct poly_field_data_s poly_field_data_t[1];
-typedef struct poly_field_data_s *poly_field_data_ptr;
-
-//TODO: having this structure is unnecessary? what else could be needed besides coeff?
-struct poly_element_s {
-  darray_t coeff;
-};
-typedef struct poly_element_s poly_element_t[1];
-typedef struct poly_element_s *poly_element_ptr;
-
-static inline int poly_coeff_count(element_ptr e) {
-  return ((poly_element_ptr) e->data)->coeff->count;
-}
+int poly_coeff_count(element_ptr e);
+element_ptr poly_coeff(element_ptr e, int i);
 
 static inline int poly_degree(element_ptr e) {
   return poly_coeff_count(e) - 1;
 }
 
-static inline element_ptr poly_coeff(element_ptr e, int i) {
-  return (element_ptr) ((poly_element_ptr) e->data)->coeff->item[i];
-}
+field_ptr poly_base_field(element_t f);
 
 void poly_alloc(element_ptr e, int n);
 void poly_remove_leading_zeroes(element_ptr e);
@@ -45,11 +28,8 @@ void poly_div(element_ptr quot, element_ptr rem,
 void field_init_poly(field_ptr f, field_ptr base_field);
 void field_init_polymod(field_ptr f, element_ptr poly);
 
-static inline field_ptr poly_base_field(element_t f) {
-  return ((poly_field_data_ptr) f->field->data)->field;
-}
-
 void poly_gcd(element_ptr d, element_ptr f, element_ptr g);
+// Return 1 if polynomial is irreducible, 0 otherwise.
 int poly_is_irred(element_ptr f);
 void poly_invert(element_ptr res, element_ptr f, element_ptr m);
 void poly_random_monic(element_ptr f, int deg);
