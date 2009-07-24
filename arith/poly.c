@@ -1068,7 +1068,7 @@ static void polymod_mul(element_ptr res, element_ptr e, element_ptr f) {
   element_t *s1 = e->data, *s2 = f->data;
   element_t prod, p0, c0;
   int i, j;
-  element_t *high; // Coefficients of x^n,...,x^{2n-2}.
+  element_t *high;  // Coefficients of x^n, ..., x^{2n-2}.
 
   high = pbc_malloc(sizeof(element_t) * (n - 1));
   for (i=0; i<n-1; i++) {

@@ -70,16 +70,17 @@ binaries : $(examples) pbc/pbc
 
 test_srcs := \
   $(addsuffix .c,$(addprefix guru/, \
-    testexp testfi testpairing testpoly))
+    fp_test testexp testfi testpairing testpoly))
 
 tests := $(test_srcs:.c=)
 
 # Object files needed to test Fp.
 fp_objs := $(addsuffix .o, \
-  arith/field arith/fp arith/naivefp arith/fastfp arith/fasterfp arith/montfp arith/random arith/init_random misc/extend_printf misc/memory)
+  arith/field arith/fp arith/naivefp arith/fastfp arith/fasterfp arith/montfp arith/random arith/init_random misc/extend_printf misc/memory misc/pbc_assert)
 
 guru/testexp: guru/testexp.o libpbc.a
 guru/testpairing: guru/testpairing.o libpbc.a
+guru/fp_test: guru/fp_test.o $(fp_objs)
 guru/testpoly: guru/testpoly.o $(fp_objs) arith/poly.o misc/darray.o
 guru/testfi: guru/testfi.o $(fp_objs) arith/fieldquadratic.o
 

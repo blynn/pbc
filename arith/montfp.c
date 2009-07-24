@@ -68,9 +68,12 @@ static void fp_set_mpz(element_ptr e, mpz_ptr z) {
     mpz_init(tmp);
     mpz_mul_2exp(tmp, z, p->bytes * 8);
     mpz_mod(tmp, tmp, e->field->order);
-    set_limbs(ep->d, tmp, p->limbs);
+    if (!mpz_sgn(tmp)) ep->flag = 0;
+    else {
+      set_limbs(ep->d, tmp, p->limbs);
+      ep->flag = 2;
+    }
     mpz_clear(tmp);
-    ep->flag = 2;
   }
 }
 
@@ -85,9 +88,12 @@ static void fp_set_si(element_ptr e, signed long int op) {
     mpz_set_si(tmp, op);
     mpz_mul_2exp(tmp, tmp, p->bytes * 8);
     mpz_mod(tmp, tmp, e->field->order);
-    set_limbs(ep->d, tmp, p->limbs);
+    if (!mpz_sgn(tmp)) ep->flag = 0;
+    else {
+      set_limbs(ep->d, tmp, p->limbs);
+      ep->flag = 2;
+    }
     mpz_clear(tmp);
-    ep->flag = 2;
   }
 }
 

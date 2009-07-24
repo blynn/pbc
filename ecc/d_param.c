@@ -527,6 +527,9 @@ static void lucas_even(element_ptr out, element_ptr in, mpz_t cofactor) {
 static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing) {
   pptr p = pairing->data;
   if (p->k == 6) {
+    // See thesis, section 6.9, "The Final Powering", which gives a formula
+    // for the first step of the final powering when Fq6 has been implemented
+    // as a quadratic extension on top of a cubic extension.
     element_t e0, e2, e3;
     element_init(e0, p->Fqk);
     element_init(e2, p->Fqd);
@@ -537,7 +540,7 @@ static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing) {
     element_ptr e0im0 = ((element_t *) e0im->data)[0];
     element_t *inre = fi_re(in)->data;
     element_t *inim = fi_im(in)->data;
-    // See thesis.
+    // Expressions in the formula are similar, hence the following function.
     void qpower(int sign) {
       polymod_const_mul(e2, inre[1], p->xpowq);
       element_set(e0re, e2);
@@ -570,6 +573,7 @@ static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing) {
     element_mul(in, e3, e0);
 
     element_set(e0, in);
+    // We use Lucas sequences to complete the final powering.
     lucas_even(out, e0, pairing->phikonr);
 
     element_clear(e0);
