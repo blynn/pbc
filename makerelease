@@ -84,13 +84,8 @@ make || {
     exit 1
 }
 make clean
-echo cmake with cross compile
-cmake -Dcrossmingw:BOOL=1 . || {
-    echo cmake mingw cross compile error
-    rm -rf $TMPDIR
-    exit 1
-}
-make || {
+echo Cross compile with blynn.make
+PLATFORM=win32 colormake -f blynn.make || {
     echo mingw cross compile error
     rm -rf $TMPDIR
     exit 1
@@ -99,7 +94,7 @@ if [[ $TESTRUN ]]; then
     echo test run: not building zip...
 else
     mkdir pbc-$VER
-    mv pbc/*.exe benchmark/*.exe param/* pbc-$VER
+    mv out/*.exe param/* pbc-$VER
     cp benchmark/REPORT.BAT pbc-$VER
     zip -r $HERE/pbc-$VER-win32-bin.zip pbc-$VER
 fi

@@ -1,20 +1,18 @@
 // Generate Freeman curves with a given discriminant.
 #include "pbc.h"
-#include "pbc_utils.h"
 
 void generate(cm_info_t cm, void *data) {
-  (void) data;
-  g_param_t param;
-  g_param_init(param);
+  UNUSED_VAR(data);
+  pbc_param_t param;
 
   pbc_info("gengparam: computing Hilbert polynomial and finding roots...");
-  g_param_from_cm(param, cm);
+  pbc_param_init_g_gen(param, cm);
   pbc_info("gengparam: bits in q = %zu", mpz_sizeinbase(cm->q, 2));
-  g_param_out_str(stdout, param);
+  pbc_param_out_str(stdout, param);
+  pbc_param_clear(param);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   int D = 35707;
 
   if (argc > 1) {

@@ -6,7 +6,7 @@
 char *pbc_getline(void)
 {
     char s[1024];
-    fgets(s, 1024, stdin);
+    if (!fgets(s, 1024, stdin)) return NULL;
     if (feof(stdin)) return NULL;
     return pbc_strdup(s);
 }

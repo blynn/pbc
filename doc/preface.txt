@@ -34,13 +34,10 @@ By default the library is installed in `/usr/local/lib`.  On some systems, this
 may not be in the library path. One way to fix this is to edit
 `/etc/ld.so.conf` and run `ldconfig`.
 
-CMake::
-  A `CMakeLists.txt` is also provided.
-  CMake is a newer tool that I prefer to use during development.
+Makefile::
+  Due to its speed and simplicity, I use `blynn.make` during development.
+  Naturally it is less portable.
 +
-  $ cmake .
-  $ make
+  $ make -f blynn.make
 
-PBC uses some GNU C extensions, notably nested functions.  For efficiency, some
-of the lower-level PBC code relies on some GMP internals, which may change in
-future releases. In that case, the PBC code will also have to be updated.
+PBC uses some GNU C extensions, notably nested functions.

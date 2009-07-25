@@ -1,7 +1,7 @@
-// Pairing-Based Calculator
-// mainly for demonstration purposes
+// Pairing-Based Calculator.
+// Mainly for demonstration purposes.
 //
-// It's times like these I wish C had garbage collection
+// It's times like these I wish C had garbage collection.
 
 #include <string.h>
 #include <ctype.h>
@@ -12,7 +12,6 @@
 #include "pbc_symtab.h"
 #include "pbc_fieldmpz.h"
 #include "pbc_fp.h"
-#include "pbc_utils.h"
 
 char *pbc_getline(void);
 

@@ -23,9 +23,11 @@ ifeq ($(PLATFORM),win32)
   RANLIB := i586-mingw32msvc-ranlib
   CPPFLAGS := $(CPPFLAGS) -I/home/blynn/cross/gmp/include
   LDFLAGS := -L/home/blynn/cross/gmp/lib
+  pbc_getline_objs := pbc/pbc_getline.o
 else
   # tcmalloc is faster than normal malloc.
   LDLIBS := $(LDLIBS) -ltcmalloc
+  pbc_getline_objs := pbc/pbc_getline.readline.o
 endif
 
 libpbc_srcs := \
@@ -48,7 +50,7 @@ bin_srcs := \
   $(addsuffix .c,$(addprefix example/, \
     bls hess joux paterson yuanli zhangkim zss)) \
   $(addsuffix .c,$(addprefix gen/, \
-    gena1param genaparam gendparam geneparam genfparam \
+    gena1param genaparam gendparam geneparam genfparam gengparam \
     hilbertpoly listmnt listfreeman)) \
   benchmark/benchmark.c benchmark/timersa.c benchmark/ellnet.c
 
@@ -60,7 +62,7 @@ endef
 
 $(foreach x,$(bin_srcs:.c=.o),$(eval $(call demo_tmpl,$(x))))
 
-pbc_objs := pbc/pbc.o pbc/pbc_getline.readline.o
+pbc_objs := pbc/pbc.o $(pbc_getline_objs)
 
 pbc/pbc : $(pbc_objs) libpbc.a
 	$(CC) -o $@ $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -lreadline
