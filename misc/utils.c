@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <gmp.h>
 
+#include "pbc_utils.h"
 #include "pbc_field.h"
 
 static void print_warning(void) {

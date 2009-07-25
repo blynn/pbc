@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
+#include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
@@ -13,7 +14,6 @@
 #include "pbc_memory.h"
 #include "pbc_symtab.h"
 #include "param_utils.h"
-#include "pbc_utils.h"
 
 struct f_param_s {
     mpz_t q; //curve defined over F_q

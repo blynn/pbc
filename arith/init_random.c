@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
-#include "pbc_assert.h"
+#include "pbc_utils.h"
 #include "pbc_random.h"
 
 void init_random_function(void) {

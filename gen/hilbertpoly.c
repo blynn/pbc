@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h> //for atoi, exit
 #include <gmp.h>
+#include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_darray.h"
 #include "pbc_poly.h"

@@ -1,9 +1,8 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
-#include "pbc_assert.h"
+#include "pbc_utils.h"
 #include "pbc_symtab.h"
 #include "pbc_parse.h"
 #include "pbc_memory.h"
@@ -34,12 +33,12 @@ void param_read_generic(symtab_t tab, const char *input) {
 
   token_init(tok);
   for (;;) {
-    input = token_get_generic(tok, input);
+    input = token_get(tok, input);
     if (tok->type != token_word) {
       break;
     }
     s = pbc_strdup(tok->s);
-    input = token_get_generic(tok, input);
+    input = token_get(tok, input);
     if (tok->type != token_word) {
       pbc_free(s);
       break;

@@ -5,8 +5,9 @@
 #include "pbc_utils.h"
 #include "pbc_memory.h"
 
-static void deterministic_mpz_random(mpz_t z, mpz_t limit, void *data) {
+void init_random_function(void);
 
+static void deterministic_mpz_random(mpz_t z, mpz_t limit, void *data) {
   static gmp_randstate_t rs;
   static int rs_is_ready;
   UNUSED_VAR (data);
@@ -18,7 +19,6 @@ static void deterministic_mpz_random(mpz_t z, mpz_t limit, void *data) {
   mpz_urandomm(z, rs, limit);
 }
 
-// TODO: Warn on error.
 static void file_mpz_random(mpz_t r, mpz_t limit, void *data) {
   char *filename = (char *) data;
   FILE *fp;
@@ -33,7 +33,10 @@ static void file_mpz_random(mpz_t r, mpz_t limit, void *data) {
   leftover = n % 8;
   bytes = (unsigned char *) pbc_malloc(bytecount);
   for (;;) {
-    fread(bytes, 1, bytecount, fp);
+    if (!fread(bytes, 1, bytecount, fp)) {
+      pbc_warn("error reading source of random bits");
+      return;
+    }
     if (leftover) {
       *bytes = *bytes % (1 << leftover);
     }
@@ -57,9 +60,7 @@ void set_random_function(void (*fun)(mpz_t, mpz_t, void *), void *data) {
 }
 
 void pbc_mpz_random(mpz_t z, mpz_t limit) {
-  if (!random_function_ready) {
-    init_random_function();
-  }
+  if (!random_function_ready) init_random_function();
   current_mpz_random(z, limit, current_random_data);
 }
 

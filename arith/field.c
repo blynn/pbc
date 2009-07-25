@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h> // for memcmp()
 #include <gmp.h>
-#include "pbc_field.h"
 #include "pbc_utils.h"
+#include "pbc_field.h"
 #include "pbc_memory.h"
 
 // returns recommended window size.  n is exponent.

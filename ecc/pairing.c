@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
+#include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_darray.h"
 #include "pbc_poly.h"
@@ -20,8 +21,6 @@
 #include "pbc_f_param.h"
 #include "pbc_a1_param.h"
 #include "pbc_g_param.h"
-
-#include "pbc_utils.h"
 
 int generic_is_almost_coddh(element_ptr a, element_ptr b,
     element_ptr c, element_ptr d, pairing_t pairing) {
@@ -78,12 +77,12 @@ int pairing_init_set_str(pairing_t pairing, const char *input) {
   pairing->pp_clear = default_pp_clear;
   pairing->pp_apply = default_pp_apply;
   token_init(tok);
-  input = token_get_generic(tok, input);
+  input = token_get(tok, input);
   if (tok->type != token_word) {
     pbc_error("unexpected token");
     return 1;
   }
-  input = token_get_generic(tok, input);
+  input = token_get(tok, input);
   if (tok->type != token_word) {
     pbc_error("expected 'type'");
     return 1;

@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <stdio.h>  // for EOF
 #include <string.h> // for strchr
 #include <stdlib.h> // for pbc_malloc, pbc_free
@@ -6,7 +5,7 @@
 #include "pbc_memory.h"
 
 // TODO: Replace with Flex.
-const char *token_get_generic(token_t tok, const char *input) {
+const char *token_get(token_t tok, const char *input) {
   char *buf;
   int n = 32;
   int i;

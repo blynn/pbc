@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "pbc_assert.h"
+#include "pbc_utils.h"
 #include "pbc_memory.h"
 
 static void *default_pbc_malloc(size_t size) {

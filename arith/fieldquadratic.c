@@ -11,9 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
+#include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_fieldquadratic.h"
-#include "pbc_utils.h"
 #include "pbc_memory.h"
 
 // Per-element data.

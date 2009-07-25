@@ -21,6 +21,6 @@ typedef struct token_s *token_ptr;
 
 void token_init(token_t tok);
 void token_clear(token_t tok);
-const char *token_get_generic(token_t tok, const char *s);
+const char *token_get(token_t tok, const char *s);
 
 #endif //__PBC_PARSE_H__

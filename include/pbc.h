@@ -10,6 +10,7 @@
 extern "C" {
 #endif
 
+#include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_pairing.h"
 #include "pbc_curve.h"
@@ -23,7 +24,6 @@ extern "C" {
 #include "pbc_g_param.h"
 #include "pbc_random.h"
 #include "pbc_memory.h"
-#include "pbc_assert.h"
 
 #if defined (__cplusplus)
 }  // extern "C"

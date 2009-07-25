@@ -3,6 +3,7 @@
 #include <stdlib.h> //for rand, pbc_malloc, pbc_free
 #include <string.h> //for strcmp
 #include <gmp.h>
+#include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_fp.h"
 #include "pbc_pairing.h"
@@ -13,7 +14,6 @@
 #include "pbc_memory.h"
 #include "pbc_symtab.h"
 #include "param_utils.h"
-#include "pbc_utils.h"
 
 struct e_param_s {
   mpz_t q;    // Curve is defined over F_q.

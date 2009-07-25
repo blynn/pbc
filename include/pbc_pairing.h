@@ -2,6 +2,7 @@
 // * stdio.h
 // * gmp.h
 // * field.h
+// * utils.h
 #ifndef __PBC_PAIRING_H__
 #define __PBC_PAIRING_H__
 

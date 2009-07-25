@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <gmp.h>
 #include <string.h>
+#include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_fp.h"
 #include "pbc_memory.h"

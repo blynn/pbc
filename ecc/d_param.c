@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
+#include "pbc_utils.h"
 #include "pbc_darray.h"
 #include "pbc_field.h"
 #include "pbc_poly.h"
@@ -19,7 +20,6 @@
 #include "pbc_memory.h"
 #include "pbc_symtab.h"
 #include "param_utils.h"
-#include "pbc_utils.h"
 
 struct d_param_s {
   mpz_t q;       // curve defined over F_q

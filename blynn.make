@@ -37,7 +37,7 @@ libpbc_srcs := \
     a_param d_param e_param f_param g_param \
     hilbert mnt mpc)) \
   $(addsuffix .c,$(addprefix misc/, \
-    pbc_assert \
+    utils \
     darray symtab \
     parse \
     extend_printf memory)) \
@@ -70,16 +70,16 @@ binaries : $(examples) pbc/pbc
 
 test_srcs := \
   $(addsuffix .c,$(addprefix guru/, \
-    fp_test quadratic_test poly_test testexp testpairing))
+    fp_test quadratic_test poly_test exp_test pairing_test))
 
 tests := $(test_srcs:.c=)
 
 # Object files needed to test Fp.
 fp_objs := $(addsuffix .o, \
-  arith/field arith/fp arith/naivefp arith/fastfp arith/fasterfp arith/montfp arith/random arith/init_random misc/extend_printf misc/memory misc/pbc_assert)
+  arith/field arith/fp arith/naivefp arith/fastfp arith/fasterfp arith/montfp arith/random arith/init_random misc/extend_printf misc/memory misc/utils)
 
-guru/testexp: guru/testexp.o libpbc.a
-guru/testpairing: guru/testpairing.o libpbc.a
+guru/exp_test: guru/exp_test.o libpbc.a
+guru/pairing_test: guru/pairing_test.o libpbc.a
 guru/fp_test: guru/fp_test.o $(fp_objs)
 guru/poly_test: guru/poly_test.o $(fp_objs) arith/poly.o misc/darray.o
 guru/quadratic_test: guru/quadratic_test.o $(fp_objs) arith/fieldquadratic.o

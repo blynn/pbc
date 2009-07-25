@@ -3,6 +3,7 @@
 #include <stdlib.h> //for rand, pbc_malloc, pbc_free
 #include <string.h> //for strcmp
 #include <gmp.h>
+#include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
@@ -15,16 +16,15 @@
 #include "pbc_memory.h"
 #include "pbc_symtab.h"
 #include "param_utils.h"
-#include "pbc_utils.h"
 
 typedef struct {
-    int exp2;
-    int exp1;
-    int sign1;
-    int sign0;
-    mpz_t r; // r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1
-    mpz_t q; // we work in E(F_q) (and E(F_q^2))
-    mpz_t h; // r * h = q + 1
+  int exp2;
+  int exp1;
+  int sign1;
+  int sign0;
+  mpz_t r; // r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1
+  mpz_t q; // we work in E(F_q) (and E(F_q^2))
+  mpz_t h; // r * h = q + 1
 } *a_param_ptr;
 
 typedef struct {

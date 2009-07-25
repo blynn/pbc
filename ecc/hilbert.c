@@ -3,6 +3,7 @@
 #include <stdlib.h> //for pbc_malloc, pbc_free
 #include <gmp.h>
 #include <math.h>
+#include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_darray.h"
 #include "pbc_poly.h"

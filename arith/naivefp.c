@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
+#include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_random.h"
-#include "pbc_utils.h"
 #include "pbc_fp.h"
 #include "pbc_memory.h"
 

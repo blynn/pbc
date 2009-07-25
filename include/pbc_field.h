@@ -2,10 +2,12 @@
  * field_t: represents fields, rings and groups.
  * element_t: represents an element of a field_t.
  */
-//requires
+
+// Requires:
 // * stdarg.h
 // * stdio.h
 // * gmp.h
+// * utils.h
 #ifndef __PBC_FIELD_H__
 #define __PBC_FIELD_H__
 
@@ -25,7 +27,6 @@ struct element_pp_s {
 typedef struct element_pp_s element_pp_t[1];
 typedef struct element_pp_s *element_pp_ptr;
 
-#include "pbc_assert.h"
 void pbc_assert(int expr, char *msg, const char *func);
 void pbc_assert_match2(element_ptr a, element_ptr b, const char *func);
 void pbc_assert_match3(element_ptr a, element_ptr b, element_ptr c,
