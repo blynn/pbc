@@ -14,6 +14,7 @@
 #include "pbc_pairing.h"
 #include "pbc_memory.h"
 
+#include "pbc_param.h"
 #include "pbc_a_param.h"
 #include "pbc_mnt.h"
 #include "pbc_d_param.h"
@@ -102,12 +103,11 @@ void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx)
     pairing->phi = phi_warning;
     //TODO: yuck!
     if (!strcmp(s, "a")) {
-	a_param_t ap;
-
-	a_param_init(ap);
-	a_param_inp_generic (ap, fops, ctx);
-	pairing_init_a_param(pairing, ap);
-	a_param_clear(ap);
+pbc_param_t par;
+pbc_param_init_a(par);
+pbc_param_inp_generic(par, fops, ctx);
+pairing_init_pbc_param(pairing, par);
+pbc_param_clear(par);
     } else if (!strcmp(s, "d")) {
 	d_param_t cp;
 
