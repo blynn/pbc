@@ -1464,64 +1464,33 @@ void pbc_param_init_a_gen(pbc_param_ptr par, int rbits, int qbits) {
 
 // Type A1 pairings:
 
+struct a1_param_s {
+    mpz_t p;
+    mpz_t n;
+    unsigned int l;
+};
+typedef struct a1_param_s a1_param_t[1];
+typedef struct a1_param_s *a1_param_ptr;
+
 struct a1_pairing_data_s {
   field_t Fp, Fp2, Ep;
 };
 typedef struct a1_pairing_data_s a1_pairing_data_t[1];
 typedef struct a1_pairing_data_s *a1_pairing_data_ptr;
 
-void a1_param_init(a1_param_t param) {
-  mpz_init(param->p);
-  mpz_init(param->n);
-}
-
-void a1_param_clear(a1_param_t param) {
+static void a1_clear(void *data) {
+  a1_param_ptr param = data;
   mpz_clear(param->p);
   mpz_clear(param->n);
+  pbc_free(data);
 }
 
-void a1_param_out_str(FILE *stream, a1_param_ptr p) {
+static void a1_out_str(FILE *stream, void *data) {
+  a1_param_ptr p = data;
   param_out_type(stream, "a1");
   param_out_mpz(stream, "p", p->p);
   param_out_mpz(stream, "n", p->n);
   param_out_int(stream, "l", p->l);
-}
-
-void a1_param_inp_generic (a1_param_ptr p, fetch_ops_t fops, void *ctx) {
-  PBC_ASSERT(fops, "NULL fops");
-  PBC_ASSERT(ctx, "NULL ctx");
-  symtab_t tab;
-
-  symtab_init(tab);
-  param_read_generic (tab, fops, ctx);
-
-  lookup_mpz(p->p, tab, "p");
-  lookup_mpz(p->n, tab, "n");
-  p->l = lookup_int(tab, "l");
-
-  param_clear_tab(tab);
-  symtab_clear(tab);
-}
-
-void a1_param_gen(a1_param_t param, mpz_t order) {
-  //if order is even, ideally check all even l, not just multiples of 4
-  //but I don't see a good reason for having an even order
-  unsigned int l = 4;
-  mpz_t n;
-  mpz_ptr p = param->p;
-  mpz_init(n);
-  mpz_mul_ui(n, order, 4);
-  mpz_sub_ui(p, n, 1);
-  for (;;) {
-    if (mpz_probab_prime_p(p, 20)) {
-      break;
-    }
-    mpz_add(p, p, n);
-    l += 4;
-  }
-  param->l = l;
-  mpz_set(param->n, order);
-  mpz_clear(n);
 }
 
 struct pp2_coeff_s {
@@ -1825,7 +1794,7 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
   element_clear(e0);
 }
 
-void a1_pairing_clear(pairing_t pairing) {
+static void a1_pairing_clear(pairing_t pairing) {
   field_clear(pairing->GT);
 
   a1_pairing_data_ptr p = pairing->data;
@@ -1855,7 +1824,8 @@ static void a1_pairing_option_set(pairing_t pairing, char *key, char *value) {
   }
 }
 
-void pairing_init_a1_param(pairing_t pairing, a1_param_t param) {
+static void a1_init_pairing(pairing_t pairing, void *data) {
+  a1_param_ptr param = data;
   element_t a, b;
   mpz_init(pairing->r);
   mpz_set(pairing->r, param->n);
@@ -1897,4 +1867,59 @@ void pairing_init_a1_param(pairing_t pairing, a1_param_t param) {
   pairing->pp_clear = a1_pairing_pp_clear;
   pairing->pp_apply = a1_pairing_pp_apply;
   pairing->option_set = a1_pairing_option_set;
+}
+
+static void a1_init(pbc_param_t p) {
+  static pbc_param_interface_t interface = {{
+    a1_clear,
+    a1_init_pairing,
+    a1_out_str,
+  }};
+  p->api = interface;
+  a1_param_ptr param = p->data = pbc_malloc(sizeof(*param));
+  mpz_init(param->p);
+  mpz_init(param->n);
+}
+
+// Public interface:
+
+void pbc_param_init_a1(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
+  PBC_ASSERT(fops, "NULL fops");
+  PBC_ASSERT(ctx, "NULL ctx");
+  a1_init(par);
+  a1_param_ptr p = par->data;
+  symtab_t tab;
+
+  symtab_init(tab);
+  param_read_generic (tab, fops, ctx);
+
+  lookup_mpz(p->p, tab, "p");
+  lookup_mpz(p->n, tab, "n");
+  p->l = lookup_int(tab, "l");
+
+  param_clear_tab(tab);
+  symtab_clear(tab);
+}
+
+void pbc_param_init_a1_gen(pbc_param_ptr par, mpz_t order) {
+  a1_init(par);
+  a1_param_ptr param = par->data;
+  // If order is even, ideally check all even l, not just multiples of 4
+  // but I don't see a good reason for having an even order.
+  unsigned int l = 4;
+  mpz_t n;
+  mpz_ptr p = param->p;
+  mpz_init(n);
+  mpz_mul_ui(n, order, 4);
+  mpz_sub_ui(p, n, 1);
+  for (;;) {
+    if (mpz_probab_prime_p(p, 20)) {
+      break;
+    }
+    mpz_add(p, p, n);
+    l += 4;
+  }
+  param->l = l;
+  mpz_set(param->n, order);
+  mpz_clear(n);
 }

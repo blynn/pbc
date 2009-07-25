@@ -71,7 +71,7 @@ static void default_pp_clear(pairing_pp_t p) {
   UNUSED_VAR(p);
 }
 
-void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
+int pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
   PBC_ASSERT(fops, "NULL fetch_ops");
   PBC_ASSERT(ctx, "NULL ctx");
   char *s;
@@ -95,59 +95,53 @@ void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
 
   pairing->is_almost_coddh = generic_is_almost_coddh;
   pairing->phi = phi_warning;
-  //TODO: yuck!
-  if (!strcmp(s, "a")) {
-    pbc_param_t par;
-    pbc_param_init_a(par, fops, ctx);
-    pairing_init_pbc_param(pairing, par);
-    pbc_param_clear(par);
-  } else if (!strcmp(s, "d")) {
-    pbc_param_t par;
-    pbc_param_init_d(par, fops, ctx);
-    pairing_init_pbc_param(pairing, par);
-    pbc_param_clear(par);
-  } else if (!strcmp(s, "e")) {
-    pbc_param_t par;
-    pbc_param_init_e(par, fops, ctx);
-    pairing_init_pbc_param(pairing, par);
-    pbc_param_clear(par);
-  } else if (!strcmp(s, "f")) {
-    pbc_param_t par;
-    pbc_param_init_f(par, fops, ctx);
-    pairing_init_pbc_param(pairing, par);
-    pbc_param_clear(par);
-  } else if (!strcmp(s, "a1")) {
-    a1_param_t a1p;
+  static struct {
+    char *s;
+    void (*fun)(pbc_param_ptr, fetch_ops_t, void *);
+  } funtable[] = {
+      { "a", pbc_param_init_a },
+      { "d", pbc_param_init_d },
+      { "e", pbc_param_init_e },
+      { "f", pbc_param_init_f },
+      { "g", pbc_param_init_g },
+      { "a1", pbc_param_init_a1 },
+  };
 
-    a1_param_init(a1p);
-    a1_param_inp_generic (a1p, fops, ctx);
-    pairing_init_a1_param(pairing, a1p);
-    a1_param_clear(a1p);
-  } else if (!strcmp(s, "g")) {
-    pbc_param_t par;
-    pbc_param_init_g(par, fops, ctx);
-    pairing_init_pbc_param(pairing, par);
-    pbc_param_clear(par);
-  } else {
-    pbc_die("unknown pairing type!");
+  int res = 1;
+  unsigned int i;
+  for(i = 0; i < sizeof(funtable)/sizeof(*funtable); i++) {
+    if (!strcmp(s, funtable[i].s)) {
+      pbc_param_t par;
+      funtable[i].fun(par, fops, ctx);
+      pairing_init_pbc_param(pairing, par);
+      pbc_param_clear(par);
+      res = 0;
+      break;
+    }
   }
+
   token_clear(tok);
   pbc_free(s);
+  if (res) {
+    pbc_error("unknown pairing type");
+    return 1;
+  }
   pairing->G1->pairing = pairing;
   pairing->G2->pairing = pairing;
   pairing->GT->pairing = pairing;
+  return 0;
 }
 
-void pairing_init_inp_buf (pairing_t pairing, const char *buf, size_t len) {
+int pairing_init_inp_buf (pairing_t pairing, const char *buf, size_t len) {
   PBC_ASSERT(buf, "NULL buf");
   tracker_t t;
   tracker_init (&t, buf, len);
-  pairing_init_inp_generic (pairing, &fops_buf, &t);
+  return pairing_init_inp_generic(pairing, &fops_buf, &t);
 }
 
-void pairing_init_inp_str(pairing_t pairing, FILE *stream) {
+int pairing_init_inp_str(pairing_t pairing, FILE *stream) {
   PBC_ASSERT(stream, "NULL stream");
-  pairing_init_inp_generic (pairing, &fops_str, stream);
+  return pairing_init_inp_generic(pairing, &fops_str, stream);
 }
 
 void pairing_clear(pairing_t pairing) {
