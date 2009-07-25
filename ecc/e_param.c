@@ -127,19 +127,14 @@ void e_param_gen(e_param_t p, int rbits, int qbits)
     element_set_si(j, 1);
     field_init_curve_b(cc, j, n, NULL);
     element_clear(j);
-
-    //we may need to twist it however
+    // We may need to twist it.
     {
+        // Pick a random point P and twist the curve if P has the wrong order.
 	element_t P;
-
-	//pick a random point P and see if it has the right order
 	element_init(P, cc);
 	element_random(P);
 	element_mul_mpz(P, P, n);
-	//if not, we twist the curve
-	if (!element_is0(P)) {
-	    twist_curve(cc);
-	}
+	if (!element_is0(P)) field_reinit_curve_twist(cc);
 	element_clear(P);
     }
     element_to_mpz(p->a, curve_field_a_coeff(cc));

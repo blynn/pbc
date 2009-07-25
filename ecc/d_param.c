@@ -917,8 +917,7 @@ void pairing_init_d_param(pairing_t pairing, d_param_t param) {
   }
 
   field_init_curve_ab_map(p->Etwist, p->Eq, element_field_to_polymod, p->Fqd, pairing->r, NULL);
-
-  twist_curve(p->Etwist);
+  field_reinit_curve_twist(p->Etwist);
 
   element_init(p->nqrinv, p->Fqd);
   element_invert(p->nqrinv, field_get_nqr(p->Fqd));
@@ -994,17 +993,12 @@ static void compute_cm_curve(d_param_ptr param, cm_info_ptr cm) {
 
   // We may need to twist it.
   {
+    // Pick a random point P and twist the curve if it has the wrong order.
     element_t P;
-
-    // Pick a random point P and see if it has the right order.
     element_init(P, cc);
     element_random(P);
     element_mul_mpz(P, P, cm->n);
-    //element_printf("P = %B", P);
-    // If not, we twist the curve.
-    if (!element_is0(P)) {
-      twist_curve(cc);
-    }
+    if (!element_is0(P)) field_reinit_curve_twist(cc);
     element_clear(P);
   }
 
