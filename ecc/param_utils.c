@@ -9,7 +9,7 @@
 #include "pbc_parse.h"
 #include "pbc_tracker.h"
 #include "pbc_memory.h"
-#include "pbc_param.h"
+#include "param_utils.h"
 
 void param_out_type(FILE *stream, char *s) {
   fprintf(stream, "type %s\n", s);
@@ -66,7 +66,6 @@ void param_read_str(symtab_t tab, FILE *stream) {
   assert (stream);
   param_read_generic (tab, &fops_str, stream);
 }
-
 
 void param_clear_tab(symtab_t tab) {
   symtab_forall_data(tab, pbc_free);

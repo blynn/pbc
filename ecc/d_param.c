@@ -6,7 +6,6 @@
 #include <string.h>
 #include <gmp.h>
 #include "pbc_fops.h"
-#include "pbc_symtab.h"
 #include "pbc_darray.h"
 #include "pbc_field.h"
 #include "pbc_poly.h"
@@ -20,6 +19,8 @@
 #include "pbc_d_param.h"
 #include "pbc_tracker.h"
 #include "pbc_memory.h"
+#include "pbc_symtab.h"
+#include "param_utils.h"
 #include "pbc_utils.h"
 
 struct d_param_s {

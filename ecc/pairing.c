@@ -84,12 +84,13 @@ int pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
   token_init(tok);
   token_get_generic (tok, fops, ctx);
   if (tok->type != token_word) {
-    return;
+    pbc_error("unexpected token");
+    return 1;
   }
-  //word should be "type"
   token_get_generic (tok, fops, ctx);
   if (tok->type != token_word) {
-    return;
+    pbc_error("expected 'type'");
+    return 1;
   }
   s = pbc_strdup(tok->s);
 
@@ -98,7 +99,7 @@ int pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
   static struct {
     char *s;
     void (*fun)(pbc_param_ptr, fetch_ops_t, void *);
-  } funtable[] = {
+  } funtab[] = {
       { "a", pbc_param_init_a },
       { "d", pbc_param_init_d },
       { "e", pbc_param_init_e },
@@ -109,10 +110,10 @@ int pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
 
   int res = 1;
   unsigned int i;
-  for(i = 0; i < sizeof(funtable)/sizeof(*funtable); i++) {
-    if (!strcmp(s, funtable[i].s)) {
+  for(i = 0; i < sizeof(funtab)/sizeof(*funtab); i++) {
+    if (!strcmp(s, funtab[i].s)) {
       pbc_param_t par;
-      funtable[i].fun(par, fops, ctx);
+      funtab[i].fun(par, fops, ctx);
       pairing_init_pbc_param(pairing, par);
       pbc_param_clear(par);
       res = 0;

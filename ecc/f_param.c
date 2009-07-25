@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <gmp.h>
 #include "pbc_fops.h"
-#include "pbc_symtab.h"
 #include "pbc_field.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
@@ -14,6 +13,8 @@
 #include "pbc_curve.h"
 #include "pbc_tracker.h"
 #include "pbc_memory.h"
+#include "pbc_symtab.h"
+#include "param_utils.h"
 #include "pbc_utils.h"
 
 struct f_param_s {

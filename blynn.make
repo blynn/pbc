@@ -33,7 +33,7 @@ libpbc_srcs := \
     field fp montfp naivefp fastfp fasterfp fieldmpz fieldquadratic poly \
     random dlog)) \
   $(addsuffix .c,$(addprefix ecc/, \
-    curve singular pairing param \
+    curve singular pairing param_utils \
     a_param d_param e_param f_param g_param \
     hilbert mnt mpc)) \
   $(addsuffix .c,$(addprefix misc/, \
