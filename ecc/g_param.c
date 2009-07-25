@@ -14,11 +14,27 @@
 #include "pbc_mnt.h"
 #include "pbc_curve.h"
 #include "pbc_pairing.h"
-#include "pbc_g_param.h"
 #include "pbc_param.h"
+#include "pbc_g_param.h"
 #include "pbc_tracker.h"
 #include "pbc_memory.h"
 #include "pbc_utils.h"
+
+struct g_param_s {
+  mpz_t q; //curve defined over F_q
+  mpz_t n; //has order n (= q - t + 1) in F_q
+  mpz_t h; //h * r = n, r is prime
+  mpz_t r;
+  mpz_t a, b; //curve equation is y^2 = x^3 + ax + b
+  int k; //embedding degree
+  mpz_t nk; //order of curve over F_q^k
+  mpz_t hk; //hk * r^2 = nk
+  mpz_t *coeff; //coefficients of polynomial used to extend F_q by k/2
+  mpz_t nqr; //a quadratic nonresidue in F_q^d that lies in F_q
+};
+
+typedef struct g_param_s g_param_t[1];
+typedef struct g_param_s *g_param_ptr;
 
 struct mnt_pairing_data_s {
   field_t Fq, Fqx, Fqd, Fqk;
@@ -29,20 +45,8 @@ struct mnt_pairing_data_s {
 typedef struct mnt_pairing_data_s mnt_pairing_data_t[1];
 typedef struct mnt_pairing_data_s *mnt_pairing_data_ptr;
 
-void g_param_init(g_param_ptr param) {
-  mpz_init(param->q);
-  mpz_init(param->n);
-  mpz_init(param->h);
-  mpz_init(param->r);
-  mpz_init(param->a);
-  mpz_init(param->b);
-  mpz_init(param->nk);
-  mpz_init(param->hk);
-  param->coeff = NULL;
-  mpz_init(param->nqr);
-}
-
-void g_param_clear(g_param_ptr param) {
+static void g_clear(void *data) {
+  g_param_ptr param = data;
   int i;
   mpz_clear(param->q);
   mpz_clear(param->n);
@@ -59,7 +63,8 @@ void g_param_clear(g_param_ptr param) {
   pbc_free(param->coeff);
 }
 
-void g_param_out_str(FILE *stream, g_param_ptr p) {
+static void g_out_str(FILE *stream, void *data) {
+  g_param_ptr p = data;
   int i;
   char s[80];
   param_out_type(stream, "g");
@@ -76,37 +81,6 @@ void g_param_out_str(FILE *stream, g_param_ptr p) {
     param_out_mpz(stream, s, p->coeff[i]);
   }
   param_out_mpz(stream, "nqr", p->nqr);
-}
-
-void g_param_inp_generic (g_param_ptr p, fetch_ops_t fops, void *ctx) {
-  PBC_ASSERT(fops, "NULL fops");
-  PBC_ASSERT(ctx, "NULL ctx");
-  symtab_t tab;
-  char s[80];
-  int i;
-
-  symtab_init(tab);
-  param_read_generic (tab, fops, ctx);
-
-  lookup_mpz(p->q, tab, "q");
-  lookup_mpz(p->n, tab, "n");
-  lookup_mpz(p->h, tab, "h");
-  lookup_mpz(p->r, tab, "r");
-  lookup_mpz(p->a, tab, "a");
-  lookup_mpz(p->b, tab, "b");
-  lookup_mpz(p->nk, tab, "nk");
-  lookup_mpz(p->hk, tab, "hk");
-  lookup_mpz(p->nqr, tab, "nqr");
-
-  p->coeff = pbc_realloc(p->coeff, sizeof(mpz_t) * 5);
-  for (i=0; i<5; i++) {
-    sprintf(s, "coeff%d", i);
-    mpz_init(p->coeff[i]);
-    lookup_mpz(p->coeff[i], tab, s);
-  }
-
-  param_clear_tab(tab);
-  symtab_clear(tab);
 }
 
 static inline void d_miller_evalfn(element_t e0,
@@ -1149,7 +1123,7 @@ static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
   element_clear(v);
 }
 
-void g_pairing_clear(pairing_t pairing) {
+static void g_pairing_clear(pairing_t pairing) {
   field_clear(pairing->GT);
   mnt_pairing_data_ptr p = pairing->data;
 
@@ -1193,7 +1167,91 @@ static void g_finalpow(element_ptr e) {
   element_clear(t0);
 }
 
-void pairing_init_g_param(pairing_t pairing, g_param_t param) {
+// Computes a curve and sets fp to the field it is defined over using the
+// complex multiplication method, where cm holds appropriate data
+// (e.g. discriminant, field order).
+static void compute_cm_curve(g_param_ptr param, cm_info_ptr cm) {
+  darray_t coefflist;
+  element_t hp, root;
+  field_t fp, fpx;
+  int i, n;
+  field_t cc;
+
+  field_init_fp(fp, cm->q);
+  field_init_poly(fpx, fp);
+  element_init(hp, fpx);
+
+  darray_init(coefflist);
+
+  hilbert_poly(coefflist, cm->D);
+
+  n = coefflist->count;
+  // Temporarily set the coefficient of x^{n-1} to 1 so hp has degree n - 1,
+  // allowing us to use poly_coeff().
+  poly_set_coeff1(hp, n - 1);
+  for (i=0; i<n; i++) {
+    element_set_mpz(poly_coeff(hp, i), coefflist->item[i]);
+  }
+
+  hilbert_poly_clear(coefflist);
+
+  darray_clear(coefflist);
+  //TODO: remove x = 0, 1728 roots
+  //TODO: what if there's no roots?
+  //printf("hp ");
+  //element_out_str(stdout, 0, hp);
+  //printf("\n");
+
+  element_init(root, fp);
+  poly_findroot(root, hp);
+  //printf("root = ");
+  //element_out_str(stdout, 0, root);
+  //printf("\n");
+  element_clear(hp);
+  field_clear(fpx);
+
+  //the root is the j-invariant of our desired curve
+  field_init_curve_j(cc, root, cm->n, NULL);
+  element_clear(root);
+
+  //we may need to twist it however
+  {
+    // Pick a random point P and twist the curve if it has the wrong order.
+    element_t P;
+    element_init(P, cc);
+    element_random(P);
+    element_mul_mpz(P, P, cm->n);
+    if (!element_is0(P)) field_reinit_curve_twist(cc);
+    element_clear(P);
+  }
+
+  mpz_set(param->q, cm->q);
+  mpz_set(param->n, cm->n);
+  mpz_set(param->h, cm->h);
+  mpz_set(param->r, cm->r);
+  element_to_mpz(param->a, curve_field_a_coeff(cc));
+  element_to_mpz(param->b, curve_field_b_coeff(cc));
+  {
+    mpz_t z;
+    mpz_init(z);
+    //compute order of curve in F_q^k
+    //n = q - t + 1 hence t = q - n + 1
+    mpz_sub(z, param->q, param->n);
+    mpz_add_ui(z, z, 1);
+    compute_trace_n(z, param->q, z, 10);
+    mpz_pow_ui(param->nk, param->q, 10);
+    mpz_sub_ui(z, z, 1);
+    mpz_sub(param->nk, param->nk, z);
+    mpz_mul(z, param->r, param->r);
+    mpz_divexact(param->hk, param->nk, z);
+    mpz_clear(z);
+  }
+  field_clear(cc);
+  field_clear(fp);
+}
+
+static void g_init_pairing(pairing_t pairing, void *data) {
+  g_param_ptr param = data;
   mnt_pairing_data_ptr p;
   element_t a, b;
   element_t irred;
@@ -1288,90 +1346,64 @@ void pairing_init_g_param(pairing_t pairing, g_param_t param) {
   element_clear(b);
 }
 
-// Computes a curve and sets fp to the field it is defined over using the
-// complex multiplication method, where cm holds appropriate data
-// (e.g. discriminant, field order).
-static void compute_cm_curve(g_param_ptr param, cm_info_ptr cm) {
-  darray_t coefflist;
-  element_t hp, root;
-  field_t fp, fpx;
-  int i, n;
-  field_t cc;
-
-  field_init_fp(fp, cm->q);
-  field_init_poly(fpx, fp);
-  element_init(hp, fpx);
-
-  darray_init(coefflist);
-
-  hilbert_poly(coefflist, cm->D);
-
-  n = coefflist->count;
-  // Temporarily set the coefficient of x^{n-1} to 1 so hp has degree n - 1,
-  // allowing us to use poly_coeff().
-  poly_set_coeff1(hp, n - 1);
-  for (i=0; i<n; i++) {
-    element_set_mpz(poly_coeff(hp, i), coefflist->item[i]);
-  }
-
-  hilbert_poly_clear(coefflist);
-
-  darray_clear(coefflist);
-  //TODO: remove x = 0, 1728 roots
-  //TODO: what if there's no roots?
-  //printf("hp ");
-  //element_out_str(stdout, 0, hp);
-  //printf("\n");
-
-  element_init(root, fp);
-  poly_findroot(root, hp);
-  //printf("root = ");
-  //element_out_str(stdout, 0, root);
-  //printf("\n");
-  element_clear(hp);
-  field_clear(fpx);
-
-  //the root is the j-invariant of our desired curve
-  field_init_curve_j(cc, root, cm->n, NULL);
-  element_clear(root);
-
-  //we may need to twist it however
-  {
-    // Pick a random point P and twist the curve if it has the wrong order.
-    element_t P;
-    element_init(P, cc);
-    element_random(P);
-    element_mul_mpz(P, P, cm->n);
-    if (!element_is0(P)) field_reinit_curve_twist(cc);
-    element_clear(P);
-  }
-
-  mpz_set(param->q, cm->q);
-  mpz_set(param->n, cm->n);
-  mpz_set(param->h, cm->h);
-  mpz_set(param->r, cm->r);
-  element_to_mpz(param->a, curve_field_a_coeff(cc));
-  element_to_mpz(param->b, curve_field_b_coeff(cc));
-  {
-    mpz_t z;
-    mpz_init(z);
-    //compute order of curve in F_q^k
-    //n = q - t + 1 hence t = q - n + 1
-    mpz_sub(z, param->q, param->n);
-    mpz_add_ui(z, z, 1);
-    compute_trace_n(z, param->q, z, 10);
-    mpz_pow_ui(param->nk, param->q, 10);
-    mpz_sub_ui(z, z, 1);
-    mpz_sub(param->nk, param->nk, z);
-    mpz_mul(z, param->r, param->r);
-    mpz_divexact(param->hk, param->nk, z);
-    mpz_clear(z);
-  }
-  field_clear(cc);
-  field_clear(fp);
+static void g_init(pbc_param_ptr p) {
+  static pbc_param_interface_t interface = {{
+    g_clear,
+    g_init_pairing,
+    g_out_str,
+  }};
+  p->api = interface;
+  g_param_ptr param = p->data = pbc_malloc(sizeof(*param));
+  mpz_init(param->q);
+  mpz_init(param->n);
+  mpz_init(param->h);
+  mpz_init(param->r);
+  mpz_init(param->a);
+  mpz_init(param->b);
+  mpz_init(param->nk);
+  mpz_init(param->hk);
+  param->coeff = NULL;
+  mpz_init(param->nqr);
 }
 
-void g_param_from_cm(g_param_t param, cm_info_ptr cm) {
+// Public interface:
+
+void pbc_param_init_g(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
+  PBC_ASSERT(fops, "NULL fops");
+  PBC_ASSERT(ctx, "NULL ctx");
+  g_init(par);
+  g_param_ptr p = par->data;
+  symtab_t tab;
+  char s[80];
+  int i;
+
+  symtab_init(tab);
+  param_read_generic (tab, fops, ctx);
+
+  lookup_mpz(p->q, tab, "q");
+  lookup_mpz(p->n, tab, "n");
+  lookup_mpz(p->h, tab, "h");
+  lookup_mpz(p->r, tab, "r");
+  lookup_mpz(p->a, tab, "a");
+  lookup_mpz(p->b, tab, "b");
+  lookup_mpz(p->nk, tab, "nk");
+  lookup_mpz(p->hk, tab, "hk");
+  lookup_mpz(p->nqr, tab, "nqr");
+
+  p->coeff = pbc_realloc(p->coeff, sizeof(mpz_t) * 5);
+  for (i=0; i<5; i++) {
+    sprintf(s, "coeff%d", i);
+    mpz_init(p->coeff[i]);
+    lookup_mpz(p->coeff[i], tab, s);
+  }
+
+  param_clear_tab(tab);
+  symtab_clear(tab);
+}
+
+void pbc_param_init_g_gen(pbc_param_t p, cm_info_ptr cm) {
+  g_init(p);
+  g_param_ptr param = p->data;
   field_t Fq, Fqx, Fqd;
   element_t irred, nqr;
   int i;

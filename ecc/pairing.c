@@ -124,12 +124,10 @@ void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
     pairing_init_a1_param(pairing, a1p);
     a1_param_clear(a1p);
   } else if (!strcmp(s, "g")) {
-    g_param_t gp;
-
-    g_param_init(gp);
-    g_param_inp_generic (gp, fops, ctx);
-    pairing_init_g_param(pairing, gp);
-    g_param_clear(gp);
+    pbc_param_t par;
+    pbc_param_init_g(par, fops, ctx);
+    pairing_init_pbc_param(pairing, par);
+    pbc_param_clear(par);
   } else {
     pbc_die("unknown pairing type!");
   }
