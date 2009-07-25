@@ -14,8 +14,7 @@
 #include "pbc_curve.h"
 #include "pbc_random.h"
 #include "pbc_memory.h"
-#include "pbc_symtab.h"
-#include "param_utils.h"
+#include "param_io.h"
 
 typedef struct {
   int exp2;
@@ -1378,13 +1377,9 @@ static void a_param_init(pbc_param_ptr par) {
 
 // Public interface for type A pairings:
 
-void pbc_param_init_a(pbc_param_ptr par, const char *s) {
-  symtab_t tab;
+void pbc_param_init_a(pbc_param_ptr par, const char *(*tab)(const char *)) {
   a_param_init(par);
   a_param_ptr p = par->data;
-
-  symtab_init(tab);
-  param_read_generic(tab, s);
 
   lookup_mpz(p->q, tab, "q");
   lookup_mpz(p->r, tab, "r");
@@ -1393,11 +1388,7 @@ void pbc_param_init_a(pbc_param_ptr par, const char *s) {
   p->exp1 = lookup_int(tab, "exp1");
   p->sign1 = lookup_int(tab, "sign1");
   p->sign0 = lookup_int(tab, "sign0");
-
-  param_clear_tab(tab);
-  symtab_clear(tab);
 }
-
 
 void pbc_param_init_a_gen(pbc_param_ptr par, int rbits, int qbits) {
   a_param_init(par);
@@ -1880,20 +1871,13 @@ static void a1_init(pbc_param_t p) {
 
 // Public interface:
 
-void pbc_param_init_a1(pbc_param_ptr par, const char *s) {
+void pbc_param_init_a1(pbc_param_ptr par, const char *(*tab)(const char *)) {
   a1_init(par);
   a1_param_ptr p = par->data;
-  symtab_t tab;
-
-  symtab_init(tab);
-  param_read_generic(tab, s);
 
   lookup_mpz(p->p, tab, "p");
   lookup_mpz(p->n, tab, "n");
   p->l = lookup_int(tab, "l");
-
-  param_clear_tab(tab);
-  symtab_clear(tab);
 }
 
 void pbc_param_init_a1_gen(pbc_param_ptr par, mpz_t order) {

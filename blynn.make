@@ -33,13 +33,12 @@ libpbc_srcs := \
     field fp montfp naivefp fastfp fasterfp fieldmpz fieldquadratic poly \
     random dlog)) \
   $(addsuffix .c,$(addprefix ecc/, \
-    curve singular pairing param_utils \
+    curve singular pairing param_io \
     a_param d_param e_param f_param g_param \
     hilbert mnt mpc)) \
   $(addsuffix .c,$(addprefix misc/, \
     utils \
     darray symtab \
-    parse \
     extend_printf memory)) \
   $(addsuffix $(nonlinux).c,misc/get_time arith/init_random)
 

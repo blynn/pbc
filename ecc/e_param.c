@@ -12,8 +12,7 @@
 #include "pbc_curve.h"
 #include "pbc_random.h"
 #include "pbc_memory.h"
-#include "pbc_symtab.h"
-#include "param_utils.h"
+#include "param_io.h"
 
 struct e_param_s {
   mpz_t q;    // Curve is defined over F_q.
@@ -887,12 +886,9 @@ static void e_init(pbc_param_ptr p) {
 
 // Public interface:
 
-void pbc_param_init_e(pbc_param_ptr par, const char *s) {
+void pbc_param_init_e(pbc_param_ptr par, const char *(*tab)(const char *)) {
   e_init(par);
   e_param_ptr p = par->data;
-  symtab_t tab;
-  symtab_init(tab);
-  param_read_generic(tab, s);
 
   lookup_mpz(p->q, tab, "q");
   lookup_mpz(p->r, tab, "r");
@@ -903,9 +899,6 @@ void pbc_param_init_e(pbc_param_ptr par, const char *s) {
   p->exp1 = lookup_int(tab, "exp1");
   p->sign1 = lookup_int(tab, "sign1");
   p->sign0 = lookup_int(tab, "sign0");
-
-  param_clear_tab(tab);
-  symtab_clear(tab);
 }
 
 void pbc_param_init_e_gen(pbc_param_t par, int rbits, int qbits) {

@@ -22,17 +22,17 @@ void symtab_clear(symtab_t t);
 /*@manual symtab
 Puts 'value' at 'key' in 't'.
 */
-void symtab_put(symtab_t t, void *value, char *key);
+void symtab_put(symtab_t t, void *value, const char *key);
 
 /*@manual symtab
 Returns true if 't' contains key 'key'.
 */
-int symtab_has(symtab_t t, char *key);
+int symtab_has(symtab_t t, const char *key);
 
 /*@manual symtab
 Returns pointer at key 'key' in 't'.
 */
-void *symtab_at(symtab_t t, char *key);
+void *symtab_at(symtab_t t, const char *key);
 
 void symtab_forall_data(symtab_t t, void (*func)(void *));
 

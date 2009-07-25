@@ -16,8 +16,7 @@
 #include "pbc_param.h"
 #include "pbc_g_param.h"
 #include "pbc_memory.h"
-#include "pbc_symtab.h"
-#include "param_utils.h"
+#include "param_io.h"
 
 struct g_param_s {
   mpz_t q; //curve defined over F_q
@@ -1367,15 +1366,11 @@ static void g_init(pbc_param_ptr p) {
 
 // Public interface:
 
-void pbc_param_init_g(pbc_param_ptr par, const char *input) {
+void pbc_param_init_g(pbc_param_ptr par, const char *(*tab)(const char *)) {
   g_init(par);
   g_param_ptr p = par->data;
-  symtab_t tab;
   char s[80];
   int i;
-
-  symtab_init(tab);
-  param_read_generic(tab, input);
 
   lookup_mpz(p->q, tab, "q");
   lookup_mpz(p->n, tab, "n");
@@ -1393,9 +1388,6 @@ void pbc_param_init_g(pbc_param_ptr par, const char *input) {
     mpz_init(p->coeff[i]);
     lookup_mpz(p->coeff[i], tab, s);
   }
-
-  param_clear_tab(tab);
-  symtab_clear(tab);
 }
 
 void pbc_param_init_g_gen(pbc_param_t p, cm_info_ptr cm) {

@@ -9,7 +9,6 @@
 #include "pbc_poly.h"
 #include "pbc_curve.h"
 #include "pbc_symtab.h"
-#include "pbc_parse.h"
 #include "pbc_pairing.h"
 #include "pbc_memory.h"
 
@@ -21,6 +20,120 @@
 #include "pbc_f_param.h"
 #include "pbc_a1_param.h"
 #include "pbc_g_param.h"
+
+// Parser that reads a bunch of strings and places them in a symbol table.
+// TODO: Replace with Flex/Bison?
+
+enum {
+  token_none = 0,
+  token_langle,
+  token_langleslash,
+  token_rangle,
+  token_word,
+  token_eof,
+};
+
+struct token_s {
+  int type;
+  char *s;
+};
+typedef struct token_s token_t[1];
+typedef struct token_s *token_ptr;
+
+static const char *token_get(token_t tok, const char *input) {
+  char *buf;
+  int n = 32;
+  int i;
+  int c;
+
+  // Skip whitespace and comments.
+  for(;;) {
+    for (;;) {
+      c = *input++;
+      if (c == EOF) {
+        tok->type = token_eof;
+        return input;
+      }
+      if (!strchr(" \t\r\n", c)) break;
+    }
+
+    if (c == '#') {
+      for(;;) {
+        c = *input++;
+        if (c == EOF) {
+          tok->type = token_eof;
+          return input;
+        }
+        if (c == '\n') break;
+      }
+    } else break;
+  }
+
+  if (c == '<') {
+    c = *input++;
+    if (c == '/') {
+      tok->type = token_langleslash;
+      return input;
+    }
+    input--;
+    tok->type = token_langle;
+    return input;
+  } else if (c == '>') {
+    tok->type = token_rangle;
+    return input;
+  } else {
+    tok->type = token_word;
+    pbc_free(tok->s);
+    buf = (char *) pbc_malloc(n);
+    i = 0;
+    for (;;) {
+       buf[i] = c;
+       i++;
+       if (i == n) {
+       n += 32;
+       buf = (char *) pbc_realloc(buf, n);
+       }
+       c = *input++;
+       if (c == EOF || strchr(" \t\r\n</>", c)) break;
+    }
+    buf[i] = 0;
+    input--;
+    tok->s = buf;
+  }
+  return input;
+}
+
+static void token_init(token_t tok) {
+   tok->type = token_none;
+   tok->s = NULL;
+}
+
+static void token_clear(token_t tok) {
+   pbc_free(tok->s);
+}
+
+void read_symtab(symtab_t tab, const char *input) {
+  token_t tok;
+  char *s, *s1;
+
+  token_init(tok);
+  for (;;) {
+    input = token_get(tok, input);
+    if (tok->type != token_word) {
+      break;
+    }
+    s = pbc_strdup(tok->s);
+    input = token_get(tok, input);
+    if (tok->type != token_word) {
+      pbc_free(s);
+      break;
+    }
+    s1 = pbc_strdup(tok->s);
+    symtab_put(tab, s1, s);
+    pbc_free(s);
+  }
+  token_clear(tok);
+}
 
 int generic_is_almost_coddh(element_ptr a, element_ptr b,
     element_ptr c, element_ptr d, pairing_t pairing) {
@@ -69,31 +182,28 @@ static void default_pp_clear(pairing_pp_t p) {
 }
 
 int pairing_init_set_str(pairing_t pairing, const char *input) {
-  char *s;
-  token_t tok;
-
   pairing->option_set = default_option_set;
   pairing->pp_init = default_pp_init;
   pairing->pp_clear = default_pp_clear;
   pairing->pp_apply = default_pp_apply;
-  token_init(tok);
-  input = token_get(tok, input);
-  if (tok->type != token_word) {
-    pbc_error("unexpected token");
-    return 1;
+
+  symtab_t tab;
+  symtab_init(tab);
+  read_symtab(tab, input);
+  const char *lookup(const char *key) {
+    if (!symtab_has(tab, key)) {
+      pbc_error("missing param: `%s'", key);
+      return NULL;
+    }
+    return symtab_at(tab, key);
   }
-  input = token_get(tok, input);
-  if (tok->type != token_word) {
-    pbc_error("expected 'type'");
-    return 1;
-  }
-  s = pbc_strdup(tok->s);
+  const char *s = lookup("type");
 
   pairing->is_almost_coddh = generic_is_almost_coddh;
   pairing->phi = phi_warning;
   static struct {
     char *s;
-    void (*fun)(pbc_param_ptr, const char*);
+    void (*fun)(pbc_param_ptr, const char *(*)(const char *));
   } funtab[] = {
       { "a", pbc_param_init_a },
       { "d", pbc_param_init_d },
@@ -108,16 +218,16 @@ int pairing_init_set_str(pairing_t pairing, const char *input) {
   for(i = 0; i < sizeof(funtab)/sizeof(*funtab); i++) {
     if (!strcmp(s, funtab[i].s)) {
       pbc_param_t par;
-      funtab[i].fun(par, input);
+      funtab[i].fun(par, lookup);
       pairing_init_pbc_param(pairing, par);
       pbc_param_clear(par);
       res = 0;
       break;
     }
   }
+  symtab_forall_data(tab, pbc_free);
+  symtab_clear(tab);
 
-  token_clear(tok);
-  pbc_free(s);
   if (res) {
     pbc_error("unknown pairing type");
     return 1;

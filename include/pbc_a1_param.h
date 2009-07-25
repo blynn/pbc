@@ -4,7 +4,7 @@
 #ifndef __PBC_A1_PARAM_H__
 #define __PBC_A1_PARAM_H__
 
-void pbc_param_init_a1(pbc_param_ptr par, const char *s);
+void pbc_param_init_a1(pbc_param_ptr par, const char *(*tab)(const char *));
 
 /*@manual a1param
 Generate type A1 pairing parameters and store them in 'p'.  The group order
