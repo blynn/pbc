@@ -1254,6 +1254,46 @@ static void polymod_out_info(FILE *str, field_ptr f) {
   field_out_info(str, p->field);
 }
 
+// Sets d = gcd(f, g).
+static void poly_gcd(element_ptr d, element_ptr f, element_ptr g) {
+  element_t a, b, q, r;
+  element_init(a, d->field);
+  element_init(b, d->field);
+  element_init(q, d->field);
+  element_init(r, d->field);
+
+  element_set(a, f);
+  element_set(b, g);
+  for(;;) {
+    //TODO: don't care about q
+    poly_div(q, r, a, b);
+    if (element_is0(r)) break;
+    element_set(a, b);
+    element_set(b, r);
+  }
+  element_set(d, b);
+  element_clear(a);
+  element_clear(b);
+  element_clear(q);
+  element_clear(r);
+}
+
+// Sets f = c g where c is the inverse of the leading coefficient of g.
+static void poly_make_monic(element_t f, element_t g) {
+  int n = poly_coeff_count(g);
+  int i;
+  element_ptr e0;
+  poly_alloc(f, n);
+  if (!n) return;
+
+  e0 = poly_coeff(f, n - 1);
+  element_invert(e0, poly_coeff(g, n - 1));
+  for (i=0; i<n-1; i++) {
+    element_mul(poly_coeff(f, i), poly_coeff(g, i), e0);
+  }
+  element_set1(e0);
+}
+
 // The above should be static.
 
 void field_init_poly(field_ptr f, field_ptr base_field) {
@@ -1330,21 +1370,6 @@ void poly_const_mul(element_ptr res, element_ptr a, element_ptr poly) {
     element_mul(poly_coeff(res, i), a, poly_coeff(poly, i));
   }
   poly_remove_leading_zeroes(res);
-}
-
-void poly_make_monic(element_t f, element_t g) {
-  int n = poly_coeff_count(g);
-  int i;
-  element_ptr e0;
-  poly_alloc(f, n);
-  if (!n) return;
-
-  e0 = poly_coeff(f, n - 1);
-  element_invert(e0, poly_coeff(g, n - 1));
-  for (i=0; i<n-1; i++) {
-    element_mul(poly_coeff(f, i), poly_coeff(g, i), e0);
-  }
-  element_set1(e0);
 }
 
 void poly_random_monic(element_ptr f, int deg) {
@@ -1458,29 +1483,6 @@ void polymod_const_mul(element_ptr res, element_ptr a, element_ptr e) {
   }
 }
 
-void poly_gcd(element_ptr d, element_ptr f, element_ptr g) {
-  element_t a, b, q, r;
-  element_init(a, d->field);
-  element_init(b, d->field);
-  element_init(q, d->field);
-  element_init(r, d->field);
-
-  element_set(a, f);
-  element_set(b, g);
-  for(;;) {
-    //TODO: don't care about q
-    poly_div(q, r, a, b);
-    if (element_is0(r)) break;
-    element_set(a, b);
-    element_set(b, r);
-  }
-  element_set(d, b);
-  element_clear(a);
-  element_clear(b);
-  element_clear(q);
-  element_clear(r);
-}
-
 // Returns 1 if polynomial is irreducible, 0 otherwise.
 // A polynomial f(x) is irreducible in F_q[x] if and only if:
 //  (1) f(x) | x^{q^n} - x, and
@@ -1577,4 +1579,86 @@ void element_field_to_polymod(element_ptr f, element_ptr g) {
   for (i=1; i<n; i++) {
     element_set0(coeff[i]);
   }
+}
+
+// Returns 0 when a root exists and sets root to one of the roots.
+int poly_findroot(element_ptr root, element_ptr poly) {
+  // Compute gcd(x^q - x, poly).
+  field_t fpxmod;
+  element_t p, x, r, fac, g;
+  mpz_t q;
+
+  mpz_init(q);
+  mpz_set(q, poly_base_field(poly)->order);
+
+  field_init_polymod(fpxmod, poly);
+  element_init(p, fpxmod);
+  element_init(x, fpxmod);
+  element_init(g, poly->field);
+  element_set1(((element_t *) x->data)[1]);
+pbc_info("findroot: degree %d...", poly_degree(poly));
+  element_pow_mpz(p, x, q);
+  element_sub(p, p, x);
+
+  element_polymod_to_poly(g, p);
+  element_clear(p);
+  poly_gcd(g, g, poly);
+  poly_make_monic(g, g);
+  element_clear(x);
+  field_clear(fpxmod);
+
+  if (!poly_degree(g)) {
+    printf("no roots!\n");
+    mpz_clear(q);
+    element_clear(g);
+    return -1;
+  }
+
+  // Cantor-Zassenhaus algorithm.
+  element_init(fac, g->field);
+  element_init(x, g->field);
+  element_set_si(x, 1);
+  mpz_sub_ui(q, q, 1);
+  mpz_divexact_ui(q, q, 2);
+  element_init(r, g->field);
+  for (;;) {
+    if (poly_degree(g) == 1) break;  // Found a root!
+step_random:
+    poly_random_monic(r, 1);
+    // TODO: evaluate at g instead of bothering with gcd
+    poly_gcd(fac, r, g);
+
+    if (poly_degree(fac) > 0) {
+      poly_make_monic(g, fac);
+    } else {
+      field_init_polymod(fpxmod, g);
+      int n;
+      element_init(p, fpxmod);
+
+      element_poly_to_polymod_truncate(p, r);
+pbc_info("findroot: degree %d...", poly_degree(g));
+      element_pow_mpz(p, p, q);
+
+      element_polymod_to_poly(r, p);
+      element_clear(p);
+
+      element_add(r, r, x);
+      poly_gcd(fac, r, g);
+      n = poly_degree(fac);
+      if (n > 0 && n < poly_degree(g)) {
+        poly_make_monic(g, fac);
+      } else {
+        goto step_random;
+      }
+      field_clear(fpxmod);
+    }
+  }
+pbc_info("findroot: found root");
+  element_neg(root, poly_coeff(g, 0));
+  element_clear(r);
+  mpz_clear(q);
+  element_clear(x);
+  element_clear(g);
+  element_clear(fac);
+  return 0;
 }

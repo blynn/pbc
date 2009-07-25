@@ -980,7 +980,7 @@ static void compute_cm_curve(d_param_ptr param, cm_info_ptr cm) {
   //printf("\n");
 
   element_init(root, fp);
-  findroot(root, hp);
+  poly_findroot(root, hp);
   //printf("root = ");
   //element_out_str(stdout, 0, root);
   //printf("\n");

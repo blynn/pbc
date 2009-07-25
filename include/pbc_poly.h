@@ -47,15 +47,8 @@ void field_init_poly(field_ptr f, field_ptr base_field);
 // Requires poly to be monic.
 void field_init_polymod(field_ptr f, element_ptr poly);
 
-// TODO: Move findroot to poly.c and expose that instead of these functions:
-// Sets d = gcd(f, g).
-// Exposed because ecc/hilbert.c uses it in findroot.
-void poly_gcd(element_ptr d, element_ptr f, element_ptr g);
-
-// Sets f = c g for some constant c and is monic.
-// Requires the leading coefficient of g to be a unit.
-// Exposed because ecc/hilbert.c uses it in findroot.
-void poly_make_monic(element_t f, element_t g);
+// Returns 0 when a root exists and sets root to one of the roots.
+int poly_findroot(element_ptr root, element_ptr poly);
 
 // Returns 1 if polynomial is irreducible, 0 otherwise.
 // Requires the polynomial to be monic.
@@ -71,4 +64,5 @@ element_ptr polymod_coeff(element_ptr e, int i);
 
 void polymod_const_mul(element_ptr res, element_ptr a, element_ptr e);
 int polymod_field_degree(field_t f);
+
 #endif //__PBC_POLY_H__
