@@ -44,13 +44,13 @@ static const char *token_get(token_t tok, const char *input) {
   char *buf;
   int n = 32;
   int i;
-  int c;
+  char c;
 
   // Skip whitespace and comments.
   for(;;) {
     for (;;) {
       c = *input++;
-      if (c == EOF) {
+      if (!c) {
         tok->type = token_eof;
         return input;
       }
@@ -60,7 +60,7 @@ static const char *token_get(token_t tok, const char *input) {
     if (c == '#') {
       for(;;) {
         c = *input++;
-        if (c == EOF) {
+        if (!c) {
           tok->type = token_eof;
           return input;
         }
@@ -94,7 +94,7 @@ static const char *token_get(token_t tok, const char *input) {
        buf = (char *) pbc_realloc(buf, n);
        }
        c = *input++;
-       if (c == EOF || strchr(" \t\r\n</>", c)) break;
+       if (!c || strchr(" \t\r\n</>", c)) break;
     }
     buf[i] = 0;
     input--;
@@ -112,7 +112,7 @@ static void token_clear(token_t tok) {
    pbc_free(tok->s);
 }
 
-void read_symtab(symtab_t tab, const char *input) {
+static void read_symtab(symtab_t tab, const char *input) {
   token_t tok;
   char *s, *s1;
 
@@ -186,6 +186,8 @@ int pairing_init_set_str(pairing_t pairing, const char *input) {
   pairing->pp_init = default_pp_init;
   pairing->pp_clear = default_pp_clear;
   pairing->pp_apply = default_pp_apply;
+  pairing->is_almost_coddh = generic_is_almost_coddh;
+  pairing->phi = phi_warning;
 
   symtab_t tab;
   symtab_init(tab);
@@ -199,8 +201,6 @@ int pairing_init_set_str(pairing_t pairing, const char *input) {
   }
   const char *s = lookup("type");
 
-  pairing->is_almost_coddh = generic_is_almost_coddh;
-  pairing->phi = phi_warning;
   static struct {
     char *s;
     void (*fun)(pbc_param_ptr, const char *(*)(const char *));
@@ -214,24 +214,27 @@ int pairing_init_set_str(pairing_t pairing, const char *input) {
   };
 
   int res = 1;
-  unsigned int i;
-  for(i = 0; i < sizeof(funtab)/sizeof(*funtab); i++) {
-    if (!strcmp(s, funtab[i].s)) {
-      pbc_param_t par;
-      funtab[i].fun(par, lookup);
-      pairing_init_pbc_param(pairing, par);
-      pbc_param_clear(par);
-      res = 0;
-      break;
+  if (s) {
+    unsigned int i;
+    for(i = 0; i < sizeof(funtab)/sizeof(*funtab); i++) {
+      if (!strcmp(s, funtab[i].s)) {
+	pbc_param_t par;
+	funtab[i].fun(par, lookup);
+	pairing_init_pbc_param(pairing, par);
+	pbc_param_clear(par);
+	res = 0;
+	break;
+      }
     }
   }
+
   symtab_forall_data(tab, pbc_free);
   symtab_clear(tab);
-
   if (res) {
     pbc_error("unknown pairing type");
     return 1;
   }
+
   pairing->G1->pairing = pairing;
   pairing->G2->pairing = pairing;
   pairing->GT->pairing = pairing;

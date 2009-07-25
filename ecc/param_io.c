@@ -1,5 +1,3 @@
-// Input/output utility routines for pairing parameters.
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

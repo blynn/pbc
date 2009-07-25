@@ -1,3 +1,5 @@
+// Input/output utility routines for pairing parameters.
+
 // Requires:
 // * stdio.h
 #ifndef __PARAM_UTILS_H__

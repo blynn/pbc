@@ -28,6 +28,7 @@ else
   # tcmalloc is faster than normal malloc.
   LDLIBS := $(LDLIBS) -ltcmalloc
   pbc_getline_objs := pbc/pbc_getline.readline.o
+  pbc_pbc_libs := -lreadline
 endif
 
 libpbc_srcs := \
@@ -64,10 +65,11 @@ $(foreach x,$(bin_srcs:.c=.o),$(eval $(call demo_tmpl,$(x))))
 
 pbc_objs := pbc/pbc.o $(pbc_getline_objs)
 
-pbc/pbc : $(pbc_objs) libpbc.a
-	$(CC) -o $@ $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) -lreadline
+pbc_bin := out/pbc$(exe_suffix)
+$(pbc_bin) : $(pbc_objs) libpbc.a
+	$(CC) -o $@ $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) $(pbc_pbc_libs)
 
-binaries : $(examples) pbc/pbc
+binaries : $(examples) $(pbc_bin)
 
 test_srcs := \
   $(addsuffix .c,$(addprefix guru/, \
