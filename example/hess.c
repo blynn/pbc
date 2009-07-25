@@ -6,12 +6,12 @@
 
 #include <pbc.h>
 #include <pbc_time.h>
-#include <stdio.h>
+#include "demo.h"
 
-int main(void) {
+int main(int argc, char **argv) {
   pairing_t pairing;
   double time1, time2;
-  pairing_init_inp_str(pairing, stdin);
+  demo_get_pairing(pairing, argc, argv);
 
   element_t Qid, P, P1, Ppub, s, k, Did, r, v, u, t1, t3, t4, t5, t6, t7, t8;
   mpz_t t2;

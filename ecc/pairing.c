@@ -7,10 +7,8 @@
 #include "pbc_darray.h"
 #include "pbc_poly.h"
 #include "pbc_curve.h"
-#include "pbc_fops.h"
 #include "pbc_symtab.h"
 #include "pbc_parse.h"
-#include "pbc_tracker.h"
 #include "pbc_pairing.h"
 #include "pbc_memory.h"
 
@@ -71,9 +69,7 @@ static void default_pp_clear(pairing_pp_t p) {
   UNUSED_VAR(p);
 }
 
-int pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
-  PBC_ASSERT(fops, "NULL fetch_ops");
-  PBC_ASSERT(ctx, "NULL ctx");
+int pairing_init_set_str(pairing_t pairing, const char *input) {
   char *s;
   token_t tok;
 
@@ -82,12 +78,12 @@ int pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
   pairing->pp_clear = default_pp_clear;
   pairing->pp_apply = default_pp_apply;
   token_init(tok);
-  token_get_generic (tok, fops, ctx);
+  input = token_get_generic(tok, input);
   if (tok->type != token_word) {
     pbc_error("unexpected token");
     return 1;
   }
-  token_get_generic (tok, fops, ctx);
+  input = token_get_generic(tok, input);
   if (tok->type != token_word) {
     pbc_error("expected 'type'");
     return 1;
@@ -98,7 +94,7 @@ int pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
   pairing->phi = phi_warning;
   static struct {
     char *s;
-    void (*fun)(pbc_param_ptr, fetch_ops_t, void *);
+    void (*fun)(pbc_param_ptr, const char*);
   } funtab[] = {
       { "a", pbc_param_init_a },
       { "d", pbc_param_init_d },
@@ -113,7 +109,7 @@ int pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
   for(i = 0; i < sizeof(funtab)/sizeof(*funtab); i++) {
     if (!strcmp(s, funtab[i].s)) {
       pbc_param_t par;
-      funtab[i].fun(par, fops, ctx);
+      funtab[i].fun(par, input);
       pairing_init_pbc_param(pairing, par);
       pbc_param_clear(par);
       res = 0;
@@ -131,18 +127,6 @@ int pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
   pairing->G2->pairing = pairing;
   pairing->GT->pairing = pairing;
   return 0;
-}
-
-int pairing_init_inp_buf (pairing_t pairing, const char *buf, size_t len) {
-  PBC_ASSERT(buf, "NULL buf");
-  tracker_t t;
-  tracker_init (&t, buf, len);
-  return pairing_init_inp_generic(pairing, &fops_buf, &t);
-}
-
-int pairing_init_inp_str(pairing_t pairing, FILE *stream) {
-  PBC_ASSERT(stream, "NULL stream");
-  return pairing_init_inp_generic(pairing, &fops_str, stream);
 }
 
 void pairing_clear(pairing_t pairing) {

@@ -5,9 +5,7 @@
 #include <gmp.h>
 #include "pbc_assert.h"
 #include "pbc_symtab.h"
-#include "pbc_fops.h"
 #include "pbc_parse.h"
-#include "pbc_tracker.h"
 #include "pbc_memory.h"
 #include "param_utils.h"
 
@@ -30,20 +28,18 @@ void param_out_int(FILE *stream, char *s, int i) {
   mpz_clear(z);
 }
 
-void param_read_generic(symtab_t tab, fetch_ops_t fops, void *ctx) {
-  assert (fops);
-  assert (ctx);
+void param_read_generic(symtab_t tab, const char *input) {
   token_t tok;
   char *s, *s1;
 
   token_init(tok);
   for (;;) {
-    token_get_generic (tok, fops, ctx);
+    input = token_get_generic(tok, input);
     if (tok->type != token_word) {
       break;
     }
     s = pbc_strdup(tok->s);
-    token_get_generic (tok, fops, ctx);
+    input = token_get_generic(tok, input);
     if (tok->type != token_word) {
       pbc_free(s);
       break;
@@ -53,18 +49,6 @@ void param_read_generic(symtab_t tab, fetch_ops_t fops, void *ctx) {
     pbc_free(s);
   }
   token_clear(tok);
-}
-
-void param_read_buf(symtab_t tab, const char *buf, size_t len) {
-  assert (buf);
-  tracker_t t;
-  tracker_init (&t, buf, len);
-  param_read_generic (tab, &fops_buf, &t);
-}
-
-void param_read_str(symtab_t tab, FILE *stream) {
-  assert (stream);
-  param_read_generic (tab, &fops_str, stream);
 }
 
 void param_clear_tab(symtab_t tab) {

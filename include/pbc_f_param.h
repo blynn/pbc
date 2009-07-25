@@ -1,10 +1,11 @@
-//requires
-// * fops.h
+// Type F pairings.
+
+// Requires:
 // * param.h
 #ifndef __PBC_F_PARAM_H__
 #define __PBC_F_PARAM_H__
 
-void pbc_param_init_f(pbc_param_ptr p, fetch_ops_t fops, void *ctx);
+void pbc_param_init_f(pbc_param_ptr p, const char *s);
 
 /*@manual fparam
 Generate type F pairing parameters and store them in 'p'.

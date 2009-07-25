@@ -1,5 +1,6 @@
 #include <pbc.h>
 #include <pbc_time.h>
+#include "../example/demo.h"
 
 /* I've heard that sometimes automatic garbage collection can outperform
  * manual collection, so I briefly tried using the Boehm-Demers-Weiser GC
@@ -30,82 +31,79 @@
 #include <gc.h>
 #include <pbc_utils.h>
 
-void *gc_alloc(size_t size)
-{
-    return GC_MALLOC(size);
+void *gc_alloc(size_t size) {
+  return GC_MALLOC(size);
 }
 
-void *gc_realloc(void *ptr, size_t size)
-{
-    return GC_REALLOC(ptr, size);
+void *gc_realloc(void *ptr, size_t size) {
+  return GC_REALLOC(ptr, size);
 }
 
-void gc_free(void *ptr)
-{
-    UNUSED_VAR(ptr);
+void gc_free(void *ptr) {
+  UNUSED_VAR(ptr);
 }
 
  * The following should be the first two statements in main()
 
-    GC_INIT();
-    pbc_set_memory_functions(gc_alloc, gc_realloc, gc_free);
+GC_INIT();
+pbc_set_memory_functions(gc_alloc, gc_realloc, gc_free);
 
  */
 
-int main(void)
-{
-    pairing_t pairing;
-    element_t x, y, r, r2;
-    int i, n;
-    double t0, t1, ttotal, ttotalpp;
-    pairing_pp_t pp;
+int main(int argc, char **argv) {
+  pairing_t pairing;
+  element_t x, y, r, r2;
+  int i, n;
+  double t0, t1, ttotal, ttotalpp;
+  pairing_pp_t pp;
 
-    //Cheat for slightly faster times:
-    //pbc_set_memory_functions(malloc, realloc, free);
+  // Cheat for slightly faster times:
+  // pbc_set_memory_functions(malloc, realloc, free);
 
-    pairing_init_inp_str(pairing, stdin);
-    element_init_G1(x, pairing);
-    element_init_G2(y, pairing);
-    element_init_GT(r, pairing);
-    element_init_GT(r2, pairing);
+  demo_get_pairing(pairing, argc, argv);
 
-    n = 10;
-    ttotal = 0.0;
-    ttotalpp = 0.0;
-    for (i=0; i<n; i++) {
-	element_random(x);
-	element_random(y);
+  element_init_G1(x, pairing);
+  element_init_G2(y, pairing);
+  element_init_GT(r, pairing);
+  element_init_GT(r2, pairing);
 
-	pairing_pp_init(pp, x, pairing);
-	t0 = get_time();
-	pairing_pp_apply(r, y, pp);
-	t1 = get_time();
-	ttotalpp += t1 - t0;
-	pairing_pp_clear(pp);
+  n = 10;
+  ttotal = 0.0;
+  ttotalpp = 0.0;
+  for (i=0; i<n; i++) {
+    element_random(x);
+    element_random(y);
 
-	t0 = get_time();
+    pairing_pp_init(pp, x, pairing);
+    t0 = get_time();
+    pairing_pp_apply(r, y, pp);
+    t1 = get_time();
+    ttotalpp += t1 - t0;
+    pairing_pp_clear(pp);
 
-	pairing_apply(r2, x, y, pairing);
-	t1 = get_time();
-	ttotal += t1 - t0;
+    t0 = get_time();
 
-	element_printf("x = %B\n", x);
-	element_printf("y = %B\n", y);
-	element_printf("e(x,y) = %B\n", r);
-	if (element_cmp(r, r2)) {
-	    printf("BUG!\n");
-	    exit(1);
-	}
+    pairing_apply(r2, x, y, pairing);
+    t1 = get_time();
+    ttotal += t1 - t0;
+
+    element_printf("x = %B\n", x);
+    element_printf("y = %B\n", y);
+    element_printf("e(x,y) = %B\n", r);
+    if (element_cmp(r, r2)) {
+      printf("BUG!\n");
+      exit(1);
     }
-    printf("average pairing time = %f\n", ttotal / n);
-    printf("average pairing time (preprocessed) = %f\n", ttotalpp / n);
+  }
+  printf("average pairing time = %f\n", ttotal / n);
+  printf("average pairing time (preprocessed) = %f\n", ttotalpp / n);
 
-    element_clear(x);
-    element_clear(y);
-    element_clear(r);
-    element_clear(r2);
+  element_clear(x);
+  element_clear(y);
+  element_clear(r);
+  element_clear(r2);
 
-    pairing_clear(pairing);
+  pairing_clear(pairing);
 
-    return 0;
+  return 0;
 }

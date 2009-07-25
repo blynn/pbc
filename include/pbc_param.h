@@ -1,7 +1,5 @@
 // Requires:
 // * gmp.h
-// * fops.h
-// * symtab.h
 #ifndef __PBC_PARAM_H__
 #define __PBC_PARAM_H__
 

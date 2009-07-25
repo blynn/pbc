@@ -4,7 +4,6 @@
 #include <gmp.h>
 #include "pbc_field.h"
 #include "pbc_curve.h"
-#include "pbc_fops.h"
 #include "pbc_pairing.h"
 #include "pbc_fp.h"
 #include "pbc_memory.h"

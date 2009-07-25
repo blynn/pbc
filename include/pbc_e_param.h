@@ -1,12 +1,11 @@
 // Type E pairings.
 
 // Requires:
-// * fops.h
 // * param.h
 #ifndef __PBC_E_PARAM_H__
 #define __PBC_E_PARAM_H__
 
-void pbc_param_init_e(pbc_param_ptr p, fetch_ops_t fops, void *ctx);
+void pbc_param_init_e(pbc_param_ptr p, const char *s);
 
 /*@manual eparam
 Generate type E pairing parameters and store them in 'p',

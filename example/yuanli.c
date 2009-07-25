@@ -30,16 +30,15 @@ I've defined it as H(A, B, h, Kab)=e(h,H1(A)+H1(B))+Kab.
 
 #include <pbc.h>
 #include <pbc_time.h>
-#include <stdio.h>
+#include "demo.h"
 
-int main(void)
-{
+int main(int argc, char **argv) {
   pairing_t pairing;
   double t0, t1;
   element_t s, a, b, P, Ppub, Qa, Qb, Sa, Sb, Ta, Tb, Kab, Kba, K, temp1,
     temp2, temp3, temp4, temp5, h;
 
-  pairing_init_inp_str(pairing, stdin);
+  demo_get_pairing(pairing, argc, argv);
   if (!pairing_is_symmetric(pairing)) pbc_die("pairing must be symmetric");
 
   element_init_Zr(s, pairing);

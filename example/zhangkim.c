@@ -6,9 +6,9 @@
 
 #include <pbc.h>
 #include <pbc_time.h>
-#include <stdio.h>
+#include "demo.h"
 
-int main(void) {
+int main(int argc, char **argv) {
   pairing_t pairing;
   double time1, time2;
   element_t P, Ppub, s, R, Qid, Sid, a, b, r, c, S, negc, t1, t2, t3, t5,
@@ -16,7 +16,7 @@ int main(void) {
   mpz_t t4, t13;
   mpz_init(t4);
   mpz_init(t13);
-  pairing_init_inp_str(pairing, stdin);
+  demo_get_pairing(pairing, argc, argv);
   if (!pairing_is_symmetric(pairing)) pbc_die("pairing must be symmetric");
   element_init_G1(P, pairing);
   element_init_G1(Ppub, pairing);

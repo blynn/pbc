@@ -1,4 +1,4 @@
-/* 
+/*
  * Example of a singular curve, similar to 19.c
  * but the Tate pairing degenerates
  *

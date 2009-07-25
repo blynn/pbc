@@ -13,7 +13,7 @@ int __cdecl gettimeofday(struct timeval* p, void* tz /* IGNORED */){
     long long ns100; /*time since 1 Jan 1601 in 100ns units */
     FILETIME ft;
   } _now;
-  
+
   UNUSED_VAR(tz);
   GetSystemTimeAsFileTime( &(_now.ft) );
   p->tv_usec=(long)((_now.ns100 / 10LL) % 1000000LL );

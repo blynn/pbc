@@ -40,7 +40,7 @@ libpbc_srcs := \
     pbc_assert \
     darray symtab \
     parse \
-    fops tracker extend_printf memory)) \
+    extend_printf memory)) \
   $(addsuffix $(nonlinux).c,misc/get_time arith/init_random)
 
 libpbc_objs := $(libpbc_srcs:.c=.o)

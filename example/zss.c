@@ -6,11 +6,11 @@
 
 #include <pbc.h>
 #include <pbc_time.h>
-#include <stdio.h>
+#include "demo.h"
 
-int main(void) {
+int main(int argc, char **argv) {
   pairing_t pairing;
-  pairing_init_inp_str(pairing, stdin);
+  demo_get_pairing(pairing, argc, argv);
   if (!pairing_is_symmetric(pairing)) pbc_die("pairing must be symmetric");
   double time1, time2;
   element_t P, Ppub, x, S, H, t1, t2, t3, t4;

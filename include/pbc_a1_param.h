@@ -1,11 +1,10 @@
 // requires
-// * fops.h
 // * gmp.h
 // * param.h
 #ifndef __PBC_A1_PARAM_H__
 #define __PBC_A1_PARAM_H__
 
-void pbc_param_init_a1(pbc_param_ptr par, fetch_ops_t fops, void *ctx);
+void pbc_param_init_a1(pbc_param_ptr par, const char *s);
 
 /*@manual a1param
 Generate type A1 pairing parameters and store them in 'p'.  The group order

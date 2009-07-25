@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
-#include "pbc_fops.h"
 #include "pbc_darray.h"
 #include "pbc_field.h"
 #include "pbc_poly.h"
@@ -15,7 +14,6 @@
 #include "pbc_pairing.h"
 #include "pbc_param.h"
 #include "pbc_g_param.h"
-#include "pbc_tracker.h"
 #include "pbc_memory.h"
 #include "pbc_symtab.h"
 #include "param_utils.h"
@@ -1369,9 +1367,7 @@ static void g_init(pbc_param_ptr p) {
 
 // Public interface:
 
-void pbc_param_init_g(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
-  PBC_ASSERT(fops, "NULL fops");
-  PBC_ASSERT(ctx, "NULL ctx");
+void pbc_param_init_g(pbc_param_ptr par, const char *input) {
   g_init(par);
   g_param_ptr p = par->data;
   symtab_t tab;
@@ -1379,7 +1375,7 @@ void pbc_param_init_g(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
   int i;
 
   symtab_init(tab);
-  param_read_generic (tab, fops, ctx);
+  param_read_generic(tab, input);
 
   lookup_mpz(p->q, tab, "q");
   lookup_mpz(p->n, tab, "n");
@@ -1392,7 +1388,7 @@ void pbc_param_init_g(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
   lookup_mpz(p->nqr, tab, "nqr");
 
   p->coeff = pbc_realloc(p->coeff, sizeof(mpz_t) * 5);
-  for (i=0; i<5; i++) {
+  for (i = 0; i < 5; i++) {
     sprintf(s, "coeff%d", i);
     mpz_init(p->coeff[i]);
     lookup_mpz(p->coeff[i], tab, s);

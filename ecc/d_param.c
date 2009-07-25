@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
-#include "pbc_fops.h"
 #include "pbc_darray.h"
 #include "pbc_field.h"
 #include "pbc_poly.h"
@@ -17,7 +16,6 @@
 #include "pbc_pairing.h"
 #include "pbc_param.h"
 #include "pbc_d_param.h"
-#include "pbc_tracker.h"
 #include "pbc_memory.h"
 #include "pbc_symtab.h"
 #include "param_utils.h"
@@ -1025,9 +1023,7 @@ static void d_param_init(pbc_param_ptr p) {
 
 // Public interface:
 
-void pbc_param_init_d(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
-  PBC_ASSERT(fops, "NULL fops");
-  PBC_ASSERT(ctx, "NULL ctx");
+void pbc_param_init_d(pbc_param_ptr par, const char *input) {
   d_param_init(par);
   d_param_ptr p = par->data;
   symtab_t tab;
@@ -1035,7 +1031,7 @@ void pbc_param_init_d(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
   int i, d;
 
   symtab_init(tab);
-  param_read_generic(tab, fops, ctx);
+  param_read_generic(tab, input);
 
   lookup_mpz(p->q, tab, "q");
   lookup_mpz(p->n, tab, "n");

@@ -2,12 +2,11 @@
 
 // Requires:
 // * mnt.h
-// * fops.h
 // * param.h
 #ifndef __PBC_G_PARAM_H__
 #define __PBC_G_PARAM_H__
 
-void pbc_param_init_g(pbc_param_ptr p, fetch_ops_t fops, void *ctx);
+void pbc_param_init_g(pbc_param_ptr p, const char *s);
 
 /*@manual gparam
 Type G curves are generated using the complex multiplication (CM) method.  This

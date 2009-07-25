@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
-#include "pbc_fops.h"
 #include "pbc_field.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
@@ -11,7 +10,6 @@
 #include "pbc_f_param.h"
 #include "pbc_poly.h"
 #include "pbc_curve.h"
-#include "pbc_tracker.h"
 #include "pbc_memory.h"
 #include "pbc_symtab.h"
 #include "param_utils.h"
@@ -451,15 +449,13 @@ static void f_init(pbc_param_ptr p) {
 
 // Public interface:
 
-void pbc_param_init_f(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
+void pbc_param_init_f(pbc_param_ptr par, const char *s) {
   f_init(par);
   f_param_ptr p = par->data;
-  PBC_ASSERT(fops, "NULL fops");
-  PBC_ASSERT(ctx, "NULL ctx");
   symtab_t tab;
 
   symtab_init(tab);
-  param_read_generic (tab, fops, ctx);
+  param_read_generic(tab, s);
 
   lookup_mpz(p->q, tab, "q");
   lookup_mpz(p->r, tab, "r");

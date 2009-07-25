@@ -3,7 +3,6 @@
 #include <stdlib.h> //for rand, pbc_malloc, pbc_free
 #include <string.h> //for strcmp
 #include <gmp.h>
-#include "pbc_fops.h"
 #include "pbc_field.h"
 #include "pbc_fp.h"
 #include "pbc_pairing.h"
@@ -11,7 +10,6 @@
 #include "pbc_e_param.h"
 #include "pbc_curve.h"
 #include "pbc_random.h"
-#include "pbc_tracker.h"
 #include "pbc_memory.h"
 #include "pbc_symtab.h"
 #include "param_utils.h"
@@ -889,14 +887,12 @@ static void e_init(pbc_param_ptr p) {
 
 // Public interface:
 
-void pbc_param_init_e(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
-  PBC_ASSERT(fops, "NULL fops");
-  PBC_ASSERT(ctx, "NULL ctx");
+void pbc_param_init_e(pbc_param_ptr par, const char *s) {
   e_init(par);
   e_param_ptr p = par->data;
   symtab_t tab;
   symtab_init(tab);
-  param_read_generic (tab, fops, ctx);
+  param_read_generic(tab, s);
 
   lookup_mpz(p->q, tab, "q");
   lookup_mpz(p->r, tab, "r");
