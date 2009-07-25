@@ -11,18 +11,6 @@
 #include "pbc_memory.h"
 #include "pbc_param.h"
 
-void pbc_param_inp_generic(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
-  par->api->inp_generic(par->data, fops, ctx);
-}
-
-void pairing_init_pbc_param(struct pairing_s *pairing, pbc_param_ptr par) {
-  par->api->init_pairing(pairing, par->data);
-}
-
-void pbc_param_clear(pbc_param_ptr par) {
-  par->api->clear(par->data);
-}
-
 void param_out_type(FILE *stream, char *s) {
   fprintf(stream, "type %s\n", s);
 }

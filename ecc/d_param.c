@@ -16,11 +16,27 @@
 #include "pbc_mnt.h"
 #include "pbc_curve.h"
 #include "pbc_pairing.h"
-#include "pbc_d_param.h"
 #include "pbc_param.h"
+#include "pbc_d_param.h"
 #include "pbc_tracker.h"
 #include "pbc_memory.h"
 #include "pbc_utils.h"
+
+struct d_param_s {
+  mpz_t q;       // curve defined over F_q
+  mpz_t n;       // has order n (= q - t + 1) in F_q
+  mpz_t h;       // h * r = n, r is prime
+  mpz_t r;
+  mpz_t a, b;    // curve equation is y^2 = x^3 + ax + b
+  int k;         // embedding degree
+  mpz_t nk;      // order of curve over F_q^k
+  mpz_t hk;      // hk * r^2 = nk
+  mpz_t *coeff;  // coefficients of polynomial used to extend F_q by k/2
+  mpz_t nqr;     // a quadratic nonresidue in F_q^d that lies in F_q
+};
+
+typedef struct d_param_s d_param_t[1];
+typedef struct d_param_s *d_param_ptr;
 
 // Per-pairing data.
 typedef struct {
@@ -36,21 +52,8 @@ typedef struct {
   element_t xpowq, xpowq2;    // x^q and x^{2q} in F_q^d.
 } *pptr;
 
-void d_param_init(d_param_ptr param) {
-  mpz_init(param->q);
-  mpz_init(param->n);
-  mpz_init(param->h);
-  mpz_init(param->r);
-  mpz_init(param->a);
-  mpz_init(param->b);
-  mpz_init(param->nk);
-  mpz_init(param->hk);
-  param->k = 0;
-  param->coeff = NULL;
-  mpz_init(param->nqr);
-}
-
-void d_param_clear(d_param_ptr param) {
+static void d_clear(void *data) {
+  d_param_ptr param = data;
   int d = param->k / 2;
   int i;
   mpz_clear(param->q);
@@ -66,9 +69,11 @@ void d_param_clear(d_param_ptr param) {
     mpz_clear(param->coeff[i]);
   }
   pbc_free(param->coeff);
+  pbc_free(data);
 }
 
-void d_param_out_str(FILE *stream, d_param_ptr p) {
+static void d_out_str(FILE *stream, void *data) {
+  d_param_ptr p = data;
   int d = p->k / 2;
   int i;
   char s[80];
@@ -87,39 +92,6 @@ void d_param_out_str(FILE *stream, d_param_ptr p) {
     param_out_mpz(stream, s, p->coeff[i]);
   }
   param_out_mpz(stream, "nqr", p->nqr);
-}
-
-void d_param_inp_generic(d_param_ptr p, fetch_ops_t fops, void *ctx) {
-  PBC_ASSERT(fops, "NULL fops");
-  PBC_ASSERT(ctx, "NULL ctx");
-  symtab_t tab;
-  char s[80];
-  int i, d;
-
-  symtab_init(tab);
-  param_read_generic (tab, fops, ctx);
-
-  lookup_mpz(p->q, tab, "q");
-  lookup_mpz(p->n, tab, "n");
-  lookup_mpz(p->h, tab, "h");
-  lookup_mpz(p->r, tab, "r");
-  lookup_mpz(p->a, tab, "a");
-  lookup_mpz(p->b, tab, "b");
-  p->k = lookup_int(tab, "k");
-  lookup_mpz(p->nk, tab, "nk");
-  lookup_mpz(p->hk, tab, "hk");
-  lookup_mpz(p->nqr, tab, "nqr");
-
-  d = p->k / 2;
-  p->coeff = pbc_realloc(p->coeff, sizeof(mpz_t) * d);
-  for (i=0; i<d; i++) {
-    sprintf(s, "coeff%d", i);
-    mpz_init(p->coeff[i]);
-    lookup_mpz(p->coeff[i], tab, s);
-  }
-
-  param_clear_tab(tab);
-  symtab_clear(tab);
 }
 
 // Define l = aX + bY + c where a, b, c are in Fq.
@@ -830,7 +802,7 @@ static void d_pairing_pp_apply(element_ptr out, element_ptr in2,
   element_clear(v);
 }
 
-void d_pairing_clear(pairing_t pairing) {
+static void d_pairing_clear(pairing_t pairing) {
   field_clear(pairing->GT);
   pptr p = pairing->data;
 
@@ -855,7 +827,8 @@ void d_pairing_clear(pairing_t pairing) {
   pbc_free(p);
 }
 
-void pairing_init_d_param(pairing_t pairing, d_param_t param) {
+static void d_init_pairing(pairing_ptr pairing, void *data) {
+  d_param_ptr param = data;
   pptr p;
   element_t a, b;
   element_t irred;
@@ -1028,7 +1001,67 @@ static void compute_cm_curve(d_param_ptr param, cm_info_ptr cm) {
   field_clear(fp);
 }
 
-void d_param_from_cm(d_param_t param, cm_info_ptr cm) {
+static void d_param_init(pbc_param_ptr p) {
+  static pbc_param_interface_t interface = {{
+    d_clear,
+    d_init_pairing,
+    d_out_str,
+  }};
+  p->api = interface;
+  d_param_ptr param = p->data = pbc_malloc(sizeof(*param));
+  mpz_init(param->q);
+  mpz_init(param->n);
+  mpz_init(param->h);
+  mpz_init(param->r);
+  mpz_init(param->a);
+  mpz_init(param->b);
+  mpz_init(param->nk);
+  mpz_init(param->hk);
+  param->k = 0;
+  param->coeff = NULL;
+  mpz_init(param->nqr);
+}
+
+// Public interface:
+
+void pbc_param_init_d(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
+  PBC_ASSERT(fops, "NULL fops");
+  PBC_ASSERT(ctx, "NULL ctx");
+  d_param_init(par);
+  d_param_ptr p = par->data;
+  symtab_t tab;
+  char s[80];
+  int i, d;
+
+  symtab_init(tab);
+  param_read_generic(tab, fops, ctx);
+
+  lookup_mpz(p->q, tab, "q");
+  lookup_mpz(p->n, tab, "n");
+  lookup_mpz(p->h, tab, "h");
+  lookup_mpz(p->r, tab, "r");
+  lookup_mpz(p->a, tab, "a");
+  lookup_mpz(p->b, tab, "b");
+  p->k = lookup_int(tab, "k");
+  lookup_mpz(p->nk, tab, "nk");
+  lookup_mpz(p->hk, tab, "hk");
+  lookup_mpz(p->nqr, tab, "nqr");
+
+  d = p->k / 2;
+  p->coeff = pbc_realloc(p->coeff, sizeof(mpz_t) * d);
+  for (i=0; i<d; i++) {
+    sprintf(s, "coeff%d", i);
+    mpz_init(p->coeff[i]);
+    lookup_mpz(p->coeff[i], tab, s);
+  }
+
+  param_clear_tab(tab);
+  symtab_clear(tab);
+}
+
+void pbc_param_init_d_gen(pbc_param_ptr p, cm_info_ptr cm) {
+  d_param_init(p);
+  d_param_ptr param = p->data;
   field_t Fq, Fqx, Fqd;
   element_t irred, nqr;
   int d = cm->k / 2;

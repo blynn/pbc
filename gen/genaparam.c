@@ -1,23 +1,22 @@
+// Generate type A pairings.
+// Usage:
+//   genaparam [RBITS [QBITS]]
+//
+// RBITS
+//   The number of bits in r, the order of the subgroup G1. Default is 160.
+// QBITS
+//   The number of bits in q, the order of the full group. Default is 512.
+
 #include <stdlib.h>
 #include "pbc.h"
 
-int main(int argc, char **argv)
-{
-    int rbits = 160, qbits = 512;
-    a_param_t ap;
+int main(int argc, char **argv) {
+  int rbits = argc > 1 ? atoi(argv[1]) : 160;
+  int qbits = argc > 2 ? atoi(argv[2]) : 512;
 
-    a_param_init(ap);
-
-    if (argc > 1) {
-	rbits = atoi(argv[1]);
-    }
-    if (argc > 2) {
-	qbits = atoi(argv[2]);
-    }
-    a_param_gen(ap, rbits, qbits);
-
-    a_param_out_str(stdout, ap);
-    a_param_clear(ap);
-
-    return 0;
+  pbc_param_t par;
+  pbc_param_init_a_gen(par, rbits, qbits);
+  pbc_param_out_str(stdout, par);
+  pbc_param_clear(par);
+  return 0;
 }

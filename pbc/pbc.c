@@ -1090,7 +1090,6 @@ static val_ptr f_zz(darray_ptr arg)
 static val_ptr f_gen_A(darray_ptr arg)
 {
     mpz_t rbits, qbits;
-    a_param_t param;
     pairing_ptr p;
     val_ptr res;
     res = check_arg(arg, 2, t_element, t_element);
@@ -1112,14 +1111,14 @@ static val_ptr f_gen_A(darray_ptr arg)
     element_to_mpz(rbits, e0);
     element_to_mpz(qbits, e1);
     //TODO: check rbits and qbits aren't too big
-    a_param_init(param);
-    a_param_gen(param, mpz_get_ui(rbits), mpz_get_ui(qbits));
+    pbc_param_t param;
+    pbc_param_init_a_gen(param, mpz_get_ui(rbits), mpz_get_ui(qbits));
     p = pbc_malloc(sizeof(pairing_t));
-    pairing_init_a_param(p, param);
+    pairing_init_pbc_param(p, param);
     res = val_new(t_pairing, p);
     mpz_clear(rbits);
     mpz_clear(qbits);
-    a_param_clear(param);
+    pbc_param_clear(param);
     return res;
 }
 

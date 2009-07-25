@@ -9,14 +9,24 @@
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
 #include "pbc_pairing.h"
+#include "pbc_param.h"
 #include "pbc_a_param.h"
 #include "pbc_a1_param.h"
 #include "pbc_curve.h"
-#include "pbc_param.h"
 #include "pbc_random.h"
 #include "pbc_tracker.h"
 #include "pbc_memory.h"
 #include "pbc_utils.h"
+
+typedef struct {
+    int exp2;
+    int exp1;
+    int sign1;
+    int sign0;
+    mpz_t r; // r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1
+    mpz_t q; // we work in E(F_q) (and E(F_q^2))
+    mpz_t h; // r * h = q + 1
+} *a_param_ptr;
 
 typedef struct {
   field_t Fq, Fq2, Eq;
@@ -24,104 +34,8 @@ typedef struct {
   int sign1;
 } *a_pairing_data_ptr;
 
-static void a_inp_generic(void *data, fetch_ops_t fops, void *ctx) {
-  a_param_inp_generic(data, fops, ctx);
-}
-
-static void a_clear(void *data) {
-  a_param_clear(data);
-  pbc_free(data);
-}
-
-static void a_init_pairing(pairing_ptr p, void *data) {
-  pairing_init_a_param(p, data);
-}
-
-static pbc_param_interface_t interface_a = {{
-  a_clear,
-  a_init_pairing,
-  a_inp_generic,
-}};
-
-void pbc_param_init_a(pbc_param_ptr par) {
-  par->api = interface_a;
-  a_param_ptr p = par->data = pbc_malloc(sizeof(*p));
-  mpz_init(p->r);
-  mpz_init(p->q);
-  mpz_init(p->h);
-}
-
-void a_param_init(a_param_t sp) {
-  mpz_init(sp->r);
-  mpz_init(sp->q);
-  mpz_init(sp->h);
-}
-
-void a_param_clear(a_param_t sp) {
-  mpz_clear(sp->r);
-  mpz_clear(sp->q);
-  mpz_clear(sp->h);
-}
-
-void a_param_gen(a_param_t sp, int rbits, int qbits) {
-  int found = 0;
-
-  mpz_ptr q = sp->q;
-  mpz_ptr r = sp->r;
-  mpz_ptr h = sp->h;
-
-  do {
-    int i;
-    mpz_set_ui(r, 0);
-
-    if (rand() % 2) {
-      sp->exp2 = rbits - 1;
-      sp->sign1 = 1;
-    } else {
-      sp->exp2 = rbits;
-      sp->sign1 = -1;
-    }
-    mpz_setbit(r, sp->exp2);
-
-    //use q as a temp variable
-    mpz_set_ui(q, 0);
-    sp->exp1 = (rand() % (sp->exp2 - 1)) + 1;
-    mpz_setbit(q, sp->exp1);
-    if (sp->sign1 > 0) {
-      mpz_add(r, r, q);
-    } else {
-      mpz_sub(r, r, q);
-    }
-
-    if (rand() % 2) {
-      sp->sign0 = 1;
-      mpz_add_ui(r, r, 1);
-    } else {
-      sp->sign0 = -1;
-      mpz_sub_ui(r, r, 1);
-    }
-    if (!mpz_probab_prime_p(r, 10)) continue;
-    for (i=0; i<10; i++) {
-      int bit;
-      //use q as a temp variable
-      mpz_set_ui(q, 0);
-      bit = qbits - rbits - 4 + 1;
-      if (bit < 3) bit = 3;
-      mpz_setbit(q, bit);
-      pbc_mpz_random(h, q);
-      mpz_mul_ui(h, h, 12);
-      //finally q takes the value it should
-      mpz_mul(q, h, r);
-      mpz_sub_ui(q, q, 1);
-      if (mpz_probab_prime_p(q, 10)) {
-        found = 1;
-        break;
-      }
-    }
-  } while (!found);
-}
-
-void a_param_out_str(FILE *stream, a_param_ptr p) {
+static void a_out_str(FILE *stream, void *data) {
+  a_param_ptr p = data;
   param_out_type(stream, "a");
   param_out_mpz(stream, "q", p->q);
   param_out_mpz(stream, "h", p->h);
@@ -132,24 +46,12 @@ void a_param_out_str(FILE *stream, a_param_ptr p) {
   param_out_int(stream, "sign0", p->sign0);
 }
 
-void a_param_inp_generic(a_param_ptr p, fetch_ops_t fops, void *ctx) {
-  PBC_ASSERT(fops, "NULL fops");
-  PBC_ASSERT(ctx, "NULL ctx");
-  symtab_t tab;
-
-  symtab_init(tab);
-  param_read_generic (tab, fops, ctx);
-
-  lookup_mpz(p->q, tab, "q");
-  lookup_mpz(p->r, tab, "r");
-  lookup_mpz(p->h, tab, "h");
-  p->exp2 = lookup_int(tab, "exp2");
-  p->exp1 = lookup_int(tab, "exp1");
-  p->sign1 = lookup_int(tab, "sign1");
-  p->sign0 = lookup_int(tab, "sign0");
-
-  param_clear_tab(tab);
-  symtab_clear(tab);
+static void a_clear(void *data) {
+  a_param_ptr sp = data;
+  mpz_clear(sp->r);
+  mpz_clear(sp->q);
+  mpz_clear(sp->h);
+  pbc_free(data);
 }
 
 static void phi_identity(element_ptr out, element_ptr in, pairing_ptr pairing) {
@@ -1420,7 +1322,8 @@ static void a_finalpow(element_t e) {
   element_clear(t1);
 }
 
-void pairing_init_a_param(pairing_t pairing, a_param_t param) {
+static void a_init_pairing(pairing_ptr pairing, void *data) {
+  a_param_ptr param = data;
   element_t a, b;
   a_pairing_data_ptr p;
 
@@ -1460,6 +1363,107 @@ void pairing_init_a_param(pairing_t pairing, a_param_t param) {
   pairing->pp_clear = a_pairing_pp_clear;
   pairing->pp_apply = a_pairing_pp_apply;
 }
+
+static void a_param_init(pbc_param_ptr par) {
+  static pbc_param_interface_t interface = {{
+    a_clear,
+    a_init_pairing,
+    NULL,
+    a_out_str,
+  }};
+  par->api = interface;
+  a_param_ptr p = par->data = pbc_malloc(sizeof(*p));
+  mpz_init(p->r);
+  mpz_init(p->q);
+  mpz_init(p->h);
+}
+
+// Public interface for type A pairings:
+
+void pbc_param_init_a(pbc_param_ptr par, fetch_ops_t fops, void *ctx) {
+  PBC_ASSERT(fops, "NULL fops");
+  PBC_ASSERT(ctx, "NULL ctx");
+  symtab_t tab;
+  a_param_init(par);
+  a_param_ptr p = par->data;
+
+  symtab_init(tab);
+  param_read_generic(tab, fops, ctx);
+
+  lookup_mpz(p->q, tab, "q");
+  lookup_mpz(p->r, tab, "r");
+  lookup_mpz(p->h, tab, "h");
+  p->exp2 = lookup_int(tab, "exp2");
+  p->exp1 = lookup_int(tab, "exp1");
+  p->sign1 = lookup_int(tab, "sign1");
+  p->sign0 = lookup_int(tab, "sign0");
+
+  param_clear_tab(tab);
+  symtab_clear(tab);
+}
+
+
+void pbc_param_init_a_gen(pbc_param_ptr par, int rbits, int qbits) {
+  a_param_init(par);
+  a_param_ptr sp = par->data;
+  int found = 0;
+
+  mpz_ptr q = sp->q;
+  mpz_ptr r = sp->r;
+  mpz_ptr h = sp->h;
+
+  do {
+    int i;
+    mpz_set_ui(r, 0);
+
+    if (rand() % 2) {
+      sp->exp2 = rbits - 1;
+      sp->sign1 = 1;
+    } else {
+      sp->exp2 = rbits;
+      sp->sign1 = -1;
+    }
+    mpz_setbit(r, sp->exp2);
+
+    //use q as a temp variable
+    mpz_set_ui(q, 0);
+    sp->exp1 = (rand() % (sp->exp2 - 1)) + 1;
+    mpz_setbit(q, sp->exp1);
+    if (sp->sign1 > 0) {
+      mpz_add(r, r, q);
+    } else {
+      mpz_sub(r, r, q);
+    }
+
+    if (rand() % 2) {
+      sp->sign0 = 1;
+      mpz_add_ui(r, r, 1);
+    } else {
+      sp->sign0 = -1;
+      mpz_sub_ui(r, r, 1);
+    }
+    if (!mpz_probab_prime_p(r, 10)) continue;
+    for (i=0; i<10; i++) {
+      int bit;
+      //use q as a temp variable
+      mpz_set_ui(q, 0);
+      bit = qbits - rbits - 4 + 1;
+      if (bit < 3) bit = 3;
+      mpz_setbit(q, bit);
+      pbc_mpz_random(h, q);
+      mpz_mul_ui(h, h, 12);
+      //finally q takes the value it should
+      mpz_mul(q, h, r);
+      mpz_sub_ui(q, q, 1);
+      if (mpz_probab_prime_p(q, 10)) {
+        found = 1;
+        break;
+      }
+    }
+  } while (!found);
+}
+
+// Type A1 pairings:
 
 struct a1_pairing_data_s {
   field_t Fp, Fp2, Ep;

@@ -5,13 +5,12 @@
 
 void generate(cm_info_t cm, void *data) {
   UNUSED_VAR(data);
-  d_param_t param;
-  d_param_init(param);
-
+  pbc_param_t param;
   pbc_info("gendparam: computing Hilbert polynomial and finding roots...");
-  d_param_from_cm(param, cm);
+  pbc_param_init_d_gen(param, cm);
   pbc_info("gendparam: bits in q = %zu\n", mpz_sizeinbase(cm->q, 2));
-  d_param_out_str(stdout, param);
+  pbc_param_out_str(stdout, param);
+  pbc_param_clear(param);
 }
 
 int main(int argc, char **argv) {
