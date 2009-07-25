@@ -7,7 +7,6 @@
 // QBITS
 //   The number of bits in q, the order of the full group. Default is 512.
 
-#include <stdlib.h>
 #include "pbc.h"
 
 int main(int argc, char **argv) {

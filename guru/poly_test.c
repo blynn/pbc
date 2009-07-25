@@ -23,7 +23,7 @@ int main(void) {
   int a[3], d;
   a[0] = a[1] = a[2] = 0;
   for(;;) {
-    element_ptr f = malloc(sizeof(*f));
+    element_ptr f = pbc_malloc(sizeof(*f));
     element_init(f, fx);
     int j;
     for(j = 0; j < 3; j++) {
@@ -65,7 +65,7 @@ break2: ;
       element_ptr g = data2;
       if (!poly_degree(f) || !poly_degree(g)) return;
       if (poly_degree(f) + poly_degree(g) > 3) return;
-      element_ptr h = malloc(sizeof(*h));
+      element_ptr h = pbc_malloc(sizeof(*h));
       element_init(h, fx);
       element_mul(h, f, g);
       darray_append(prodlist, h);

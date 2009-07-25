@@ -1368,7 +1368,6 @@ static void a_param_init(pbc_param_ptr par) {
   static pbc_param_interface_t interface = {{
     a_clear,
     a_init_pairing,
-    NULL,
     a_out_str,
   }};
   par->api = interface;

@@ -107,19 +107,15 @@ void pairing_init_inp_generic(pairing_t pairing, fetch_ops_t fops, void *ctx) {
     pairing_init_pbc_param(pairing, par);
     pbc_param_clear(par);
   } else if (!strcmp(s, "e")) {
-    e_param_t ep;
-
-    e_param_init(ep);
-    e_param_inp_generic (ep, fops, ctx);
-    pairing_init_e_param(pairing, ep);
-    e_param_clear(ep);
+    pbc_param_t par;
+    pbc_param_init_e(par, fops, ctx);
+    pairing_init_pbc_param(pairing, par);
+    pbc_param_clear(par);
   } else if (!strcmp(s, "f")) {
-    f_param_t fp;
-
-    f_param_init(fp);
-    f_param_inp_generic (fp, fops, ctx);
-    pairing_init_f_param(pairing, fp);
-    f_param_clear(fp);
+    pbc_param_t par;
+    pbc_param_init_f(par, fops, ctx);
+    pairing_init_pbc_param(pairing, par);
+    pbc_param_clear(par);
   } else if (!strcmp(s, "a1")) {
     a1_param_t a1p;
 
