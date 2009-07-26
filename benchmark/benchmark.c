@@ -1,6 +1,6 @@
 #include <pbc.h>
 #include <pbc_time.h>
-#include "../example/demo.h"
+#include "pbc_test.h"
 
 /* I've heard that sometimes automatic garbage collection can outperform
  * manual collection, so I briefly tried using the Boehm-Demers-Weiser GC

@@ -80,6 +80,10 @@ int main(void) {
   element_to_mpz(m, z);
   EXPECT(!mpz_cmp(m, n));
 
+  element_from_hash(z, NULL, 0);
+  element_from_hash(x, NULL, 0);
+  EXPECT(!element_cmp(z, x));
+
   element_clear(x);
   element_clear(y);
   element_clear(z);

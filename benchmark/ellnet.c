@@ -1,6 +1,6 @@
 #include <pbc.h>
 #include <pbc_time.h>
-#include "../example/demo.h"
+#include "pbc_test.h"
 
 void time_pairing(pairing_ptr pairing) {
   int i, n;
