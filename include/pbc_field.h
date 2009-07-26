@@ -31,6 +31,7 @@ void pbc_assert(int expr, char *msg, const char *func);
 void pbc_assert_match2(element_ptr a, element_ptr b, const char *func);
 void pbc_assert_match3(element_ptr a, element_ptr b, element_ptr c,
                        const char *func);
+
 struct pairing_s;
 struct field_s {
   void (*field_clear)(struct field_s *f);
@@ -91,6 +92,8 @@ typedef struct field_s *field_ptr;
 typedef struct field_s field_t[1];
 
 typedef void (*fieldmap) (element_t dst, element_t src);
+
+void field_out_info(FILE* out, field_ptr f);
 
 /*@manual internal
 Initialize 'e' to be an element of the algebraic structure 'f'
@@ -548,8 +551,6 @@ Returns the number of bytes needed to hold 'e' in compressed form.
 Currently only implemented for points on an elliptic curve.
 */
 int element_length_in_bytes_compressed(element_t e);
-
-void field_out_info(FILE * out, field_ptr f);
 
 /*@manual epow
 Prepare to exponentiate an element 'in', and store preprocessing information

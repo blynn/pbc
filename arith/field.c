@@ -523,7 +523,7 @@ static void warn_field_clear(field_ptr f) {
   pbc_warn("field %p has no clear function", f);
 }
 
-void field_out_info(FILE * out, field_ptr f) {
+void field_out_info(FILE* out, field_ptr f) {
   f->out_info(out, f);
 }
 

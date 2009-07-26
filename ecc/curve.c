@@ -273,26 +273,24 @@ static int curve_sign(element_ptr e) {
 }
 
 static void curve_from_hash(element_t a, void *data, int len) {
-  //TODO: don't find a hash by the 255th try = freeze!
-  void *datacopy;
   element_t t, t1;
   point_ptr p = a->data;
   curve_data_ptr cdp = a->field->data;
 
-  datacopy = pbc_malloc(len);
-  memcpy(datacopy, data, len);
-
   element_init(t, cdp->field);
   element_init(t1, cdp->field);
   p->inf_flag = 0;
+  element_from_hash(p->x, data, len);
   for(;;) {
-    element_from_hash(p->x, datacopy, len);
     element_square(t, p->x);
     element_add(t, t, cdp->a);
     element_mul(t, t, p->x);
     element_add(t, t, cdp->b);
     if (element_is_sqr(t)) break;
-    ((char *) datacopy)[0]++;
+    // Compute x <- x^2 + 1 and try again.
+    element_square(p->x, p->x);
+    element_set1(t);
+    element_add(p->x, p->x, t);
   }
   element_sqrt(p->y, t);
   if (element_sgn(p->y) < 0) element_neg(p->y, p->y);
@@ -301,7 +299,6 @@ static void curve_from_hash(element_t a, void *data, int len) {
 
   element_clear(t);
   element_clear(t1);
-  pbc_free(datacopy);
 }
 
 static size_t curve_out_str(FILE *stream, int base, element_ptr a) {

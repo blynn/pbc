@@ -294,7 +294,7 @@ benchmark/benchmark.o: include/pbc_a1_param.h include/pbc_a_param.h
 benchmark/benchmark.o: include/pbc_d_param.h include/pbc_e_param.h
 benchmark/benchmark.o: include/pbc_f_param.h include/pbc_g_param.h
 benchmark/benchmark.o: include/pbc_random.h include/pbc_memory.h
-benchmark/benchmark.o: include/pbc_time.h
+benchmark/benchmark.o: include/pbc_time.h include/pbc_test.h
 benchmark/timersa.o: include/pbc.h include/pbc_utils.h include/pbc_field.h
 benchmark/timersa.o: include/pbc_param.h include/pbc_pairing.h
 benchmark/timersa.o: include/pbc_curve.h include/pbc_mnt.h
@@ -310,7 +310,7 @@ benchmark/ellnet.o: include/pbc_a1_param.h include/pbc_a_param.h
 benchmark/ellnet.o: include/pbc_d_param.h include/pbc_e_param.h
 benchmark/ellnet.o: include/pbc_f_param.h include/pbc_g_param.h
 benchmark/ellnet.o: include/pbc_random.h include/pbc_memory.h
-benchmark/ellnet.o: include/pbc_time.h
+benchmark/ellnet.o: include/pbc_time.h include/pbc_test.h
 guru/fp_test.o: include/pbc.h include/pbc_utils.h include/pbc_field.h
 guru/fp_test.o: include/pbc_param.h include/pbc_pairing.h include/pbc_curve.h
 guru/fp_test.o: include/pbc_mnt.h include/pbc_a1_param.h
