@@ -30,6 +30,10 @@ the group of points over the ground field) when G1 and G2 differ.
 
 include::gen/param.txt[]
 
+The following sections describe functions that generate pairing parameters
+of different types. These were used to prepare the sample parameters in
+the +param+ subdirectory.
+
 === Type A ===
 
 Pairings on type A curves are the fast and ought to be used where the
@@ -117,10 +121,8 @@ include::gen/fparam.txt[]
 Type G curves have embedding degree 10. They are quite slow at the moment
 so for now type F is a better choice.
 
-
 The file `param/g149.param` contains parameters for a
 type G pairing with 149-bit group and field sizes.
-
 
 The +g_param_t+ data type holds parameters for a type G pairing.
 

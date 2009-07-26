@@ -58,7 +58,7 @@ static void default_pp_clear(pairing_pp_t p) {
   UNUSED_VAR(p);
 }
 
-int pairing_init_set_str(pairing_t pairing, const char *input) {
+int pairing_init_set_buf(pairing_t pairing, const char *input, size_t len) {
   pairing->option_set = default_option_set;
   pairing->pp_init = default_pp_init;
   pairing->pp_clear = default_pp_clear;
@@ -67,7 +67,7 @@ int pairing_init_set_str(pairing_t pairing, const char *input) {
   pairing->phi = phi_warning;
 
   pbc_param_t par;
-  int res = pbc_param_init_set_str(par, input);
+  int res = pbc_param_init_set_buf(par, input, len);
   if (res) {
     pbc_error("error initializing pairing");
     return 1;
@@ -79,6 +79,10 @@ int pairing_init_set_str(pairing_t pairing, const char *input) {
   pairing->G2->pairing = pairing;
   pairing->GT->pairing = pairing;
   return 0;
+}
+
+int pairing_init_set_str(pairing_t pairing, const char *s) {
+  return pairing_init_set_buf(pairing, s, 0);
 }
 
 void pairing_clear(pairing_t pairing) {

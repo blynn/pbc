@@ -27,19 +27,21 @@ operate on them start with +pairing_+.
 
 === Initializing Pairings ===
 
-The easiest way:
+To initialize a pairing from an ASCIIZ string:
 
   pairing_t pairing;
-  pairing_init_set_str(pairing, s);
+  pairing_init_set_str(pairing, s);  // Where s is a char *.
 
-This initializes +pairing+ with parameters contained in an ASCIIZ string in
-a certain text format.
+The string 's' holds _pairing parameters_ in a text format.
+The +param+ subdirectory contains several examples which are suitable for
+cryptography.
 
-If you have pairing parameters of type `pbc_param_t` available (see
-<<paramchap>>), you can initialize pairings with:
+Alternatively, call:
 
   pairing_t pairing;
   pairing_init_pbc_param(pairing, param);
+
+where 'param' has type `pbc_param_t` (see <<paramchap>>).
 
 include::gen/pairing_init.txt[]
 

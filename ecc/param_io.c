@@ -35,37 +35,37 @@ struct token_s {
 typedef struct token_s token_t[1];
 typedef struct token_s *token_ptr;
 
-static const char *token_get(token_t tok, const char *input) {
+static const char *token_get(token_t tok, const char *input, const char *end) {
   char *buf;
   int n = 32;
   int i;
   char c;
-
+  void get(void) {
+    c = !end || input < end ? *input++ : '\0';
+  }
   // Skip whitespace and comments.
   for(;;) {
-    for (;;) {
-      c = *input++;
+    do {
+      get();
       if (!c) {
         tok->type = token_eof;
         return input;
       }
-      if (!strchr(" \t\r\n", c)) break;
-    }
+    } while (strchr(" \t\r\n", c));
 
     if (c == '#') {
-      for(;;) {
-        c = *input++;
+      do {
+	get();
         if (!c) {
           tok->type = token_eof;
           return input;
         }
-        if (c == '\n') break;
-      }
+      } while (c != '\n');
     } else break;
   }
 
   if (c == '<') {
-    c = *input++;
+    get();
     if (c == '/') {
       tok->type = token_langleslash;
       return input;
@@ -82,14 +82,14 @@ static const char *token_get(token_t tok, const char *input) {
     buf = (char *) pbc_malloc(n);
     i = 0;
     for (;;) {
-       buf[i] = c;
-       i++;
-       if (i == n) {
-       n += 32;
-       buf = (char *) pbc_realloc(buf, n);
-       }
-       c = *input++;
-       if (!c || strchr(" \t\r\n</>", c)) break;
+      buf[i] = c;
+      i++;
+      if (i == n) {
+	n += 32;
+	buf = (char *) pbc_realloc(buf, n);
+      }
+      get();
+      if (!c || strchr(" \t\r\n</>", c)) break;
     }
     buf[i] = 0;
     input--;
@@ -107,18 +107,18 @@ static void token_clear(token_t tok) {
    pbc_free(tok->s);
 }
 
-static void read_symtab(symtab_t tab, const char *input) {
+static void read_symtab(symtab_t tab, const char *input, size_t limit) {
   token_t tok;
   char *s, *s1;
-
+  const char *inputend = limit ? input + limit : NULL;
   token_init(tok);
   for (;;) {
-    input = token_get(tok, input);
+    input = token_get(tok, input, inputend);
     if (tok->type != token_word) {
       break;
     }
     s = pbc_strdup(tok->s);
-    input = token_get(tok, input);
+    input = token_get(tok, input, inputend);
     if (tok->type != token_word) {
       pbc_free(s);
       break;
@@ -179,12 +179,7 @@ int lookup_int(const char *(*tab)(const char *), const char *key) {
   return res;
 }
 
-// The only function that should be public:
-
-int pbc_param_init_set_str(pbc_param_t par, const char *input) {
-  symtab_t tab;
-  symtab_init(tab);
-  read_symtab(tab, input);
+static int param_set_tab(pbc_param_t par, symtab_t tab) {
   const char *lookup(const char *key) {
     if (!symtab_has(tab, key)) {
       pbc_error("missing param: `%s'", key);
@@ -218,11 +213,28 @@ int pbc_param_init_set_str(pbc_param_t par, const char *input) {
     }
   }
 
+  if (res) pbc_error("unknown pairing type");
+  return res;
+}
+
+// Public functions:
+
+int pbc_param_init_set_str(pbc_param_t par, const char *input) {
+  symtab_t tab;
+  symtab_init(tab);
+  read_symtab(tab, input, 0);
+  int res = param_set_tab(par, tab);
   symtab_forall_data(tab, pbc_free);
   symtab_clear(tab);
-  if (res) {
-    pbc_error("unknown pairing type");
-    return 1;
-  }
-  return 0;
+  return res;
+}
+
+int pbc_param_init_set_buf(pbc_param_t par, const char *input, size_t len) {
+  symtab_t tab;
+  symtab_init(tab);
+  read_symtab(tab, input, len);
+  int res = param_set_tab(par, tab);
+  symtab_forall_data(tab, pbc_free);
+  symtab_clear(tab);
+  return res;
 }

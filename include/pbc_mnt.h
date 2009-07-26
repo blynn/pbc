@@ -34,7 +34,7 @@ Returns the number of CM parameters found.
 int find_mnt6_curve(void (*callback)(cm_info_ptr, void *), void *data,
     unsigned int D, unsigned int bitlimit);
 
-/*@manual cminfo
+/*@manual gparam
 For a given discriminant D, searches for a Freeman curve of embedding
 degree 10
 suitable for cryptography (type D pairings) where the group order

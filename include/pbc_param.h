@@ -26,6 +26,13 @@ Returns 0 if successful, 1 otherwise.
 int pbc_param_init_set_str(pbc_param_t par, const char *s);
 
 /*@manual param
+Same, but read at most 'len' bytes.
+If 'len' is 0, it behaves as the previous function.
+Returns 0 if successful, 1 otherwise.
+*/
+int pbc_param_init_set_buf(pbc_param_t par, const char *s, size_t len);
+
+/*@manual param
 Write pairing parameters to ''stream'' in a text format.
 */
 static inline void pbc_param_out_str(FILE *stream, pbc_param_ptr p) {

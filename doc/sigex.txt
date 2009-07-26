@@ -29,8 +29,11 @@ First we include `pbc/pbc.h`:
 
 Next we initialize a pairing:
 
-    pairing_t pairing;
-    pairing_init_inp_str(pairing, stdin);
+  pairing_t pairing;
+  char param[1024];
+  size_t count = fread(param, 1, 1024, stdin);
+  if (!count) pbc_die("input error");
+  pairing_init_set_buf(pairing, param, count);
 
 Later we give pairing parameters to our program on standard input. Any file in
 the `param` subdirectory will suffice, for example:
@@ -116,8 +119,8 @@ will also work but the buffer 'data' will be roughly twice as large.
 We can save more space by using the 'x'-coordinate of the signature only
 
     int n = pairing_length_in_bytes_x_only_G1(pairing);
-    //alternative:
-    //int n = element_length_in_bytes_x_only(sig);
+    // Alternative:
+    //   int n = element_length_in_bytes_x_only(sig);
     unsigned char *data = malloc(n);
     element_to_bytes_compressed(data, sig);
 

@@ -85,18 +85,25 @@ static inline void pairing_pp_apply(element_t out, element_t in2, pairing_pp_t p
   p->pairing->pp_apply((element_ptr) out->data, in2, p);
 }
 
-/*@manual param
+/*@manual pairing_init
+Initialize pairing from parameters in a ASCIIZ string 'str'
+Returns 0 on success, 1 on failure.
+*/
+int pairing_init_set_str(pairing_t pairing, const char *s);
+
+/*@manual pairing_init
+Same, but read at most 'len' bytes.
+If 'len' is 0, it behaves as the previous function.
+Returns 0 on success, 1 on failure.
+*/
+int pairing_init_set_buf(pairing_t pairing, const char *s, size_t len);
+
+/*@manual pairing_init
 Initialize a pairing with pairing parameters 'p'.
 */
 static inline void pairing_init_pbc_param(struct pairing_s *pairing, pbc_param_ptr p) {
   p->api->init_pairing(pairing, p->data);
 }
-
-/*@manual pairing_init
-Initialize pairing from parameters in an ASCIIZ string 'str'.
-Returns 0 on success, 1 on failure.
-*/
-int pairing_init_set_str(pairing_t pairing, const char *s);
 
 /*@manual pairing_init
 Free the space occupied by 'pairing'. Call
