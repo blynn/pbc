@@ -12,10 +12,10 @@ extern "C" {
 
 #include "pbc_utils.h"
 #include "pbc_field.h"
+#include "pbc_param.h"
 #include "pbc_pairing.h"
 #include "pbc_curve.h"
 #include "pbc_mnt.h"
-#include "pbc_param.h"
 #include "pbc_a1_param.h"
 #include "pbc_a_param.h"
 #include "pbc_d_param.h"

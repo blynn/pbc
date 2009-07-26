@@ -20,11 +20,10 @@ typedef struct pbc_param_s *pbc_param_ptr;
 typedef struct pbc_param_s pbc_param_t[1];
 
 /*@manual param
-Initialize a pairing with pairing parameters 'p'.
+Initializes pairing parameters from the string 's'.
+Returns 0 if successful, 1 otherwise.
 */
-static inline void pairing_init_pbc_param(struct pairing_s *pairing, pbc_param_ptr p) {
-  p->api->init_pairing(pairing, p->data);
-}
+int pbc_param_init_set_str(pbc_param_t par, const char *s);
 
 /*@manual param
 Write pairing parameters to ''stream'' in a text format.

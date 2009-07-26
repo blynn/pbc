@@ -7,14 +7,14 @@
 #include "pbc_field.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
-#include "pbc_pairing.h"
 #include "pbc_param.h"
-#include "pbc_a_param.h"
-#include "pbc_a1_param.h"
+#include "pbc_pairing.h"
 #include "pbc_curve.h"
 #include "pbc_random.h"
 #include "pbc_memory.h"
 #include "param_io.h"
+#include "pbc_a_param.h"
+#include "pbc_a1_param.h"
 
 typedef struct {
   int exp2;

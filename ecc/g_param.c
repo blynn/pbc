@@ -12,10 +12,10 @@
 #include "pbc_hilbert.h"
 #include "pbc_mnt.h"
 #include "pbc_curve.h"
-#include "pbc_pairing.h"
 #include "pbc_param.h"
-#include "pbc_g_param.h"
+#include "pbc_pairing.h"
 #include "pbc_memory.h"
+#include "pbc_g_param.h"
 #include "param_io.h"
 
 struct g_param_s {
@@ -1289,7 +1289,7 @@ static void g_init_pairing(pairing_t pairing, void *data) {
 
   field_init_quadratic(p->Fqk, p->Fqd);
 
-  // compute phi(k)/r = (q^4 - q^3 + ... + 1)/r
+  // Compute phi(k)/r = (q^4 - q^3 + ... + 1)/r.
   {
     element_ptr e = p->xpowq;
     mpz_t z0;

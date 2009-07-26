@@ -1,7 +1,9 @@
-// Input/output utility routines for pairing parameters.
+// Input/output routines common to all pairing parameters.
 
 // Requires:
+// * param.h
 // * stdio.h
+// * gmp.h
 #ifndef __PARAM_UTILS_H__
 #define __PARAM_UTILS_H__
 void param_out_type(FILE *stream, char *s);

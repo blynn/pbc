@@ -14,10 +14,10 @@
 #include "pbc_hilbert.h"
 #include "pbc_mnt.h"
 #include "pbc_curve.h"
-#include "pbc_pairing.h"
 #include "pbc_param.h"
-#include "pbc_d_param.h"
+#include "pbc_pairing.h"
 #include "pbc_memory.h"
+#include "pbc_d_param.h"
 #include "param_io.h"
 
 struct d_param_s {

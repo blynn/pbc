@@ -1,8 +1,9 @@
 // Requires:
 // * stdio.h
 // * gmp.h
-// * field.h
 // * utils.h
+// * field.h
+// * param.h
 #ifndef __PBC_PAIRING_H__
 #define __PBC_PAIRING_H__
 
@@ -82,6 +83,13 @@ static inline void pairing_pp_apply(element_t out, element_t in2, pairing_pp_t p
     return;
   }
   p->pairing->pp_apply((element_ptr) out->data, in2, p);
+}
+
+/*@manual param
+Initialize a pairing with pairing parameters 'p'.
+*/
+static inline void pairing_init_pbc_param(struct pairing_s *pairing, pbc_param_ptr p) {
+  p->api->init_pairing(pairing, p->data);
 }
 
 /*@manual pairing_init

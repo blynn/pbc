@@ -6,12 +6,12 @@
 #include "pbc_field.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
-#include "pbc_pairing.h"
 #include "pbc_param.h"
-#include "pbc_f_param.h"
+#include "pbc_pairing.h"
 #include "pbc_poly.h"
 #include "pbc_curve.h"
 #include "pbc_memory.h"
+#include "pbc_f_param.h"
 #include "param_io.h"
 
 struct f_param_s {

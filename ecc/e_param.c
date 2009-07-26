@@ -6,12 +6,12 @@
 #include "pbc_utils.h"
 #include "pbc_field.h"
 #include "pbc_fp.h"
-#include "pbc_pairing.h"
 #include "pbc_param.h"
-#include "pbc_e_param.h"
+#include "pbc_pairing.h"
 #include "pbc_curve.h"
 #include "pbc_random.h"
 #include "pbc_memory.h"
+#include "pbc_e_param.h"
 #include "param_io.h"
 
 struct e_param_s {

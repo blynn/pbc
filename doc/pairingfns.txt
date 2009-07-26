@@ -1,29 +1,19 @@
 == Pairing Functions ==
 
-An application will most likely need to instantiate a bilinear pairing
-before performing any other operations.
-The easiest way to do this is to initialize a pairing with
+An application should first instantiate a bilinear pairing to setup various
+curves, groups and other mathematical miscellany. The easiest is to use
 previously-generated pairing parameters.
 
-Parameters for various pairings are included with
-the PBC library distribution in the
-`param` subdirectory and should
-be suitable for cryptographic use. Some programs in
-the `gen` subdirectory may be used to
-generate parameters (see the chapter on bundled programs).
-Also, on the PBC website an archive containing many pairing
-parameters is available for download.
-
-Particular instantiations of bilinear pairings are stored in the data
-type +pairing_t+. Functions that operate on them
-start with +pairing_+.
-
+Parameters for various pairings are included with the PBC library distribution
+in the `param` subdirectory and should be suitable for cryptographic use. Some
+programs in the `gen` subdirectory may be used to generate parameters (see the
+chapter on bundled programs). Also, see the PBC website for many more pairing
+parameters.
 
 Pairings involve three groups of prime order. The PBC library labels them
 G1, G2, and GT, and labels the order r. The pairing is
 a bilinear map that takes two elements as input,
 one from G1 and one from G2, and outputs an element of GT.
-
 
 The elements of G2 are at least as long as G1; G1 is guaranteed to be the
 shorter of the two. Sometimes G1 and G2 are the same group (i.e. the pairing
@@ -32,23 +22,24 @@ is symmetric) so their elements can be mixed freely. In this case the
 
 A later chapter discusses <<paramchap, the different pairing types>>.
 
+Bilinear pairings are stored in the data type +pairing_t+. Functions that
+operate on them start with +pairing_+.
+
 === Initializing Pairings ===
 
-The only way to initialize a pairing
-is to provide pairing parameters to a +pairing_t+
-variable using one of the functions
-beginning with +pairing_init_inp_+. For example,
+The easiest way:
 
   pairing_t pairing;
-  pairing_init_inp_str(pairing, stdin);
+  pairing_init_set_str(pairing, s);
 
-will initialize +pairing+ with
-parameters are fed to the program on standard
-input.
+This initializes +pairing+ with parameters contained in an ASCIIZ string in
+a certain text format.
 
+If you have pairing parameters of type `pbc_param_t` available (see
+<<paramchap>>), you can initialize pairings with:
 
-The format of the pairing parameters is a text format that
-is output by the param functions.
+  pairing_t pairing;
+  pairing_init_pbc_param(pairing, param);
 
 include::gen/pairing_init.txt[]
 
@@ -59,7 +50,6 @@ of the inputs is important. The first, which holds the output, must be from the
 group GT. The second must be from G1, the third from G2, and the fourth must be
 the +pairing_t+ variable that relates them.  (One cannot mix and match G1, G2,
 and GT groups from different pairings.)
-
 
 In some applications, the programmer may know that many pairings with the same
 G1 input will be computed. In this case, preprocessing should be used to avoid
