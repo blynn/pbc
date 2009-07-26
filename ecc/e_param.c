@@ -17,7 +17,7 @@
 struct e_param_s {
   mpz_t q;    // Curve is defined over F_q.
   mpz_t r;    // q = h r^2 + 1, r is prime.
-  mpz_t h;    // h is 28 h^2 for some h.
+  mpz_t h;    // h is 28 times some square.
   mpz_t a, b; // Curve equation is Y^2 = X^3 + aX + b.
   int exp2;
   int exp1;

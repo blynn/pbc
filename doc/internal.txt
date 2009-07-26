@@ -138,17 +138,18 @@ This happens behind the scenes in PBC.
 
 === Type A Internals ===
 
-Type A pairings are constructed on the curve y^2^ = x^3^ \+ x over the field F_q
-for some prime q.  Both G1 and G2 are the group of points E(F_q), so this
-pairing is symmetric.  It turns out #E(F_q) = q \+ 1 and
-#E(F_q^2^) = (q \+ 1)^2^. Thus the embedding degree k is 2,
+Type A pairings are constructed on the curve y^2^ = x^3^ + x over the field F_q
+for some prime q = 3 mod 4.
+Both G1 and G2 are the group of points E(F_q), so this
+pairing is symmetric.  It turns out #E(F_q) = q + 1 and
+#E(F_q^2^) = (q + 1)^2^. Thus the embedding degree k is 2,
 and hence GT is a subgroup of F_q^2.  The order r is some prime
-factor of q \+ 1.
+factor of q + 1.
 
-Write q \+ 1 = r * h. For efficiency, r is picked to be a Solinas prime,
+Write q + 1 = r * h. For efficiency, r is picked to be a Solinas prime,
 that is, r has the form 2^a^ +- 2^b^ +- 1 for some integers 0 < b < a.
 
-Also, q = -1 mod 12 so F_q^2^ can be implemented as F_q[i]
+Also, we choose q = -1 mod 12 so F_q^2^ can be implemented as F_q[i]
 (where i = sqrt(-1)) and since q = -1 mod 3, cube roots in F_q
 are easy to compute. This latter feature may be removed because I have
 not found a use for it yet (in which case we only need q = -1 mod 4).
@@ -161,11 +162,26 @@ not found a use for it yet (in which case we only need q = -1 mod 4).
     r * h = q + 1
     q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
 
+=== Type B Internals ===
+
+Unimplemented. The curve y^2^ = x^3^ + 1 over the field F_q for some prime
+q = 2 mod 3, which implies cube roots in F_q are easy to compute.
+Similar to type A, but it turns out we must choose between symmetry or
+efficiency due to the nature of a certain optimization.
+
+=== Type C Internals ===
+
+Unimplemented. The supersingular curves y^2^ = x^3^ + 2x + 1 and
+y^2^ = x^3^ + 2x - 1 over a field of characteristic 3. Discussed at length
+by Boneh, Lynn, and Shacham, "Short signatures from the Weil pairing".
+Many optimizations can be applied to speed up these pairings; see
+Barreto et al., "Efficient algorithms for pairing-based cryptosystems", but
+sadly, an attack due to Coppersmith makes these curves less attractive.
+
 === Type D Internals ===
 
 These are ordinary curves of with embedding degree 6, whose orders are prime
-or a prime multiplied by a small constant. These are constructed using the
-method due to MNT.
+or a prime multiplied by a small constant.
 
 A type D curve is defined over some field F_q and has order h * r where
 r is a prime and h is a small constant. Over the field F_q^6^ its order is
@@ -175,12 +191,13 @@ Typically the order of the curve E is around 170 bits, as is F_q, the base
 field, thus q^k^ is around the 1024-bit mark which is commonly considered
 good enough.
 
-  d_param struct fields:
++d_param+ struct fields:
+
   q   F_q is the base field
   n   # of points in E(F_q)
   r   large prime dividing n
   h   n = h * r
-  a   E is given by y^2 = x^3 + ax + b
+  a   E: y^2 = x^3 + ax + b
   b
   nk  # of points in E(F_q^k)
   hk  nk = hk * r * r
@@ -188,6 +205,9 @@ good enough.
   coeff1
   coeff2
   nqr quadratic nonresidue in F_q
+
+These were discovered by Miyaji, Nakabayashi and Takano,
+"New explicit conditions of elliptic curve traces for FR-reduction".
 
 === Type E Internals ===
 
@@ -210,7 +230,13 @@ As q is typically 1024 bits, group elements take a lot of space to represent.
 Moreover, many optimizations do not apply to this type, resulting in a slower
 pairing.
 
-TODO: describe fields
++e_param+ struct fields:
+  exp2, exp1, sign1, sign0, r:
+    r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1 (Solinas prime)
+  q, h
+    q = h r^2 + 1 where r is prime, and h is 28 times a perfect square
+  a, b
+    E: y^2 = x^3 + ax + b
 
 === Type F Internals ===
 
@@ -223,7 +249,41 @@ Also, embedding degree k = 12 allows higher security short signatures.
 be used to scale security from 160-bits to say 256-bits because finite
 field attacks are subexponential.)
 
-TODO: describe fields
++f_param+ struct fields:
+  q:
+    The curve is defined over Fq
+  r:
+    The order of the curve.
+  b:
+    E: y^2= x^3 + b
+  beta:
+    A quadratic nonresidue in Fq: used in quadratic extension.
+  alpha0, alpha1:
+    x^6 + alpha0 + alpha1 sqrt(beta) is irreducible: used in sextic extension.
+
+Discovered by Barreto and Naehrig, "Pairing-friendly elliptic curves of prime order".
+
+=== Type G Internals ===
+
+Another construction based on the CM method.
+
++g_param+ struct fields:
+  q, n, h, r:
+    h * r = n is the order of E(F_q)
+  a, b:
+    E: y^2 = x^3 + ax + b
+  nk:
+    #E(F_q^10)
+  hk:
+    hk * r^2 = nk
+  coeff:
+    array of coefficients of polynomial used for quintic extension.
+  nqr:
+    a quadratic nonresidue
+
++g_param+ struct fields:
+
+Discovered by Freeman, "Constructing pairing-friendly elliptic curves with embedding degree 10."
 
 === Source Code ===
 

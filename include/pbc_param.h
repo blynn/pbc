@@ -19,16 +19,25 @@ struct pbc_param_s {
 typedef struct pbc_param_s *pbc_param_ptr;
 typedef struct pbc_param_s pbc_param_t[1];
 
-static inline void pairing_init_pbc_param(struct pairing_s *pairing, pbc_param_ptr par) {
-  par->api->init_pairing(pairing, par->data);
+/*@manual param
+Initialize a pairing with pairing parameters 'p'.
+*/
+static inline void pairing_init_pbc_param(struct pairing_s *pairing, pbc_param_ptr p) {
+  p->api->init_pairing(pairing, p->data);
 }
 
-static inline void pbc_param_out_str(FILE *stream, pbc_param_ptr par) {
-  par->api->out_str(stream, par->data);
+/*@manual param
+Write pairing parameters to ''stream'' in a text format.
+*/
+static inline void pbc_param_out_str(FILE *stream, pbc_param_ptr p) {
+  p->api->out_str(stream, p->data);
 }
 
-static inline void pbc_param_clear(pbc_param_ptr par) {
-  par->api->clear(par->data);
+/*@manual param
+Clear 'p'. Call after 'p' is no longer needed.
+*/
+static inline void pbc_param_clear(pbc_param_ptr p) {
+  p->api->clear(p->data);
 }
 
 #endif //__PBC_PARAM_H__

@@ -19,16 +19,17 @@
 #include "param_io.h"
 
 struct g_param_s {
-  mpz_t q; //curve defined over F_q
-  mpz_t n; //has order n (= q - t + 1) in F_q
-  mpz_t h; //h * r = n, r is prime
+  mpz_t q;    // Curve defined over F_q.
+  mpz_t n;    // n = #E(F_q) (= q - t + 1)
+  mpz_t h;    // h * r = n, r is prime
   mpz_t r;
-  mpz_t a, b; //curve equation is y^2 = x^3 + ax + b
-  int k; //embedding degree
-  mpz_t nk; //order of curve over F_q^k
-  mpz_t hk; //hk * r^2 = nk
-  mpz_t *coeff; //coefficients of polynomial used to extend F_q by k/2
-  mpz_t nqr; //a quadratic nonresidue in F_q^d that lies in F_q
+  mpz_t a, b; // E: y^2 = x^3 + ax + b
+
+  // k = 10 for these curves.
+  mpz_t nk;      // #E(F_q^k)
+  mpz_t hk;      // hk * r^2 = nk
+  mpz_t *coeff;  //Coefficients of polynomial used to extend F_q by k/2
+  mpz_t nqr;     // Quadratic nonresidue in F_q^d that lies in F_q.
 };
 
 typedef struct g_param_s g_param_t[1];
@@ -1407,7 +1408,7 @@ void pbc_param_init_g_gen(pbc_param_t p, cm_info_ptr cm) {
   } while (!poly_is_irred(irred));
   field_init_polymod(Fqd, irred);
 
-  //find a quadratic nonresidue of Fqd lying in Fq
+  // Find a quadratic nonresidue of Fqd lying in Fq.
   element_init(nqr, Fqd);
   do {
     element_random(((element_t *) nqr->data)[0]);

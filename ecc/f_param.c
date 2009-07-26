@@ -15,9 +15,9 @@
 #include "param_io.h"
 
 struct f_param_s {
-    mpz_t q; //curve defined over F_q
-    mpz_t r; //r is the order of the curve
-    mpz_t b; //curve equation is y^2 = x^3 + b
+    mpz_t q; // Curve defined over F_q.
+    mpz_t r; // The order of the curve.
+    mpz_t b; // E: y^2 = x^3 + b
     mpz_t beta; //beta is a quadratic nonresidue in Fq
 	//we use F_q^2 = F_q[sqrt(beta)]
     mpz_t alpha0, alpha1;

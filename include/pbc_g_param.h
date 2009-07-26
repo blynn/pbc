@@ -11,8 +11,8 @@ void pbc_param_init_g(pbc_param_ptr par, const char *(*tab)(const char *));
 /*@manual gparam
 Type G curves are generated using the complex multiplication (CM) method.  This
 function sets 'p' to a type G pairing parameters from CM parameters 'cm'.
-Another part of the library searches for appropriate CM parameters (see below)
-and the results can be passed to this function.
+Another part of the library searches for appropriate CM parameters (see type D
+curves) and the results can be passed to this function.
 
 To be secure, generic discrete log algorithms must be infeasible in groups of
 order r, and finite field discrete log algorithms must be infeasible in finite

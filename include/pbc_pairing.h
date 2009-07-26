@@ -85,7 +85,7 @@ static inline void pairing_pp_apply(element_t out, element_t in2, pairing_pp_t p
 }
 
 /*@manual pairing_init
-Read in pairing parameters from an ASCIIZ string 'str'.
+Initialize pairing from parameters in an ASCIIZ string 'str'.
 Returns 0 on success, 1 on failure.
 */
 int pairing_init_set_str(pairing_t pairing, const char *s);
