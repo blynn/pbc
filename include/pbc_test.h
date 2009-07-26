@@ -1,3 +1,5 @@
+// Useful for tests.
+
 // Read pairing from file specified as first argument, or from standard input
 // if there is no first argument.
 static inline void demo_get_pairing(pairing_t pairing, int argc, char **argv) {
@@ -14,3 +16,8 @@ static inline void demo_get_pairing(pairing_t pairing, int argc, char **argv) {
 
   pairing_init_set_buf(pairing, s, count);
 }
+
+#define EXPECT(cond) \
+  if (cond); else pbc_err_count++, fprintf(stderr, "\n*** FAIL ***\n  %s:%d: %s\n\n", __FILE__, __LINE__, #cond)
+
+int pbc_err_count;

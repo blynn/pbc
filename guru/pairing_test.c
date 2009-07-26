@@ -1,5 +1,5 @@
 #include "pbc.h"
-#include "test.h"
+#include "pbc_test.h"
 
 int main(void) {
   element_t g, h;

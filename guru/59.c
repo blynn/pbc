@@ -1,8 +1,7 @@
-//step-by-step Weil and Tate pairings
-//for my thesis
-//Ben Lynn
+// Step-by-step Weil and Tate pairings.
+// For my thesis.
 #include <string.h>
-#include <pbc.h>
+#include "pbc.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
 

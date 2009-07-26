@@ -3,7 +3,7 @@
 #include "pbc_fp.h"
 #include "pbc_poly.h"
 #include "pbc_darray.h"
-#include "test.h"
+#include "pbc_test.h"
 
 int main(void) {
   field_t fp, fx;
@@ -121,5 +121,5 @@ break3:
   field_clear(fp);
   element_clear(e);
 
-  return errcount;
+  return pbc_err_count;
 }

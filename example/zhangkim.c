@@ -6,7 +6,7 @@
 
 #include <pbc.h>
 #include <pbc_time.h>
-#include "demo.h"
+#include <pbc_test.h>
 
 int main(int argc, char **argv) {
   pairing_t pairing;

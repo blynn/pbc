@@ -3,7 +3,7 @@
 #include "pbc.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
-#include "test.h"
+#include "pbc_test.h"
 
 int main(void) {
   field_t fp, fp2;

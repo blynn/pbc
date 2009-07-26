@@ -2,7 +2,7 @@
 
 #include "pbc.h"
 #include "pbc_fp.h"
-#include "test.h"
+#include "pbc_test.h"
 
 int main(void) {
   field_t fp;
@@ -87,5 +87,5 @@ int main(void) {
   mpz_clear(prime);
   mpz_clear(m);
   mpz_clear(n);
-  return errcount;
+  return pbc_err_count;
 }

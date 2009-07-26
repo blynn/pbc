@@ -3,8 +3,8 @@
 // See the PBC_sig library for a practical implementation.
 //
 // Ben Lynn
-#include "pbc.h"
-#include "demo.h"
+#include <pbc.h>
+#include <pbc_test.h>
 
 int main(int argc, char **argv) {
   pairing_t pairing;
