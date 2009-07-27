@@ -271,7 +271,7 @@ static inline void element_mul_mpz(element_t n, element_t a, mpz_t z) {
 }
 
 /*@manual earith
-Set 'n' = 'a' 'z', that is 'a' \+ 'a' \+ ... \+ 'a' where there are 'z' 'a'#'s#.
+Set 'n' = 'a' 'z', that is 'a' + 'a' + ... + 'a' where there are 'z' 'a'#'s#.
 */
 static inline void element_mul_si(element_t n, element_t a,
                                   signed long int z) {
@@ -281,7 +281,7 @@ static inline void element_mul_si(element_t n, element_t a,
 
 /*@manual earith
 'z' must be an element of a integer mod ring (i.e. *Z*~n~ for some n).
-Set 'c' = 'a' 'z', that is 'a' \+ 'a' \+ ... \+ 'a'
+Set 'c' = 'a' 'z', that is 'a' + 'a' + ... + 'a'
 where there are 'z' 'a''s.
 */
 static inline void element_mul_zn(element_t c, element_t a, element_t z) {

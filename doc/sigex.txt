@@ -21,7 +21,7 @@ To verify a signature sigma, Bob checks that
 
 We now translate the above to C code using the PBC library.
 
-=== BLS Signatures ===
+=== BLS signatures ===
 
 First we include `pbc/pbc.h`:
 
@@ -98,7 +98,7 @@ if (!element_cmp(temp1, temp2)) {
 }
 ....
 
-=== Import/Export ===
+=== Import/export ===
 
 To be useful, at some stage the signature must be converted
 to bytes for storage or transmission:

@@ -50,7 +50,7 @@ void time_pairing(pairing_ptr pairing) {
 int main(int argc, char **argv) {
   pairing_t pairing;
 
-  demo_get_pairing(pairing, argc, argv);
+  pbc_demo_pairing_init(pairing, argc, argv);
 
   printf("Miller's algorithm\n");
   time_pairing(pairing);

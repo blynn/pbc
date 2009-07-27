@@ -10,7 +10,7 @@ maintainer-clean-local:
 
 lib_LTLIBRARIES = libpbc.la 
 
-# this should really be a versioned dir, i.e., $(includedir)/pbc-0.2.16/pbc
+# this should really be a versioned dir, i.e., $(includedir)/pbc-0.5.0
 library_includedir = $(includedir)/pbc
 library_include_HEADERS = include/pbc_a1_param.h \
 include/pbc_a_param.h \

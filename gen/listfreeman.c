@@ -1,18 +1,20 @@
-// List curve generation parameters for curves that may be suitable
-// for cryptography.
+// List discriminant and bits in r and q for type G pairings that may be
+// suitable for cryptography.
+
 #include "pbc.h"
 
-void show(cm_info_t cm, void *data) {
+int show(cm_info_t cm, void *data) {
   unsigned int D = (unsigned int) data;
   int qbits, rbits;
   qbits = mpz_sizeinbase(cm->q, 2);
   rbits = mpz_sizeinbase(cm->r, 2);
   printf("%d, %d, %d\n", D, qbits, rbits);
   fflush(stdout);
+  return 0;
 }
 
 void try(int tryD) {
-  find_freeman_curve(show, (void *) tryD, tryD, 500);
+  cm_search_g(show, (void *) tryD, tryD, 500);
 }
 
 int main(int argc, char **argv) {

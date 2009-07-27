@@ -4,12 +4,10 @@ Ben Lynn
 
 == Changes in PBC 0.5.0 ==
 
-There are two major incompatibilities:
+The major changes are pairing parameters and pairing initialization.
 
-=== 1. Pairing initialization functions ===
-
-One must now supply a buffer containing pairing parameters instead of a
-`FILE *` stream. For example, instead of:
+For pairing initialization, supply a buffer containing pairing parameters
+instead of a `FILE *` stream. For example, rather than:
 
   pairing_init_inp_str(pairing, stdin);
 
@@ -23,12 +21,11 @@ write something like:
 For file reads, personally I like to use mmap() which suits
 pairing_init_set_buf().
 
-=== 2. Pairing parameter data type ===
-
 The `pbc_param_t` data type for pairing parameters replaces `a_param_t`, ...,
 `g_param_t`. Having the same data type for all pairing parameter types
-simplifies the library. At last, one can initialize a `pairing_t` from a
-`pbc_param_t`:
+simplifies the library, though some functions had to be changed slightly.
+
+At last, one can initialize a `pairing_t` from a `pbc_param_t`:
 
   pairing_t p;
   pbc_param_t par;

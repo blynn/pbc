@@ -3,7 +3,7 @@
 #include "pbc.h"
 #include "pbc_utils.h"  // for UNUSED_VAR
 
-void generate(cm_info_t cm, void *data) {
+int generate(cm_info_t cm, void *data) {
   UNUSED_VAR(data);
   pbc_param_t param;
   pbc_info("gendparam: computing Hilbert polynomial and finding roots...");
@@ -11,6 +11,7 @@ void generate(cm_info_t cm, void *data) {
   pbc_info("gendparam: bits in q = %zu\n", mpz_sizeinbase(cm->q, 2));
   pbc_param_out_str(stdout, param);
   pbc_param_clear(param);
+  return 1;
 }
 
 int main(int argc, char **argv) {
@@ -26,7 +27,7 @@ int main(int argc, char **argv) {
   }
   pbc_info("Using D = %d\n", D);
 
-  if (!find_mnt6_curve(generate, NULL, D, 500)) {
+  if (!cm_search_d(generate, NULL, D, 500)) {
     pbc_die("no suitable curves for this D");
   }
   return 0;

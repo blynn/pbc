@@ -1,13 +1,17 @@
 [[paramchap]]
-== Param Functions ==
+== Param functions ==
 
 Pairings are initialized from _pairing parameters_, which are objects of type
 `pbc_param_t`. Some applications can ignore this data type because
 `pairing_init_set_str()` handles it behind the scenes: it reads a string as a
 `pbc_param_t`, then initializes a pairing with these parameters.
 
-Applications generating their own pairing parameters will need to use
-these functions.
+include::gen/param.txt[]
+
+[[paramgenchap]]
+=== Param generation ===
+
+These were used to prepare the sample parameters in the +param+ subdirectory.
 
 We label the pairing families with capital letters roughly in the order of
 discovery, so we can refer to them easily. Type B and C are unimplemented,
@@ -19,105 +23,19 @@ Type F has even shorter elements but is slower still.
 The speed differences are hardware-dependent,
 and also change when preprocessing is used.
 
-PBC uses G1 to denote the group with the shorter representation (G1 is
-the group of points over the ground field) when G1 and G2 differ.
-
-include::gen/param.txt[]
-
-The following sections describe functions that generate pairing parameters
-of different types. These were used to prepare the sample parameters in
-the +param+ subdirectory.
-
-=== Type A ===
-
-Pairings on type A curves are the fast and ought to be used where the
-main concern is efficiency. Typically, r should be about 160 bits long
-and q about 512 bits. In this case, elements of groups G1 and G2 take
-512 bits to represent.
-
-The file `param/a.param` contains parameters for a
-type A pairing suitable for cryptographic use.
-
-The +a_param_t+ data type holds parameters for a type A pairing.
-
-include::gen/aparam.txt[]
-
-=== Type A1 ===
-
-Some pairing-based cryptosystems require the group order to be a particular
-composite number. Fortunately, it is easy to find type A pairings with
-any given order. Such pairings are designated type A1 in the library.
-
-The file `param/a1.param` contains sample parameters for a
-type A1 pairing, but it is only for benchmarking: it is useless without
-the factorization of +n+, the order of the group.
-
-The +a1_param_t+ data type holds parameters for a type A1 pairing.
-
-include::gen/a1param.txt[]
-
-=== Type D ===
-
-Using type D pairings allows elements of group G1 to be quite short, typically
-170-bits. Because of a certain trick, elements of group G2 need only be 3 times
-longer, that is, about 510 bits rather than 6 times long. They are not quite
-as short as type F pairings, but much faster.
-
-I sometimes refer to a type D curve as a triplet of numbers: the discriminant,
-the number of bits in the prime q, and the number of bits in the prime r. The
-`gen/listmnt` program prints these numbers.
-
-Among the bundled type D curve parameters are the curves 9563-201-181,
-62003-159-158 and 496659-224-224 which have shortened names `param/d201.param`,
-`param/d159.param` and `param/d225.param` respectively.
-
-The +d_param_t+ data type holds parameters for a type D pairing.
-
-See `gen/listmnt.c` and `gen/gendparam.c` for how to generate type D pairing
-parameters.
-
-Unfortunately currently the only way to determine the order of the curve group
-and the order of the base field is to access internal fields of struct
-cm_info_s.
-
-include::gen/dparam.txt[]
-
-The +cm_info_t+ data type holds CM parameters that are used
-to generate curves.
+The +cm_info_t+ data type holds CM parameters that are used to generate type D
+and G curves.
 
 include::gen/cminfo.txt[]
 
-=== Type E ===
+include::gen/aparam.txt[]
 
-This pairing is just a curiosity: it can be implemented entirely in a field of
-prime order, that is, only arithmetic modulo a prime is needed and there is
-never a need to extend a field.
+include::gen/a1param.txt[]
 
-If some day a mathematician discovers that discrete log in field extensions is
-substantially easier to solve than previously thought, or finds that discrete
-log can be solved in elliptic curves as easily as they can be in finite fields,
-this pairing type may become useful.
+include::gen/dparam.txt[]
 
 include::gen/eparam.txt[]
 
-=== Type F ===
-
-Type F should be used when the top priority is to minimize bandwidth (e.g.
-short signatures). The current implementation makes them slow.
-
-If finite field discrete log algorithms improve further, type D pairings will
-have to use larger fields, but type F can still remain short, up to a point.
-
 include::gen/fparam.txt[]
-
-=== Type G ===
-
-Type G curves have embedding degree 10. They are quite slow at the moment
-so for now type F is a better choice.
-
-The file `param/g149.param` contains parameters for a
-type G pairing with 149-bit group and field sizes.
-
-The +g_param_t+ data type holds parameters for a type G pairing.
 
 include::gen/gparam.txt[]

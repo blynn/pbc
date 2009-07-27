@@ -9,7 +9,7 @@
 
 int main(int argc, char **argv) {
   pairing_t pairing;
-  demo_get_pairing(pairing, argc, argv);
+  pbc_demo_pairing_init(pairing, argc, argv);
   if (!pairing_is_symmetric(pairing)) pbc_die("pairing must be symmetric");
   double time1, time2;
   element_t P, Ppub, x, S, H, t1, t2, t3, t4;

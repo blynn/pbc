@@ -5,9 +5,8 @@ target: $(TARGETS)
 TARGETS:=manual.html manual.txt manual.pdf manual/index.html chunked/index.html
 
 TXTFILES:=preface.txt quickstart.txt basics.txt sigex.txt \
-  pairingfns.txt elementfns.txt paramfns.txt randomfns.txt \
-  alloc.txt bundle.txt internal.txt security.txt \
-  contributors.txt
+  pairingfns.txt elementfns.txt paramfns.txt miscfns.txt \
+  bundle.txt internal.txt security.txt contributors.txt
 
 GENFILES:=gen/*.txt
 

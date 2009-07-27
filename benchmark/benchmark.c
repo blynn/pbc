@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
   // Cheat for slightly faster times:
   // pbc_set_memory_functions(malloc, realloc, free);
 
-  demo_get_pairing(pairing, argc, argv);
+  pbc_demo_pairing_init(pairing, argc, argv);
 
   element_init_G1(x, pairing);
   element_init_G2(y, pairing);

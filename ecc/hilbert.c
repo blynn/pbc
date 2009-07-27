@@ -329,7 +329,7 @@ static void precision_clear(void) {
 
 // Returns darray of mpz's that are coefficients of H_D(x).
 // See Cohen; my D is -D in his notation.
-void hilbert_poly(darray_t P, int D) {
+void poly_hilbert(darray_t P, int D) {
   int a, b;
   int t;
   int B = floor(sqrt((double) D / 3.0));
@@ -530,7 +530,7 @@ if (0) {
   precision_clear();
 }
 
-void hilbert_poly_clear(darray_t P) {
+void poly_hilbert_clear(darray_t P) {
   int i, n = P->count;
 
   for (i=0; i<n; i++) {

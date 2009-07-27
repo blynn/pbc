@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
   element_t secret_key;
   element_t temp1, temp2;
 
-  demo_get_pairing(pairing, argc, argv);
+  pbc_demo_pairing_init(pairing, argc, argv);
 
   element_init_G2(g, pairing);
   element_init_G2(public_key, pairing);

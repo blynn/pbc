@@ -1,13 +1,30 @@
-== Quick Start ==
+== Installing PBC ==
 
-One can experiment with the PBC library without writing a single line of C.
-The binary `pbc/pbc` should be present after PBC successfully compiles.
+The PBC library needs http://www.swox.com/gmp/[the GMP library].
+Multiple ways to install PBC are provided.
 
-The `pbc` program is an interactive calculator that can be used to test the PBC
-library, and also experiment with pairings in general.
+GNU Build System (autotools)::
+  This build system has been tested and works on Linux and Mac OS X with a
+  fink installation.
++
+  $ ./configure
+  $ make
+  $ make install
++
+By default the library is installed in `/usr/local/lib`.  On some systems, this
+may not be in the library path. One way to fix this is to edit
+`/etc/ld.so.conf` and run `ldconfig`.
+
+Makefile::
+  Due to its speed and simplicity, I use `blynn.make` during development.
+  Naturally it is less portable.
++
+  $ make -f blynn.make
+
+PBC uses some GNU C extensions, notably nested functions.
 
 [[pbcintro]]
-=== Playing with Pairings ===
+=== Quick start ===
 
 We shall use the following notation. For our purposes, the pairing is a
 bilinear map from two cyclic groups, G1 and G2 to a third group GT, where each

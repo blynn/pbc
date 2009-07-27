@@ -10,7 +10,7 @@
 int main(int argc, char **argv) {
   pairing_t pairing;
   double time1, time2;
-  demo_get_pairing(pairing, argc, argv);
+  pbc_demo_pairing_init(pairing, argc, argv);
 
   element_t Qid, P, P1, Ppub, s, k, Did, r, v, u, t1, t3, t4, t5, t6, t7, t8;
   mpz_t t2;

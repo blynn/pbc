@@ -1,4 +1,28 @@
-== PBC Internals ==
+== PBC internals ==
+
+The source code is organized by subdirectories:
+
+*`include`*: Include files describing the API.
+
+*`arith`*: Finite fields: modular arithmetic, polynomial rings, and polynomial
+rings modulo a polynomial. Finite fields of low characteristic are unsupported.
+
+*`ecc`*: Elliptic curve generation, elliptic curve groups and pairings. One
+source file is dedicated to each type of pairing, containing specialized
+optimizations. Some of the code requires arbitrary precision complex numbers,
+which also live here but should be moved elsewhere one day.
+
+*`misc`*: Dynamic arrays, symbol tables, benchmarking, logging, debugging,
+other utilities.
+
+*`gen`*: Programs that generate pairing parameters and list Hilbert
+polynomials. These were used to prepare the samples in the `param` directory.
+
+*`example`*: Example programs showing how to use the library.
+
+*`guru`*: Tests, experimental code.
+
+=== Groups, rings, fields ===
 
 Algebraic structures are represented in the +field_t+ data type, which mostly
 contains pointers to functions written to perform operations such as addition
@@ -54,8 +78,6 @@ polynomial addition is performed for elements of a polynomial ring and so on.
     n->field->add(n, a, b);
   }
 
-=== Design Notes ===
-
 My design may seem dangerous because if a programmer inadvertently attempts
 to add a polynomial and a point on an elliptic curve, say, the code
 will compile without warnings since they have the same data type.
@@ -106,38 +128,7 @@ as Hovav Shacham suggested, it may be nice to eventually have a converter that
 takes human-friendly infix operator expressions like `a = (b + c) *
 d` and outputs the assembly-like `element_` equivalents.)
 
-The
-http://www.gnu.org/software/libc/manual/html_node/Reserved-Names.html[GNU libc manual]
-states that data types ending in +_t+ should not be used because they are
-reserved for future additions to C or POSIX.  On the other hand, I want to stay
-consistent with GMP, and ending data types with +_t+ is common practice.
-
-=== Directory Layout ===
-
-The source code is organized into several subdirectories.
-
-*`include`*: Include files describing the API.
-
-*`arith`*: Finite fields of any characteristic greater than 3:
-modular arithmetic, polynomial rings, and polynomial
-rings modulo a polynomial. In future, finite fields of
-low characteristic may be implemented.
-
-*`ecc`*: Arbitrary precision complex numbers, curve generation (which depends
-on the former), curve group operations and pairings. One source file is
-dedicated to each type of pairing, containing specialized optimizations.
-
-*`misc`*: Dynamic arrays, symbol tables, benchmarking, debugging, other
-utilities.
-
-*`gen`*: Programs that generate pairing parameters and list Hilbert
-polynomials. These were used to prepare the samples in the `param` directory.
-
-*`example`*: Example programs showing how to use the library.
-
-*`guru`*: Tests, experimental code.
-
-=== Internal Randomness ===
+=== Internal randomness ===
 
 Some algorithms require a quadratic nonresidue in a given field. These
 are computed lazily: The first time a quadratic nonresidue is requested, one is
@@ -162,7 +153,7 @@ construction is later required.
 
 This happens behind the scenes in PBC.
 
-=== Type A Internals ===
+=== Type A internals ===
 
 Type A pairings are constructed on the curve y^2^ = x^3^ + x over the field F_q
 for some prime q = 3 mod 4.
@@ -188,14 +179,29 @@ not found a use for it yet (in which case we only need q = -1 mod 4).
     r * h = q + 1
     q is a prime, h is a multiple of 12 (thus q = -1 mod 12)
 
-=== Type B Internals ===
+Type A1 uses the same equation, but have different fields since the library
+is given r and cannot choose it.
 
-Unimplemented. The curve y^2^ = x^3^ + 1 over the field F_q for some prime
-q = 2 mod 3, which implies cube roots in F_q are easy to compute.
-Similar to type A, but it turns out we must choose between symmetry or
-efficiency due to the nature of a certain optimization.
++a1_param+ struct fields:
 
-=== Type C Internals ===
+  p, n, l:
+    p * 1 = n * l
+    p is prime, same as the q in a_param, n is the order of the group.
+
+=== Type B internals ===
+
+Unimplemented. Similar to type A. The curve y^2^ = x^3^ + 1 over the field F_q
+for some prime q = 2 mod 3, which implies cube roots in F_q are easy to
+compute, though we can achieve this for type A pairings by constraining q
+appropriately. I recommend requiring q = 3 mod 4 as well, so that -1 is
+a quadratic nonresidue.
+
+The lack of an x term simplifies some routines such as point doubling.
+
+It turns out we must choose between symmetry or efficiency due to the nature of
+a certain optimization.
+
+=== Type C internals ===
 
 Unimplemented. The supersingular curves y^2^ = x^3^ + 2x + 1 and
 y^2^ = x^3^ + 2x - 1 over a field of characteristic 3. Discussed at length
@@ -204,7 +210,7 @@ Many optimizations can be applied to speed up these pairings; see
 Barreto et al., "Efficient algorithms for pairing-based cryptosystems", but
 sadly, an attack due to Coppersmith makes these curves less attractive.
 
-=== Type D Internals ===
+=== Type D internals ===
 
 These are ordinary curves of with embedding degree 6, whose orders are prime
 or a prime multiplied by a small constant.
@@ -257,6 +263,7 @@ Moreover, many optimizations do not apply to this type, resulting in a slower
 pairing.
 
 +e_param+ struct fields:
+
   exp2, exp1, sign1, sign0, r:
     r = 2^exp2 + sign1 * 2^exp1 + sign0 * 1 (Solinas prime)
   q, h
@@ -264,7 +271,7 @@ pairing.
   a, b
     E: y^2 = x^3 + ax + b
 
-=== Type F Internals ===
+=== Type F internals ===
 
 Using carefully crafted polynomials, k = 12 pairings can be constructed.
 Only 160 bits are needed to represent elements of one group, and 320 bits
@@ -276,6 +283,7 @@ be used to scale security from 160-bits to say 256-bits because finite
 field attacks are subexponential.)
 
 +f_param+ struct fields:
+
   q:
     The curve is defined over Fq
   r:
@@ -294,6 +302,7 @@ Discovered by Barreto and Naehrig, "Pairing-friendly elliptic curves of prime or
 Another construction based on the CM method.
 
 +g_param+ struct fields:
+
   q, n, h, r:
     h * r = n is the order of E(F_q)
   a, b:
@@ -311,14 +320,14 @@ Another construction based on the CM method.
 
 Discovered by Freeman, "Constructing pairing-friendly elliptic curves with embedding degree 10."
 
-=== Testing Functions ===
+=== Testing functions ===
 
 For testing, debugging, demonstrations and benchmarks.
-One must include +pbc_test.h+ to use them.
+Declared in +pbc_test.h+:
 
 include::gen/test.txt[]
 
-=== Dynamic Arrays ===
+=== Dynamic arrays ===
 
 The +darray_t+ data type manages an array of pointers of type +void \*+,
 allocating more memory when necessary.
@@ -326,7 +335,7 @@ Declared in +pbc_darray.h+.
 
 include::gen/darray.txt[]
 
-=== Symbol Tables ===
+=== Symbol tables ===
 
 The +symtab_t+ data type manages symbol tables where the keys are strings of
 type +char \*+ and the values are pointers of type +void \*+.
@@ -337,7 +346,7 @@ from a string. Declared in +pbc_symtab.h+.
 
 include::gen/symtab.txt[]
 
-=== Religious Stances ===
+=== Religious stances ===
 
 I chose C because:
 
@@ -389,3 +398,9 @@ remove those annoying +#ifndef+ statements too.
 I grudgingly accept some macros for PBC's debugging features.
 
 I liberally use nested functions, a GNU C extension. I find their expressiveness so indispensable that I'm willing to sacrifice portability for them.
+
+The
+http://www.gnu.org/software/libc/manual/html_node/Reserved-Names.html[GNU libc manual]
+states that data types ending in +_t+ should not be used because they are
+reserved for future additions to C or POSIX.  On the other hand, I want to stay
+consistent with GMP, and ending data types with +_t+ is common practice.

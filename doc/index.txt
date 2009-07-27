@@ -1,4 +1,4 @@
-== PBC Library Manual ==
+== PBC library manual ==
 
 Other editions:
 

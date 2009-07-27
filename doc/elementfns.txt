@@ -1,4 +1,4 @@
-=== Element Functions ===
+== Element functions ==
 
 Elements of groups, rings and fields are stored in the +element_t+ data type.
 Variables of this type must be initialized before use, and should be cleared
@@ -12,24 +12,30 @@ elements.
 Another caveat is that many of these functions assume their arguments come from
 the same ring, group or field. No implicit type casting is performed.
 
-Because of the way PBC is designed, checking that elements from different
-algberaic structures have not been mistakenly mixed is not easy to do at
-compile-time. Instead, runtime checks are performed if PBC_DEBUG is defined
-before the PBC header file is included:
+For debug builds, turn on run-time checks by defining `PBC_DEBUG` before
+including `pbc.h`:
 
   #define PBC_DEBUG
   #include <pbc.h>
 
-This feature impairs performance so should be disabled in the final build.
+Also, when `PBC_DEBUG` is defined, the following macros are active.
+Normally they are replaced with empty statements.
 
-=== Initializing Elements ===
+include::gen/debug.txt[]
+
+=== Initializing elements ===
 
 When an element is initialized it is associated with an algebraic structure,
 such as a particular finite field or elliptic curve group.
 
+We use G1 and G2 to denote the input groups to the pairing, and GT for the
+output group. All have order r, and Zr means the ring of integers modulo r.
+G1 is the smaller group (the group of points over the base field). With
+symmetric pairings, G1 = G2.
+
 include::gen/einit.txt[]
 
-=== Assigning Elements ===
+=== Assigning elements ===
 
 These functions assign values to elements. When integers are assigned,
 they are mapped to algebraic structures canonically if it makes sense
@@ -37,11 +43,11 @@ they are mapped to algebraic structures canonically if it makes sense
 
 include::gen/eassign.txt[]
 
-=== Converting Elements ===
+=== Converting elements ===
 
 include::gen/econvert.txt[]
 
-=== Element Arithmetic ===
+=== Element arithmetic ===
 
 Unless otherwise stated, all +element_t+ arguments to these functions must have
 been initialized to be from the same algebraic structure.  When one of these
@@ -61,7 +67,7 @@ should be used for GT.
 
 include::gen/earith.txt[]
 
-=== Exponentiating Elements ===
+=== Exponentiating elements ===
 
 Exponentiation and multiexponentiation functions.  If it is known in advance
 that a particular element will be exponentiated several times in the future,
@@ -76,20 +82,20 @@ time can be saved in the long run by first calling the preprocessing function:
 
 include::gen/epow.txt[]
 
-=== Comparing Elements ===
+=== Comparing elements ===
 
 These functions compare elements from the same algebraic structure.
 
 include::gen/ecmp.txt[]
 
-=== I/O of Elements ===
+=== Element I/O ===
 
 Functions for producing human-readable outputs for elements.
 Converting elements to and from bytes are discussed later.
 
 include::gen/eio.txt[]
 
-=== Random Elements ===
+=== Random elements ===
 
 Only works for finite algebraic structures. Effect on polynomial rings, fields
 of characteristic zero, etc. undefined.
@@ -99,7 +105,7 @@ how to select a different source of random bits.
 
 include::gen/erandom.txt[]
 
-=== Element Import/Export ===
+=== Element import/export ===
 
 Functions for serializing and deserializing elements.
 

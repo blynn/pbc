@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     t9, t10, t11;
   mpz_t t3;
   mpz_init(t3);
-  demo_get_pairing(pairing, argc, argv);
+  pbc_demo_pairing_init(pairing, argc, argv);
   if (!pairing_is_symmetric(pairing)) pbc_die("pairing must be symmetric");
 
   element_init_G1(P, pairing);

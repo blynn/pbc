@@ -1,4 +1,4 @@
-== Bundled Programs ==
+== Bundled programs ==
 
 Several binaries and curve parameters are bundled with the PBC library,
 such as <<pbcintro, the `pbc` program>>.
@@ -11,7 +11,7 @@ from files such as these on standard input, for example:
   $ example/bls < param/e.param
 
 [[pbcref]]
-=== Pairing-Based Calculator ===
+=== Pairing-based calculator ===
 
 The `pbc` subdirectory contains a program also named
 `pbc` which allows interactive testing of the PBC library.
@@ -63,7 +63,7 @@ Returns +string+ converted to an element of +G+, e.g.
 +
   x = fromstr("[123,456]", GT)
 
-=== Parameter Generation ===
+=== Parameter generation ===
 
 Programs that generate pairing parameters are located in the `gen`
 subdirectory. Some of the programs are already functional enough to be used to
@@ -84,7 +84,7 @@ first; for now, read the source!
   Computing the Hilbert polynomial is an intermediate step when generating
   type D parameters.
 
-=== Example Cryptosystems ===
+=== Example cryptosystems ===
 
 In the `example` subdirectory there are various programs that read curve
 parameters on standard input and perform computations that would be required in

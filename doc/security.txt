@@ -1,8 +1,8 @@
-== Security Issues ==
+== Security issues ==
 
 We list potential security issues.
 
-=== Truncated Hashes ===
+=== Truncated hashes ===
 
 For points on an elliptic curve over the base field, +element_from_hash()+ will
 truncate the input hash until it can represent an x-coordinate in that field.
@@ -20,14 +20,14 @@ This is harmless for the base field, because all the pairing types implemented
 so far use an integer mod ring as the base field, rather than an extension of
 some low characteristic field.
 
-=== Zeroed Memory ===
+=== Zeroed memory ===
 
 Unlike OpenSSL, there are no functions to zero memory locations used in
 sensitive computations. To some extent, one can use +element_random()+ to
 overwrite data.  I have no immediate plans to implement this, but could be
 convinced to do so if I hear enough reasons.
 
-=== PRNG Determinism ===
+=== PRNG determinism ===
 
 On platforms without `/dev/urandom` PBC falls back on a deterministic
 pseudo-random number generator.

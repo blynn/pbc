@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
   int i, n;
 
   printf("reading pairing from stdin...\n");
-  demo_get_pairing(pairing, argc, argv);
+  pbc_demo_pairing_init(pairing, argc, argv);
 
   element_init(r, pairing->Zr);
   element_init(g1, pairing->G1);

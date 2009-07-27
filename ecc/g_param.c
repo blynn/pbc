@@ -7,9 +7,9 @@
 #include "pbc_darray.h"
 #include "pbc_field.h"
 #include "pbc_poly.h"
+#include "pbc_hilbert.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
-#include "pbc_hilbert.h"
 #include "pbc_mnt.h"
 #include "pbc_curve.h"
 #include "pbc_param.h"
@@ -1182,7 +1182,7 @@ static void compute_cm_curve(g_param_ptr param, cm_info_ptr cm) {
 
   darray_init(coefflist);
 
-  hilbert_poly(coefflist, cm->D);
+  poly_hilbert(coefflist, cm->D);
 
   n = coefflist->count;
   // Temporarily set the coefficient of x^{n-1} to 1 so hp has degree n - 1,
@@ -1192,7 +1192,7 @@ static void compute_cm_curve(g_param_ptr param, cm_info_ptr cm) {
     element_set_mpz(poly_coeff(hp, i), coefflist->item[i]);
   }
 
-  hilbert_poly_clear(coefflist);
+  poly_hilbert_clear(coefflist);
 
   darray_clear(coefflist);
   //TODO: remove x = 0, 1728 roots

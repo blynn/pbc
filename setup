@@ -1,10 +1,10 @@
 #!/bin/bash -x
 
-libtoolize --force --copy 
+libtoolize --force --copy
 aclocal
 autoheader
-automake --add-missing --copy --gnu 
-autoconf 
+automake --add-missing --copy --gnu
+autoconf
 
 if test -f config.status; then
     sh config.status

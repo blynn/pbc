@@ -1,4 +1,4 @@
-== Pairing Functions ==
+== Pairing functions ==
 
 An application should first instantiate a bilinear pairing to setup various
 curves, groups and other mathematical miscellany. The easiest is to use
@@ -20,12 +20,10 @@ shorter of the two. Sometimes G1 and G2 are the same group (i.e. the pairing
 is symmetric) so their elements can be mixed freely. In this case the
 +pairing_is_symmetric+ function returns 1.
 
-A later chapter discusses <<paramchap, the different pairing types>>.
-
 Bilinear pairings are stored in the data type +pairing_t+. Functions that
 operate on them start with +pairing_+.
 
-=== Initializing Pairings ===
+=== Initializing pairings ===
 
 To initialize a pairing from an ASCIIZ string:
 
@@ -45,7 +43,7 @@ where 'param' has type `pbc_param_t` (see <<paramchap>>).
 
 include::gen/pairing_init.txt[]
 
-=== Applying Pairings ===
+=== Applying pairings ===
 
 The function `pairing_apply` can be called to apply a bilinear map.  The order
 of the inputs is important. The first, which holds the output, must be from the
@@ -67,6 +65,6 @@ then used to compute pairings:
 
 include::gen/pairing_apply.txt[]
 
-=== Other Pairing Functions ===
+=== Other pairing functions ===
 
 include::gen/pairing_op.txt[]

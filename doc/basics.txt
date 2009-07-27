@@ -1,9 +1,4 @@
-== PBC Basics ==
-
-This chapter gives a high-level view of the library, and explains
-various design choices and conventions.
-
-=== Headers and Libraries ===
+=== Basics ===
 
 Programs using the PBC library should include the file `pbc.h`:
 
@@ -14,44 +9,6 @@ and linked against the PBC library and the GMP library, e.g.
   $ gcc program.c -L. -lpbc -lgmp
 
 The file `pbc.h` already includes `gmp.h`.
-
-=== Types ===
-
-Since the PBC library is built on top of GMP, the GMP types
-are available. PBC types are similar to GMP types.
-The following example is paraphrased from an example in the GMP
-manual, and shows how to declare the PBC data type +element_t+.
-
-    element_t sum;
-    struct foo { element_t x, y; };
-    element_t vec[20];
-
-The +pairing_t+ data type holds bilinear pairing
-parameter information. There are other data types but for many
-pairing-based cryptography applications they are only needed internally.
-
-Examples of other data types defined by PBC are +field_t+
-for rings and fields and +mpc_t+ for complex arbitrary
-precision floats.
-
-=== Function Classes ===
-
-PBC contains several classes of functions:
-
-* Functions involving pairings; these begin with
-+pairing_+.
-
-* Functions operating on elements of groups, rings and fields; these begin
-with +element_+.
-
-* Functions generating pairing parameters, that is, find elliptic curves
-where efficiently computable bilinear pairings exist; these begin
-with +pbc_param_+.
-
-* Miscellaneous functions, such as ones controlling how random bits are
-generated.
-
-=== Conventions ===
 
 PBC follows GMP in several respects:
 
@@ -68,8 +25,42 @@ that variable remains modified when control return is returned to the caller.
 By default. +malloc()+ and friends are called but this can be changed.
 * PBC functions are mostly reentrant.
 
+Since the PBC library is built on top of GMP, the GMP types
+are available. PBC types are similar to GMP types.
+The following example is paraphrased from an example in the GMP
+manual, and shows how to declare the PBC data type +element_t+.
+
+    element_t sum;
+    struct foo { element_t x, y; };
+    element_t vec[20];
+
+Many programs only need +element_t+ and one other data type called
++pairing_type+.
+
 GMP has the +mpz_t+ type for integers, +mpq_t+ for rationals and so on.
 In contrast, PBC uses the +element_t+ data type for elements of different
 algebraic structures, such as elliptic curve groups, polynomial rings and
 finite fields. Functions assume their inputs come from appropriate algebraic
 structures.
+
+Other applications may need other data types such as:
+
+ - +pbc_param_t+: pairing parameters.
+ - +cm_info_t+: parameters for constructing curves via the  CM method.
+ - +field_t+: groups, rings and fields.
+ - +mpc_t+: complex arbitrary precision floats.
+
+PBC contains several classes of functions:
+
+* Functions involving pairings; these begin with
++pairing_+.
+
+* Functions operating on elements of groups, rings and fields; these begin
+with +element_+.
+
+* Functions generating pairing parameters, that is, find elliptic curves
+where efficiently computable bilinear pairings exist; these begin
+with +pbc_param_+.
+
+* Miscellaneous functions, such as ones controlling how random bits are
+generated.

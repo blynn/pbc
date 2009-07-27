@@ -3,17 +3,18 @@
 
 #include "pbc.h"
 
-void consider(cm_info_t cm, void *data) {
+int consider(cm_info_t cm, void *data) {
   unsigned int D = (unsigned int) data;
   int qbits, rbits;
   qbits = mpz_sizeinbase(cm->q, 2);
   rbits = mpz_sizeinbase(cm->r, 2);
   printf("%d, %d, %d\n", D, qbits, rbits);
   fflush(stdout);
+  return 0;
 }
 
 void try(unsigned int D) {
-  find_mnt6_curve(consider, (void *) D, D, 500);
+  cm_search_d(consider, (void *) D, D, 500);
 }
 
 int main(int argc, char **argv)

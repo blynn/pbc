@@ -1,45 +1,67 @@
 #!/usr/bin/gawk -f
 # Extract GMP-style documentation from source using AsciiDoc format.
-# Fragile, e.g. requires function definition/declaration
-# to end with ")\n" or ");" or ") {"
-# and does not play well with function pointer parameters
-/^\/\*@/ {
-    outfile = "gen/" gensub(".*manual ", "", 1) ".txt"
-    print "Writing to " outfile
-    n = 0
-    getline
-    while ($0 != "*/") {
-	a[n] = $0
-	n++
-	getline
-    }
+# Fragile:
+# - requires function definition/declaration to end with ")\n" or ");" or ") {"
+# - does not play nice with function pointer parameters
 
-#    do {
-#	getline
-#	print
-#    } while (!match($0, ";") && !match($0, "{"))
+# Look for the magic string "/*@manual "
+/^\/\*@manual / {
+  outfile = "gen/" gensub(".*manual ", "", 1) ".txt"
+  print "Writing to " outfile
+  n = 0
+  getline
+  # Stop at the line "*/".
+  while ($0 != "*/") {
+    a[n] = $0
+    n++
     getline
+  }
+
+# Simple version with no markup:
+#  do {
+#     getline
+#     print
+#  } while (!match($0, ";") && !match($0, "{"))
+
+# Mark up bits of the function declaration with AsciiDoc, e.g:
+# "int main(int argc, char *argv[]);" should become
+# "int *main*('int argc', 'char *argv[]');"
+# Also suppress "static inline".
+  getline
+
+# Handle variable declarations.
+  if (!match($0, "\\(")) {
+    s = gensub("([^ ]*);", "*\\1*", 1)  # Bold variable name.
+# Handle macro declarations.
+  } else if (match($0, "^#define")) {
+    s = gensub("^#define *(.*[^ ]) *\\\\$", "*\\1*", 1)
+# Otherwise it's a function.
+  } else {
+
     sub("static inline ", "")
-    s = gensub("(\\w*)\\(", " *\\1*(", 1)  # Function name.
+    s = gensub("(\\w*)\\(", " *\\1*(", 1)  # Bold function name.
     s = gensub("\\((.*$)", "('\\1", 1, s)  # First parameter.
     gsub(", *", "', '", s)  # Separating commas.
     gsub("_ptr", "_t", s)
+# Handle multi-line function declarations.
     while (!match(s, ");") && !match(s, ") *$") && !match(s, ") *{")) {
-	getline
-	gsub("^ *", "")      # Remove leading whitespace.
-	gsub(", *", "', '")  # Commas again.
-	gsub("_ptr", "_t")
-	s = s $0             # Concatenate.
+      getline
+      gsub("^ *", "")      # Remove leading whitespace.
+      gsub(", *", "', '")  # Commas again.
+      gsub("_ptr", "_t")
+      s = s $0
     }
     s = gensub("(.*)\\)", "\\1')", 1, s)  # Last parameter
     gsub("_ptr", "_t", s)
     gsub(")[^)]*$", ")", s);
-    print s "\n" > outfile
-    if (n > 0) {
-      print "____" > outfile
-      for(i = 0; i < n; i++) {
-	  print a[i] > outfile
-      }
-      print "____" > outfile
+  }
+
+  print s "\n" > outfile
+  if (n > 0) {
+    print "____" > outfile
+    for(i = 0; i < n; i++) {
+      print a[i] > outfile
     }
+    print "____" > outfile
+  }
 }

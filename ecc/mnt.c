@@ -190,7 +190,7 @@ void cm_info_clear(cm_info_t cm) {
   mpz_clear(cm->n);
 }
 
-static int mnt_step2(void (*callback)(cm_info_t, void *), void *data,
+static int mnt_step2(int (*callback)(cm_info_t, void *), void *data,
     unsigned int D, mpz_t U) {
   int d;
   mpz_t n, l, q;
@@ -208,7 +208,7 @@ static int mnt_step2(void (*callback)(cm_info_t, void *), void *data,
     d = -1;
   } else {
     mpz_clear(l);
-    return 1;
+    return 0;
   }
 
   mpz_divexact_ui(l, l, 3);
@@ -219,7 +219,7 @@ static int mnt_step2(void (*callback)(cm_info_t, void *), void *data,
   if (!mpz_probab_prime_p(q, 10)) {
     mpz_clear(q);
     mpz_clear(l);
-    return 1;
+    return 0;
   }
 
   mpz_init(n);
@@ -232,7 +232,8 @@ static int mnt_step2(void (*callback)(cm_info_t, void *), void *data,
 
   mpz_init(p);
   mpz_init(r);
-  mpz_init(cofac); {
+  mpz_init(cofac);
+  {
   mpz_set_ui(cofac, 1);
   mpz_set(r, n);
   mpz_set_ui(p, 2);
@@ -252,10 +253,10 @@ static int mnt_step2(void (*callback)(cm_info_t, void *), void *data,
       mpz_clear(q);
       mpz_clear(l);
       mpz_clear(n);
-      return 1;
+      return 0;
     }
   }
-}
+  }
 
   cm_info_init(cm);
   cm->k = 6;
@@ -264,7 +265,7 @@ static int mnt_step2(void (*callback)(cm_info_t, void *), void *data,
   mpz_set(cm->r, r);
   mpz_set(cm->h, cofac);
   mpz_set(cm->n, n);
-  callback(cm, data);
+  int res = callback(cm, data);
   cm_info_clear(cm);
 
   mpz_clear(cofac);
@@ -273,22 +274,20 @@ static int mnt_step2(void (*callback)(cm_info_t, void *), void *data,
   mpz_clear(q);
   mpz_clear(l);
   mpz_clear(n);
-  return 0;
+  return res;
 }
 
-int find_mnt6_curve(void (*callback)(cm_info_t, void *), void *data,
+int cm_search_d(int (*callback)(cm_info_t, void *), void *data,
     unsigned int D, unsigned int bitlimit) {
   mpz_t D3;
   mpz_t t0, t1, t2;
-
-  int found_count = 0;
 
   mpz_init(D3);
   mpz_set_ui(D3, D * 3);
 
   if (mpz_perfect_square_p(D3)) {
-  //(the only squares that differ by 8 are 1 and 9,
-  //which we get if U=V=1, D=3, but then l is not an integer)
+    // The only squares that differ by 8 are 1 and 9,
+    // which we get if U=V=1, D=3, but then l is not an integer.
     mpz_clear(D3);
     return 0;
   }
@@ -302,11 +301,13 @@ int find_mnt6_curve(void (*callback)(cm_info_t, void *), void *data,
   general_pell(ps, D3, -8);
 
   int i, n;
+  int res = 0;
   n = ps->count;
   if (n) for (;;) {
     for (i=0; i<n; i++) {
       //element_printf("%Zd, %Zd\n", ps->x[i], ps->y[i]);
-      if (!mnt_step2(callback, data, D, ps->x[i])) found_count++;
+      res = mnt_step2(callback, data, D, ps->x[i]);
+      if (res) goto toobig;
       //compute next solution as follows
       //if p, q is current solution
       //compute new solution p', q' via
@@ -331,10 +332,10 @@ toobig:
   mpz_clear(t1);
   mpz_clear(t2);
   mpz_clear(D3);
-  return found_count;
+  return res;
 }
 
-static int freeman_step2(void (*callback)(cm_info_t, void *), void *data,
+static int freeman_step2(int (*callback)(cm_info_t, void *), void *data,
     unsigned int D, mpz_t U) {
   mpz_t n, x, q;
   mpz_t p;
@@ -348,9 +349,9 @@ static int freeman_step2(void (*callback)(cm_info_t, void *), void *data,
   } else if (!mpz_cmp_ui(x, 10)) {
     mpz_add_ui(x, U, 5);
   } else {
-    //TODO: this code should never be reached
+    pbc_die("should never reach here");
     mpz_clear(x);
-    return 1;
+    return 0;
   }
 
   mpz_divexact_ui(x, x, 15);
@@ -373,7 +374,7 @@ static int freeman_step2(void (*callback)(cm_info_t, void *), void *data,
     mpz_clear(q);
     mpz_clear(r);
     mpz_clear(x);
-    return 1;
+    return 0;
   }
 
   //t = 10x^2 + 5x + 3
@@ -388,7 +389,8 @@ static int freeman_step2(void (*callback)(cm_info_t, void *), void *data,
   mpz_sub_ui(n, n, 2);
 
   mpz_init(p);
-  mpz_init(cofac); {
+  mpz_init(cofac);
+  {
   mpz_set_ui(cofac, 1);
   mpz_set(r, n);
   mpz_set_ui(p, 2);
@@ -408,10 +410,10 @@ static int freeman_step2(void (*callback)(cm_info_t, void *), void *data,
       mpz_clear(q);
       mpz_clear(x);
       mpz_clear(n);
-      return 1;
+      return 0;
     }
   }
-}
+  }
 
   cm_info_init(cm);
   cm->k = 10;
@@ -420,7 +422,7 @@ static int freeman_step2(void (*callback)(cm_info_t, void *), void *data,
   mpz_set(cm->r, r);
   mpz_set(cm->h, cofac);
   mpz_set(cm->n, n);
-  callback(cm, data);
+  int res = callback(cm, data);
   cm_info_clear(cm);
 
   mpz_clear(cofac);
@@ -429,15 +431,13 @@ static int freeman_step2(void (*callback)(cm_info_t, void *), void *data,
   mpz_clear(q);
   mpz_clear(x);
   mpz_clear(n);
-  return 0;
+  return res;
 }
 
-int find_freeman_curve(void (*callback)(cm_info_t, void *), void *data,
+int cm_search_g(int (*callback)(cm_info_t, void *), void *data,
     unsigned int D, unsigned int bitlimit) {
   mpz_t D15;
   mpz_t t0, t1, t2;
-
-  int found_count = 0;
 
   mpz_init(D15);
   mpz_set_ui(D15, D);
@@ -447,9 +447,7 @@ int find_freeman_curve(void (*callback)(cm_info_t, void *), void *data,
   mpz_init(t1);
   mpz_init(t2);
 
-  if (mpz_perfect_square_p(D15)) {
-    return 0;
-  }
+  if (mpz_perfect_square_p(D15)) return 0;
 
   pell_solution_t ps;
 
@@ -457,9 +455,11 @@ int find_freeman_curve(void (*callback)(cm_info_t, void *), void *data,
 
   int i, n;
   n = ps->count;
+  int res = 0;
   if (n) for (;;) {
     for (i=0; i<n; i++) {
-      if (!freeman_step2(callback, data, D, ps->x[i])) found_count++;
+      res = freeman_step2(callback, data, D, ps->x[i]);
+      if (res) goto toobig;
       // Compute next solution as follows:
       // If p, q is current solution
       // then compute new solution p', q' via
@@ -484,5 +484,5 @@ toobig:
   mpz_clear(t1);
   mpz_clear(t2);
   mpz_clear(D15);
-  return found_count;
+  return res;
 }

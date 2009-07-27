@@ -3,9 +3,11 @@
 #ifndef __PBC_TEST_H__
 #define __PBC_TEST_H__
 
-// Read pairing from file specified as first argument, or from standard input
-// if there is no first argument.
-static inline void demo_get_pairing(pairing_t pairing, int argc, char **argv) {
+/*@manual test
+Initializes pairing from file specified as first argument, or from standard
+input if there is no first argument.
+*/
+static inline void pbc_demo_pairing_init(pairing_t pairing, int argc, char **argv) {
   char s[1024];
   FILE *fp = stdin;
 
@@ -20,11 +22,21 @@ static inline void demo_get_pairing(pairing_t pairing, int argc, char **argv) {
   if (pairing_init_set_buf(pairing, s, count)) pbc_die("pairing init failed");
 }
 
+/*@manual test
+Returns seconds elapsed since the first call to this function.
+Returns 0 the first time.
+*/
 double pbc_get_time(void);
 
-#define EXPECT(cond) \
-  if (cond); else pbc_err_count++, fprintf(stderr, "\n*** FAIL ***\n  %s:%d: %s\n\n", __FILE__, __LINE__, #cond)
+/*@manual test
+Macro: if `condition` evaluates to 0 then print an error.
+*/
+#define EXPECT(condition) \
+  if (condition); else pbc_err_count++, fprintf(stderr, "\n*** FAIL ***\n  %s:%d: %s\n\n", __FILE__, __LINE__, #condition)
 
+/*@manual test
+Total number of failed EXPECT checks.
+*/
 int pbc_err_count;
 
 #endif //__PBC_TEST_H__

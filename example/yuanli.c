@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
   element_t s, a, b, P, Ppub, Qa, Qb, Sa, Sb, Ta, Tb, Kab, Kba, K, temp1,
     temp2, temp3, temp4, temp5, h;
 
-  demo_get_pairing(pairing, argc, argv);
+  pbc_demo_pairing_init(pairing, argc, argv);
   if (!pairing_is_symmetric(pairing)) pbc_die("pairing must be symmetric");
 
   element_init_Zr(s, pairing);
