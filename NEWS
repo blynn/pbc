@@ -45,3 +45,10 @@ that define these functions, but they are no longer included by `pbc.h`.
 
 I replaced the CMake files with `blynn.make`. I use this during development,
 though I test the autotools before each release.
+
+To reduce symbol pollution, all API names now start with
+`pbc_`, `field_`, `element_` or `pairing_`. There are undocumented functions
+that begin with `poly_`, `curve_`, `darray_`, `symtab_`, and `mpc_` which
+
+fi_re grrr
+fp_tonelli

@@ -1,7 +1,7 @@
 // Generate Freeman curves with a given discriminant.
 #include "pbc.h"
 
-int generate(cm_info_t cm, void *data) {
+int generate(pbc_cm_t cm, void *data) {
   UNUSED_VAR(data);
   pbc_param_t param;
 
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
   }
   pbc_info("Using D = %d", D);
 
-  if (!cm_search_g(generate, NULL, D, 500)) {
+  if (!pbc_cm_search_g(generate, NULL, D, 500)) {
     pbc_die("No suitable curves for this D");
   }
   return 0;

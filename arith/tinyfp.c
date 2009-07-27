@@ -282,7 +282,7 @@ void field_init_tiny_fp(field_ptr f, mpz_t prime) {
   f->set0 = fp_set0;
   f->set1 = fp_set1;
   f->is_sqr = fp_is_sqr;
-  f->sqrt = fp_tonelli;
+  f->sqrt = element_tonelli;
   f->field_clear = fp_field_clear;
   f->to_bytes = fp_to_bytes;
   f->from_bytes = fp_from_bytes;

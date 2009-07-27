@@ -3,7 +3,7 @@
 #include "pbc.h"
 #include "pbc_utils.h"  // for UNUSED_VAR
 
-int generate(cm_info_t cm, void *data) {
+int generate(pbc_cm_t cm, void *data) {
   UNUSED_VAR(data);
   pbc_param_t param;
   pbc_info("gendparam: computing Hilbert polynomial and finding roots...");
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
   }
   pbc_info("Using D = %d\n", D);
 
-  if (!cm_search_d(generate, NULL, D, 500)) {
+  if (!pbc_cm_search_d(generate, NULL, D, 500)) {
     pbc_die("no suitable curves for this D");
   }
   return 0;

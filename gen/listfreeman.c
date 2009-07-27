@@ -3,7 +3,7 @@
 
 #include "pbc.h"
 
-int show(cm_info_t cm, void *data) {
+int show(pbc_cm_t cm, void *data) {
   unsigned int D = (unsigned int) data;
   int qbits, rbits;
   qbits = mpz_sizeinbase(cm->q, 2);
@@ -14,7 +14,7 @@ int show(cm_info_t cm, void *data) {
 }
 
 void try(int tryD) {
-  cm_search_g(show, (void *) tryD, tryD, 500);
+  pbc_cm_search_g(show, (void *) tryD, tryD, 500);
 }
 
 int main(int argc, char **argv) {

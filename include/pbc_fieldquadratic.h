@@ -22,8 +22,8 @@ void element_field_to_quadratic(element_ptr out, element_ptr in);
 void element_field_to_fi(element_ptr a, element_ptr b);
 
 // In K[a], each element has the form x + ya.
-element_ptr fi_re(element_ptr a);  // Return x.
-element_ptr fi_im(element_ptr a);  // Return y.
+element_ptr element_re(element_ptr a);  // Return x.
+element_ptr element_im(element_ptr a);  // Return y.
 // When a = sqrt(-1) these are the real and imaginary parts.
 
 #endif //__PBC_FIELDQUADRATIC_H__

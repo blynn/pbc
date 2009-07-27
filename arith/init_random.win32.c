@@ -46,6 +46,6 @@ static void win32_mpz_random(mpz_t r, mpz_t limit, void *data) {
   pbc_free(bytes);
 }
 
-void init_random_function(void) {
-  set_random_function(win32_mpz_random, NULL);
+void pbc_init_random(void) {
+  pbc_random_set_function(win32_mpz_random, NULL);
 }

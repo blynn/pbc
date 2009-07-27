@@ -34,6 +34,6 @@ Among the bundled type D curve parameters are the curves 9563-201-181,
 See `gen/listmnt.c` and `gen/gendparam.c` for how to generate type D pairing
 parameters.
 */
-void pbc_param_init_d_gen(pbc_param_ptr p, cm_info_ptr cm);
+void pbc_param_init_d_gen(pbc_param_ptr p, pbc_cm_ptr cm);
 
 #endif //__PBC_D_PARAM_H__

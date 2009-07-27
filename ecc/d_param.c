@@ -98,8 +98,8 @@ static void d_out_str(FILE *stream, void *data) {
 // used to construct the quadratic field extension Fqk of Fqd.
 static inline void d_miller_evalfn(element_t e0,
     element_t a, element_t b, element_t c, element_t Qx, element_t Qy) {
-  element_ptr re_out = fi_re(e0);
-  element_ptr im_out = fi_im(e0);
+  element_ptr re_out = element_re(e0);
+  element_ptr im_out = element_im(e0);
 
   int i;
   int d = polymod_field_degree(re_out->field);
@@ -437,12 +437,12 @@ static void lucas_even(element_ptr out, element_ptr in, mpz_t cofactor) {
   }
   element_t temp;
   element_init_same_as(temp, out);
-  element_ptr in0 = fi_re(in);
-  element_ptr in1 = fi_im(in);
-  element_ptr v0 = fi_re(out);
-  element_ptr v1 = fi_im(out);
-  element_ptr t0 = fi_re(temp);
-  element_ptr t1 = fi_im(temp);
+  element_ptr in0 = element_re(in);
+  element_ptr in1 = element_im(in);
+  element_ptr v0 = element_re(out);
+  element_ptr v1 = element_im(out);
+  element_ptr t0 = element_re(temp);
+  element_ptr t1 = element_im(temp);
   int j;
 
   element_set_si(t0, 2);
@@ -504,12 +504,12 @@ static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing) {
     element_init(e0, p->Fqk);
     element_init(e2, p->Fqd);
     element_init(e3, p->Fqk);
-    element_ptr e0re = fi_re(e0);
-    element_ptr e0im = fi_im(e0);
+    element_ptr e0re = element_re(e0);
+    element_ptr e0im = element_im(e0);
     element_ptr e0re0 = ((element_t *) e0re->data)[0];
     element_ptr e0im0 = ((element_t *) e0im->data)[0];
-    element_t *inre = fi_re(in)->data;
-    element_t *inim = fi_im(in)->data;
+    element_t *inre = element_re(in)->data;
+    element_t *inim = element_im(in)->data;
     // Expressions in the formula are similar, hence the following function.
     void qpower(int sign) {
       polymod_const_mul(e2, inre[1], p->xpowq);
@@ -534,8 +534,8 @@ static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing) {
     }
     qpower(1);
     element_set(e3, e0);
-    element_set(e0re, fi_re(in));
-    element_neg(e0im, fi_im(in));
+    element_set(e0re, element_re(in));
+    element_neg(e0im, element_im(in));
     element_mul(e3, e3, e0);
     qpower(-1);
     element_mul(e0, e0, in);
@@ -918,7 +918,7 @@ static void d_init_pairing(pairing_ptr pairing, void *data) {
 // Computes a curve and sets fp to the field it is defined over using the
 // complex multiplication method, where cm holds the appropriate information
 // (e.g. discriminant, field order).
-static void compute_cm_curve(d_param_ptr param, cm_info_ptr cm) {
+static void compute_cm_curve(d_param_ptr param, pbc_cm_ptr cm) {
   darray_t coefflist;
   element_t hp, root;
   field_t fp, fpx;
@@ -1047,7 +1047,7 @@ void pbc_param_init_d(pbc_param_ptr par, const char *(*tab)(const char *)) {
   }
 }
 
-void pbc_param_init_d_gen(pbc_param_ptr p, cm_info_ptr cm) {
+void pbc_param_init_d_gen(pbc_param_ptr p, pbc_cm_ptr cm) {
   d_param_init(p);
   d_param_ptr param = p->data;
   field_t Fq, Fqx, Fqd;

@@ -176,27 +176,27 @@ static void pell_solution_clear(pell_solution_t ps) {
   mpz_clear(ps->miny);
 }
 
-void cm_info_init(cm_info_t cm) {
+void pbc_cm_init(pbc_cm_t cm) {
   mpz_init(cm->q);
   mpz_init(cm->r);
   mpz_init(cm->h);
   mpz_init(cm->n);
 }
 
-void cm_info_clear(cm_info_t cm) {
+void pbc_cm_clear(pbc_cm_t cm) {
   mpz_clear(cm->q);
   mpz_clear(cm->r);
   mpz_clear(cm->h);
   mpz_clear(cm->n);
 }
 
-static int mnt_step2(int (*callback)(cm_info_t, void *), void *data,
+static int mnt_step2(int (*callback)(pbc_cm_t, void *), void *data,
     unsigned int D, mpz_t U) {
   int d;
   mpz_t n, l, q;
   mpz_t p;
   mpz_t r, cofac;
-  cm_info_t cm;
+  pbc_cm_t cm;
 
   mpz_init(l);
   mpz_mod_ui(l, U, 6);
@@ -258,7 +258,7 @@ static int mnt_step2(int (*callback)(cm_info_t, void *), void *data,
   }
   }
 
-  cm_info_init(cm);
+  pbc_cm_init(cm);
   cm->k = 6;
   cm->D = D;
   mpz_set(cm->q, q);
@@ -266,7 +266,7 @@ static int mnt_step2(int (*callback)(cm_info_t, void *), void *data,
   mpz_set(cm->h, cofac);
   mpz_set(cm->n, n);
   int res = callback(cm, data);
-  cm_info_clear(cm);
+  pbc_cm_clear(cm);
 
   mpz_clear(cofac);
   mpz_clear(r);
@@ -277,7 +277,7 @@ static int mnt_step2(int (*callback)(cm_info_t, void *), void *data,
   return res;
 }
 
-int cm_search_d(int (*callback)(cm_info_t, void *), void *data,
+int pbc_cm_search_d(int (*callback)(pbc_cm_t, void *), void *data,
     unsigned int D, unsigned int bitlimit) {
   mpz_t D3;
   mpz_t t0, t1, t2;
@@ -335,12 +335,12 @@ toobig:
   return res;
 }
 
-static int freeman_step2(int (*callback)(cm_info_t, void *), void *data,
+static int freeman_step2(int (*callback)(pbc_cm_t, void *), void *data,
     unsigned int D, mpz_t U) {
   mpz_t n, x, q;
   mpz_t p;
   mpz_t r, cofac;
-  cm_info_t cm;
+  pbc_cm_t cm;
 
   mpz_init(x);
   mpz_mod_ui(x, U, 15);
@@ -415,7 +415,7 @@ static int freeman_step2(int (*callback)(cm_info_t, void *), void *data,
   }
   }
 
-  cm_info_init(cm);
+  pbc_cm_init(cm);
   cm->k = 10;
   cm->D = D;
   mpz_set(cm->q, q);
@@ -423,7 +423,7 @@ static int freeman_step2(int (*callback)(cm_info_t, void *), void *data,
   mpz_set(cm->h, cofac);
   mpz_set(cm->n, n);
   int res = callback(cm, data);
-  cm_info_clear(cm);
+  pbc_cm_clear(cm);
 
   mpz_clear(cofac);
   mpz_clear(r);
@@ -434,7 +434,7 @@ static int freeman_step2(int (*callback)(cm_info_t, void *), void *data,
   return res;
 }
 
-int cm_search_g(int (*callback)(cm_info_t, void *), void *data,
+int pbc_cm_search_g(int (*callback)(pbc_cm_t, void *), void *data,
     unsigned int D, unsigned int bitlimit) {
   mpz_t D15;
   mpz_t t0, t1, t2;

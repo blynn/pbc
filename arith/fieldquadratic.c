@@ -550,11 +550,11 @@ void element_field_to_fi(element_ptr a, element_ptr b) {
   element_field_to_quadratic(a, b);
 }
 
-element_ptr fi_re(element_ptr a) {
+element_ptr element_re(element_ptr a) {
   return ((eptr) a->data)->x;
 }
 
-element_ptr fi_im(element_ptr a) {
+element_ptr element_im(element_ptr a) {
   return ((eptr) a->data)->y;
 }
 

@@ -256,7 +256,7 @@ void field_init_naive_fp(field_ptr f, mpz_t prime) {
   f->set0 = zp_set0;
   f->set1 = zp_set1;
   f->is_sqr = zp_is_sqr;
-  f->sqrt = fp_tonelli;
+  f->sqrt = element_tonelli;
   f->field_clear = zp_field_clear;
   f->to_bytes = zp_to_bytes;
   f->from_bytes = zp_from_bytes;

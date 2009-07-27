@@ -128,15 +128,15 @@ static void cc_miller_no_denom(element_t res, mpz_t q, element_t P,
       e2 = polymod_coeff(e0, i);
       element_mul(e1, polymod_coeff(v, j), Qx);
       if (flag == 1) element_mul(e1, e1, negalpha);
-      element_mul(fi_re(e1), fi_re(e1), a);
-      element_mul(fi_im(e1), fi_im(e1), a);
+      element_mul(element_re(e1), element_re(e1), a);
+      element_mul(element_im(e1), element_im(e1), a);
       element_mul(e2, polymod_coeff(v, k), Qy);
-      element_mul(fi_re(e2), fi_re(e2), b);
-      element_mul(fi_im(e2), fi_im(e2), b);
+      element_mul(element_re(e2), element_re(e2), b);
+      element_mul(element_im(e2), element_im(e2), b);
       element_add(e2, e2, e1);
       if (flag == 2) element_mul(e2, e2, negalpha);
-      element_mul(fi_re(e1), fi_re(polymod_coeff(v, i)), c);
-      element_mul(fi_im(e1), fi_im(polymod_coeff(v, i)), c);
+      element_mul(element_re(e1), element_re(polymod_coeff(v, i)), c);
+      element_mul(element_im(e1), element_im(polymod_coeff(v, i)), c);
       element_add(e2, e2, e1);
     }
     do_term(0, 2, 3, 2);
@@ -153,15 +153,15 @@ static void cc_miller_no_denom(element_t res, mpz_t q, element_t P,
 
     e1 = polymod_coeff(e0, 4);
 
-    element_mul(fi_re(e1), fi_re(Qx), a);
-    element_mul(fi_im(e1), fi_im(Qx), a);
+    element_mul(element_re(e1), element_re(Qx), a);
+    element_mul(element_im(e1), element_im(Qx), a);
 
     e1 = polymod_coeff(e0, 3);
 
-    element_mul(fi_re(e1), fi_re(Qy), b);
-    element_mul(fi_im(e1), fi_im(Qy), b);
+    element_mul(element_re(e1), element_re(Qy), b);
+    element_mul(element_im(e1), element_im(Qy), b);
 
-    element_set(fi_re(polymod_coeff(e0, 0)), c);
+    element_set(element_re(polymod_coeff(e0, 0)), c);
 
     element_mul(v, v, e0);
     */
@@ -354,8 +354,8 @@ static void f_init_pairing(pairing_t pairing, void *data) {
 
   element_init(p->negalpha, p->Fq2);
   element_init(p->negalphainv, p->Fq2);
-  element_set_mpz(fi_re(p->negalpha), param->alpha0);
-  element_set_mpz(fi_im(p->negalpha), param->alpha1);
+  element_set_mpz(element_re(p->negalpha), param->alpha0);
+  element_set_mpz(element_im(p->negalpha), param->alpha1);
 
   element_set(poly_coeff(irred, 0), p->negalpha);
   field_init_polymod(p->Fq12, irred);
@@ -371,10 +371,10 @@ static void f_init_pairing(pairing_t pairing, void *data) {
   field_init_curve_ab(p->Eq, e0, e1, pairing->r, NULL);
   element_set_mpz(e0, param->alpha0);
   element_neg(e0, e0);
-  element_mul(fi_re(e2), e0, e1);
+  element_mul(element_re(e2), e0, e1);
   element_set_mpz(e0, param->alpha1);
   element_neg(e0, e0);
-  element_mul(fi_im(e2), e0, e1);
+  element_mul(element_im(e2), e0, e1);
   element_clear(e0);
   element_init(e0, p->Fq2);
   field_init_curve_ab(p->Etwist, e0, e2, pairing->r, NULL);
@@ -568,8 +568,8 @@ void pbc_param_init_f_gen(pbc_param_t p, int bits) {
     mpz_clear(z1);
   }
 
-  element_to_mpz(fp->alpha0, fi_re(poly_coeff(f, 0)));
-  element_to_mpz(fp->alpha1, fi_im(poly_coeff(f, 0)));
+  element_to_mpz(fp->alpha0, element_re(poly_coeff(f, 0)));
+  element_to_mpz(fp->alpha1, element_im(poly_coeff(f, 0)));
 
   element_clear(f);
 

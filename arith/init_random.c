@@ -4,14 +4,14 @@
 #include "pbc_utils.h"
 #include "pbc_random.h"
 
-void init_random_function(void) {
+void pbc_init_random(void) {
   FILE *fp;
   fp = fopen("/dev/urandom", "rb");
   if (!fp) {
     pbc_warn("could not open /dev/urandom, using deterministic random number generator");
-    random_set_deterministic();
+    pbc_random_set_deterministic(0);
   } else {
-    random_set_file("/dev/urandom");
+    pbc_random_set_file("/dev/urandom");
     fclose(fp);
   }
 }

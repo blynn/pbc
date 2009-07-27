@@ -5,18 +5,22 @@
 #include "pbc_utils.h"
 #include "pbc_memory.h"
 
-void init_random_function(void);
+void pbc_init_random(void);
 
-static void deterministic_mpz_random(mpz_t z, mpz_t limit, void *data) {
-  static gmp_randstate_t rs;
+// Must use pointer due to lack of gmp_randstate_ptr.
+static gmp_randstate_t *get_rs(void) {
   static int rs_is_ready;
-  UNUSED_VAR (data);
-
+  static gmp_randstate_t rs;
   if (!rs_is_ready) {
     gmp_randinit_default(rs);
     rs_is_ready = 1;
   }
-  mpz_urandomm(z, rs, limit);
+  return &rs;
+}
+
+static void deterministic_mpz_random(mpz_t z, mpz_t limit, void *data) {
+  UNUSED_VAR (data);
+  mpz_urandomm(z, *get_rs(), limit);
 }
 
 static void file_mpz_random(mpz_t r, mpz_t limit, void *data) {
@@ -53,14 +57,14 @@ static void (*current_mpz_random)(mpz_t, mpz_t, void *);
 static void *current_random_data;
 static int random_function_ready = 0;
 
-void set_random_function(void (*fun)(mpz_t, mpz_t, void *), void *data) {
+void pbc_random_set_function(void (*fun)(mpz_t, mpz_t, void *), void *data) {
   current_mpz_random = fun;
   current_random_data = data;
   random_function_ready = 1;
 }
 
 void pbc_mpz_random(mpz_t z, mpz_t limit) {
-  if (!random_function_ready) init_random_function();
+  if (!random_function_ready) pbc_init_random();
   current_mpz_random(z, limit, current_random_data);
 }
 
@@ -72,10 +76,11 @@ void pbc_mpz_randomb(mpz_t z, unsigned int bits) {
   mpz_clear(limit);
 }
 
-void random_set_deterministic(void) {
-  set_random_function(deterministic_mpz_random, NULL);
+void pbc_random_set_deterministic(unsigned int seed) {
+  gmp_randseed_ui(*get_rs(), seed);
+  pbc_random_set_function(deterministic_mpz_random, NULL);
 }
 
-void random_set_file(char *filename) {
-  set_random_function(file_mpz_random, filename);
+void pbc_random_set_file(char *filename) {
+  pbc_random_set_function(file_mpz_random, filename);
 }
