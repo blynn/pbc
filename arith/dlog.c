@@ -12,7 +12,7 @@
 // finds x such that g^x = h
 // will hang if no such x exists
 // x in some field_t that set_mpz makes sense for
-void brute_force_dlog(element_t x, element_t g, element_t h) {
+void element_dlog_brute_force(element_t x, element_t g, element_t h) {
   element_t g0;
   mpz_t count;
 
@@ -33,7 +33,7 @@ void brute_force_dlog(element_t x, element_t g, element_t h) {
 
 // x in Z_r, g, h in some group of order r
 // finds x such that g^x = h
-void pollard_rho(element_t x, element_t g, element_t h) {
+void element_dlog_pollard_rho(element_t x, element_t g, element_t h) {
 // see Blake, Seroussi and Smart
 // only one snark for this implementation
   int i, s = 20;

@@ -997,7 +997,7 @@ static val_ptr f_brute_force_dlog(darray_ptr arg) {
   }
   element_ptr e = pbc_malloc(sizeof(element_t));
   element_init(e, Z);
-  brute_force_dlog(e, e0, e1);
+  element_dlog_brute_force(e, e0, e1);
   res = val_new(t_element, e);
   return res;
 }
@@ -1017,7 +1017,7 @@ static val_ptr f_pollard_rho(darray_ptr arg) {
   field_ptr f = a2->data;
   element_ptr e = pbc_malloc(sizeof(element_t));
   element_init(e, f);
-  pollard_rho(e, e0, e1);
+  element_dlog_pollard_rho(e, e0, e1);
   res = val_new(t_element, e);
   return res;
 }
@@ -1132,7 +1132,7 @@ static val_ptr f_index_calculus(darray_ptr arg) {
   element_init(e, Z);
   element_to_mpz(g, e0);
   element_to_mpz(h, e1);
-  index_calculus_dlog(x, g, h, q1);
+  pbc_mpz_index_calculus(x, g, h, q1);
   element_set_mpz(e, x);
   res = val_new(t_element, e);
   mpz_clear(x);
@@ -1194,8 +1194,8 @@ int main(int argc, char **argv) {
   symtab_put(builtin, f_div, "div");
   symtab_put(builtin, f_pairing, "pairing");
   symtab_put(builtin, f_nextprime, "nextprime");
-  symtab_put(builtin, f_brute_force_dlog, "brute_force_dlog");
-  symtab_put(builtin, f_pollard_rho, "pollard_rho");
+  symtab_put(builtin, f_brute_force_dlog, "element_dlog_brute_force");
+  symtab_put(builtin, f_pollard_rho, "element_dlog_pollard_rho");
   //symtab_put(builtin, f_index_calculus, "index_calculus");
   symtab_put(builtin, f_zz, "ZZ");
   symtab_put(builtin, f_gen_A, "gen_A");

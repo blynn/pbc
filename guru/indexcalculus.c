@@ -759,7 +759,7 @@ static void index_calculus_step2(mpz_t x, mpz_t *ind, int r,
   }
 }
 
-void index_calculus_dlog(mpz_t x, mpz_t g, mpz_t h, mpz_t q) {
+void pbc_mpz_index_calculus(mpz_t x, mpz_t g, mpz_t h, mpz_t q) {
   int i, r;
   mpz_t q1, z0;
 

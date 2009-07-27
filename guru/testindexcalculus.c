@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     pbc_mpz_random(h, q);
     mpz_powm(h, g, h, q);
 
-    index_calculus_dlog(x, g, h, q);
+    element_dlog_index_calculus(x, g, h, q);
     element_printf("%Zd^%Zd %% %Zd = %Zd\n", g, x, q, h);
 
     return 0;
