@@ -1,7 +1,7 @@
 #include <sys/time.h>
 #include <time.h>
 
-double get_time(void)
+double pbc_get_time(void)
 {
     static struct timeval last_tv, tv;
     static int first = 1;

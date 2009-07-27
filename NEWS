@@ -2,125 +2,49 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
-Changes between PBC version 0.4.21 and 0.4.20
+== Changes in PBC 0.5.0 ==
 
-* Added element_pp_pow_zn().
-* More comments in the source.
+There are two major incompatibilities:
 
-Changes between PBC version 0.4.20 and 0.4.19
+=== 1. Pairing initialization functions ===
 
-* Win32 random number generator fix thanks to Stefan Weber.
+One must now supply a buffer containing pairing parameters instead of a
+`FILE *` stream. For example, instead of:
 
-Changes between PBC version 0.4.19 and 0.4.18
+  pairing_init_inp_str(pairing, stdin);
 
-* Win32 random number generator thanks to Yulian Kalev.
+write something like:
 
-Changes between PBC version 0.4.18 and 0.4.17
+  char s[1024];
+  size_t count = fread(s, 1, 1024, stdin);
+  if (!count) pbc_die("input error");
+  if (pairing_init_set_buf(pairing, s, count)) pbc_die("pairing init failed");
 
-* Fix bilinear_map() bug
-* Replace darray with callback in curve finding functions
+For file reads, personally I like to use mmap() which suits
+pairing_init_set_buf().
 
-Changes between PBC version 0.4.17 and 0.4.16
+=== 2. Pairing parameter data type ===
 
-* Handle identity elements in pairings
+The `pbc_param_t` data type for pairing parameters replaces `a_param_t`, ...,
+`g_param_t`. Having the same data type for all pairing parameter types
+simplifies the library. At last, one can initialize a `pairing_t` from a
+`pbc_param_t`:
 
-Changes between PBC version 0.4.16 and 0.4.15
+  pairing_t p;
+  pbc_param_t par;
+  pbc_param_init_a_gen(par, 160, 512);
+  pairing_init_pbc_param(p, par);
+  pbc_param_clear(par);
 
-* Removed bonehfranklin.c example
-* Upgraded GPL to version 3
+=== Minor differences ===
 
-Changes between PBC version 0.4.15 and 0.4.14
+I trimmed the API. The file stream operations are gone. I removed the
+fetch_ops_t and tracker_t types. The standard C library already provides
+routines for reading from disk to memory; it is unnecessary for PBC to overlap.
 
-* Stop element_from_hash crashing on GT for D curves (reported by Paul Miller)
+I refactored to avoid exposing `symtab_t` and `darray_t`, as well as several
+undocumented routines such as `poly_alloc()`. I mostly preserved the headers
+that define these functions, but they are no longer included by `pbc.h`.
 
-Changes between PBC version 0.4.14 and 0.4.13
-
-* PBC should work with C++ programs
-
-Changes between PBC version 0.4.13 and 0.4.12
-
-* Fixed minor bugs in D and G pairings
-
-Changes between PBC version 0.4.12 and 0.4.11
-
-* Fixed preprocessed exponentiation bug introduced in 0.4.10 (reported by
-  Ian Goldberg)
-
-Changes between PBC version 0.4.11 and 0.4.10
-
-* Plugged memory leaks introduced in the last version
-
-Changes between PBC version 0.4.10 and 0.4.9
-
-* Multiplicative subgroups: can now generate random elements and
-  hash to output group of pairing 
-
-Changes between PBC version 0.4.9 and 0.4.8
-
-* Patched memory leak for D, G pairings (reported by Michael Cheng)
-
-Changes between PBC version 0.4.8 and 0.4.7
-
-* configure.ac fixes (Joe Cooley)
-* example/zss.c fixes (Joe Cooley)
-
-Changes between PBC version 0.4.7 and 0.4.6
-
-* Bugfix: element_cmp for zero case in prime field
-* Symmetric pairing checks for other examples
-* Faster D, G pairings
-
-Changes between PBC version 0.4.6 and 0.4.5
-
-* Type G pairings (embedding degree 10)
-* Bugfix for version 0.4.5 random point generation
-
-Changes between PBC version 0.4.5 and 0.4.4
-
-* Symmetric pairing checks for example/hess.c and example/paterson.c
-* Shipsey-Stange algorithm for type E pairing (not used by default)
-* Random point generation is faster in some cases
-* Added benchmark/ellnet.c
-
-Changes between PBC version 0.4.4 and 0.4.3
-
-* Optimizations for most pairings
-* Shipsey-Stange algorithm for type A pairing (not used by default)
-
-Changes between PBC version 0.4.3 and 0.4.2
-
-* Added pairing_is_symmetric function.
-* element_from_bytes for G1, G2 check input is valid.
-* Added -e option for pbc.
-
-Changes between PBC version 0.4.2 and 0.4.1
-
-* Added element_set_str, element_snprintf, element_snprint functions.
-* Added fromstr function and string handling to pbc/pbc test program.
-* Minor bugfixes and cleanup.
-
-Changes between PBC version 0.4.1 and 0.4.0
-
-* Removed test subdirectory: moved programs to new subdirectories:
-  - benchmark: programs for obtaining timings.
-  - example: pairing-based cryptosystem demos.
-  - gen: programs that generate pairing parameters.
-  - pbc: the "Pairing-Based Calculator".
-  - guru: for testing obscure parts of the library. Most need not
-    know of its existence.
-* Documentation for some of the above programs.
-* New cryptosystem demos (by Dmitry Kosolapov).
-
-Changes between PBC version 0.4.0 and 0.3.17
-
-* Signatures and broadcast encryption spun off into new libraries.
-* Memory leaks plugged, including two that were relatively low-level
-  (and hence serious).
-* New debugging facilities: if PBC_DEBUG is defined, during runtime
-  PBC will check that elements from different algebraic structures are not
-  mixed.
-* If a memory allocation fails, PBC prints a message and quits (rather
-  than quietly continuing causing unpredictable behaviour). 
-* Custom memory allocation.
-* All PBC header files given "pbc" prefix.
-* Minor fixes.
+I replaced the CMake files with `blynn.make`. I use this during development,
+though I test the autotools before each release.

@@ -177,7 +177,7 @@ int element_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
   return info.result;
 }
 
-int element_snprintf (char *buf, size_t size, const char *fmt, ...) {
+int element_snprintf(char *buf, size_t size, const char *fmt, ...) {
   int status;
   va_list ap;
 

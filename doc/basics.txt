@@ -9,22 +9,11 @@ Programs using the PBC library should include the file `pbc.h`:
 
   #include <pbc.h>
 
-and linked against the PBC library, e.g.
+and linked against the PBC library and the GMP library, e.g.
 
-  $ gcc program.c -L. -lpbc
+  $ gcc program.c -L. -lpbc -lgmp
 
-The file `pbc.h` includes `gmp.h` thus all GMP functions are available.
-
-To catch certain bugs, first define the PBC_DEBUG symbol before including
-`pbc.h`:
-
-  #define PBC_DEBUG
-  #include <pbc.h>
-
-The program will now abort when PBC detects a statement incorrectly
-mixing elements from different algebraic structures. Note these checks are
-performed at runtime, so this feature should be disabled for production
-builds.
+The file `pbc.h` already includes `gmp.h`.
 
 === Types ===
 
@@ -47,7 +36,7 @@ precision floats.
 
 === Function Classes ===
 
-PBC contains several classes of functions.
+PBC contains several classes of functions:
 
 * Functions involving pairings; these begin with
 +pairing_+.
@@ -55,9 +44,9 @@ PBC contains several classes of functions.
 * Functions operating on elements of groups, rings and fields; these begin
 with +element_+.
 
-* Functions generating pairings, that is, find elliptic curves
-where efficiently computable bilinear pairings exist; useful if the
-bundled pairings are inadequate.
+* Functions generating pairing parameters, that is, find elliptic curves
+where efficiently computable bilinear pairings exist; these begin
+with +pbc_param_+.
 
 * Miscellaneous functions, such as ones controlling how random bits are
 generated.
@@ -76,18 +65,11 @@ GMP variables in function calls: effectively as call-by references.
 In other words, as in GMP, if a function that modifies an input variable,
 that variable remains modified when control return is returned to the caller.
 * Like GMP, variables automatically allocate memory when needed.
-By default. +malloc()+ and friends
-are called but this can be changed.
-* The +element_t+ type is small (but certain other types
-are not).
+By default. +malloc()+ and friends are called but this can be changed.
 * PBC functions are mostly reentrant.
 
-Recall GMP has the +mpz_t+ type for integers, +mpq_t+ for
-rationals and so on.  In contrast, PBC uses the +element_t+ data type for
-elements of different algebraic structures, such as elliptic curve groups,
-polynomial rings and finite fields. Many functions assume the inputs come from
-the same algebraic structure and trouble can arise if for example one attempts
-to add a polynomial to a point on an elliptic curve.
-
-The algebraic structure that an +element_t+ variable belongs to is specified in
-an initialization call.
+GMP has the +mpz_t+ type for integers, +mpq_t+ for rationals and so on.
+In contrast, PBC uses the +element_t+ data type for elements of different
+algebraic structures, such as elliptic curve groups, polynomial rings and
+finite fields. Functions assume their inputs come from appropriate algebraic
+structures.

@@ -5,7 +5,6 @@
 */
 
 #include <pbc.h>
-#include <pbc_time.h>
 #include <pbc_test.h>
 
 int main(int argc, char **argv) {
@@ -39,7 +38,7 @@ int main(int argc, char **argv) {
   element_init_GT(t6, pairing);
   element_init_GT(t7, pairing);
 
-  time1 = get_time();
+  time1 = pbc_get_time();
   printf("Hess ID-based signature protocol\n");
   printf("KEYGEN\n");
   element_random(P);
@@ -84,7 +83,7 @@ int main(int argc, char **argv) {
   } else {
     printf("Signature is invalid!\n");
   }
-  time2 = get_time();
+  time2 = pbc_get_time();
   printf("All time = %fs\n", time2 - time1);
 
   element_clear(P);

@@ -323,8 +323,7 @@ static int curve_snprint(char *s, size_t n, element_ptr a) {
   size_t result = 0, left;
   int status;
 
-  void clip_sub(void)
-  {
+  void clip_sub(void) {
     result += status;
     left = result >= n ? 0 : n - result;
   }

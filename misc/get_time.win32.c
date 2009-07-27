@@ -21,7 +21,7 @@ int __cdecl gettimeofday(struct timeval* p, void* tz) {
   return 0; // Assume success?
 }
 
-double get_time(void) {
+double pbc_get_time(void) {
   static struct timeval last_tv, tv;
   static int first = 1;
   static double res = 0;

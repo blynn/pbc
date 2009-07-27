@@ -35,7 +35,7 @@ include/pbc_poly.h \
 include/pbc_random.h \
 include/pbc_singular.h \
 include/pbc_symtab.h \
-include/pbc_time.h \
+include/pbc_test.h \
 include/pbc_utils.h
 
 libpbc_la_CPPFLAGS = -Iinclude

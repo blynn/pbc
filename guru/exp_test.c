@@ -2,7 +2,6 @@
 
 #include <string.h>
 #include "pbc.h"
-#include "pbc_time.h"
 #include "pbc_test.h"
 
 int main(int argc, char **argv) {
@@ -35,35 +34,35 @@ int main(int argc, char **argv) {
   element_pp_init(g2_pp, g2);
 
   n = 100;
-  t0 = get_time();
+  t0 = pbc_get_time();
   for (i=0; i<n; i++) {
     element_pow_mpz(u1, g1, r_mpz);
   }
-  t1 = get_time();
+  t1 = pbc_get_time();
   printf("G1 exp:\t\t%fs\n", t1 - t0);
 
   n = 100;
-  t0 = get_time();
+  t0 = pbc_get_time();
   for (i=0; i<n; i++) {
     element_pow_mpz(u2, g2, r_mpz);
   }
-  t1 = get_time();
+  t1 = pbc_get_time();
   printf("G2 exp:\t\t%fs\n", t1 - t0);
 
   n = 100;
-  t0 = get_time();
+  t0 = pbc_get_time();
   for (i=0; i<n; i++) {
     element_pp_pow(up1, r_mpz, g1_pp);
   }
-  t1 = get_time();
+  t1 = pbc_get_time();
   printf("G1 pp exp:\t%fs\n", t1 - t0);
 
   n = 100;
-  t0 = get_time();
+  t0 = pbc_get_time();
   for (i=0; i<n; i++) {
     element_pp_pow(up2, r_mpz, g2_pp);
   }
-  t1 = get_time();
+  t1 = pbc_get_time();
   printf("G2 pp exp:\t%fs\n", t1 - t0);
 
   if (element_cmp(u1, up1)) {

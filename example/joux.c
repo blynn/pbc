@@ -5,7 +5,6 @@
 */
 
 #include <pbc.h>
-#include <pbc_time.h>
 #include <pbc_test.h>
 
 int main(int argc, char **argv) {
@@ -31,7 +30,7 @@ int main(int argc, char **argv) {
   element_init_GT(Kb, pairing);
   element_init_GT(Kc, pairing);
 
-  time1 = get_time();
+  time1 = pbc_get_time();
   printf("Joux key agreement between A, B and C.\n");
   element_random(P);
   element_random(a);
@@ -58,7 +57,7 @@ int main(int argc, char **argv) {
   element_printf("Kc = %B\n", Kc);
 
   printf("Shared key K = Ka = Kb = Kc\n");
-  time2 = get_time();
+  time2 = pbc_get_time();
   printf("All time = %fs\n", time2 - time1);
 
 

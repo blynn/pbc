@@ -5,7 +5,6 @@
 */
 
 #include <pbc.h>
-#include <pbc_time.h>
 #include <pbc_test.h>
 
 int main(int argc, char **argv) {
@@ -28,7 +27,7 @@ int main(int argc, char **argv) {
 
   printf("ZSS short signature schema\n");
   printf("KEYGEN\n");
-  time1 = get_time();
+  time1 = pbc_get_time();
   element_random(x);
   element_random(P);
   element_mul_zn(Ppub, P, x);
@@ -54,7 +53,7 @@ int main(int argc, char **argv) {
   element_printf("e(P, P) = %B\n", t4);
   if (!element_cmp(t3, t4)) printf("Signature is valid\n");
   else printf("Signature is invalid\n");
-  time2 = get_time();
+  time2 = pbc_get_time();
   printf("All time = %fs\n", time2 - time1);
   element_clear(P);
   element_clear(Ppub);

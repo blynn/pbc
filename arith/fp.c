@@ -176,3 +176,44 @@ int pbc_trial_divide(int (*fun)(mpz_t factor, unsigned int multiplicity),
   mpz_clear(p);
   return 0;
 }
+
+// For each digit of 'n', call fun(). If it returns 1, then return 1 and
+// abort. Otherwise return 0.
+int pbc_mpz_trickle(int (*fun)(char), int base, mpz_t n) {
+  // TODO: Support different bases.
+  if (!base) base = 10;
+  if (base < 2 || base > 10) {
+    pbc_warn("only bases 2 to 10 supported");
+    return 1;
+  }
+  mpz_t d, z, q;
+  mpz_init(d);
+  mpz_init(z);
+  mpz_init(q);
+  mpz_set(z, n);
+  int res;
+  int len;
+  mpz_ui_pow_ui(d, base, len = mpz_sizeinbase(z, base));
+  if (mpz_cmp(d, z) > 0) {
+    len--;
+    mpz_divexact_ui(d, d, base);
+  }
+  while (mpz_cmp_ui(z, base) >= 0) {
+    mpz_fdiv_qr(q, z, z, d);
+    res = fun('0' + mpz_get_ui(q));
+    if (res) goto clean;
+    mpz_divexact_ui(d, d, base);
+    len--;
+  }
+  while (len) {
+    res = fun('0');
+    if (res) goto clean;
+    len--;
+  }
+  res = fun('0' + mpz_get_ui(z));
+clean:
+  mpz_clear(q);
+  mpz_clear(z);
+  mpz_clear(d);
+  return res;
+}

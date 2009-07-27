@@ -2,7 +2,7 @@
 
 Algebraic structures are represented in the +field_t+ data type, which mostly
 contains pointers to functions written to perform operations such as addition
-and multiplication on elements of that particular group, ring or field:
+and multiplication in that particular group, ring or field:
 
   struct field_s {
     ...
@@ -22,9 +22,10 @@ cumbersome.  It may help if one views groups and rings as handicapped fields.
 
 The last two lines of the above code excerpt show how GMP and PBC define data
 types: they are arrays of length one so that when a variable is
-declared, space is automatically allocated for it.  Yet when used as a argument
-to a function, a pointer is passed, thus there is no need to explicitly
-allocate and deallocate memory, nor reference and dereference variables.
+declared, space is automatically allocated for it on the stack.
+Yet when used as a argument to a function, a pointer is passed, thus there is
+no need to explicitly allocate and deallocate memory, nor reference and
+dereference variables.
 
 Each +element_t+ contains a field named +field+ to such a +field_t+ variable.
 The only other field is +data+, which stores any data needed for the
@@ -53,12 +54,11 @@ polynomial addition is performed for elements of a polynomial ring and so on.
     n->field->add(n, a, b);
   }
 
-=== Design ===
+=== Design Notes ===
 
 My design may seem dangerous because if a programmer inadvertently attempts
 to add a polynomial and a point on an elliptic curve, say, the code
-will compile without warnings since they have the same data type,
-but the results are undefined and the library will mostly cause a crash.
+will compile without warnings since they have the same data type.
 
 However I settled on having a catch-all ``glorified +void *+'' +element_t+
 because I wanted to
@@ -69,8 +69,10 @@ because I wanted to
   polynomial rings can be trivially modified to benchmark addition in a group,
   and
 - interchange different implementations of the same algebraic structure, for
-  example, when I was comparing Montgomery representation versus a naive
-  implementation of modular arithmetic.
+  example, compare Montgomery representation versus a naive implementation of
+  integer modulo rings.
+
+Additionally, defining `PBC_DEBUG` catches many type mismatches.
 
 In mathematics, groups, rings and fields should be distinguished, but for
 implmentation, it is simplest lump them together under the same heading.
@@ -110,19 +112,43 @@ states that data types ending in +_t+ should not be used because they are
 reserved for future additions to C or POSIX.  On the other hand, I want to stay
 consistent with GMP, and ending data types with +_t+ is common practice.
 
+=== Directory Layout ===
+
+The source code is organized into several subdirectories.
+
+*`include`*: Include files describing the API.
+
+*`arith`*: Finite fields of any characteristic greater than 3:
+modular arithmetic, polynomial rings, and polynomial
+rings modulo a polynomial. In future, finite fields of
+low characteristic may be implemented.
+
+*`ecc`*: Arbitrary precision complex numbers, curve generation (which depends
+on the former), curve group operations and pairings. One source file is
+dedicated to each type of pairing, containing specialized optimizations.
+
+*`misc`*: Dynamic arrays, symbol tables, benchmarking, debugging, other
+utilities.
+
+*`gen`*: Programs that generate pairing parameters and list Hilbert
+polynomials. These were used to prepare the samples in the `param` directory.
+
+*`example`*: Example programs showing how to use the library.
+
+*`guru`*: Tests, experimental code.
+
 === Internal Randomness ===
 
-Some algorithms require a quadratic nonresidue in a given field. The first
-time a quadratic nonresidue is requested, one is generated at random, using
-the same source of random bits as other PBC random functions. [Which
-reminds me, should I get rid of the +nqr+ field and
-instead have it as part of the +data+ field in
-struct field_s?]
+Some algorithms require a quadratic nonresidue in a given field. These
+are computed lazily: The first time a quadratic nonresidue is requested, one is
+generated at random, using the same source of random bits as other PBC random
+functions. [Which reminds me, should I get rid of the +nqr+ field and instead
+have it as part of the +data+ field in struct field_s?]
 
 In `fieldquadratic.c`, a quadratic field extension is constructed with a square
 root of this randomly generated quadratic nonresidue in the base field.  Thus
 for a nondeterminstic source of random bits, the same field may be constructed
-  differently on different runs.
+differently on different runs.
 
 To construct the same field the same way every time, one must record the
 quadratic nonresidue generated from one run, and call `field_set_nqr()` every
@@ -285,29 +311,31 @@ Another construction based on the CM method.
 
 Discovered by Freeman, "Constructing pairing-friendly elliptic curves with embedding degree 10."
 
-=== Source Code ===
+=== Testing Functions ===
 
-The source code is organized into several subdirectories.
+For testing, debugging, demonstrations and benchmarks.
+One must include +pbc_test.h+ to use them.
 
-All include files are in the `include` directory.
+include::gen/test.txt[]
 
-The `arith` directory contains code for implementing
-finite fields of any characteristic greater than 3:
-modular arithmetic, polynomial rings, and finally polynomial
-rings modulo a polynomial. In future, finite fields of
-low characteristic may be implemented.
+=== Dynamic Arrays ===
 
-The `ecc` directory contains code for arbitrary
-precision complex numbers, curve generation (which depends on the former),
-curve group operations and pairings. A separate source file is dedicated
-to each type of pairing, containing optimizations tailored for
-its pairing.
+The +darray_t+ data type manages an array of pointers of type +void \*+,
+allocating more memory when necessary.
+Declared in +pbc_darray.h+.
 
-The `misc` directory contains code for dynamic arrays,
-symbol tables, parsing, benchmarking, debugging and so on.
+include::gen/darray.txt[]
 
-The `test` directory contains test programs. They
-were used to generate the files in the `param` directory.
+=== Symbol Tables ===
+
+The +symtab_t+ data type manages symbol tables where the keys are strings of
+type +char \*+ and the values are pointers of type +void \*+.
+
+At present, they are implemented inefficiently using dynamic arrays, but this
+will change if the need arises. They are only used when reading a +pbc_param_t+
+from a string. Declared in +pbc_symtab.h+.
+
+include::gen/symtab.txt[]
 
 === Religious Stances ===
 
@@ -358,6 +386,6 @@ constants can be defined with enum instead.  I intend to minimize the number of
 +#include+ statements in header files for PBC's internal use as much as
 possible (they should be in the `.c` files instead), and later perhaps even
 remove those annoying +#ifndef+ statements too.
+I grudgingly accept some macros for PBC's debugging features.
 
-Unfortunately I do not know of an easy way to avoid the C preprocessor
-for PBC's debugging features.
+I liberally use nested functions, a GNU C extension. I find their expressiveness so indispensable that I'm willing to sacrifice portability for them.

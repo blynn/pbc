@@ -1,4 +1,4 @@
-== Randomness Functions ==
+== Random Functions ==
 
 The first time PBC is asked to generate a random number,
 the library will try to open the file `/dev/urandom` as a

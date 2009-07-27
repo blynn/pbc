@@ -1,5 +1,4 @@
 #include <pbc.h>
-#include <pbc_time.h>
 #include "pbc_test.h"
 
 void time_pairing(pairing_ptr pairing) {
@@ -20,15 +19,15 @@ void time_pairing(pairing_ptr pairing) {
     element_random(y);
 
     pairing_pp_init(pp, x, pairing);
-    t0 = get_time();
+    t0 = pbc_get_time();
     pairing_pp_apply(r, y, pp);
-    t1 = get_time();
+    t1 = pbc_get_time();
     ttotalpp += t1 - t0;
     pairing_pp_clear(pp);
 
-    t0 = get_time();
+    t0 = pbc_get_time();
     pairing_apply(r2, x, y, pairing);
-    t1 = get_time();
+    t1 = pbc_get_time();
     ttotal += t1 - t0;
 
     //element_printf("x = %B\n", x);

@@ -29,7 +29,6 @@ I've defined it as H(A, B, h, Kab)=e(h,H1(A)+H1(B))+Kab.
 */
 
 #include <pbc.h>
-#include <pbc_time.h>
 #include <pbc_test.h>
 
 int main(int argc, char **argv) {
@@ -66,7 +65,7 @@ int main(int argc, char **argv) {
 
   printf("Yuan-Li key agreement protocol\n");
 
-  t0 = get_time();
+  t0 = pbc_get_time();
 
 //Setup, system parameters generation
   printf("SETUP STAGE\n");
@@ -157,7 +156,7 @@ int main(int argc, char **argv) {
   element_clear(Ta);
   element_clear(Tb);
 
-  t1 = get_time();
+  t1 = pbc_get_time();
 
   printf("All time = %fs\n", t1 - t0);
   printf("Have a good day!\n");

@@ -1,27 +1,21 @@
 [[paramchap]]
 == Param Functions ==
 
-Pairings are initialized from _pairing parameters_, which are objects
-of type `pbc_param_t`. Parameters are either generated, or read from
-a string.
+Pairings are initialized from _pairing parameters_, which are objects of type
+`pbc_param_t`. Some applications can ignore this data type because
+`pairing_init_set_str()` handles it behind the scenes: it reads a string as a
+`pbc_param_t`, then initializes a pairing with these parameters.
 
-The function `pairing_init_set_str` combines two steps: it reads
-a string as a `pbc_param_t`, then initializes a pairing with these parameters.
-This is convenient for applications that only use previously generated pairing
-parameters.
+Applications generating their own pairing parameters will need to use
+these functions.
 
-There are several types of pairings, which, like vitamins, are labelled with
-capital letters roughly in the order of discovery. Not all known pairing types
-are implemented in PBC. We only consider pairings whose group order is close to
-the field size. Type C takes place in a field of low characteristic, which
-makes it susceptible to the Coppersmith attack, reducing its utility. I hope to
-implement Type B eventually
+We label the pairing families with capital letters roughly in the order of
+discovery, so we can refer to them easily. Type B and C are unimplemented,
+though I hope to eventually.
 
-Type A is best when speed is the main concern.
-Type D is a good choice when elements should be short but is slower
-(can be roughly two to five times slower).
-Type F has even shorter elements but is slower still (can be at least
-ten times slower than type A).
+Type A is fastest.
+Type D is a good choice when elements should be short but is slower.
+Type F has even shorter elements but is slower still.
 The speed differences are hardware-dependent,
 and also change when preprocessing is used.
 
