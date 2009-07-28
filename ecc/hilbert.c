@@ -8,8 +8,9 @@
 #include "pbc_darray.h"
 #include "pbc_poly.h"
 #include "pbc_hilbert.h"
-#include "pbc_mpc.h"
 #include "pbc_memory.h"
+
+#include "mpc.h"
 
 static mpf_t pi, eulere, recipeulere, epsilon, negepsilon;
 
@@ -495,7 +496,7 @@ if (0) {
     if (b > B) break;
   }
 
-  //round polynomial
+  // Round polynomial.
   {
     int i;
     mpz_ptr coeff;

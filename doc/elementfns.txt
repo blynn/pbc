@@ -100,8 +100,7 @@ include::gen/eio.txt[]
 Only works for finite algebraic structures. Effect on polynomial rings, fields
 of characteristic zero, etc. undefined.
 
-See the chapter on randomness functions on where PBC gets random bits from and
-how to select a different source of random bits.
+See <<randomref>> for how PBC gets random bits.
 
 include::gen/erandom.txt[]
 

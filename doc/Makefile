@@ -10,10 +10,10 @@ TXTFILES:=preface.txt quickstart.txt basics.txt sigex.txt \
 
 GENFILES:=gen/*.txt
 
-gendoc $(GENFILES) : ../include/*.h extract
+gendoc $(GENFILES) : ../*/*.h extract
 	-rm $(GENFILES)
 	-mkdir gen
-	cat ../include/*.h | ./extract
+	cat `grep -l '\/\*@manual' ../*/*.h` | ./extract
 	for a in gen/*.*.txt; do b=$${a%.*.txt}.txt; cat $$a $$b > tmp; mv tmp $$b ; rm $$a; done
 
 manual.xml: $(TXTFILES) $(GENFILES)

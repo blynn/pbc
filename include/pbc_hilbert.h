@@ -1,4 +1,4 @@
-// requires
+// Requires:
 // * darray.h
 #ifndef __PBC_HILBERT_H__
 #define __PBC_HILBERT_H__

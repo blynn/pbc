@@ -595,12 +595,14 @@ void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
                        unsigned char *data, unsigned int len);
 
 /*@manual epow
-Compute 'x' such that 'g^x = h' by brute force.
+Computes 'x' such that 'g^x^ = h' by brute force, where
+'x' lies in a field where `element_set_mpz()` makes sense.
 */
 void element_dlog_brute_force(element_t x, element_t g, element_t h);
 
 /*@manual epow
-Compute 'x' such that 'g^x = h' using Pollard rho method.
+Computes 'x' such that 'g^x^ = h' using Pollard rho method, where
+'x' lies in a field where `element_set_mpz()` makes sense.
 */
 void element_dlog_pollard_rho(element_t x, element_t g, element_t h);
 

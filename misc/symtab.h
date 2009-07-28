@@ -4,7 +4,6 @@
 #include "pbc_darray.h"
 
 #pragma GCC visibility push(hidden)
-// All of this is internal to the library.
 
 struct symtab_s {
     darray_t list;

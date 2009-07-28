@@ -1,9 +1,9 @@
-// requires
+// Requires:
 // * stdlib.h
 #ifndef __PBC_MEMORY_H__
 #define __PBC_MEMORY_H__
 
-//memory allocation functions
+// Memory allocation functions used by PBC.
 extern void *(*pbc_malloc)(size_t);
 extern void *(*pbc_realloc)(void *, size_t);
 extern void (*pbc_free)(void *);

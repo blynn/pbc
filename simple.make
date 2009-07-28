@@ -134,43 +134,43 @@ ecc/singular.o: include/pbc_memory.h
 ecc/pairing.o: include/pbc_utils.h include/pbc_field.h include/pbc_darray.h
 ecc/pairing.o: include/pbc_poly.h include/pbc_curve.h include/pbc_param.h
 ecc/pairing.o: include/pbc_pairing.h include/pbc_memory.h
-ecc/param.o: include/pbc_utils.h include/pbc_symtab.h include/pbc_darray.h
-ecc/param.o: include/pbc_memory.h include/pbc_param.h include/pbc_a_param.h
-ecc/param.o: include/pbc_mnt.h include/pbc_d_param.h include/pbc_e_param.h
-ecc/param.o: include/pbc_f_param.h include/pbc_a1_param.h
-ecc/param.o: include/pbc_g_param.h ecc/param.h
+ecc/param.o: include/pbc_utils.h include/pbc_memory.h include/pbc_param.h
+ecc/param.o: include/pbc_a_param.h include/pbc_mnt.h include/pbc_d_param.h
+ecc/param.o: include/pbc_e_param.h include/pbc_f_param.h
+ecc/param.o: include/pbc_a1_param.h include/pbc_g_param.h misc/symtab.h
+ecc/param.o: include/pbc_darray.h ecc/param.h
 ecc/a_param.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
 ecc/a_param.o: include/pbc_fieldquadratic.h include/pbc_param.h
 ecc/a_param.o: include/pbc_pairing.h include/pbc_curve.h include/pbc_random.h
-ecc/a_param.o: include/pbc_memory.h include/pbc_a_param.h
+ecc/a_param.o: include/pbc_memory.h ecc/param.h include/pbc_a_param.h
 ecc/a_param.o: include/pbc_a1_param.h
 ecc/d_param.o: include/pbc_utils.h include/pbc_darray.h include/pbc_field.h
 ecc/d_param.o: include/pbc_poly.h include/pbc_hilbert.h include/pbc_fp.h
 ecc/d_param.o: include/pbc_fieldquadratic.h include/pbc_mnt.h
 ecc/d_param.o: include/pbc_curve.h include/pbc_param.h include/pbc_pairing.h
-ecc/d_param.o: include/pbc_memory.h include/pbc_d_param.h
+ecc/d_param.o: include/pbc_memory.h include/pbc_d_param.h ecc/param.h
 ecc/e_param.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
 ecc/e_param.o: include/pbc_param.h include/pbc_pairing.h include/pbc_curve.h
 ecc/e_param.o: include/pbc_random.h include/pbc_memory.h
-ecc/e_param.o: include/pbc_e_param.h
+ecc/e_param.o: include/pbc_e_param.h ecc/param.h
 ecc/f_param.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
 ecc/f_param.o: include/pbc_fieldquadratic.h include/pbc_param.h
 ecc/f_param.o: include/pbc_pairing.h include/pbc_poly.h include/pbc_curve.h
-ecc/f_param.o: include/pbc_memory.h include/pbc_f_param.h
+ecc/f_param.o: include/pbc_memory.h include/pbc_f_param.h ecc/param.h
 ecc/g_param.o: include/pbc_utils.h include/pbc_darray.h include/pbc_field.h
 ecc/g_param.o: include/pbc_poly.h include/pbc_hilbert.h include/pbc_fp.h
 ecc/g_param.o: include/pbc_fieldquadratic.h include/pbc_mnt.h
 ecc/g_param.o: include/pbc_curve.h include/pbc_param.h include/pbc_pairing.h
-ecc/g_param.o: include/pbc_memory.h include/pbc_g_param.h
+ecc/g_param.o: include/pbc_memory.h include/pbc_g_param.h ecc/param.h
 ecc/hilbert.o: include/pbc_utils.h include/pbc_field.h include/pbc_darray.h
-ecc/hilbert.o: include/pbc_poly.h include/pbc_hilbert.h include/pbc_mpc.h
-ecc/hilbert.o: include/pbc_memory.h
+ecc/hilbert.o: include/pbc_poly.h include/pbc_hilbert.h include/pbc_memory.h
+ecc/hilbert.o: ecc/mpc.h
 ecc/mnt.o: include/pbc_darray.h include/pbc_mnt.h include/pbc_memory.h
 ecc/mnt.o: include/pbc_utils.h
-ecc/mpc.o: include/pbc_darray.h include/pbc_mpc.h
+ecc/mpc.o: include/pbc_darray.h ecc/mpc.h
 misc/utils.o: include/pbc_utils.h include/pbc_field.h
 misc/darray.o: include/pbc_darray.h include/pbc_memory.h
-misc/symtab.o: include/pbc_symtab.h include/pbc_darray.h include/pbc_memory.h
+misc/symtab.o: include/pbc_memory.h
 misc/extend_printf.o: include/pbc_utils.h include/pbc_field.h
 misc/extend_printf.o: include/pbc_memory.h
 misc/memory.o: include/pbc_utils.h include/pbc_memory.h

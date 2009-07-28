@@ -5,7 +5,6 @@
 #define __PBC_DARRAY_H__
 
 #pragma GCC visibility push(hidden)
-// All of this is internal to the library.
 
 struct darray_s {
   void **item;

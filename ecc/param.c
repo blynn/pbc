@@ -3,7 +3,6 @@
 #include <string.h>
 #include <gmp.h>
 #include "pbc_utils.h"
-#include "pbc_symtab.h"
 #include "pbc_memory.h"
 #include "pbc_param.h"
 #include "pbc_a_param.h"
@@ -14,6 +13,7 @@
 #include "pbc_a1_param.h"
 #include "pbc_g_param.h"
 
+#include "misc/symtab.h"
 #include "ecc/param.h"
 
 // Parser that reads a bunch of strings and places them in a symbol table.

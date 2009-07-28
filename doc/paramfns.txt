@@ -14,16 +14,12 @@ include::gen/param.txt[]
 These were used to prepare the sample parameters in the +param+ subdirectory.
 
 We label the pairing families with capital letters roughly in the order of
-discovery, so we can refer to them easily. Type B and C are unimplemented,
-though I hope to eventually.
+discovery, so we can refer to them easily. Type A is fastest. Type D is a good
+choice when elements should be short but is slower. Type F has even shorter
+elements but is slower still. The speed differences are hardware-dependent, and
+also change when preprocessing is used. Type B and C are unimplemented.
 
-Type A is fastest.
-Type D is a good choice when elements should be short but is slower.
-Type F has even shorter elements but is slower still.
-The speed differences are hardware-dependent,
-and also change when preprocessing is used.
-
-The +cm_info_t+ data type holds CM parameters that are used to generate type D
+The +pbc_cm_t+ data type holds CM parameters that are used to generate type D
 and G curves.
 
 include::gen/cminfo.txt[]

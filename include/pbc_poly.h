@@ -4,7 +4,6 @@
 // Requires:
 // * gmp.h
 // * field.h
-// * darray.h
 #ifndef __PBC_POLY_H__
 #define __PBC_POLY_H__
 

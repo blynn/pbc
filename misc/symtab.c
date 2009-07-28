@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-#include "pbc_symtab.h"
 #include "pbc_memory.h"
+
+#include "symtab.h"
 
 struct entry_s {
   char *key;

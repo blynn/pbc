@@ -1,3 +1,4 @@
+[[bundlechap]]
 == Bundled programs ==
 
 Several binaries and curve parameters are bundled with the PBC library,
@@ -67,22 +68,23 @@ Returns +string+ converted to an element of +G+, e.g.
 
 Programs that generate pairing parameters are located in the `gen`
 subdirectory. Some of the programs are already functional enough to be used to
-find parameters for real applications.  I need to write more documentation
+find parameters for real applications. I need to write more documentation
 first; for now, read the source!
 
 *listmnt*::
   Searches for discriminants D that lead to MNT curves with subgroups
   of prime order.
 
-*genaparam*, *gena1param*, *gendparam*, *geneparam*, *genfparam*::
+*genaparam*, *gena1param*, *gendparam*, *geneparam*, *genfparam*, *gengparam*::
   Prints parameters for a curve suitable for computing pairings of a given type.
-  The output can be fed to some of the other test programs.  The program
-  `gendparam` should be given a discriminant as the first argument.
+  The output can be fed to some of the other test programs.  The programs
+  `gendparam` and `gengparam` should be given a discriminant as the first
+  argument.
 
 *hilbertpoly*::
-  Prints the Hilbert polynomial for a given discriminant (the first argument).
-  Computing the Hilbert polynomial is an intermediate step when generating
-  type D parameters.
+  Prints the Hilbert polynomial for a given range of discriminants. Computing
+  the Hilbert polynomial is an intermediate step when generating type D
+  parameters.
 
 === Example cryptosystems ===
 

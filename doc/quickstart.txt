@@ -15,11 +15,11 @@ By default the library is installed in `/usr/local/lib`.  On some systems, this
 may not be in the library path. One way to fix this is to edit
 `/etc/ld.so.conf` and run `ldconfig`.
 
-Makefile::
-  Due to its speed and simplicity, I use `blynn.make` during development.
+Simple Makefile::
+  Due to its speed and simplicity, I use `simple.make` during development.
   Naturally it is less portable.
 +
-  $ make -f blynn.make
+  $ make -f simple.make
 
 PBC uses some GNU C extensions, notably nested functions.
 

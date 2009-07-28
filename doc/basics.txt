@@ -22,7 +22,7 @@ GMP variables in function calls: effectively as call-by references.
 In other words, as in GMP, if a function that modifies an input variable,
 that variable remains modified when control return is returned to the caller.
 * Like GMP, variables automatically allocate memory when needed.
-By default. +malloc()+ and friends are called but this can be changed.
+By default, +malloc()+ and friends are called but this can be changed.
 * PBC functions are mostly reentrant.
 
 Since the PBC library is built on top of GMP, the GMP types
@@ -34,33 +34,25 @@ manual, and shows how to declare the PBC data type +element_t+.
     struct foo { element_t x, y; };
     element_t vec[20];
 
-Many programs only need +element_t+ and one other data type called
-+pairing_type+.
-
 GMP has the +mpz_t+ type for integers, +mpq_t+ for rationals and so on.
 In contrast, PBC uses the +element_t+ data type for elements of different
 algebraic structures, such as elliptic curve groups, polynomial rings and
 finite fields. Functions assume their inputs come from appropriate algebraic
 structures.
 
-Other applications may need other data types such as:
+PBC data types and functions can be categorized as follows. The first two alone
+suffice for a range of applications.
 
- - +pbc_param_t+: pairing parameters.
- - +cm_info_t+: parameters for constructing curves via the  CM method.
- - +field_t+: groups, rings and fields.
- - +mpc_t+: complex arbitrary precision floats.
+ - +element_t+: elements of an algebraic structure.
+ - +pairing_t+: pairings where elements belong; can initialize from sample
+   pairing parameters bundled with PBC in the +param+ subdirectory.
+ - +pbc_param_t+: used to generate pairing parameters.
+ - +pbc_cm_t+: parameters for constructing curves via the CM method; sometimes
+   required by +pbc_param_t+.
+ - +field_t+: algebraic structures: groups, rings and fields; used internally
+   by +pairing_t+.
+ - a few miscellaneous functions, such as ones controlling how random bits are
+   generated.
 
-PBC contains several classes of functions:
-
-* Functions involving pairings; these begin with
-+pairing_+.
-
-* Functions operating on elements of groups, rings and fields; these begin
-with +element_+.
-
-* Functions generating pairing parameters, that is, find elliptic curves
-where efficiently computable bilinear pairings exist; these begin
-with +pbc_param_+.
-
-* Miscellaneous functions, such as ones controlling how random bits are
-generated.
+Functions operating on a given data type usually have the same prefix, e.g.
+those involving +element_t+ objects begin with +element_+.
