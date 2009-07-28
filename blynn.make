@@ -10,7 +10,7 @@ RANLIB := ranlib
 warnflags := -Wall -W -Wfloat-equal -Wendif-labels -Wshadow \
 	     -Wpointer-arith -Wcast-align -Wstrict-prototypes \
              -Wredundant-decls #-std=c99 -pedantic
-CPPFLAGS := -Iinclude
+CPPFLAGS := -Iinclude -I.
 optflags := -O3 -g -pipe -ffast-math -fomit-frame-pointer
 LDLIBS := -lgmp -lm
 CFLAGS := $(optflags) $(warnflags)
@@ -36,7 +36,7 @@ libpbc_srcs := \
     field fp montfp naivefp fastfp fasterfp fieldmpz fieldquadratic poly \
     random dlog)) \
   $(addsuffix .c,$(addprefix ecc/, \
-    curve singular pairing param_io \
+    curve singular pairing param \
     a_param d_param e_param f_param g_param \
     hilbert mnt mpc)) \
   $(addsuffix .c,$(addprefix misc/, \
@@ -108,7 +108,6 @@ depend:
 
 arith/field.o: include/pbc_utils.h include/pbc_field.h include/pbc_memory.h
 arith/fp.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
-arith/fp.o: include/pbc_memory.h
 arith/montfp.o: include/pbc_utils.h include/pbc_field.h include/pbc_random.h
 arith/montfp.o: include/pbc_fp.h include/pbc_memory.h
 arith/naivefp.o: include/pbc_utils.h include/pbc_field.h include/pbc_random.h
@@ -135,36 +134,37 @@ ecc/singular.o: include/pbc_memory.h
 ecc/pairing.o: include/pbc_utils.h include/pbc_field.h include/pbc_darray.h
 ecc/pairing.o: include/pbc_poly.h include/pbc_curve.h include/pbc_param.h
 ecc/pairing.o: include/pbc_pairing.h include/pbc_memory.h
-ecc/param_io.o: include/pbc_utils.h include/pbc_symtab.h include/pbc_darray.h
-ecc/param_io.o: include/pbc_memory.h ecc/param_io.h include/pbc_param.h
-ecc/param_io.o: include/pbc_a_param.h include/pbc_mnt.h include/pbc_d_param.h
-ecc/param_io.o: include/pbc_e_param.h include/pbc_f_param.h
-ecc/param_io.o: include/pbc_a1_param.h include/pbc_g_param.h
+ecc/param.o: include/pbc_utils.h include/pbc_symtab.h include/pbc_darray.h
+ecc/param.o: include/pbc_memory.h include/pbc_param.h include/pbc_a_param.h
+ecc/param.o: include/pbc_mnt.h include/pbc_d_param.h include/pbc_e_param.h
+ecc/param.o: include/pbc_f_param.h include/pbc_a1_param.h
+ecc/param.o: include/pbc_g_param.h ecc/param.h
 ecc/a_param.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
 ecc/a_param.o: include/pbc_fieldquadratic.h include/pbc_param.h
 ecc/a_param.o: include/pbc_pairing.h include/pbc_curve.h include/pbc_random.h
-ecc/a_param.o: include/pbc_memory.h ecc/param_io.h include/pbc_a_param.h
+ecc/a_param.o: include/pbc_memory.h include/pbc_a_param.h
 ecc/a_param.o: include/pbc_a1_param.h
 ecc/d_param.o: include/pbc_utils.h include/pbc_darray.h include/pbc_field.h
-ecc/d_param.o: include/pbc_poly.h include/pbc_fp.h
+ecc/d_param.o: include/pbc_poly.h include/pbc_hilbert.h include/pbc_fp.h
 ecc/d_param.o: include/pbc_fieldquadratic.h include/pbc_mnt.h
 ecc/d_param.o: include/pbc_curve.h include/pbc_param.h include/pbc_pairing.h
-ecc/d_param.o: include/pbc_memory.h include/pbc_d_param.h ecc/param_io.h
+ecc/d_param.o: include/pbc_memory.h include/pbc_d_param.h
 ecc/e_param.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
 ecc/e_param.o: include/pbc_param.h include/pbc_pairing.h include/pbc_curve.h
 ecc/e_param.o: include/pbc_random.h include/pbc_memory.h
-ecc/e_param.o: include/pbc_e_param.h ecc/param_io.h
+ecc/e_param.o: include/pbc_e_param.h
 ecc/f_param.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
 ecc/f_param.o: include/pbc_fieldquadratic.h include/pbc_param.h
 ecc/f_param.o: include/pbc_pairing.h include/pbc_poly.h include/pbc_curve.h
-ecc/f_param.o: include/pbc_memory.h include/pbc_f_param.h ecc/param_io.h
+ecc/f_param.o: include/pbc_memory.h include/pbc_f_param.h
 ecc/g_param.o: include/pbc_utils.h include/pbc_darray.h include/pbc_field.h
-ecc/g_param.o: include/pbc_poly.h include/pbc_fp.h
+ecc/g_param.o: include/pbc_poly.h include/pbc_hilbert.h include/pbc_fp.h
 ecc/g_param.o: include/pbc_fieldquadratic.h include/pbc_mnt.h
 ecc/g_param.o: include/pbc_curve.h include/pbc_param.h include/pbc_pairing.h
-ecc/g_param.o: include/pbc_memory.h include/pbc_g_param.h ecc/param_io.h
+ecc/g_param.o: include/pbc_memory.h include/pbc_g_param.h
 ecc/hilbert.o: include/pbc_utils.h include/pbc_field.h include/pbc_darray.h
-ecc/hilbert.o: include/pbc_poly.h include/pbc_mpc.h include/pbc_memory.h
+ecc/hilbert.o: include/pbc_poly.h include/pbc_hilbert.h include/pbc_mpc.h
+ecc/hilbert.o: include/pbc_memory.h
 ecc/mnt.o: include/pbc_darray.h include/pbc_mnt.h include/pbc_memory.h
 ecc/mnt.o: include/pbc_utils.h
 ecc/mpc.o: include/pbc_darray.h include/pbc_mpc.h
@@ -269,6 +269,7 @@ gen/gengparam.o: include/pbc_g_param.h include/pbc_random.h
 gen/gengparam.o: include/pbc_memory.h
 gen/hilbertpoly.o: include/pbc_utils.h include/pbc_field.h
 gen/hilbertpoly.o: include/pbc_darray.h include/pbc_poly.h
+gen/hilbertpoly.o: include/pbc_hilbert.h
 gen/listmnt.o: include/pbc.h include/pbc_utils.h include/pbc_field.h
 gen/listmnt.o: include/pbc_param.h include/pbc_pairing.h include/pbc_curve.h
 gen/listmnt.o: include/pbc_mnt.h include/pbc_a1_param.h include/pbc_a_param.h

@@ -39,7 +39,7 @@ void darray_remove_last(darray_ptr a)
     a->count--;
 }
 
-void darray_realloc(darray_ptr a, int size)
+static void darray_realloc(darray_ptr a, int size)
 {
     a->max = size;
     a->item = pbc_realloc(a->item, sizeof(void *) * a->max);
@@ -70,14 +70,6 @@ void darray_clear(darray_t a)
     pbc_free(a->item);
     a->max = 0;
     a->count = 0;
-}
-
-void darray_show(darray_ptr a)
-{
-    int i;
-    for (i=0;i<a->count;i++) {
-	printf("%d: %p\n", i, a->item[i]);
-    }
 }
 
 void darray_remove_index(darray_ptr a, int n)

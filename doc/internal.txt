@@ -2,7 +2,8 @@
 
 The source code is organized by subdirectories:
 
-*`include`*: Include files describing the API.
+*`include`*: Headers describing the official API. Headers in other places
+are for internal use only.
 
 *`arith`*: Finite fields: modular arithmetic, polynomial rings, and polynomial
 rings modulo a polynomial. Finite fields of low characteristic are unsupported.

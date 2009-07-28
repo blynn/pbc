@@ -5,8 +5,6 @@
 #include "pbc_utils.h"
 #include "pbc_symtab.h"
 #include "pbc_memory.h"
-#include "param_io.h"
-
 #include "pbc_param.h"
 #include "pbc_a_param.h"
 #include "pbc_mnt.h"
@@ -15,6 +13,8 @@
 #include "pbc_f_param.h"
 #include "pbc_a1_param.h"
 #include "pbc_g_param.h"
+
+#include "ecc/param.h"
 
 // Parser that reads a bunch of strings and places them in a symbol table.
 // TODO: Replace with Flex/Bison?
@@ -130,8 +130,9 @@ static void read_symtab(symtab_t tab, const char *input, size_t limit) {
   token_clear(tok);
 }
 
-// TODO: Make these static and move them to the header? Library users should
-// not need these functions. If so, I should also rename this file to param.c.
+// These functions have hidden visibility on platforms that support it
+// (see header). We could go further by making these static and moving them to
+// the header. If done, I should rename this file to param.c.
 
 void param_out_type(FILE *stream, char *s) {
   fprintf(stream, "type %s\n", s);

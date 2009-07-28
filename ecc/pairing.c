@@ -12,7 +12,7 @@
 #include "pbc_pairing.h"
 #include "pbc_memory.h"
 
-int generic_is_almost_coddh(element_ptr a, element_ptr b,
+static int generic_is_almost_coddh(element_ptr a, element_ptr b,
     element_ptr c, element_ptr d, pairing_t pairing) {
   int res = 0;
   element_t t0, t1;
@@ -202,7 +202,7 @@ static void mulg_pp_pow(element_t out, mpz_ptr power, element_pp_t p) {
   element_pp_pow(out->data, power, p->data);
 }
 
-void GT_init_finite_field(pairing_ptr pairing, field_t f) {
+void pairing_GT_init(pairing_ptr pairing, field_t f) {
   field_ptr gt = pairing->GT;
 
   field_init(gt);

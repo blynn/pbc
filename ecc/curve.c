@@ -427,13 +427,13 @@ static void curve_out_info(FILE *out, field_t f) {
   }
 }
 
-int odd_curve_is_sqr(element_ptr e) {
+static int odd_curve_is_sqr(element_ptr e) {
   UNUSED_VAR(e);
   return 1;
 }
 
 //TODO: untested
-int even_curve_is_sqr(element_ptr e) {
+static int even_curve_is_sqr(element_ptr e) {
   mpz_t z;
   element_t e1;
   int result;
@@ -688,7 +688,7 @@ void field_init_curve_b(field_ptr f, element_ptr b, mpz_t order, mpz_t cofac) {
 
 // Compute trace of Frobenius at q^n given trace at q.
 // See p.105 of Blake, Seroussi and Smart.
-void compute_trace_n(mpz_t res, mpz_t q, mpz_t trace, int n) {
+void pbc_mpz_trace_n(mpz_t res, mpz_t q, mpz_t trace, int n) {
   int i;
   mpz_t c0, c1, c2;
   mpz_t t0;

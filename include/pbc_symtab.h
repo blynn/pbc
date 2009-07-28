@@ -3,6 +3,9 @@
 
 #include "pbc_darray.h"
 
+#pragma GCC visibility push(hidden)
+// All of this is internal to the library.
+
 struct symtab_s {
     darray_t list;
 };
@@ -35,5 +38,7 @@ Returns pointer at key 'key' in 't'.
 void *symtab_at(symtab_t t, const char *key);
 
 void symtab_forall_data(symtab_t t, void (*func)(void *));
+
+#pragma GCC visibility pop
 
 #endif //__PBC_SYMTAB_H__

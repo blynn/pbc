@@ -12,7 +12,7 @@
 #include "pbc_random.h"
 #include "pbc_memory.h"
 #include "pbc_e_param.h"
-#include "param_io.h"
+#include "ecc/param.h"
 
 struct e_param_s {
   mpz_t q;    // Curve is defined over F_q.
@@ -827,7 +827,7 @@ static void e_finalpow(element_ptr e) {
   element_pow_mpz(e->data, e->data, e->field->pairing->phikonr);
 }
 
-void e_init_pairing(pairing_t pairing, void *data) {
+static void e_init_pairing(pairing_t pairing, void *data) {
   e_param_ptr param = data;
   e_pairing_data_ptr p;
   element_t a, b;
@@ -856,7 +856,7 @@ void e_init_pairing(pairing_t pairing, void *data) {
   mpz_divexact(pairing->phikonr, pairing->phikonr, pairing->r);
 
   pairing->G2 = pairing->G1 = p->Eq;
-  GT_init_finite_field(pairing, p->Fq);
+  pairing_GT_init(pairing, p->Fq);
   pairing->finalpow = e_finalpow;
   pairing->phi = phi_identity;
   pairing->option_set = e_pairing_option_set;

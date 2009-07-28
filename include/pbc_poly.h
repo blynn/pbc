@@ -8,6 +8,16 @@
 #ifndef __PBC_POLY_H__
 #define __PBC_POLY_H__
 
+// Initializes a polynomial ring.
+void field_init_poly(field_ptr f, field_ptr base_field);
+
+// Initializes a polynomial modulo ring.
+// Requires poly to be monic.
+void field_init_polymod(field_ptr f, element_ptr poly);
+
+#pragma GCC visibility push(hidden)
+// Internal library functions:
+
 // Returns deg f + 1.
 int poly_coeff_count(element_ptr f);
 
@@ -40,13 +50,6 @@ void poly_set_coeff(element_ptr f, element_ptr a, int n);
 void poly_setx(element_ptr f);
 void poly_const_mul(element_ptr res, element_ptr a, element_ptr poly);
 
-// Initializes a polynomial ring.
-void field_init_poly(field_ptr f, field_ptr base_field);
-
-// Initializes a polynomial modulo ring.
-// Requires poly to be monic.
-void field_init_polymod(field_ptr f, element_ptr poly);
-
 // Returns 0 when a root exists and sets root to one of the roots.
 int poly_findroot(element_ptr root, element_ptr poly);
 
@@ -64,5 +67,7 @@ element_ptr polymod_coeff(element_ptr e, int i);
 
 void polymod_const_mul(element_ptr res, element_ptr a, element_ptr e);
 int polymod_field_degree(field_t f);
+
+#pragma GCC visibility pop
 
 #endif //__PBC_POLY_H__

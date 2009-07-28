@@ -12,7 +12,7 @@
 #include "pbc_curve.h"
 #include "pbc_memory.h"
 #include "pbc_f_param.h"
-#include "param_io.h"
+#include "ecc/param.h"
 
 struct f_param_s {
     mpz_t q; // Curve defined over F_q.
@@ -384,7 +384,7 @@ static void f_init_pairing(pairing_t pairing, void *data) {
 
   pairing->G1 = p->Eq;
   pairing->G2 = p->Etwist;
-  GT_init_finite_field(pairing, p->Fq12);
+  pairing_GT_init(pairing, p->Fq12);
   pairing->finalpow = f_finalpow;
   pairing->map = f_pairing;
   pairing->clear_func = f_pairing_clear;
@@ -551,7 +551,7 @@ void pbc_param_init_f_gen(pbc_param_t p, int bits) {
     //(n_12 / r^2)P != O for some (in fact most) P in E'(F_q^6)
     mpz_pow_ui(z0, q, 12);
     mpz_add_ui(z0, z0, 1);
-    compute_trace_n(z1, q, t, 12);
+    pbc_mpz_trace_n(z1, q, t, 12);
     mpz_sub(z1, z0, z1);
     mpz_mul(z0, r, r);
     mpz_divexact(z1, z1, z0);

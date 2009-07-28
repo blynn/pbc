@@ -123,7 +123,8 @@ static void generic_pow_mpz(element_ptr x, element_ptr a, mpz_ptr n) {
   clear_pow_window(k, a_lookup);
 }
 
-void naive_generic_pow_mpz(element_ptr x, element_ptr a, mpz_ptr n) {
+/* TODO: Allow fields to choose this exponentiation routine so we can compare.
+static void naive_generic_pow_mpz(element_ptr x, element_ptr a, mpz_ptr n) {
   int s;
 
   element_t result;
@@ -145,6 +146,7 @@ void naive_generic_pow_mpz(element_ptr x, element_ptr a, mpz_ptr n) {
   element_set(x, result);
   element_clear(result);
 }
+*/
 
 void element_pow2_mpz(element_ptr x, element_ptr a1, mpz_ptr n1,
                       element_ptr a2, mpz_ptr n2) {
@@ -318,16 +320,16 @@ static void element_pow_base_table(element_ptr x, mpz_ptr n,
   element_clear(result);
 }
 
-void default_element_pp_init(element_pp_t p, element_t in) {
+static void default_element_pp_init(element_pp_t p, element_t in) {
   p->data =
       element_build_base_table(in, mpz_sizeinbase(in->field->order, 2), 5);
 }
 
-void default_element_pp_pow(element_t out, mpz_ptr power, element_pp_t p) {
+static void default_element_pp_pow(element_t out, mpz_ptr power, element_pp_t p) {
   element_pow_base_table(out, power, p->data);
 }
 
-void default_element_pp_clear(element_pp_t p) {
+static void default_element_pp_clear(element_pp_t p) {
   struct element_base_table *base_table = p->data;
   int lookup_size = 1 << base_table->k;
   element_t *lookup;
@@ -502,7 +504,7 @@ static void generic_out_info(FILE * out, field_ptr f) {
   element_fprintf(out, "order = %Zd\n", f->order);
 }
 
-int default_element_snprint(char *s, size_t n, element_t e) {
+static int default_element_snprint(char *s, size_t n, element_t e) {
   UNUSED_VAR(e);
   if (n == 1) {
     s[0] = '0';
@@ -513,7 +515,7 @@ int default_element_snprint(char *s, size_t n, element_t e) {
   return 1;
 }
 
-int default_element_set_str(element_t e, char *s, int base) {
+static int default_element_set_str(element_t e, char *s, int base) {
   UNUSED_VAR(s);
   UNUSED_VAR(base);
   element_set0(e);

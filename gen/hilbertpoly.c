@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
 
   darray_init(coefflist);
 
-  poly_hilbert(coefflist, D);
+  pbc_hilbert(coefflist, D);
 
   n = coefflist->count;
   printf(" ");

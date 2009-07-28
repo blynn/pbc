@@ -1,12 +1,16 @@
-//darray = "dynamic array"
-//A linked-list implementation using C arrays
+// darray = "dynamic array"
+// A linked-list implementation using C arrays.
+
 #ifndef __PBC_DARRAY_H__
 #define __PBC_DARRAY_H__
 
+#pragma GCC visibility push(hidden)
+// All of this is internal to the library.
+
 struct darray_s {
-    void **item;
-    int count;
-    int max;
+  void **item;
+  int count;
+  int max;
 };
 
 typedef struct darray_s darray_t[1];
@@ -31,9 +35,8 @@ void darray_append(darray_t a, void *p);
 /*@manual darray
 Returns the pointer at index 'i' in the dynamic array 'a'.
 */
-static inline void *darray_at(darray_t a, int i)
-{
-    return a->item[i];
+static inline void *darray_at(darray_t a, int i) {
+  return a->item[i];
 }
 
 int darray_index_of(darray_ptr a, void *p);
@@ -54,19 +57,18 @@ void *darray_at_test(darray_ptr a, int (*test)(void *));
 /*@manual darray
 Returns the number of pointers held in 'a'.
 */
-static inline int darray_count(darray_ptr a)
-{
-    return a->count;
+static inline int darray_count(darray_ptr a) {
+  return a->count;
 }
 
-static inline int darray_is_empty(darray_ptr a)
-{
-    return !a->count;
+static inline int darray_is_empty(darray_ptr a) {
+  return !a->count;
 }
 
-static inline void *darray_last(darray_t a)
-{
-    return a->item[a->count - 1];
+static inline void *darray_last(darray_t a) {
+  return a->item[a->count - 1];
 }
+
+#pragma GCC visibility pop
 
 #endif //__PBC_DARRAY_H__

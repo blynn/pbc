@@ -18,7 +18,7 @@
 #include "pbc_pairing.h"
 #include "pbc_memory.h"
 #include "pbc_d_param.h"
-#include "param_io.h"
+#include "ecc/param.h"
 
 struct d_param_s {
   mpz_t q;       // curve defined over F_q
@@ -899,7 +899,7 @@ static void d_init_pairing(pairing_ptr pairing, void *data) {
   pairing->G2 = p->Etwist;
 
   p->k = param->k;
-  GT_init_finite_field(pairing, p->Fqk);
+  pairing_GT_init(pairing, p->Fqk);
   pairing->finalpow = cc_finalpow;
 
   // By default use affine coordinates.
@@ -930,7 +930,7 @@ static void compute_cm_curve(d_param_ptr param, pbc_cm_ptr cm) {
   element_init(hp, fpx);
 
   darray_init(coefflist);
-  poly_hilbert(coefflist, cm->D);
+  pbc_hilbert(coefflist, cm->D);
 
   n = coefflist->count;
   // Temporarily set the coefficient of x^{n-1} to 1 so hp has degree n - 1,
@@ -940,7 +940,7 @@ static void compute_cm_curve(d_param_ptr param, pbc_cm_ptr cm) {
     element_set_mpz(poly_coeff(hp, i), coefflist->item[i]);
   }
 
-  poly_hilbert_clear(coefflist);
+  pbc_hilbert_clear(coefflist);
 
   darray_clear(coefflist);
   // TODO: Remove x = 0, 1728 roots.
@@ -986,7 +986,7 @@ static void compute_cm_curve(d_param_ptr param, pbc_cm_ptr cm) {
     // n = q - t + 1 hence t = q - n + 1
     mpz_sub(z, param->q, param->n);
     mpz_add_ui(z, z, 1);
-    compute_trace_n(z, param->q, z, param->k);
+    pbc_mpz_trace_n(z, param->q, z, param->k);
     mpz_pow_ui(param->nk, param->q, param->k);
     mpz_sub_ui(z, z, 1);
     mpz_sub(param->nk, param->nk, z);

@@ -49,7 +49,7 @@ libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
 	misc/memory.c \
 	ecc/mpc.c ecc/mnt.c ecc/hilbert.c ecc/curve.c ecc/pairing.c \
 	ecc/singular.c \
-	ecc/param_io.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
+	ecc/param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
 	ecc/f_param.c ecc/g_param.c misc/extend_printf.c
 libpbc_la_LDFLAGS =  -lgmp -lm
 

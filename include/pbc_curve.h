@@ -44,7 +44,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
 void field_reinit_curve_twist(field_t f);
 
 // Compute trace of Frobenius at q^n given trace at q.
-void compute_trace_n(mpz_t res, mpz_t q, mpz_t trace, int n);
+void pbc_mpz_trace_n(mpz_t res, mpz_t q, mpz_t trace, int n);
 
 void field_init_curve_with_map(field_ptr cnew, field_ptr c,
   field_ptr dstfield, fieldmap map);
@@ -52,6 +52,11 @@ void field_init_curve_with_map(field_ptr cnew, field_ptr c,
 void field_init_curve_ab_map(field_t cnew, field_t c,
   fieldmap map, field_ptr mapdest,
   mpz_t ordernew, mpz_t cofacnew);
+
+void field_curve_use_random_solvefory(field_ptr f);
+
+#pragma GCC visibility push(hidden)
+// Internal:
 
 element_ptr curve_x_coord(element_t e);
 element_ptr curve_y_coord(element_t e);
@@ -64,6 +69,6 @@ void curve_from_x(element_ptr e, element_t x);
 void curve_set_si(element_t R, long int x, long int y);
 void curve_set_gen_no_cofac(element_ptr a);
 
-void field_curve_use_random_solvefory(field_ptr f);
+#pragma GCC visibility pop
 
 #endif //__PBC_CURVE_H__

@@ -215,9 +215,6 @@ static inline int pairing_length_in_bytes_Zr(pairing_t pairing) {
   return pairing->Zr->fixed_length_in_bytes;
 }
 
-int generic_is_almost_coddh(element_ptr a, element_ptr b,
-    element_ptr c, element_ptr d, pairing_t pairing);
-
 static inline int is_almost_coddh(element_t a, element_t b,
     element_t c, element_t d, pairing_t pairing) {
   return pairing->is_almost_coddh(a, b, c, d, pairing);
@@ -254,8 +251,8 @@ static inline void pairing_option_set(pairing_t pairing, char *key, char *value)
   pairing->option_set(pairing, key, value);
 }
 
-// initialize GT = group of rth roots of unity in f
-// assumes pairing->r has been set
-void GT_init_finite_field(pairing_ptr pairing, field_t f);
+// Initialize GT = group of rth roots of unity in f.
+// Requires pairing->r has been set.
+void pairing_GT_init(pairing_ptr pairing, field_t f);
 
 #endif //__PBC_PAIRING_H__

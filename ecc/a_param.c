@@ -12,7 +12,7 @@
 #include "pbc_curve.h"
 #include "pbc_random.h"
 #include "pbc_memory.h"
-#include "param_io.h"
+#include "ecc/param.h"
 #include "pbc_a_param.h"
 #include "pbc_a1_param.h"
 
@@ -1352,7 +1352,7 @@ static void a_init_pairing(pairing_ptr pairing, void *data) {
   pairing->G1 = p->Eq;
   pairing->G2 = pairing->G1;
   pairing->phi = phi_identity;
-  GT_init_finite_field(pairing, p->Fq2);
+  pairing_GT_init(pairing, p->Fq2);
   pairing->finalpow = a_finalpow;
 
   pairing->clear_func = a_pairing_clear;
@@ -1844,7 +1844,7 @@ static void a1_init_pairing(pairing_t pairing, void *data) {
   pairing->finalpow = a_finalpow;
   pairing->G1 = pbc_malloc(sizeof(field_t));
   pairing->G2 = pairing->G1 = p->Ep;
-  GT_init_finite_field(pairing, p->Fp2);
+  pairing_GT_init(pairing, p->Fp2);
 
   pairing->map = a1_pairing;
   pairing->phi = phi_identity;
