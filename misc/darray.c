@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "pbc_darray.h"
 #include "pbc_memory.h"
+#include "darray.h"
 
 #define NDEBUG
 #include <assert.h>

@@ -1,7 +1,7 @@
 #ifndef __PBC_SYMTAB_H__
 #define __PBC_SYMTAB_H__
 
-#include "pbc_darray.h"
+#include "darray.h"
 
 #pragma GCC visibility push(hidden)
 

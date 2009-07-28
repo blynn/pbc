@@ -13,10 +13,6 @@
 #include <stdlib.h> //for atoi, exit
 #include <gmp.h>
 #include "pbc_utils.h"
-#include "pbc_field.h"
-#include "pbc_darray.h"
-#include "pbc_poly.h"
-#include "pbc_memory.h"
 #include "pbc_hilbert.h"
 
 int main(int argc, char **argv) {

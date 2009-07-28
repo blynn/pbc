@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <gmp.h>
 #include "pbc_utils.h"
-#include "pbc_darray.h"
 #include "pbc_field.h"
 #include "pbc_memory.h"
+#include "misc/darray.h"
 
 // g, h in some group of order r
 // finds x such that g^x = h

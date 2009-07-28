@@ -5,10 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
-#include "pbc_darray.h"
 #include "pbc_mnt.h"
 #include "pbc_memory.h"
 #include "pbc_utils.h"
+#include "misc/darray.h"
 
 struct pell_solution_s {
   int count;

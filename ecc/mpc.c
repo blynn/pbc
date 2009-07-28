@@ -1,7 +1,6 @@
 //GMP based complex floats
 #include <stdio.h>
 #include <gmp.h>
-#include "pbc_darray.h"
 #include "mpc.h"
 
 //(a+bi)(c+di) = ac - bd  + ((a+b)(c+d) - ac - bd)i

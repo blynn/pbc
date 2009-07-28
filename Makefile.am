@@ -15,7 +15,6 @@ library_includedir = $(includedir)/pbc
 library_include_HEADERS = include/pbc_a1_param.h \
 include/pbc_a_param.h \
 include/pbc_curve.h \
-include/pbc_darray.h \
 include/pbc_d_param.h \
 include/pbc_e_param.h \
 include/pbc_field.h \
@@ -28,13 +27,11 @@ include/pbc.h \
 include/pbc_hilbert.h \
 include/pbc_memory.h \
 include/pbc_mnt.h \
-include/pbc_mpc.h \
 include/pbc_pairing.h \
 include/pbc_param.h \
 include/pbc_poly.h \
 include/pbc_random.h \
 include/pbc_singular.h \
-include/pbc_symtab.h \
 include/pbc_test.h \
 include/pbc_utils.h
 
@@ -44,19 +41,19 @@ libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
 	arith/fp.c arith/fasterfp.c arith/montfp.c \
 	arith/dlog.c \
 	arith/fieldquadratic.c arith/poly.c \
-	arith/random.c arith/init_random.c misc/darray.c misc/symtab.c misc/get_time.c \
-	misc/utils.c \
-	misc/memory.c \
+	arith/random.c arith/init_random.c \
+	misc/darray.c misc/symtab.c misc/get_time.c \
+	misc/utils.c misc/memory.c misc/extend_printf.c \
 	ecc/mpc.c ecc/mnt.c ecc/hilbert.c ecc/curve.c ecc/pairing.c \
 	ecc/singular.c \
 	ecc/param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
-	ecc/f_param.c ecc/g_param.c misc/extend_printf.c
+	ecc/f_param.c ecc/g_param.c
 libpbc_la_LDFLAGS =  -lgmp -lm
 
 noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa benchmark/ellnet
 pbc_pbc_CPPFLAGS = -I include
 pbc_pbc_LDADD = libpbc.la
-pbc_pbc_SOURCES = pbc/pbc.c pbc/pbc_getline.c
+pbc_pbc_SOURCES = pbc/pbc.c pbc/pbc_getline.c misc/darray.c misc/symtab.c
 benchmark_benchmark_CPPFLAGS = -I include
 benchmark_benchmark_LDADD = libpbc.la
 benchmark_benchmark_SOURCES = benchmark/benchmark.c

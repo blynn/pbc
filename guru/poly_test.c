@@ -2,8 +2,8 @@
 #include "pbc.h"
 #include "pbc_fp.h"
 #include "pbc_poly.h"
-#include "pbc_darray.h"
 #include "pbc_test.h"
+#include "misc/darray.h"
 
 int main(void) {
   field_t fp, fx;

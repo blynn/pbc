@@ -1,5 +1,5 @@
 // Requires:
-// * darray.h
+// * gmp.h
 #ifndef __PBC_HILBERT_H__
 #define __PBC_HILBERT_H__
 

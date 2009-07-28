@@ -286,7 +286,6 @@ void field_init_curve_singular_with_node(field_t c, field_t field) {
   c->set1 = c->set0 = sn_set0;
   c->is1 = c->is0 = sn_is0;
   c->mul_mpz = element_pow_mpz;
-  c->mul_mpz = naive_generic_pow_mpz;
   c->out_str = sn_out_str;
   c->field_clear = sn_field_clear;
 }
