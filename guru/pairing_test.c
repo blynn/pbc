@@ -86,10 +86,13 @@ static void a_test(void) {
 
   element_clear(g);
   element_clear(h);
+  element_clear(a);
+  element_clear(b);
   element_clear(ga);
   element_clear(hb);
   element_clear(x1);
   element_clear(x2);
+  pairing_clear(pairing);
 }
 
 void oldtest(void) {
@@ -150,6 +153,7 @@ void oldtest(void) {
     printf("\n");
     element_from_bytes(h, data);
     element_printf("from_bytes h = %B\n", h);
+    free(data);
   }
 
   element_clear(g);

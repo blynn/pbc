@@ -56,10 +56,11 @@ static void g_clear(void *data) {
   mpz_clear(param->nk);
   mpz_clear(param->hk);
   mpz_clear(param->nqr);
-  for (i=0; i<5; i++) {
+  for (i = 0; i < 5; i++) {
     mpz_clear(param->coeff[i]);
   }
   pbc_free(param->coeff);
+  free(data);
 }
 
 static void g_out_str(FILE *stream, void *data) {
@@ -1170,31 +1171,26 @@ static void g_finalpow(element_ptr e) {
 // complex multiplication method, where cm holds appropriate data
 // (e.g. discriminant, field order).
 static void compute_cm_curve(g_param_ptr param, pbc_cm_ptr cm) {
-  darray_t coefflist;
   element_t hp, root;
   field_t fp, fpx;
-  int i, n;
   field_t cc;
 
   field_init_fp(fp, cm->q);
   field_init_poly(fpx, fp);
   element_init(hp, fpx);
 
-  darray_init(coefflist);
+  mpz_t *coefflist;
+  int n = pbc_hilbert(&coefflist, cm->D);
 
-  pbc_hilbert(coefflist, cm->D);
-
-  n = coefflist->count;
   // Temporarily set the coefficient of x^{n-1} to 1 so hp has degree n - 1,
   // allowing us to use poly_coeff().
   poly_set_coeff1(hp, n - 1);
-  for (i=0; i<n; i++) {
-    element_set_mpz(poly_coeff(hp, i), coefflist->item[i]);
+  int i;
+  for (i = 0; i < n; i++) {
+    element_set_mpz(poly_coeff(hp, i), coefflist[i]);
   }
+  pbc_hilbert_free(coefflist, n);
 
-  pbc_hilbert_clear(coefflist);
-
-  darray_clear(coefflist);
   //TODO: remove x = 0, 1728 roots
   //TODO: what if there's no roots?
   //printf("hp ");

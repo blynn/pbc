@@ -113,11 +113,18 @@ break2: ;
       } else break;
     }
   }
-break3:
+break3: ;
 
+  void elfree(void *data) {
+    element_clear(data);
+    free(data);
+  }
+  darray_forall(list, elfree);
+  darray_forall(prodlist, elfree);
   darray_clear(prodlist);
   darray_clear(list);
   mpz_clear(prime);
+  field_clear(fx);
   field_clear(fp);
   element_clear(e);
 

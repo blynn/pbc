@@ -919,30 +919,26 @@ static void d_init_pairing(pairing_ptr pairing, void *data) {
 // complex multiplication method, where cm holds the appropriate information
 // (e.g. discriminant, field order).
 static void compute_cm_curve(d_param_ptr param, pbc_cm_ptr cm) {
-  darray_t coefflist;
   element_t hp, root;
   field_t fp, fpx;
-  int i, n;
   field_t cc;
 
   field_init_fp(fp, cm->q);
   field_init_poly(fpx, fp);
   element_init(hp, fpx);
 
-  darray_init(coefflist);
-  pbc_hilbert(coefflist, cm->D);
+  mpz_t *coefflist;
+  int n = pbc_hilbert(&coefflist, cm->D);
 
-  n = coefflist->count;
   // Temporarily set the coefficient of x^{n-1} to 1 so hp has degree n - 1,
   // allowing us to use poly_coeff().
   poly_set_coeff1(hp, n - 1);
+  int i;
   for (i = 0; i < n; i++) {
-    element_set_mpz(poly_coeff(hp, i), coefflist->item[i]);
+    element_set_mpz(poly_coeff(hp, i), coefflist[i]);
   }
+  pbc_hilbert_free(coefflist, n);
 
-  pbc_hilbert_clear(coefflist);
-
-  darray_clear(coefflist);
   // TODO: Remove x = 0, 1728 roots.
   // TODO: What if there are no roots?
   //printf("hp ");

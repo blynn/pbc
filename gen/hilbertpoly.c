@@ -16,12 +16,10 @@
 #include "pbc_field.h"
 #include "pbc_darray.h"
 #include "pbc_poly.h"
+#include "pbc_memory.h"
 #include "pbc_hilbert.h"
 
 int main(int argc, char **argv) {
-  int n;
-  int i;
-  darray_t coefflist;
   void xpow(int degree) {
     if (degree == 1) {
       printf("X");
@@ -36,27 +34,26 @@ int main(int argc, char **argv) {
   int Dlimit = argc > 2 ? atoi(argv[2]) : D;
 
   for(; D <= Dlimit; D++) {
+    mpz_t *coefflist;
     int m = D % 4;
     if (m == 1 || m == 2) continue;
     printf("D = %d\n", D);
 
-    darray_init(coefflist);
-    pbc_hilbert(coefflist, D);
+    int n = pbc_hilbert(&coefflist, D);
 
-    n = coefflist->count;
     printf(" ");
     xpow(n - 1);
     printf("\n");
-    for (i=n-2; i>=0; i--) {
-      if (mpz_sgn((mpz_ptr) coefflist->item[i]) >= 0) {
+    int i;
+    for (i = n - 2; i >= 0; i--) {
+      if (mpz_sgn(coefflist[i]) >= 0) {
 	printf("+");
       }
-      mpz_out_str(stdout, 0, coefflist->item[i]);
+      mpz_out_str(stdout, 0, coefflist[i]);
       xpow(i);
       printf("\n");
     }
-    pbc_hilbert_clear(coefflist);
-    darray_clear(coefflist);
+    pbc_hilbert_free(coefflist, n);
   }
 
   return 0;

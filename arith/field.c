@@ -717,9 +717,10 @@ int pbc_mpz_set_str(mpz_t z, char *s, int base) {
 int pbc_trial_divide(int (*fun)(mpz_t factor, unsigned int multiplicity),
     mpz_t n, mpz_ptr limit) {
   mpz_t p, m;
-  mpz_ptr fac;
+  mpz_t fac;
   unsigned int mul;
 
+  mpz_init(fac);
   mpz_init(p);
   mpz_init(m);
   mpz_set(m ,n);
@@ -733,15 +734,14 @@ int pbc_trial_divide(int (*fun)(mpz_t factor, unsigned int multiplicity),
       mpz_set(p, m);
     }
     if (mpz_divisible_p(m, p)) {
-      fac = pbc_malloc(sizeof(mpz_t));
       mul = 0;
-      mpz_init(fac);
       mpz_set(fac, p);
       do {
         mpz_divexact(m, m, p);
         mul++;
       } while (mpz_divisible_p(m, p));
       if (fun(fac, mul)) {
+	mpz_clear(fac);
         mpz_clear(m);
         mpz_clear(p);
         return 1;
@@ -750,6 +750,7 @@ int pbc_trial_divide(int (*fun)(mpz_t factor, unsigned int multiplicity),
     mpz_nextprime(p, p);
   }
 
+  mpz_clear(fac);
   mpz_clear(m);
   mpz_clear(p);
   return 0;

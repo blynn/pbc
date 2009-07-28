@@ -328,9 +328,8 @@ static void precision_clear(void) {
   mpf_clear(negepsilon);
 }
 
-// Returns darray of mpz's that are coefficients of H_D(x).
 // See Cohen; my D is -D in his notation.
-void pbc_hilbert(darray_t P, int D) {
+size_t pbc_hilbert(mpz_t **arr, int D) {
   int a, b;
   int t;
   int B = floor(sqrt((double) D / 3.0));
@@ -344,7 +343,7 @@ void pbc_hilbert(darray_t P, int D) {
   int h = 1;
   int jcount = 1;
 
-  //first compute required precision
+  // Compute required precision.
   b = D % 2;
   for (;;) {
     t = (b*b + D) / 4;
@@ -404,9 +403,9 @@ step4:
       a++;
       if (a * a <= t) goto step3;
     } else {
-      //a, b, t/a are coeffs of an appropriate
-      //primitive reduced positive definite form
-      //compute j((-b + sqrt{-D})/(2a))
+      // a, b, t/a are coeffs of an appropriate primitive reduced positive
+      // definite form.
+      // Compute j((-b + sqrt{-D})/(2a)).
       h++;
       pbc_info("[%d/%d] a b c = %d %d %d", h, jcount, a, b, t/a);
       mpf_set_ui(f0, 1);
@@ -425,7 +424,7 @@ if (0) {
   }
 }
       if (a == b || a * a == t || !b) {
-        //P *= X - j
+        // P *= X - j
         int i, n;
         mpc_ptr p0;
         p0 = (mpc_ptr) pbc_malloc(sizeof(mpc_t));
@@ -444,18 +443,18 @@ if (0) {
         }
         darray_append(Pz, p0);
       } else {
-        //P *= X^2 - 2 Re(j) X + |j|^2
+        // P *= X^2 - 2 Re(j) X + |j|^2
         int i, n;
         mpc_ptr p0, p1;
         p0 = (mpc_ptr) pbc_malloc(sizeof(mpc_t));
         p1 = (mpc_ptr) pbc_malloc(sizeof(mpc_t));
         mpc_init(p0);
         mpc_init(p1);
-        //p1 = - 2 Re(j)
+        // p1 = - 2 Re(j)
         mpf_mul_ui(f0, mpc_re(j), 2);
         mpf_neg(f0, f0);
         mpf_set(mpc_re(p1), f0);
-        //p0 = |j|^2
+        // p0 = |j|^2
         mpf_mul(f0, mpc_re(j), mpc_re(j));
         mpf_mul(mpc_re(p0), mpc_im(j), mpc_im(j));
         mpf_add(mpc_re(p0), mpc_re(p0), f0);
@@ -496,28 +495,27 @@ if (0) {
     if (b > B) break;
   }
 
-  // Round polynomial.
+  // Round polynomial and assign.
+  int k = 0;
   {
+    *arr = pbc_malloc(sizeof(mpz_t) * (Pz->count + 1));
     int i;
-    mpz_ptr coeff;
     for (i=Pz->count - 1; i>=0; i--) {
-      coeff = (mpz_ptr) pbc_malloc(sizeof(mpz_t));
-      mpz_init(coeff);
       if (mpf_sgn(mpc_re(Pz->item[i])) < 0) {
         mpf_set_d(f0, -0.5);
       } else {
         mpf_set_d(f0, 0.5);
       }
       mpf_add(f0, f0, mpc_re(Pz->item[i]));
-      mpz_set_f(coeff, f0);
-      darray_append(P, coeff);
+      mpz_init((*arr)[k]);
+      mpz_set_f((*arr)[k], f0);
+      k++;
       mpc_clear(Pz->item[i]);
       pbc_free(Pz->item[i]);
     }
-    coeff = (mpz_ptr) pbc_malloc(sizeof(mpz_t));
-    mpz_init(coeff);
-    mpz_set_ui(coeff, 1);
-    darray_append(P, coeff);
+    mpz_init((*arr)[k]);
+    mpz_set_ui((*arr)[k], 1);
+    k++;
   }
   darray_clear(Pz);
   mpc_clear(z0);
@@ -529,13 +527,12 @@ if (0) {
   mpc_clear(j);
 
   precision_clear();
+  return k;
 }
 
-void pbc_hilbert_clear(darray_t P) {
-  int i, n = P->count;
+void pbc_hilbert_free(mpz_t *arr, size_t n) {
+  size_t i;
 
-  for (i=0; i<n; i++) {
-    mpz_ptr z = P->item[i];
-    mpz_clear(z);
-  }
+  for (i = 0; i < n; i++) mpz_clear(arr[i]);
+  pbc_free(arr);
 }

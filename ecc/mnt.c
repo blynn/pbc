@@ -24,10 +24,9 @@ typedef struct pell_solution_s *pell_solution_ptr;
 // For square D, we have (x+Dy)(x-Dy) = N so we look at the factors of N.
 static void general_pell(pell_solution_t ps, mpz_t D, int N) {
   // TODO: Use brute force for small D.
-  darray_t L;
   int i, f, n, sgnN = N > 0 ? 1 : -1;
 
-  //find square factors of N
+  // Find square factors of N.
   darray_t listf;
   darray_init(listf);
 
@@ -64,8 +63,6 @@ static void general_pell(pell_solution_t ps, mpz_t D, int N) {
   mpz_init(Q0); mpz_init(Q1);
   mpz_init(p0); mpz_init(p1); mpz_init(pnext);
   mpz_init(q0); mpz_init(q1); mpz_init(qnext);
-
-  darray_init(L);
 
   darray_init(listp);
   darray_init(listq);
@@ -144,7 +141,7 @@ static void general_pell(pell_solution_t ps, mpz_t D, int N) {
   if (n) {
     ps->x = (mpz_t *) pbc_malloc(sizeof(mpz_t) * n);
     ps->y = (mpz_t *) pbc_malloc(sizeof(mpz_t) * n);
-    for (i=0; i<n; i++) {
+    for (i = 0; i < n; i++) {
       mpz_init(ps->x[i]);
       mpz_init(ps->y[i]);
       mpz_set(ps->x[i], (mpz_ptr) listp->item[i]);
@@ -159,6 +156,15 @@ static void general_pell(pell_solution_t ps, mpz_t D, int N) {
   mpz_clear(Q0); mpz_clear(Q1);
   mpz_clear(p0); mpz_clear(p1); mpz_clear(pnext);
   mpz_clear(q0); mpz_clear(q1); mpz_clear(qnext);
+
+  void freempz(void *data) {
+    mpz_clear(data);
+    free(data);
+  }
+  darray_forall(listp, freempz);
+  darray_forall(listq, freempz);
+  darray_clear(listp);
+  darray_clear(listq);
 }
 
 static void pell_solution_clear(pell_solution_t ps) {
@@ -196,7 +202,6 @@ static int mnt_step2(int (*callback)(pbc_cm_t, void *), void *data,
   mpz_t n, l, q;
   mpz_t p;
   mpz_t r, cofac;
-  pbc_cm_t cm;
 
   mpz_init(l);
   mpz_mod_ui(l, U, 6);
@@ -229,7 +234,6 @@ static int mnt_step2(int (*callback)(pbc_cm_t, void *), void *data,
     mpz_add(n, q, l);
   }
 
-
   mpz_init(p);
   mpz_init(r);
   mpz_init(cofac);
@@ -258,6 +262,7 @@ static int mnt_step2(int (*callback)(pbc_cm_t, void *), void *data,
   }
   }
 
+  pbc_cm_t cm;
   pbc_cm_init(cm);
   cm->k = 6;
   cm->D = D;
@@ -297,7 +302,6 @@ int pbc_cm_search_d(int (*callback)(pbc_cm_t, void *), void *data,
   mpz_init(t2);
 
   pell_solution_t ps;
-
   general_pell(ps, D3, -8);
 
   int i, n;
@@ -436,26 +440,27 @@ static int freeman_step2(int (*callback)(pbc_cm_t, void *), void *data,
 
 int pbc_cm_search_g(int (*callback)(pbc_cm_t, void *), void *data,
     unsigned int D, unsigned int bitlimit) {
+  int res = 0;
   mpz_t D15;
   mpz_t t0, t1, t2;
 
   mpz_init(D15);
   mpz_set_ui(D15, D);
   mpz_mul_ui(D15, D15, 15);
+  if (mpz_perfect_square_p(D15)) {
+    mpz_clear(D15);
+    return 0;
+  }
 
   mpz_init(t0);
   mpz_init(t1);
   mpz_init(t2);
 
-  if (mpz_perfect_square_p(D15)) return 0;
-
   pell_solution_t ps;
-
   general_pell(ps, D15, -20);
 
   int i, n;
   n = ps->count;
-  int res = 0;
   if (n) for (;;) {
     for (i=0; i<n; i++) {
       res = freeman_step2(callback, data, D, ps->x[i]);

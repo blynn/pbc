@@ -1534,6 +1534,11 @@ int poly_is_irred(element_ptr f) {
   }
 
   mpz_clear(deg);
+  mpz_clear(z);
+  element_clear(g);
+  element_clear(xpow);
+  element_clear(x);
+  field_clear(rxmod);
   return res;
 }
 
@@ -1640,6 +1645,7 @@ pbc_info("findroot: degree %d...", poly_degree(g));
 
       element_polymod_to_poly(r, p);
       element_clear(p);
+      field_clear(fpxmod);
 
       element_add(r, r, x);
       poly_gcd(fac, r, g);
@@ -1649,7 +1655,6 @@ pbc_info("findroot: degree %d...", poly_degree(g));
       } else {
         goto step_random;
       }
-      field_clear(fpxmod);
     }
   }
 pbc_info("findroot: found root");
