@@ -1,10 +1,10 @@
-libpbc (0.4.21-1) unstable; urgency=low
+libpbc (0.5.0-1) unstable; urgency=low
 
-    * Win32 random number generator fix thanks to Stefan Weber.
-    * Added element_pp_pow_zn().
-    * More comments in the source.
+    * init and pairing params changes
+    * refactored the API a bit, removed various things, exposed some things
+    * refactored to avoid symbol pollution.
 
- -- Paul Miller <jettero@gmail.com>  Thu, 23 Jul 2009 21:45:00 -0400
+ -- Paul Miller <jettero@gmail.com>  Wed, 29 Jul 2009 08:57:00 -0400
 
 libpbc (0.4.19-1) unstable; urgency=low
 
