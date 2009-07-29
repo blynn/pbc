@@ -40,61 +40,47 @@ static const char *token_get(token_t tok, const char *input, const char *end) {
   int n = 32;
   int i;
   char c;
-  void get(void) {
-    c = !end || input < end ? *input++ : '\0';
+  int get(void) {
+    if (!end || input < end) {
+      c = *input++;
+      return 0;
+    } else {
+      return 1;
+    }
   }
   // Skip whitespace and comments.
   for(;;) {
     do {
-      get();
-      if (!c) {
-        tok->type = token_eof;
-        return input;
+      if (get()) {
+	tok->type = token_eof;
+	return input;
       }
     } while (strchr(" \t\r\n", c));
-
     if (c == '#') {
       do {
-	get();
-        if (!c) {
-          tok->type = token_eof;
-          return input;
-        }
+	if (get()) {
+	  tok->type = token_eof;
+	  return input;
+	}
       } while (c != '\n');
     } else break;
   }
 
-  if (c == '<') {
-    get();
-    if (c == '/') {
-      tok->type = token_langleslash;
-      return input;
+  tok->type = token_word;
+  pbc_free(tok->s);
+  buf = (char *) pbc_malloc(n);
+  i = 0;
+  for (;;) {
+    buf[i] = c;
+    i++;
+    if (i == n) {
+      n += 32;
+      buf = (char *) pbc_realloc(buf, n);
     }
-    input--;
-    tok->type = token_langle;
-    return input;
-  } else if (c == '>') {
-    tok->type = token_rangle;
-    return input;
-  } else {
-    tok->type = token_word;
-    pbc_free(tok->s);
-    buf = (char *) pbc_malloc(n);
-    i = 0;
-    for (;;) {
-      buf[i] = c;
-      i++;
-      if (i == n) {
-	n += 32;
-	buf = (char *) pbc_realloc(buf, n);
-      }
-      get();
-      if (!c || strchr(" \t\r\n</>", c)) break;
-    }
-    buf[i] = 0;
-    input--;
-    tok->s = buf;
+    if (get() || strchr(" \t\r\n</>", c)) break;
   }
+  buf[i] = 0;
+  tok->s = buf;
   return input;
 }
 
@@ -114,16 +100,16 @@ static void read_symtab(symtab_t tab, const char *input, size_t limit) {
   token_init(tok);
   for (;;) {
     input = token_get(tok, input, inputend);
-    if (tok->type != token_word) {
-      break;
-    }
+    if (tok->type != token_word) break;
     s = pbc_strdup(tok->s);
+pbc_info("d2 %s", s);
     input = token_get(tok, input, inputend);
     if (tok->type != token_word) {
       pbc_free(s);
       break;
     }
     s1 = pbc_strdup(tok->s);
+pbc_info("d3 %s", s1);
     symtab_put(tab, s1, s);
     pbc_free(s);
   }

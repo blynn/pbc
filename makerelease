@@ -69,16 +69,6 @@ cd $PBCDIR
     rm -rf $TMPDIR
     exit 1
 }
-#make dist || {
-    #echo make dist error
-    #rm -rf $TMPDIR
-    #exit 1
-#}
-#mv $TMPDIR/pbc-$VER.tar.gz $HERE || {
-    #echo Failed: mv $PBCDIR/pbc-$VER.tar.gz
-    #rm -rf $TMPDIR
-    #exit 1
-#}
 echo Testing make...
 make || {
     echo make error
@@ -86,7 +76,7 @@ make || {
     exit 1
 }
 make clean
-echo Cross compile with simple.make
+echo Cross compiling with simple.make...
 PLATFORM=win32 colormake -f simple.make || {
     echo mingw cross compile error
     rm -rf $TMPDIR
