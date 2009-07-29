@@ -1377,17 +1377,19 @@ static void a_param_init(pbc_param_ptr par) {
 
 // Public interface for type A pairings:
 
-void pbc_param_init_a(pbc_param_ptr par, const char *(*tab)(const char *)) {
+int pbc_param_init_a(pbc_param_ptr par, const char *(*tab)(const char *)) {
   a_param_init(par);
   a_param_ptr p = par->data;
 
-  lookup_mpz(p->q, tab, "q");
-  lookup_mpz(p->r, tab, "r");
-  lookup_mpz(p->h, tab, "h");
-  p->exp2 = lookup_int(tab, "exp2");
-  p->exp1 = lookup_int(tab, "exp1");
-  p->sign1 = lookup_int(tab, "sign1");
-  p->sign0 = lookup_int(tab, "sign0");
+  int err = 0;
+  err += lookup_mpz(p->q, tab, "q");
+  err += lookup_mpz(p->r, tab, "r");
+  err += lookup_mpz(p->h, tab, "h");
+  err += lookup_int(&p->exp2, tab, "exp2");
+  err += lookup_int(&p->exp1, tab, "exp1");
+  err += lookup_int(&p->sign1, tab, "sign1");
+  err += lookup_int(&p->sign0, tab, "sign0");
+  return err;
 }
 
 void pbc_param_init_a_gen(pbc_param_ptr par, int rbits, int qbits) {
@@ -1455,7 +1457,7 @@ void pbc_param_init_a_gen(pbc_param_ptr par, int rbits, int qbits) {
 struct a1_param_s {
     mpz_t p;
     mpz_t n;
-    unsigned int l;
+    int l;
 };
 typedef struct a1_param_s a1_param_t[1];
 typedef struct a1_param_s *a1_param_ptr;
@@ -1871,13 +1873,15 @@ static void a1_init(pbc_param_t p) {
 
 // Public interface:
 
-void pbc_param_init_a1(pbc_param_ptr par, const char *(*tab)(const char *)) {
+int pbc_param_init_a1(pbc_param_ptr par, const char *(*tab)(const char *)) {
   a1_init(par);
   a1_param_ptr p = par->data;
 
-  lookup_mpz(p->p, tab, "p");
-  lookup_mpz(p->n, tab, "n");
-  p->l = lookup_int(tab, "l");
+  int err = 0;
+  err += lookup_mpz(p->p, tab, "p");
+  err += lookup_mpz(p->n, tab, "n");
+  err += lookup_int(&p->l, tab, "l");
+  return err;
 }
 
 void pbc_param_init_a1_gen(pbc_param_ptr par, mpz_t order) {

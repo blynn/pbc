@@ -102,23 +102,19 @@ static void read_symtab(symtab_t tab, const char *input, size_t limit) {
     input = token_get(tok, input, inputend);
     if (tok->type != token_word) break;
     s = pbc_strdup(tok->s);
-pbc_info("d2 %s", s);
     input = token_get(tok, input, inputend);
     if (tok->type != token_word) {
       pbc_free(s);
       break;
     }
     s1 = pbc_strdup(tok->s);
-pbc_info("d3 %s", s1);
     symtab_put(tab, s1, s);
     pbc_free(s);
   }
   token_clear(tok);
 }
 
-// These functions have hidden visibility on platforms that support it
-// (see header). We could go further by making these static and moving them to
-// the header. If done, I should rename this file to param.c.
+// These functions have hidden visibility (see header).
 
 void param_out_type(FILE *stream, char *s) {
   fprintf(stream, "type %s\n", s);
@@ -139,31 +135,30 @@ void param_out_int(FILE *stream, char *s, int i) {
   mpz_clear(z);
 }
 
-void lookup_mpz(mpz_t z, const char *(*tab)(const char *), const char *key) {
+int lookup_mpz(mpz_t z, const char *(*tab)(const char *), const char *key) {
   const char *data = tab(key);
   if (!data) {
     pbc_error("missing param: `%s'", key);
-    return;
+    return 1;
   }
   mpz_set_str(z, data, 0);
+  return 0;
 }
 
-int lookup_int(const char *(*tab)(const char *), const char *key) {
-  int res;
+int lookup_int(int *n, const char *(*tab)(const char *), const char *key) {
   mpz_t z;
   const char *data = tab(key);
   if (!data) {
     pbc_error("missing param: `%s'", key);
-    return 0;
+    return 1;
   }
-
   mpz_init(z);
 
   mpz_set_str(z, data, 0);
-  res = mpz_get_si(z);
-
+  *n = mpz_get_si(z);
   mpz_clear(z);
-  return res;
+
+  return 0;
 }
 
 static int param_set_tab(pbc_param_t par, symtab_t tab) {
@@ -178,7 +173,7 @@ static int param_set_tab(pbc_param_t par, symtab_t tab) {
 
   static struct {
     char *s;
-    void (*fun)(pbc_param_ptr, const char *(*)(const char *));
+    int (*fun)(pbc_param_ptr, const char *(*)(const char *));
   } funtab[] = {
       { "a", pbc_param_init_a },
       { "d", pbc_param_init_d },
@@ -193,14 +188,14 @@ static int param_set_tab(pbc_param_t par, symtab_t tab) {
     unsigned int i;
     for(i = 0; i < sizeof(funtab)/sizeof(*funtab); i++) {
       if (!strcmp(s, funtab[i].s)) {
-	funtab[i].fun(par, lookup);
-	res = 0;
-	break;
+	res = funtab[i].fun(par, lookup);
+	if (res) pbc_error("bad pairing parameters");
+	return res;
       }
     }
   }
 
-  if (res) pbc_error("unknown pairing type");
+  pbc_error("unknown pairing type");
   return res;
 }
 

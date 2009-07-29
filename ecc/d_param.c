@@ -73,7 +73,7 @@ static void d_out_str(FILE *stream, void *data) {
   d_param_ptr p = data;
   int d = p->k / 2;
   int i;
-  char s[80];
+  char s[8];
   param_out_type(stream, "d");
   param_out_mpz(stream, "q", p->q);
   param_out_mpz(stream, "n", p->n);
@@ -1016,30 +1016,32 @@ static void d_param_init(pbc_param_ptr p) {
 
 // Public interface:
 
-void pbc_param_init_d(pbc_param_ptr par, const char *(*tab)(const char *)) {
+int pbc_param_init_d(pbc_param_ptr par, const char *(*tab)(const char *)) {
   d_param_init(par);
   d_param_ptr p = par->data;
   char s[80];
   int i, d;
 
-  lookup_mpz(p->q, tab, "q");
-  lookup_mpz(p->n, tab, "n");
-  lookup_mpz(p->h, tab, "h");
-  lookup_mpz(p->r, tab, "r");
-  lookup_mpz(p->a, tab, "a");
-  lookup_mpz(p->b, tab, "b");
-  p->k = lookup_int(tab, "k");
-  lookup_mpz(p->nk, tab, "nk");
-  lookup_mpz(p->hk, tab, "hk");
-  lookup_mpz(p->nqr, tab, "nqr");
+  int err = 0;
+  err += lookup_mpz(p->q, tab, "q");
+  err += lookup_mpz(p->n, tab, "n");
+  err += lookup_mpz(p->h, tab, "h");
+  err += lookup_mpz(p->r, tab, "r");
+  err += lookup_mpz(p->a, tab, "a");
+  err += lookup_mpz(p->b, tab, "b");
+  err += lookup_int(&p->k, tab, "k");
+  err += lookup_mpz(p->nk, tab, "nk");
+  err += lookup_mpz(p->hk, tab, "hk");
+  err += lookup_mpz(p->nqr, tab, "nqr");
 
   d = p->k / 2;
   p->coeff = pbc_realloc(p->coeff, sizeof(mpz_t) * d);
   for (i=0; i<d; i++) {
     sprintf(s, "coeff%d", i);
     mpz_init(p->coeff[i]);
-    lookup_mpz(p->coeff[i], tab, s);
+    err += lookup_mpz(p->coeff[i], tab, s);
   }
+  return err;
 }
 
 void pbc_param_init_d_gen(pbc_param_ptr p, pbc_cm_ptr cm) {

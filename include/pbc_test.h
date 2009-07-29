@@ -8,14 +8,14 @@ Initializes pairing from file specified as first argument, or from standard
 input if there is no first argument.
 */
 static inline void pbc_demo_pairing_init(pairing_t pairing, int argc, char **argv) {
-  char s[1024];
+  char s[16384];
   FILE *fp = stdin;
 
   if (argc > 1) {
     fp = fopen(argv[1], "r");
     if (!fp) pbc_die("error opening %s", argv[1]);
   }
-  size_t count = fread(s, 1, 1024, fp);
+  size_t count = fread(s, 1, 16384, fp);
   if (!count) pbc_die("input error");
   fclose(fp);
 

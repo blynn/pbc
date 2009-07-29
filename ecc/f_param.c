@@ -448,16 +448,18 @@ static void f_init(pbc_param_ptr p) {
 
 // Public interface:
 
-void pbc_param_init_f(pbc_param_ptr par, const char *(*tab)(const char *)) {
+int pbc_param_init_f(pbc_param_ptr par, const char *(*tab)(const char *)) {
   f_init(par);
   f_param_ptr p = par->data;
 
-  lookup_mpz(p->q, tab, "q");
-  lookup_mpz(p->r, tab, "r");
-  lookup_mpz(p->b, tab, "b");
-  lookup_mpz(p->beta, tab, "beta");
-  lookup_mpz(p->alpha0, tab, "alpha0");
-  lookup_mpz(p->alpha1, tab, "alpha1");
+  int err = 0;
+  err += lookup_mpz(p->q, tab, "q");
+  err += lookup_mpz(p->r, tab, "r");
+  err += lookup_mpz(p->b, tab, "b");
+  err += lookup_mpz(p->beta, tab, "beta");
+  err += lookup_mpz(p->alpha0, tab, "alpha0");
+  err += lookup_mpz(p->alpha1, tab, "alpha1");
+  return err;
 }
 
 void pbc_param_init_f_gen(pbc_param_t p, int bits) {
