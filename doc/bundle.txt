@@ -34,9 +34,8 @@ of the variable.  Function calls and expressions also resemble C.  The
 arithmetic operators +, -, /, *, ^ have the standard precedence.  Perhaps the
 only significant difference is that no terminating semicolon is required.
 
-Comments begin with "#" and end at a newline.  Double quotes are used to denote
-strings.  On error, pbc prints the error code which I have yet to translate to
-English.
+Comments begin with "#" and end at a newline. Strings are double quoted. On
+error, pbc prints the error code which I have yet to translate to English.
 
 Some of the pbc functions:
 

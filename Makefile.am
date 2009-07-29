@@ -1,5 +1,7 @@
 SUBDIRS = . example gen
 
+SO_VERSION = 1:0:0
+
 ChangeLog :
 	git log > ChangeLog
 
@@ -48,7 +50,7 @@ libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
 	ecc/singular.c \
 	ecc/param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
 	ecc/f_param.c ecc/g_param.c
-libpbc_la_LDFLAGS =  -lgmp -lm
+libpbc_la_LDFLAGS =  -lgmp -lm -version-info $(SO_VERSION)
 
 noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa benchmark/ellnet
 pbc_pbc_CPPFLAGS = -I include

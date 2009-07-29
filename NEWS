@@ -4,7 +4,7 @@ Ben Lynn
 
 == Changes in PBC 0.5.0 ==
 
-The major changes are pairing parameters and pairing initialization.
+The largest changes involve pairing initialization and pairing parameters.
 
 For pairing initialization, supply a buffer containing pairing parameters
 instead of a `FILE *` stream. For example, rather than:
@@ -36,20 +36,16 @@ At last, one can initialize a `pairing_t` from a `pbc_param_t`:
 === Minor differences ===
 
 I trimmed the API. The file stream operations are gone. I removed the
-fetch_ops_t and tracker_t types. The standard C library already provides
-routines for reading from disk to memory; it is unnecessary for PBC to overlap.
+fetch_ops_t and tracker_t types: the standard C library already provides
+routines for reading from disk to memory.
 
-I refactored to avoid exposing `symtab_t` and `darray_t`, as well as several
-undocumented routines such as `poly_alloc()`. I mostly preserved the headers
-that define these functions, but they are no longer included by `pbc.h`.
+I refactored to avoid exposing `symtab_t` and `darray_t`, and undocumented
+routines such as `poly_alloc()`. I mostly preserved the headers that define
+these functions, but they are no longer included by `pbc.h`.
 
-I replaced the CMake files with `blynn.make`. I use this during development,
-though I test the autotools before each release.
+I replaced the CMake files with `simple.make`, which I use during development,
+though I test the autotools build before release.
 
-To reduce symbol pollution, all official functions and variables of the
-PBC API now start with `pbc_`, `field_`, `element_` or `pairing_`. Watch out
-for renamed functions.
-
-There are undocumented functions that begin with `poly_`, `polymod_`, `curve_`,
-`darray_`, `symtab_`, and `mpc_`. I set the visibility of most of these to
-hidden, in anticipation of building a shared library.
+To reduce symbol pollution, all official functions and variables of the PBC
+now start with `pbc_`, `field_`, `element_` or `pairing_`. Other names mostly
+have hidden visibility in a shared library. Watch out for renamed functions.
