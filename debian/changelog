@@ -1,3 +1,9 @@
+libpbc (0.5.1-1) unstable; urgency=low
+
+    * bugfixes for the new param init stuff
+
+ -- Paul Miller <jettero@gmail.com>  Wed, 29 Jul 2009 20:50:00 -0400
+
 libpbc (0.5.0-1) unstable; urgency=low
 
     * init and pairing params changes
