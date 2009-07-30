@@ -1,3 +1,9 @@
+libpbc (0.5.1-2) unstable; urgency=low
+
+    * pulled in the actual 0.5.1 files for this pack job
+
+ -- Paul Miller <jettero@gmail.com>  Thu, 30 Jul 2009 13:10:00 -0400
+
 libpbc (0.5.1-1) unstable; urgency=low
 
     * bugfixes for the new param init stuff
