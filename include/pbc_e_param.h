@@ -5,7 +5,7 @@
 #ifndef __PBC_E_PARAM_H__
 #define __PBC_E_PARAM_H__
 
-void pbc_param_init_e(pbc_param_ptr par, const char *(*tab)(const char *));
+int pbc_param_init_e(pbc_param_ptr par, const char *(*tab)(const char *));
 
 /*@manual eparam
 Generate type E pairing parameters and store them in 'p',

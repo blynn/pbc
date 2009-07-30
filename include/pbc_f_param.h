@@ -5,7 +5,7 @@
 #ifndef __PBC_F_PARAM_H__
 #define __PBC_F_PARAM_H__
 
-void pbc_param_init_f(pbc_param_ptr par, const char *(*tab)(const char *));
+int pbc_param_init_f(pbc_param_ptr par, const char *(*tab)(const char *));
 
 /*@manual fparam
 Generate type F pairing parameters and store them in 'p'.

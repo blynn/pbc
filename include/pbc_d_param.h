@@ -6,7 +6,7 @@
 #ifndef __PBC_D_PARAM_H__
 #define __PBC_D_PARAM_H__
 
-void pbc_param_init_d(pbc_param_ptr par, const char *(*tab)(const char *));
+int pbc_param_init_d(pbc_param_ptr par, const char *(*tab)(const char *));
 
 /*@manual dparam
 Type D curves are generated using the complex multiplication (CM) method.  This

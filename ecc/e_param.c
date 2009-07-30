@@ -886,19 +886,21 @@ static void e_init(pbc_param_ptr p) {
 
 // Public interface:
 
-void pbc_param_init_e(pbc_param_ptr par, const char *(*tab)(const char *)) {
+int pbc_param_init_e(pbc_param_ptr par, const char *(*tab)(const char *)) {
   e_init(par);
   e_param_ptr p = par->data;
 
-  lookup_mpz(p->q, tab, "q");
-  lookup_mpz(p->r, tab, "r");
-  lookup_mpz(p->h, tab, "h");
-  lookup_mpz(p->a, tab, "a");
-  lookup_mpz(p->b, tab, "b");
-  p->exp2 = lookup_int(tab, "exp2");
-  p->exp1 = lookup_int(tab, "exp1");
-  p->sign1 = lookup_int(tab, "sign1");
-  p->sign0 = lookup_int(tab, "sign0");
+  int err = 0;
+  err += lookup_mpz(p->q, tab, "q");
+  err += lookup_mpz(p->r, tab, "r");
+  err += lookup_mpz(p->h, tab, "h");
+  err += lookup_mpz(p->a, tab, "a");
+  err += lookup_mpz(p->b, tab, "b");
+  err += lookup_int(&p->exp2, tab, "exp2");
+  err += lookup_int(&p->exp1, tab, "exp1");
+  err += lookup_int(&p->sign1, tab, "sign1");
+  err += lookup_int(&p->sign0, tab, "sign0");
+  return err;
 }
 
 void pbc_param_init_e_gen(pbc_param_t par, int rbits, int qbits) {

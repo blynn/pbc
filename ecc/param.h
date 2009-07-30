@@ -12,8 +12,10 @@
 void param_out_type(FILE *stream, char *s);
 void param_out_mpz(FILE *stream, char *s, mpz_t z);
 void param_out_int(FILE *stream, char *s, int i);
-int lookup_int(const char *(*tab)(const char *), const char *key);
-void lookup_mpz(mpz_t z, const char *(*tab)(const char *), const char *key);
+// TODO: Replace with a stdarg function, e.g.
+//   err = lookup("ZZi", "p", "n", "l",  p->p, p->n, &p->l);
+int lookup_int(int *n, const char *(*tab)(const char *), const char *key);
+int lookup_mpz(mpz_t z, const char *(*tab)(const char *), const char *key);
 
 #pragma GCC visibility pop
 
