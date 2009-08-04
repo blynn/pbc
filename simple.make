@@ -96,10 +96,22 @@ objs := $(srcs:.c=.o) $(pbc_objs)
 
 clean: ; -rm -r out $(objs) libpbc.a
 
+ifeq ($(PLATFORM),win32)
+
+# For Windows.
+out/pbc.def out/pbc.lib out/pbc.dll: $(libpbc_objs)
+	$(CC) -shared -o out/pbc.dll $^ -Wl,--output-def,out/pbc.def,--out-implib,out/pbc.lib $(LDFLAGS) $(LDLIBS)
+
+libpbc.a : out/pbc.lib
+	cp $^ $@
+
+else
+
 # File dependencies for library-making.
 # See GNU Make manual, sect. 11.2.
 libpbc.a: libpbc.a($(libpbc_objs))
 	$(RANLIB) $@
+endif
 
 depend:
 	makedepend -fsimple.make -Iinclude -Y -- $(CFLAGS) -- $(srcs) 2> /dev/null

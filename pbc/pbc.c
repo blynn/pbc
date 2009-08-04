@@ -1145,8 +1145,7 @@ static val_ptr f_index_calculus(darray_ptr arg) {
 */
 
 int main(int argc, char **argv) {
-  for (;;)
-  {
+  for (;;) {
     int c = getopt(argc, argv, "e");
     if (c == -1) break;
     switch (c) {
