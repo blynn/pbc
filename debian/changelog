@@ -1,3 +1,10 @@
+libpbc (0.5.2-1) unstable; urgency=low
+
+    * Fixed pbc_param_set_str().
+    * Add DLL to Windows release.
+
+ -- Paul Miller <jettero@gmail.com>  Wed, 05 Aug 2009 14:53:00 -0400
+
 libpbc (0.5.1-2) unstable; urgency=low
 
     * pulled in the actual 0.5.1 files for this pack job
