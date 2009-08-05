@@ -2,6 +2,11 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.5.2 and 0.5.1
+
+* Fixed pbc_param_set_str().
+* Add DLL to Windows release.
+
 Changes between PBC version 0.5.1 and 0.5.0
 
 * Fixed pbc_param_t parsing bugs, and added error detection.

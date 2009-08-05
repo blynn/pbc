@@ -35,6 +35,8 @@ struct token_s {
 typedef struct token_s token_t[1];
 typedef struct token_s *token_ptr;
 
+// Reads next token from `input`.
+// Returns 1 on reaching `end` (if not NULL) or '\0' is read, 0 otherwise.
 static const char *token_get(token_t tok, const char *input, const char *end) {
   char *buf;
   int n = 32;
@@ -43,7 +45,7 @@ static const char *token_get(token_t tok, const char *input, const char *end) {
   int get(void) {
     if (!end || input < end) {
       c = *input++;
-      return 0;
+      return !c;
     } else {
       return 1;
     }

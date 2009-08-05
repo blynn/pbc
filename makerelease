@@ -86,7 +86,7 @@ if [[ $TESTRUN ]]; then
     echo test run: not building zip...
 else
     mkdir pbc-$VER
-    mv out/*.exe param/* pbc-$VER
+    mv out/* param/* pbc-$VER
     cp benchmark/REPORT.BAT pbc-$VER
     zip -r $HERE/pbc-$VER-win32-bin.zip pbc-$VER
 fi
