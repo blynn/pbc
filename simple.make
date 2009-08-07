@@ -66,6 +66,8 @@ $(foreach x,$(bin_srcs:.c=.o),$(eval $(call demo_tmpl,$(x))))
 pbc/parser.tab.c pbc/parser.tab.h : pbc/parser.y
 	bison -d -b pbc/parser $^
 
+pbc/parser.tab.o : pbc/parser.tab.c pbc/parser.tab.h
+
 pbc/lex.yy.c : pbc/parser.lex
 	flex -o $@ $^
 

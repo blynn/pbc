@@ -12,7 +12,7 @@
 %error-verbose
 %token NUM ID
 %token LPAR RPAR LSQU RSQU COMMA
-%token SEMI
+%token TERMINATOR
 %right ASSIGN
 %left PLUS MINUS
 %left DIVIDE TIMES
@@ -22,12 +22,17 @@
 %%
 input
   : // Empty.
-  | input stmt SEMI { tree_eval_stmt($2); }
+  | input stmt TERMINATOR { tree_eval_stmt($2); }
   ;
 
 stmt
   : expr
-  | ID ASSIGN expr
+  | assign_expr
+  ;
+
+assign_expr
+  : ID ASSIGN expr         { $$ = tree_new_assign($1, $3); }
+  | ID ASSIGN assign_expr  { $$ = tree_new_assign($1, $3); }
   ;
 
 expr
