@@ -27,6 +27,7 @@
 \)                      return RPAR;
 \[                      return LSQU;
 \]                      return RSQU;
+#[^\n]*\n   // Comment.
 [ \t\r\n]*  // Skip whitespace.
 .                       return UNKNOWN;
 %%

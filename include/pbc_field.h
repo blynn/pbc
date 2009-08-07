@@ -104,6 +104,8 @@ static inline void element_init(element_t e, field_ptr f) {
   f->init(e);
 }
 
+element_ptr element_new(field_ptr f);
+
 /*@manual einit
 Initialize 'e' to be an element of the algebraic structure that 'e2'
 lies in.

@@ -21,6 +21,8 @@ Initialize a dynamic array 'a'. Must be called before 'a' is used.
 void darray_init(darray_t a);
 darray_ptr darray_new(void);
 
+void darray_free(darray_ptr a);
+
 /*@manual darray
 Clears a dynamic array 'a'. Should be called after 'a' is no longer needed.
 */

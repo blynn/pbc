@@ -796,3 +796,9 @@ clean:
   mpz_clear(d);
   return res;
 }
+
+element_ptr element_new(field_ptr f) {
+  element_ptr e = pbc_malloc(sizeof(*e));
+  element_init(e, f);
+  return e;
+}
