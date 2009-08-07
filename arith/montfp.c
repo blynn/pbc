@@ -182,7 +182,7 @@ static int fp_snprint(char *s, size_t n, element_ptr e) {
   return result;
 }
 
-static int fp_set_str(element_ptr e, char *s, int base) {
+static int fp_set_str(element_ptr e, const char *s, int base) {
   mpz_t z;
   mpz_init(z);
   int result = pbc_mpz_set_str(z, s, base);

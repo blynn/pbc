@@ -1191,11 +1191,11 @@ static int polymod_snprint(char *s, size_t size, element_ptr e) {
   return result + status;
 }
 
-static int polymod_set_str(element_ptr e, char *s, int base) {
+static int polymod_set_str(element_ptr e, const char *s, int base) {
   mfptr p = e->field->data;
   element_t *coeff = e->data;
   int i, n = p->n;
-  char *cp = s;
+  const char *cp = s;
   element_set0(e);
   while (*cp && isspace(*cp)) cp++;
   if (*cp++ != '[') return 0;

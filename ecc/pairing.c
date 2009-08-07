@@ -139,7 +139,7 @@ static size_t mulg_out_str(FILE *stream, int base, element_ptr e) {
   return element_out_str(stream, base, e->data);
 }
 
-static int mulg_set_str(element_ptr e, char *s, int base) {
+static int mulg_set_str(element_ptr e, const char *s, int base) {
   return element_set_str(e->data, s, base);
 }
 

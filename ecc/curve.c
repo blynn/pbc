@@ -351,9 +351,9 @@ static int curve_snprint(char *s, size_t n, element_ptr a) {
   return result + status;
 }
 
-static int curve_set_str(element_ptr e, char *s, int base) {
+static int curve_set_str(element_ptr e, const char *s, int base) {
   point_ptr p = e->data;
-  char *cp = s;
+  const char *cp = s;
   element_set0(e);
   while (*cp && isspace(*cp)) cp++;
   if (*cp == 'O') {

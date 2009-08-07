@@ -42,7 +42,7 @@ struct field_s {
   void (*set)(element_ptr, element_ptr);
   void (*set0)(element_ptr);
   void (*set1)(element_ptr);
-  int (*set_str)(element_ptr e, char *s, int base);
+  int (*set_str)(element_ptr e, const char *s, int base);
   size_t(*out_str)(FILE *stream, int base, element_ptr);
   void (*add)(element_ptr, element_ptr, element_ptr);
   void (*sub)(element_ptr, element_ptr, element_ptr);
@@ -169,7 +169,7 @@ Returns number of characters read (unlike GMP's mpz_set_str).
 A return code of zero means PBC could not find a well-formed string
 describing an element.
 */
-static inline int element_set_str(element_t e, char *s, int base) {
+static inline int element_set_str(element_t e, const char *s, int base) {
   return e->field->set_str(e, s, base);
 }
 

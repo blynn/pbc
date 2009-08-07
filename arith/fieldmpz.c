@@ -207,12 +207,22 @@ static void z_out_info(FILE *out, field_ptr f) {
   fprintf(out, "Z: wrapped GMP\n");
 }
 
+static int z_set_str(element_ptr e, const char *s, int base) {
+  mpz_t z;
+  mpz_init(z);
+  int result = pbc_mpz_set_str(z, s, base);
+  z_set_mpz(e, z);
+  mpz_clear(z);
+  return result;
+}
+
 void field_init_z(field_ptr f) {
   field_init(f);
   f->init = z_init;
   f->clear = z_clear;
   f->set_si = z_set_si;
   f->set_mpz = z_set_mpz;
+  f->set_str = z_set_str;
   f->out_str = z_out_str;
   f->sign = z_sgn;
   f->add = z_add;

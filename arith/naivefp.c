@@ -48,7 +48,7 @@ static int zp_snprint(char *s, size_t n, element_ptr e) {
   return gmp_snprintf(s, n, "%Zd", e->data);
 }
 
-static int zp_set_str(element_ptr e, char *s, int base) {
+static int zp_set_str(element_ptr e, const char *s, int base) {
   int result = pbc_mpz_set_str(e->data, s, base);
   mpz_mod(e->data, e->data, e->field->order);
   return result;

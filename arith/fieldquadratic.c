@@ -128,8 +128,8 @@ static int fq_snprint(char *s, size_t n, element_ptr e) {
   return result + status;
 }
 
-static int fq_set_str(element_ptr e, char *s, int base) {
-  char *cp = s;
+static int fq_set_str(element_ptr e, const char *s, int base) {
+  const char *cp = s;
   element_set0(e);
   while (*cp && isspace(*cp)) cp++;
   if (*cp++ != '[') return 0;

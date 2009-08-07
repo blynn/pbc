@@ -515,7 +515,7 @@ static int default_element_snprint(char *s, size_t n, element_t e) {
   return 1;
 }
 
-static int default_element_set_str(element_t e, char *s, int base) {
+static int default_element_set_str(element_t e, const char *s, int base) {
   UNUSED_VAR(s);
   UNUSED_VAR(base);
   element_set0(e);
@@ -679,7 +679,7 @@ void element_tonelli(element_ptr x, element_ptr a) {
 // Like mpz_set_str except returns number of bytes read and allows trailing
 // junk. This simplifies code for parsing elements like "[123, 456]".
 // TODO: Handle 0x, 0X and 0 conventions for hexadecimal and octal.
-int pbc_mpz_set_str(mpz_t z, char *s, int base) {
+int pbc_mpz_set_str(mpz_t z, const char *s, int base) {
   int b, i = 0;
   mpz_set_ui(z, 0);
   if (!base) b = 10;

@@ -63,6 +63,15 @@ endef
 
 $(foreach x,$(bin_srcs:.c=.o),$(eval $(call demo_tmpl,$(x))))
 
+pbc/parser.tab.c pbc/parser.tab.h : pbc/parser.y
+	bison -d -b pbc/parser $^
+
+pbc/lex.yy.c : pbc/parser.lex
+	flex -o $@ $^
+
+out/newpbc : pbc/newpbc.o pbc/parser.tab.o pbc/lex.yy.o libpbc.a
+	$(CC) -o $@ $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) $(pbc_pbc_libs)
+
 pbc_objs := pbc/pbc.o $(pbc_getline_objs)
 
 pbc_bin := out/pbc$(exe_suffix)
@@ -89,7 +98,7 @@ guru/quadratic_test: guru/quadratic_test.o $(fp_objs) arith/fieldquadratic.o
 
 test : $(tests)
 
-out: ; mkdir out
+out: ; -mkdir out
 
 srcs := $(libpbc_srcs) $(bin_srcs) $(test_srcs)
 objs := $(srcs:.c=.o) $(pbc_objs)
@@ -133,11 +142,13 @@ arith/fieldmpz.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
 arith/fieldquadratic.o: include/pbc_utils.h include/pbc_field.h
 arith/fieldquadratic.o: include/pbc_fieldquadratic.h include/pbc_memory.h
 arith/poly.o: include/pbc_utils.h include/pbc_field.h include/pbc_poly.h
-arith/poly.o: include/pbc_memory.h
+arith/poly.o: include/pbc_memory.h misc/darray.h
 arith/random.o: include/pbc_random.h include/pbc_utils.h include/pbc_memory.h
 arith/dlog.o: include/pbc_utils.h include/pbc_field.h include/pbc_memory.h
+arith/dlog.o: misc/darray.h
 ecc/curve.o: include/pbc_utils.h include/pbc_field.h include/pbc_poly.h
 ecc/curve.o: include/pbc_curve.h include/pbc_memory.h include/pbc_random.h
+ecc/curve.o: misc/darray.h
 ecc/singular.o: include/pbc_utils.h include/pbc_field.h include/pbc_curve.h
 ecc/singular.o: include/pbc_param.h include/pbc_pairing.h include/pbc_fp.h
 ecc/singular.o: include/pbc_memory.h
@@ -148,7 +159,7 @@ ecc/param.o: include/pbc_utils.h include/pbc_memory.h include/pbc_param.h
 ecc/param.o: include/pbc_a_param.h include/pbc_mnt.h include/pbc_d_param.h
 ecc/param.o: include/pbc_e_param.h include/pbc_f_param.h
 ecc/param.o: include/pbc_a1_param.h include/pbc_g_param.h misc/symtab.h
-ecc/param.o: ecc/param.h
+ecc/param.o: misc/darray.h ecc/param.h
 ecc/a_param.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
 ecc/a_param.o: include/pbc_fieldquadratic.h include/pbc_param.h
 ecc/a_param.o: include/pbc_pairing.h include/pbc_curve.h include/pbc_random.h
@@ -173,12 +184,14 @@ ecc/g_param.o: include/pbc_fieldquadratic.h include/pbc_mnt.h
 ecc/g_param.o: include/pbc_curve.h include/pbc_param.h include/pbc_pairing.h
 ecc/g_param.o: include/pbc_memory.h include/pbc_g_param.h ecc/param.h
 ecc/hilbert.o: include/pbc_utils.h include/pbc_field.h include/pbc_poly.h
-ecc/hilbert.o: include/pbc_hilbert.h include/pbc_memory.h ecc/mpc.h
+ecc/hilbert.o: include/pbc_hilbert.h include/pbc_memory.h misc/darray.h
+ecc/hilbert.o: ecc/mpc.h
 ecc/mnt.o: include/pbc_mnt.h include/pbc_memory.h include/pbc_utils.h
+ecc/mnt.o: misc/darray.h
 ecc/mpc.o: ecc/mpc.h
 misc/utils.o: include/pbc_utils.h include/pbc_field.h
-misc/darray.o: include/pbc_memory.h
-misc/symtab.o: include/pbc_memory.h misc/symtab.h
+misc/darray.o: include/pbc_memory.h misc/darray.h
+misc/symtab.o: include/pbc_memory.h misc/symtab.h misc/darray.h
 misc/extend_printf.o: include/pbc_utils.h include/pbc_field.h
 misc/extend_printf.o: include/pbc_memory.h
 misc/memory.o: include/pbc_utils.h include/pbc_memory.h
@@ -275,8 +288,7 @@ gen/gengparam.o: include/pbc_a_param.h include/pbc_d_param.h
 gen/gengparam.o: include/pbc_e_param.h include/pbc_f_param.h
 gen/gengparam.o: include/pbc_g_param.h include/pbc_random.h
 gen/gengparam.o: include/pbc_memory.h
-gen/hilbertpoly.o: include/pbc_utils.h include/pbc_field.h include/pbc_poly.h
-gen/hilbertpoly.o: include/pbc_memory.h include/pbc_hilbert.h
+gen/hilbertpoly.o: include/pbc_utils.h include/pbc_hilbert.h
 gen/listmnt.o: include/pbc.h include/pbc_utils.h include/pbc_field.h
 gen/listmnt.o: include/pbc_param.h include/pbc_pairing.h include/pbc_curve.h
 gen/listmnt.o: include/pbc_mnt.h include/pbc_a1_param.h include/pbc_a_param.h
@@ -337,7 +349,7 @@ guru/poly_test.o: include/pbc_a1_param.h include/pbc_a_param.h
 guru/poly_test.o: include/pbc_d_param.h include/pbc_e_param.h
 guru/poly_test.o: include/pbc_f_param.h include/pbc_g_param.h
 guru/poly_test.o: include/pbc_random.h include/pbc_memory.h include/pbc_fp.h
-guru/poly_test.o: include/pbc_poly.h include/pbc_test.h
+guru/poly_test.o: include/pbc_poly.h include/pbc_test.h misc/darray.h
 guru/exp_test.o: include/pbc.h include/pbc_utils.h include/pbc_field.h
 guru/exp_test.o: include/pbc_param.h include/pbc_pairing.h
 guru/exp_test.o: include/pbc_curve.h include/pbc_mnt.h include/pbc_a1_param.h
