@@ -12,8 +12,6 @@
 extern int option_easy;
 %}
 
-%option noyywrap
-
 %%
 [0-9]+                  yylval = tree_new_z(yytext);  return NUM;
 [a-zA-Z_][a-zA-Z0-9_]*  yylval = tree_new_id(yytext); return ID;
@@ -29,7 +27,7 @@ extern int option_easy;
 \)                      return RPAR;
 \[                      return LSQU;
 \]                      return RSQU;
-#[^\n]*\n   // Comment.
+#.*$        // Comment.
 [ \t\r]*    // Whitespace.
 \n                      if (option_easy) return TERMINATOR;
 .                       return UNKNOWN;

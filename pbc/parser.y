@@ -32,7 +32,8 @@ input
   ;
 
 stmt
-  : expr
+  : { $$ = NULL; }  // Empty.
+  | expr
   | assign_expr
   ;
 

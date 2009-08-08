@@ -253,6 +253,7 @@ tree_ptr tree_new_assign(tree_ptr l, tree_ptr r) {
 
 // Top-level evaluation of a syntax tree node.
 void tree_eval_stmt(tree_ptr t) {
+  if (!t) return;
   val_ptr v = tree_eval(t);
   if (t->fun != fun_assign && v) {
     v->type->out_str(stdout, v);
@@ -451,6 +452,27 @@ static void builtin(val_ptr(*fun)(tree_ptr), const char *s) {
   symtab_put(reserved, v, s);
 }
 
+int end_of_input;
+
+int yywrap(void) {
+  static char *currentline;
+  static YY_BUFFER_STATE st;
+  yy_delete_buffer(st);
+  free(currentline);
+  currentline = pbc_getline(option_prompt);
+  if (!currentline) {
+    end_of_input = 1;
+    return 1;
+  }
+  int n = strlen(currentline);
+  currentline = realloc(currentline, n + 2);
+  currentline[n] = '\n';
+  currentline[n + 1] = '\0';
+  st = yy_scan_string(currentline);
+  //if (option_echo) puts(currentline);
+  return 0;
+}
+
 int main(int argc, char **argv) {
   for (;;) {
     int c = getopt(argc, argv, "y");
@@ -490,7 +512,7 @@ int main(int argc, char **argv) {
   symtab_clear(tab);
   field_clear(Z);
 
-  for (;;) {
+  /*for (;;) {
     char *currentline = pbc_getline(option_prompt);
     if (!currentline) break;
     YY_BUFFER_STATE st = yy_scan_string(currentline);
@@ -500,6 +522,10 @@ int main(int argc, char **argv) {
     }
     yy_delete_buffer(st);
     free(currentline);
+  }*/
+  yywrap();
+  while (!end_of_input) {
+    if (2 == yyparse()) pbc_die("parser out of memory");
   }
   putchar('\n');
   return 0;
