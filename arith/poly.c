@@ -539,7 +539,7 @@ static void poly_to_mpz(mpz_t z, element_ptr e) {
 
 static void poly_out_info(FILE *str, field_ptr f) {
   pfptr p = f->data;
-  fprintf(str, "Polynomial ring. Base field:\n");
+  fprintf(str, "Polynomial ring over ");
   field_out_info(str, p->field);
 }
 
@@ -1248,8 +1248,7 @@ static void compute_x_powers(field_ptr field, element_ptr poly) {
 
 static void polymod_out_info(FILE *str, field_ptr f) {
   mfptr p = f->data;
-  element_fprintf(str, "Field extension. Min poly = %B\n", p->poly);
-  fprintf(str, "Base field:\n");
+  element_fprintf(str, "Extension, poly = %B, base field = ", p->poly);
   field_out_info(str, p->field);
 }
 

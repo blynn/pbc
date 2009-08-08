@@ -222,8 +222,7 @@ static void zp_to_mpz(mpz_ptr z, element_ptr a) {
 }
 
 static void zp_out_info(FILE * out, field_ptr f) {
-  fprintf(out, "F_p: GMP wrapped version,\n");
-  element_fprintf(out, "modulus = %Zd\n", f->order);
+  element_fprintf(out, "GF(%Zd), GMP wrapped", f->order);
 }
 
 void field_init_naive_fp(field_ptr f, mpz_t prime) {

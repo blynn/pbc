@@ -419,11 +419,11 @@ static int curve_from_bytes(element_t e, unsigned char *data) {
 
 static void curve_out_info(FILE *out, field_t f) {
   int len;
-  fprintf(out, "Group of points on elliptic curve");
+  fprintf(out, "elliptic curve");
   if ((len = f->fixed_length_in_bytes)) {
-    fprintf(out, ", bits per coord = %d\n", len * 8 / 2);
+    fprintf(out, ", bits per coord = %d", len * 8 / 2);
   } else {
-    fprintf(out, "variable-length representation\n");
+    fprintf(out, "variable-length");
   }
 }
 

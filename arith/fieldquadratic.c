@@ -385,7 +385,7 @@ static void field_clear_fq(field_ptr f) {
 
 static void fq_out_info(FILE *out, field_ptr f) {
   field_ptr fbase = f->data;
-  element_fprintf(out, "x^2 + %B quadratic extension, base field:\n", fq_nqr(f));
+  element_fprintf(out, "extension x^2 + %B, base field: ", fq_nqr(f));
   field_out_info(out, fbase);
 }
 
@@ -530,7 +530,7 @@ static void fi_sqrt(element_ptr n, element_ptr e) {
 
 static void fi_out_info(FILE *out, field_ptr f) {
   field_ptr fbase = f->data;
-  fprintf(out, "x^2 + 1 quadratic extension, base field:\n");
+  fprintf(out, "extension x^2 + 1, base field: ");
   field_out_info(out, fbase);
 }
 

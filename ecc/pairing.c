@@ -94,7 +94,7 @@ void pairing_clear(pairing_t pairing) {
 // Will consider it later, especially if timings turn out bad
 
 static void gt_out_info(FILE *out, field_ptr f) {
-  gmp_fprintf(out, "GT: order %Zd roots of unity in:\n", f->order);
+  gmp_fprintf(out, "roots of unity, order %Zd, ", f->order);
   field_out_info(out, f->data);
 }
 

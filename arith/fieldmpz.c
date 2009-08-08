@@ -204,7 +204,7 @@ static int z_length_in_bytes(element_ptr a) {
 
 static void z_out_info(FILE *out, field_ptr f) {
   UNUSED_VAR(f);
-  fprintf(out, "Z: wrapped GMP\n");
+  fprintf(out, "Z: wrapped GMP");
 }
 
 static int z_set_str(element_ptr e, const char *s, int base) {

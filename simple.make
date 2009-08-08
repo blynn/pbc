@@ -69,9 +69,9 @@ pbc/parser.tab.c pbc/parser.tab.h : pbc/parser.y
 pbc/parser.tab.o : pbc/parser.tab.c pbc/parser.tab.h
 
 pbc/lex.yy.c : pbc/parser.lex
-	flex -o $@ $^
+	flex -o $@ --header-file=pbc/lex.yy.h $^
 
-out/newpbc : pbc/newpbc.o pbc/parser.tab.o pbc/lex.yy.o libpbc.a
+out/newpbc : pbc/newpbc.o $(pbc_getline_objs) pbc/parser.tab.o pbc/lex.yy.o libpbc.a
 	$(CC) -o $@ $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) $(pbc_pbc_libs)
 
 pbc_objs := pbc/pbc.o $(pbc_getline_objs)

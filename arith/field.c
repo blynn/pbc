@@ -500,8 +500,7 @@ static int generic_is1(element_ptr a) {
 }
 
 static void generic_out_info(FILE * out, field_ptr f) {
-  element_fprintf(out, "field %p unknown\n", f);
-  element_fprintf(out, "order = %Zd\n", f->order);
+  element_fprintf(out, "unknown field %p, order = %Zd", f, f->order);
 }
 
 static int default_element_snprint(char *s, size_t n, element_t e) {
