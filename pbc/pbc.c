@@ -14,7 +14,7 @@
 #include "misc/darray.h"
 #include "misc/symtab.h"
 
-char *pbc_getline(void);
+char *pbc_getline(const char *);
 
 enum {
   t_none = 0,
@@ -152,7 +152,7 @@ static void lex(void) {
         //string continues on next line
         word[i++] = '\n';
         pbc_free(currentline);
-        currentline = pbc_getline();
+        currentline = pbc_getline(NULL);
         if (!currentline) break;
         if (option_echo) puts(currentline);
         lexcp = currentline;
@@ -1207,12 +1207,12 @@ int main(int argc, char **argv) {
   fprintf(stderr, "pbc\n");
 
   for (;;) {
-    currentline = pbc_getline();
+    currentline = pbc_getline(NULL);
     if (!currentline) break;
     if (option_echo) puts(currentline);
     lexcp = currentline;
     parseline();
-    pbc_free(currentline);
+    free(currentline);
   }
   return 0;
 }

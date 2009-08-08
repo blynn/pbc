@@ -8,6 +8,8 @@
 #include "pbc_tree.h"
 #define YYSTYPE tree_ptr
 #include "parser.tab.h"
+
+extern int option_easy;
 %}
 
 %option noyywrap
@@ -28,6 +30,7 @@
 \[                      return LSQU;
 \]                      return RSQU;
 #[^\n]*\n   // Comment.
-[ \t\r\n]*  // Skip whitespace.
+[ \t\r]*    // Whitespace.
+\n                      if (option_easy) return TERMINATOR;
 .                       return UNKNOWN;
 %%

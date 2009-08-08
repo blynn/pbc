@@ -1,6 +1,8 @@
 // Pairing-Based Calculator.
 
 // TODO: Garbage collection.
+#include <unistd.h>  // For getopt.
+
 #include "pbc.h"
 #include "pbc_fieldmpz.h"
 #include "pbc_fp.h"
@@ -12,6 +14,17 @@
 
 #include "lex.yy.h"
 #include "parser.tab.h"
+
+int option_easy = 0;
+const char *option_prompt;
+
+char *pbc_getline(const char *prompt);
+
+void yyerror(char *s) {
+  fprintf(stderr, "%s\n", s);
+}
+
+int yyparse(void);
 
 // Symbol table holding built-in functions and variables.
 static symtab_t reserved;
@@ -129,12 +142,6 @@ static val_ptr val_new_field(field_ptr f) {
   v->data = f;
   return v;
 }
-
-void yyerror(char *s) {
-  fprintf(stderr, "%s\n", s);
-}
-
-int yyparse(void);
 
 static val_ptr fun_bin(
     void (*binop)(element_ptr, element_ptr, element_ptr),
@@ -321,6 +328,19 @@ static val_ptr fun_pairing(tree_ptr t) {
   return val_new_element(e);
 }
 
+static val_ptr fun_gf(tree_ptr t) {
+  // TODO: Check args, x is an element.
+  val_ptr x = tree_eval(darray_at(t->child, 0));
+  element_ptr e = x->data;
+  mpz_t z;
+  mpz_init(z);
+  element_to_mpz(z, e);
+  field_ptr f = pbc_malloc(sizeof(*f));
+  field_init_fp(f, z);
+  mpz_clear(z);
+  return val_new_field(f);
+}
+
 static void init_pairing(const char *s) {
   pairing_init_set_str(pairing, s);
   assign_field(pairing->G1, "G1");
@@ -432,6 +452,20 @@ static void builtin(val_ptr(*fun)(tree_ptr), const char *s) {
 }
 
 int main(int argc, char **argv) {
+  for (;;) {
+    int c = getopt(argc, argv, "y");
+    if (c == -1) break;
+    switch (c) {
+      case 'y':
+        option_easy = 1;
+	option_prompt = "> ";
+        break;
+      default:
+        fprintf(stderr, "unrecognized option: %c\n", c);
+        break;
+    }
+  }
+
   field_init_z(Z);
   symtab_init(tab);
 
@@ -444,6 +478,7 @@ int main(int argc, char **argv) {
   builtin(fun_inv, "inv");
   builtin(fun_type, "type");
   builtin(fun_pairing, "pairing");
+  builtin(fun_gf, "GF");
   builtin(fun_init_pairing_a, "init_pairing_a");
   builtin(fun_init_pairing_d, "init_pairing_d");
   builtin(fun_init_pairing_e, "init_pairing_e");
@@ -456,7 +491,7 @@ int main(int argc, char **argv) {
   field_clear(Z);
 
   for (;;) {
-    char *currentline = pbc_getline();
+    char *currentline = pbc_getline(option_prompt);
     if (!currentline) break;
     YY_BUFFER_STATE st = yy_scan_string(currentline);
     //if (option_echo) puts(currentline);
@@ -464,7 +499,8 @@ int main(int argc, char **argv) {
       pbc_error("parser out of memory");
     }
     yy_delete_buffer(st);
-    pbc_free(currentline);
+    free(currentline);
   }
+  putchar('\n');
   return 0;
 }

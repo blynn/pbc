@@ -7,6 +7,7 @@
 
 #include "pbc_tree.h"
 #define YYSTYPE tree_ptr
+extern int option_easy;
 %}
 
 %error-verbose
@@ -19,10 +20,15 @@
 %right UMINUS
 %right POW
 %token UNKNOWN
+%token END 0 "end of file"
 %%
 input
   : // Empty.
   | input stmt TERMINATOR { tree_eval_stmt($2); }
+  | input stmt END {
+    if (!option_easy) pbc_warn("last statement missing terminator");
+    tree_eval_stmt($2);
+  }
   ;
 
 stmt
