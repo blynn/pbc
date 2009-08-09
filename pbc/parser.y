@@ -14,7 +14,7 @@ extern int option_easy;
 %token NUM ID
 %token LPAR RPAR LSQU RSQU COMMA
 %token TERMINATOR
-%left EQ NE LT GT LE GE
+%left EQ NE LT T_GT LE GE
 %right ASSIGN
 %left PLUS MINUS
 %left DIVIDE TIMES
@@ -47,7 +47,7 @@ expr
   | expr LE expr     { $$ = tree_new_bin(fun_le, $1, $3); }
   | expr GE expr     { $$ = tree_new_bin(fun_ge, $1, $3); }
   | expr LT expr     { $$ = tree_new_bin(fun_lt, $1, $3); }
-  | expr GT expr     { $$ = tree_new_bin(fun_gt, $1, $3); }
+  | expr T_GT expr   { $$ = tree_new_bin(fun_gt, $1, $3); }
   | expr PLUS expr   { $$ = tree_new_bin(fun_add, $1, $3); }
   | expr MINUS expr  { $$ = tree_new_bin(fun_sub, $1, $3); }
   | expr TIMES expr  { $$ = tree_new_bin(fun_mul, $1, $3); }

@@ -58,10 +58,7 @@ int poly_is_irred(element_ptr f);
 void poly_random_monic(element_ptr f, int deg);
 
 void element_field_to_poly(element_t poly, element_t constant);
-
-void element_polymod_to_poly(element_ptr f, element_ptr e);
 void element_field_to_polymod(element_ptr f, element_ptr a);
-void element_poly_to_polymod_truncate(element_ptr f, element_ptr e);
 element_ptr polymod_coeff(element_ptr e, int i);
 
 void polymod_const_mul(element_ptr res, element_ptr a, element_ptr e);

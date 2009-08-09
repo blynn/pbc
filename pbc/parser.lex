@@ -19,7 +19,7 @@ extern int option_easy;
 ==                      return EQ;
 !=                      return NE;
 \<                      return LT;
-\>                      return GT;
+\>                      return T_GT;
 \<=                     return LE;
 \>=                     return GE;
 \+                      return PLUS;

@@ -92,9 +92,15 @@ static val_ptr v_field_cast(val_ptr v, tree_ptr t) {
   // TODO: Check args, x is an element.
   val_ptr x = tree_eval(darray_at(t->child, 0));
   element_ptr e = x->data;
-  if (v->data == Z || e->field == Z) {
-    // Map to/from integer.
-    if (v->data == e->field) return x;
+  if (e->field == Z) {
+    if (v->data == Z) return x;
+    element_ptr e2 = element_new(v->data);
+    element_set_multiz(e2, e);
+    x->data = e2;
+    return x;
+  }
+  if (v->data == Z) {
+    // Map to/from integer. TODO: Map to/from multiz instead.
     mpz_t z;
     mpz_init(z);
     element_to_mpz(z, e);
@@ -574,15 +580,15 @@ int main(int argc, char **argv) {
   builtin(fun_init_pairing_f, "init_pairing_f");
   builtin(fun_init_pairing_g, "init_pairing_g");
   fun_init_pairing_a(NULL);
-
   symtab_put(reserved, val_new_field(Z), "Z");
-  symtab_clear(tab);
-  field_clear(Z);
 
   yywrap();
   while (!end_of_input) {
     if (2 == yyparse()) pbc_die("parser out of memory");
   }
   putchar('\n');
+
+  symtab_clear(tab);
+  field_clear(Z);
   return 0;
 }
