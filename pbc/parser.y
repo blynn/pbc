@@ -25,10 +25,6 @@ extern int option_easy;
 input
   : // Empty.
   | input stmt TERMINATOR { tree_eval_stmt($2); }
-  | input stmt END {
-    if (!option_easy) pbc_warn("last statement missing terminator");
-    tree_eval_stmt($2);
-  }
   ;
 
 stmt
@@ -43,7 +39,7 @@ assign_expr
   ;
 
 expr
-  : NUM
+  : multinomial
   | subexpr LPAR exprlist RPAR  { $$ = $3; tree_set_fun($$, $1); }
   | expr PLUS expr   { $$ = tree_new_bin(fun_add, $1, $3); }
   | expr MINUS expr  { $$ = tree_new_bin(fun_sub, $1, $3); }
@@ -68,5 +64,19 @@ exprlist
 nonemptyexprlist
   : expr  { tree_fun_append($$ = tree_new_funcall(), $1); }
   | nonemptyexprlist COMMA expr  { tree_fun_append($1, $3); }
+  ;
+
+multinomial
+  : NUM
+  | numlist
+  ;
+
+numlist
+  : LSQU sequence RSQU { $$ = $2; }
+  ;
+
+sequence
+  : expr { $$ = tree_new_list($1); }
+  | sequence COMMA expr { tree_append_multiz($1, $3); }
   ;
 %%

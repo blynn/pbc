@@ -424,6 +424,14 @@ static void generic_set_si(element_ptr a, long int si) {
   mpz_clear(z);
 }
 
+static void generic_set_multiz(element_ptr a, element_t m) {
+  mpz_t z;
+  mpz_init(z);
+  element_to_mpz(z, m);
+  element_set_mpz(a, z);
+  mpz_clear(z);
+}
+
 static void generic_sub(element_ptr c, element_ptr a, element_ptr b) {
   if (c != a) {
     element_neg(c, b);
@@ -557,6 +565,7 @@ void field_init(field_ptr f) {
   // random always outputs 0
   f->to_mpz = zero_to_mpz;
   f->set_mpz = zero_set_mpz;
+  f->set_multiz = generic_set_multiz;
   f->random = zero_random;
   f->set_si = generic_set_si;
   f->is1 = generic_is1;

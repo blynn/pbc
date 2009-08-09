@@ -5,6 +5,8 @@ typedef struct tree_s *tree_ptr;
 struct val_s;
 typedef struct val_s *val_ptr;
 tree_ptr tree_new_z(const char* s);
+tree_ptr tree_new_list(tree_ptr t);
+void tree_append_multiz(tree_ptr t, tree_ptr m);
 tree_ptr tree_new_id(const char* s);
 tree_ptr tree_new_assign(tree_ptr l, tree_ptr r);
 tree_ptr tree_new_uminus(tree_ptr x);

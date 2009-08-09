@@ -33,7 +33,7 @@ endif
 
 libpbc_srcs := \
   $(addsuffix .c,$(addprefix arith/, \
-    field fp montfp naivefp fastfp fasterfp fieldmpz fieldquadratic poly \
+    field fp montfp naivefp fastfp fasterfp multiz fieldmpz fieldquadratic poly \
     random dlog)) \
   $(addsuffix .c,$(addprefix ecc/, \
     curve singular pairing param \
@@ -139,6 +139,8 @@ arith/fastfp.o: include/pbc_utils.h include/pbc_field.h include/pbc_random.h
 arith/fastfp.o: include/pbc_fp.h include/pbc_memory.h
 arith/fasterfp.o: include/pbc_utils.h include/pbc_field.h
 arith/fasterfp.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
+arith/multiz.o: include/pbc_utils.h include/pbc_field.h include/pbc_random.h
+arith/multiz.o: include/pbc_fp.h include/pbc_memory.h misc/darray.h
 arith/fieldmpz.o: include/pbc_utils.h include/pbc_field.h
 arith/fieldmpz.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
 arith/fieldquadratic.o: include/pbc_utils.h include/pbc_field.h

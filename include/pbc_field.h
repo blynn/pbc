@@ -39,6 +39,7 @@ struct field_s {
   void (*clear)(element_ptr);
 
   void (*set_mpz)(element_ptr, mpz_ptr);
+  void (*set_multiz)(element_ptr, element_ptr);
   void (*set)(element_ptr, element_ptr);
   void (*set0)(element_ptr);
   void (*set1)(element_ptr);
@@ -161,6 +162,10 @@ Behaves as *snprintf* but only on one element at a time.
 */
 static inline int element_snprint(char *s, size_t n, element_t e) {
   return e->field->snprint(s, n, e);
+}
+
+static inline void element_set_multiz(element_t e, element_t m) {
+  e->field->set_multiz(e, m);
 }
 
 /*@manual eio

@@ -4,8 +4,8 @@
 #include <unistd.h>  // For getopt.
 
 #include "pbc.h"
-#include "pbc_fieldmpz.h"
 #include "pbc_fp.h"
+#include "pbc_multiz.h"
 
 #include "misc/darray.h"
 #include "misc/symtab.h"
@@ -160,9 +160,23 @@ val_ptr fun_div(tree_ptr t) { return fun_bin(element_div, t); }
 val_ptr fun_pow(tree_ptr t) { return fun_bin(element_pow_zn, t); }
 
 val_ptr fun_self(tree_ptr t) {
+  // TODO: Write element_clone(), or at least element_new().
   element_ptr e = pbc_malloc(sizeof(*e));
   element_init_same_as(e, t->data);
   element_set(e, t->data);
+  return val_new_element(e);
+}
+
+val_ptr fun_list(tree_ptr t) {
+  element_ptr e = NULL;
+  int n = darray_count(t->child);
+  int i;
+  for(i = 0; i < n; i++) {
+    val_ptr x = tree_eval(darray_at(t->child, i));
+    // TODO: Check x is element.
+    if (!i) e = multiz_new_list(x->data);
+    else multiz_append(e, x->data);
+  }
   return val_new_element(e);
 }
 
@@ -196,6 +210,10 @@ void assign_field(field_ptr f, const char* s) {
   symtab_put(tab, val_new_field(f), s);
 }
 
+void tree_append_multiz(tree_ptr t, tree_ptr m) {
+  darray_append(t->child, m);
+}
+
 tree_ptr tree_new(val_ptr (*fun)(tree_ptr), void *data) {
   tree_ptr res = pbc_malloc(sizeof(*res));
   res->fun = fun;
@@ -205,10 +223,17 @@ tree_ptr tree_new(val_ptr (*fun)(tree_ptr), void *data) {
 }
 
 tree_ptr tree_new_z(const char* s) {
-  element_ptr z = pbc_malloc(sizeof(*z));
-  element_init(z, Z);
-  element_set_str(z, s, 0);
-  return tree_new(fun_self, z);
+  element_ptr e = pbc_malloc(sizeof(*e));
+  element_init(e, Z);
+  element_set_str(e, s, 0);
+  return tree_new(fun_self, e);
+}
+
+tree_ptr tree_new_list(tree_ptr first) {
+  tree_ptr t = tree_new(fun_list, NULL);
+  t->child = darray_new();
+  darray_append(t->child, first);
+  return t;
 }
 
 tree_ptr tree_new_id(const char* s) {
@@ -488,7 +513,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  field_init_z(Z);
+  field_init_multiz(Z);
   symtab_init(tab);
 
   builtin(fun_random, "rnd");
@@ -512,17 +537,6 @@ int main(int argc, char **argv) {
   symtab_clear(tab);
   field_clear(Z);
 
-  /*for (;;) {
-    char *currentline = pbc_getline(option_prompt);
-    if (!currentline) break;
-    YY_BUFFER_STATE st = yy_scan_string(currentline);
-    //if (option_echo) puts(currentline);
-    if (2 == yyparse()) {
-      pbc_error("parser out of memory");
-    }
-    yy_delete_buffer(st);
-    free(currentline);
-  }*/
   yywrap();
   while (!end_of_input) {
     if (2 == yyparse()) pbc_die("parser out of memory");
