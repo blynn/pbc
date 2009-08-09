@@ -159,6 +159,48 @@ val_ptr fun_mul(tree_ptr t) { return fun_bin(element_mul, t); }
 val_ptr fun_div(tree_ptr t) { return fun_bin(element_div, t); }
 val_ptr fun_pow(tree_ptr t) { return fun_bin(element_pow_zn, t); }
 
+static val_ptr fun_cmp(tree_ptr t, int (*fun)(int)) {
+  // TODO: Check there are two args, types match.
+  val_ptr v0 = tree_eval(darray_at(t->child, 0));
+  val_ptr v1 = tree_eval(darray_at(t->child, 1));
+  int i = element_cmp(v0->data, v1->data);
+  element_ptr e = pbc_malloc(sizeof(*e));
+  element_init(e, Z);
+  element_set_si(e, fun(i));
+  v0->data = e;
+  return v0;
+}
+
+val_ptr fun_eq(tree_ptr t) {
+  int is0(int i) { return i == 0; }
+  return fun_cmp(t, is0);
+}
+
+val_ptr fun_ne(tree_ptr t) {
+  int isnot0(int i) { return i != 0; }
+  return fun_cmp(t, isnot0);
+}
+
+val_ptr fun_le(tree_ptr t) {
+  int isle(int i) { return i <= 0; }
+  return fun_cmp(t, isle);
+}
+
+val_ptr fun_ge(tree_ptr t) {
+  int isge(int i) { return i >= 0; }
+  return fun_cmp(t, isge);
+}
+
+val_ptr fun_lt(tree_ptr t) {
+  int islt(int i) { return i < 0; }
+  return fun_cmp(t, islt);
+}
+
+val_ptr fun_gt(tree_ptr t) {
+  int isgt(int i) { return i > 0; }
+  return fun_cmp(t, isgt);
+}
+
 val_ptr fun_self(tree_ptr t) {
   // TODO: Write element_clone(), or at least element_new().
   element_ptr e = pbc_malloc(sizeof(*e));
