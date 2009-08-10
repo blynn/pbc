@@ -95,7 +95,7 @@ static val_ptr v_field_cast(val_ptr v, tree_ptr t) {
   if (e->field == Z) {
     if (v->data == Z) return x;
     element_ptr e2 = element_new(v->data);
-    element_set_multiz(e2, e);
+    element_set_multiz(e2, e->data);
     x->data = e2;
     return x;
   }

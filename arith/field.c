@@ -6,6 +6,7 @@
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"
+#include "pbc_multiz.h"
 #include "pbc_memory.h"
 
 // returns recommended window size.  n is exponent.
@@ -424,10 +425,10 @@ static void generic_set_si(element_ptr a, long int si) {
   mpz_clear(z);
 }
 
-static void generic_set_multiz(element_ptr a, element_t m) {
+static void generic_set_multiz(element_ptr a, multiz m) {
   mpz_t z;
   mpz_init(z);
-  element_to_mpz(z, m);
+  multiz_to_mpz(z, m);
   element_set_mpz(a, z);
   mpz_clear(z);
 }

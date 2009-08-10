@@ -5,6 +5,7 @@
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"
+#include "pbc_multiz.h"
 #include "pbc_poly.h"
 #include "pbc_memory.h"
 #include "misc/darray.h"
@@ -1218,6 +1219,22 @@ static int polymod_snprint(char *s, size_t size, element_ptr e) {
   return result + status;
 }
 
+static void polymod_set_multiz(element_ptr e, multiz m) {
+  mfptr p = e->field->data;
+  element_t *coeff = e->data;
+  int i, n = p->n;
+  if (multiz_is_z(m)) {
+    element_set_multiz(coeff[0], m);
+    for (i = 1; i < n; i++) element_set0(coeff[i]);
+    return;
+  }
+  int max = multiz_count(m);
+  for (i = 0; i < n; i++) {
+    if (i >= max) element_set0(coeff[i]);
+    else element_set_multiz(coeff[i], multiz_at(m, i));
+  }
+}
+
 static int polymod_set_str(element_ptr e, const char *s, int base) {
   mfptr p = e->field->data;
   element_t *coeff = e->data;
@@ -1433,6 +1450,7 @@ void field_init_polymod(field_ptr f, element_ptr poly) {
   f->set_mpz = polymod_set_mpz;
   f->out_str = polymod_out_str;
   f->snprint = polymod_snprint;
+  f->set_multiz = polymod_set_multiz;
   f->set_str = polymod_set_str;
   f->set = polymod_set;
   f->sign = polymod_sgn;

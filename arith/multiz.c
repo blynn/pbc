@@ -18,14 +18,14 @@
 #include "misc/darray.h"
 
 // Per-element data.
-typedef struct {
+struct multiz_s {
   // Either it's an mpz, or a list of mpzs.
   char type;
   union {
     mpz_t z;
     darray_t a;
   };
-} *multiz;
+};
 
 enum {
   T_MPZ,
@@ -232,7 +232,7 @@ static multiz multiz_new_add(const multiz a, const multiz b) {
 }
 
 static void f_add(element_ptr n, element_ptr a, element_ptr b) {
-  void *delme = n->data;
+  multiz delme = n->data;
   n->data = multiz_new_add(a->data, b->data);
   multiz_free(delme);
 }
@@ -241,7 +241,7 @@ static multiz multiz_new_sub(const multiz a, const multiz b) {
   return multiz_new_bin(a, b, mpz_sub);
 }
 static void f_sub(element_ptr n, element_ptr a, element_ptr b) {
-  void *delme = n->data;
+  multiz delme = n->data;
   n->data = multiz_new_sub(a->data, b->data);
   multiz_free(delme);
 }
@@ -284,21 +284,21 @@ static multiz multiz_new_mul(const multiz a, const multiz b) {
   }
 }
 static void f_mul(element_ptr n, element_ptr a, element_ptr b) {
-  void *delme = n->data;
+  multiz delme = n->data;
   n->data = multiz_new_mul(a->data, b->data);
   multiz_free(delme);
 }
 
 static void f_mul_mpz(element_ptr n, element_ptr a, mpz_ptr z) {
   void mulz(mpz_t x, const mpz_t y) { mpz_mul(x, y, z); }
-  void *delme = n->data;
+  multiz delme = n->data;
   n->data = multiz_new_unary(a->data, mulz);
   multiz_free(delme);
 }
 
 static void f_mul_si(element_ptr n, element_ptr a, signed long int z) {
   void mulz(mpz_t x, const mpz_t y) { mpz_mul_si(x, y, z); }
-  void *delme = n->data;
+  multiz delme = n->data;
   n->data = multiz_new_unary(a->data, mulz);
   multiz_free(delme);
 }
@@ -308,13 +308,13 @@ static multiz multiz_new_neg(multiz z) {
 }
 
 static void f_set(element_ptr n, element_ptr a) {
-  void *delme = n->data;
+  multiz delme = n->data;
   n->data = multiz_clone(a->data);
   multiz_free(delme);
 }
 
 static void f_neg(element_ptr n, element_ptr a) {
-  void *delme = n->data;
+  multiz delme = n->data;
   n->data = multiz_new_neg(a->data);
   multiz_free(delme);
 }
@@ -324,7 +324,7 @@ static void f_div(element_ptr c, element_ptr a, element_ptr b) {
   mpz_init(d);
   element_to_mpz(d, b);
   void divd(mpz_t x, const mpz_t y) { mpz_tdiv_q(x, y, d); }
-  void *delme = c->data;
+  multiz delme = c->data;
   c->data = multiz_new_unary(a->data, divd);
   mpz_clear(d);
   multiz_free(delme);
@@ -332,7 +332,7 @@ static void f_div(element_ptr c, element_ptr a, element_ptr b) {
 
 // Doesn't make sense if order is infinite.
 static void f_random(element_ptr n) {
-  void *delme = n->data;
+  multiz delme = n->data;
   f_init(n);
   multiz_free(delme);
 }
@@ -350,9 +350,12 @@ static int f_is1(element_ptr n) {
   return ep->type == T_MPZ && !mpz_cmp_ui(ep->z, 1);
 }
 
+int multiz_is0(multiz m) {
+  return m->type == T_MPZ && mpz_is0(m->z);
+}
+
 static int f_is0(element_ptr n) {
-  multiz ep = n->data;
-  return ep->type == T_MPZ && mpz_is0(ep->z);
+  return multiz_is0(n->data);
 }
 
 // Usual meaning when both are integers.
@@ -482,9 +485,10 @@ static int f_set_str(element_ptr e, const char *s, int base) {
   return result;
 }
 
-static void f_set_multiz(element_ptr e, element_ptr m) {
-  multiz_free(e->data);
-  e->data = multiz_clone(m->data);;
+static void f_set_multiz(element_ptr e, multiz m) {
+  multiz delme = e->data;
+  e->data = multiz_clone(m);
+  multiz_free(delme);
 }
 
 void field_init_multiz(field_ptr f) {
@@ -523,4 +527,19 @@ void field_init_multiz(field_ptr f) {
   mpz_set_ui(f->order, 0);
   f->data = NULL;
   f->fixed_length_in_bytes = -1;
+}
+
+int multiz_is_z(multiz m) {
+  return T_MPZ == m->type;
+}
+
+int multiz_count(multiz m) {
+  if (T_ARR != m->type) return -1;
+  return darray_count(m->a);
+}
+
+multiz multiz_at(multiz m, int i) {
+  PBC_ASSERT(T_ARR == m->type, "wrong type");
+  PBC_ASSERT(darray_count(m->a) > i, "out of bounds");
+  return darray_at(m->a, i);
 }

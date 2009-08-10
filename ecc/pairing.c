@@ -139,6 +139,10 @@ static size_t mulg_out_str(FILE *stream, int base, element_ptr e) {
   return element_out_str(stream, base, e->data);
 }
 
+static void mulg_set_multiz(element_ptr e, multiz m) {
+  return element_set_multiz(e->data, m);
+}
+
 static int mulg_set_str(element_ptr e, const char *s, int base) {
   return element_set_str(e->data, s, base);
 }
@@ -218,6 +222,7 @@ void pairing_GT_init(pairing_ptr pairing, field_t f) {
   gt->cmp = mulg_cmp;
 
   gt->out_str = mulg_out_str;
+  gt->set_multiz = mulg_set_multiz;
   gt->set_str = mulg_set_str;
   gt->to_bytes = mulg_to_bytes;
   gt->from_bytes = mulg_from_bytes;

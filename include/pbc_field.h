@@ -32,6 +32,9 @@ void pbc_assert_match2(element_ptr a, element_ptr b, const char *func);
 void pbc_assert_match3(element_ptr a, element_ptr b, element_ptr c,
                        const char *func);
 
+struct multiz_s;
+typedef struct multiz_s *multiz;
+
 struct pairing_s;
 struct field_s {
   void (*field_clear)(struct field_s *f);
@@ -39,7 +42,7 @@ struct field_s {
   void (*clear)(element_ptr);
 
   void (*set_mpz)(element_ptr, mpz_ptr);
-  void (*set_multiz)(element_ptr, element_ptr);
+  void (*set_multiz)(element_ptr, multiz);
   void (*set)(element_ptr, element_ptr);
   void (*set0)(element_ptr);
   void (*set1)(element_ptr);
@@ -164,7 +167,7 @@ static inline int element_snprint(char *s, size_t n, element_t e) {
   return e->field->snprint(s, n, e);
 }
 
-static inline void element_set_multiz(element_t e, element_t m) {
+static inline void element_set_multiz(element_t e, multiz m) {
   e->field->set_multiz(e, m);
 }
 

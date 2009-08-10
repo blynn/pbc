@@ -13,6 +13,7 @@
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"
+#include "pbc_multiz.h"
 #include "pbc_fieldquadratic.h"
 #include "pbc_memory.h"
 
@@ -126,6 +127,18 @@ static int fq_snprint(char *s, size_t n, element_ptr e) {
   status = snprintf(s + result, left, "]");
   if (status < 0) return status;
   return result + status;
+}
+
+static void fq_set_multiz(element_ptr e, multiz m) {
+  eptr p = e->data;
+  if (multiz_is_z(m)) {
+    element_set_multiz(p->x, m);
+    element_set0(p->y);
+    return;
+  }
+  element_set_multiz(p->x, multiz_at(m, 0));
+  if (2 > multiz_count(m)) element_set0(p->y);
+  else element_set_multiz(p->y, multiz_at(m, 1));
 }
 
 static int fq_set_str(element_ptr e, const char *s, int base) {
@@ -571,6 +584,7 @@ void field_init_quadratic(field_ptr f, field_ptr fbase) {
   f->to_mpz = fq_to_mpz;
   f->out_str = fq_out_str;
   f->snprint = fq_snprint;
+  f->set_multiz = fq_set_multiz;
   f->set_str = fq_set_str;
   f->sign = fq_sign;
   f->add = fq_add;
@@ -616,6 +630,7 @@ void field_init_fi(field_ptr f, field_ptr fbase) {
   f->to_mpz = fq_to_mpz;
   f->out_str = fq_out_str;
   f->snprint = fq_snprint;
+  f->set_multiz = fq_set_multiz;
   f->set_str = fq_set_str;
   f->sign = fq_sign;
   f->add = fq_add;
