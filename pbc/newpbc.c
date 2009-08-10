@@ -6,6 +6,7 @@
 #include "pbc.h"
 #include "pbc_fp.h"
 #include "pbc_multiz.h"
+#include "pbc_poly.h"
 
 #include "misc/darray.h"
 #include "misc/symtab.h"
@@ -415,6 +416,14 @@ static val_ptr fun_gf(tree_ptr t) {
   return val_new_field(f);
 }
 
+static val_ptr fun_poly(tree_ptr t) {
+  // TODO: Check args, x is a field.
+  val_ptr x = tree_eval(darray_at(t->child, 0));
+  field_ptr f = pbc_malloc(sizeof(*f));
+  field_init_poly(f, x->data);
+  return val_new_field(f);
+}
+
 static void init_pairing(const char *s) {
   pairing_init_set_str(pairing, s);
   assign_field(pairing->G1, "G1");
@@ -574,6 +583,7 @@ int main(int argc, char **argv) {
   builtin(fun_type, "type");
   builtin(fun_pairing, "pairing");
   builtin(fun_gf, "GF");
+  builtin(fun_poly, "poly");
   builtin(fun_init_pairing_a, "init_pairing_a");
   builtin(fun_init_pairing_d, "init_pairing_d");
   builtin(fun_init_pairing_e, "init_pairing_e");

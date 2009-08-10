@@ -134,11 +134,29 @@ static void poly_set_si(element_ptr e, signed long int op) {
 
 static void poly_set_mpz(element_ptr e, mpz_ptr op) {
   peptr p = e->data;
-  element_ptr e0;
 
   poly_alloc(e, 1);
-  e0 = p->coeff->item[0];
-  element_set_mpz(e0, op);
+  element_set_mpz(p->coeff->item[0], op);
+  poly_remove_leading_zeroes(e);
+}
+
+static void poly_set_multiz(element_ptr e, multiz op) {
+  if (multiz_is_z(op)) {
+    // TODO: Remove unnecessary copy.
+    mpz_t z;
+    mpz_init(z);
+    multiz_to_mpz(z, op);
+    poly_set_mpz(e, z);
+    mpz_clear(z);
+    return;
+  }
+  peptr p = e->data;
+  int n = multiz_count(op);
+  poly_alloc(e, n);
+  int i;
+  for(i = 0; i < n; i++) {
+    element_set_multiz(p->coeff->item[i], multiz_at(op, i));
+  }
   poly_remove_leading_zeroes(e);
 }
 
@@ -1347,6 +1365,7 @@ void field_init_poly(field_ptr f, field_ptr base_field) {
   f->init = poly_init;
   f->clear = poly_clear;
   f->set_si = poly_set_si;
+  f->set_multiz = poly_set_multiz;
   f->set_mpz = poly_set_mpz;
   f->to_mpz = poly_to_mpz;
   f->out_str = poly_out_str;
