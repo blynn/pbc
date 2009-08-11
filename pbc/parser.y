@@ -42,18 +42,18 @@ assign_expr
 expr
   : multinomial
   | molecule
-  | expr EQ expr     { $$ = tree_new_bin(fun_eq, $1, $3); }
-  | expr NE expr     { $$ = tree_new_bin(fun_ne, $1, $3); }
-  | expr LE expr     { $$ = tree_new_bin(fun_le, $1, $3); }
-  | expr GE expr     { $$ = tree_new_bin(fun_ge, $1, $3); }
-  | expr LT expr     { $$ = tree_new_bin(fun_lt, $1, $3); }
-  | expr T_GT expr   { $$ = tree_new_bin(fun_gt, $1, $3); }
-  | expr PLUS expr   { $$ = tree_new_bin(fun_add, $1, $3); }
-  | expr MINUS expr  { $$ = tree_new_bin(fun_sub, $1, $3); }
-  | expr TIMES expr  { $$ = tree_new_bin(fun_mul, $1, $3); }
-  | expr DIVIDE expr { $$ = tree_new_bin(fun_div, $1, $3); }
-  | expr POW expr    { $$ = tree_new_bin(fun_pow, $1, $3); }
-  | MINUS expr %prec UMINUS  { $$ = tree_new_uminus($2); }
+  | expr EQ expr     { $$ = tree_new_eq($1, $3); }
+  | expr NE expr     { $$ = tree_new_ne($1, $3); }
+  | expr LE expr     { $$ = tree_new_le($1, $3); }
+  | expr GE expr     { $$ = tree_new_ge($1, $3); }
+  | expr LT expr     { $$ = tree_new_lt($1, $3); }
+  | expr T_GT expr   { $$ = tree_new_gt($1, $3); }
+  | expr PLUS expr   { $$ = tree_new_add($1, $3); }
+  | expr MINUS expr  { $$ = tree_new_sub($1, $3); }
+  | expr TIMES expr  { $$ = tree_new_mul($1, $3); }
+  | expr DIVIDE expr { $$ = tree_new_div($1, $3); }
+  | expr POW expr    { $$ = tree_new_pow($1, $3); }
+  | MINUS expr %prec UMINUS  { $$ = tree_new_neg($2); }
   ;
 
 // Not quite atoms.

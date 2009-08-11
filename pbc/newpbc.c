@@ -34,6 +34,12 @@ static field_t M;
 static field_t Z;
 static pairing_t pairing;
 
+struct val_s;
+typedef struct val_s *val_ptr;
+
+struct fun_s;
+typedef struct fun_s *fun_ptr;
+
 // Syntax tree node.
 struct tree_s {
   // Evaluates this node.
@@ -41,11 +47,10 @@ struct tree_s {
   union {
     const char *id;
     element_ptr elem;
-
-    tree_ptr tree;
+    fun_ptr fun;
+    // Child nodes.
+    darray_ptr child;
   };
-  // Child nodes; NULL if no children.
-  darray_ptr child;
 };
 
 enum {
@@ -66,10 +71,9 @@ struct fun_s {
   const char *name;
   val_ptr (*run)(val_ptr[]);
   int arity;
-  const struct val_type_s **type;
+  const struct val_type_s **sig;
 };
 typedef struct fun_s fun_t[1];
-typedef struct fun_s *fun_ptr;
 
 // When interpreting, each node of the syntax tree recursively evaluates
 // its children then returns a val_ptr.
@@ -108,10 +112,10 @@ static void v_fun_out(FILE* stream, val_ptr v) {
   fprintf(stream, "function %s, arity %d", v->fun->name, v->fun->arity);
 }
 
-static val_ptr v_fun_call(val_ptr v, tree_ptr t) {
+static val_ptr v_funcall(val_ptr v, tree_ptr t) {
   fun_ptr fun = v->fun;
   int n = fun->arity;
-  if (n != darray_count(t->child)) {
+  if (1 + n != darray_count(t->child)) {
     char buf[80];
     snprintf(buf, 80, "%s: wrong number of arguments", fun->name);
     return val_new_error(buf);
@@ -120,7 +124,7 @@ static val_ptr v_fun_call(val_ptr v, tree_ptr t) {
   int i;
   for(i = 0; i < n; i++) {
     arg[i] = tree_eval(darray_at(t->child, i));
-    if (fun->type[i] && arg[i]->type != fun->type[i]) {
+    if (fun->sig[i] && arg[i]->type != fun->sig[i]) {
       char buf[80];
       snprintf(buf, 80, "%s: argument %d type mismatch", fun->name, i + 1);
       return val_new_error(buf);
@@ -165,7 +169,7 @@ static void v_err_out(FILE* stream, val_ptr v) {
   fprintf(stream, "%s", v->msg);
 }
 
-static val_ptr v_err_call(val_ptr v, tree_ptr t) {
+static val_ptr v_errcall(val_ptr v, tree_ptr t) {
   UNUSED_VAR(t);
   return v;
 }
@@ -174,8 +178,8 @@ static struct val_type_s
   // TODO: Replace NULL with error or something else.
   v_elem[1]  = {{  "element",  v_elem_out, v_elem_eval, NULL }},
   v_field[1] = {{    "field", v_field_out,      v_self, v_field_cast }},
-  v_fun[1]   = {{ "function",   v_fun_out,      v_self, v_fun_call }},
-  v_error[1] = {{    "error",   v_err_out,      v_self, v_err_call }};
+  v_fun[1]   = {{ "function",   v_fun_out,      v_self, v_funcall }},
+  v_error[1] = {{    "error",   v_err_out,      v_self, v_errcall }};
 
 // Function signature constants for type checking.
 const struct val_type_s *sig_field[] = { v_field };
@@ -205,65 +209,74 @@ static val_ptr val_new_error(const char *msg) {
   return v;
 }
 
-static val_ptr fun_bin(
-    void (*binop)(element_ptr, element_ptr, element_ptr),
-    tree_ptr t) {
-  // TODO: Check there are two args, types match.
-  val_ptr v0 = tree_eval(darray_at(t->child, 0));
-  val_ptr v1 = tree_eval(darray_at(t->child, 1));
-  binop(v0->elem, v0->elem, v1->elem);
-  return v0;
+static val_ptr val_new_fun(fun_ptr fun) {
+  val_ptr v = pbc_malloc(sizeof(*v));
+  v->type = v_fun;
+  v->fun = fun;
+  return v;
 }
 
-val_ptr fun_add(tree_ptr t) { return fun_bin(element_add, t); }
-val_ptr fun_sub(tree_ptr t) { return fun_bin(element_sub, t); }
-val_ptr fun_mul(tree_ptr t) { return fun_bin(element_mul, t); }
-val_ptr fun_div(tree_ptr t) { return fun_bin(element_div, t); }
-val_ptr fun_pow(tree_ptr t) { return fun_bin(element_pow_zn, t); }
+static val_ptr fun_bin(
+    void (*binop)(element_ptr, element_ptr, element_ptr),
+    val_ptr v[]) {
+  binop(v[0]->elem, v[0]->elem, v[1]->elem);
+  return v[0];
+}
 
-static val_ptr fun_cmp(tree_ptr t, int (*fun)(int)) {
-  // TODO: Check there are two args, types match.
-  val_ptr v0 = tree_eval(darray_at(t->child, 0));
-  val_ptr v1 = tree_eval(darray_at(t->child, 1));
-  int i = element_cmp(v0->elem, v1->elem);
+static val_ptr run_add(val_ptr v[]) { return fun_bin(element_add, v); }
+static val_ptr run_sub(val_ptr v[]) { return fun_bin(element_sub, v); }
+static val_ptr run_mul(val_ptr v[]) { return fun_bin(element_mul, v); }
+static val_ptr run_div(val_ptr v[]) { return fun_bin(element_div, v); }
+static val_ptr run_pow(val_ptr v[]) { return fun_bin(element_pow_zn, v); }
+
+static fun_t fun_add = {{ "add", run_add, 2, sig_elem_elem }};
+static fun_t fun_sub = {{ "sub", run_sub, 2, sig_elem_elem }};
+static fun_t fun_mul = {{ "mul", run_mul, 2, sig_elem_elem }};
+static fun_t fun_div = {{ "div", run_div, 2, sig_elem_elem }};
+static fun_t fun_pow = {{ "pow", run_pow, 2, sig_elem_elem }};
+
+static val_ptr fun_cmp(val_ptr v[], int (*fun)(int)) {
+  int i = element_cmp(v[0]->elem, v[1]->elem);
   element_ptr e = pbc_malloc(sizeof(*e));
   element_init(e, M);
   element_set_si(e, fun(i));
-  v0->elem = e;
-  return v0;
+  v[0]->elem = e;
+  return v[0];
 }
 
-val_ptr fun_eq(tree_ptr t) {
+static val_ptr run_eq(val_ptr v[]) {
   int is0(int i) { return i == 0; }
-  return fun_cmp(t, is0);
+  return fun_cmp(v, is0);
 }
-
-val_ptr fun_ne(tree_ptr t) {
+static val_ptr run_ne(val_ptr v[]) {
   int isnot0(int i) { return i != 0; }
-  return fun_cmp(t, isnot0);
+  return fun_cmp(v, isnot0);
 }
-
-val_ptr fun_le(tree_ptr t) {
+static val_ptr run_le(val_ptr v[]) {
   int isle(int i) { return i <= 0; }
-  return fun_cmp(t, isle);
+  return fun_cmp(v, isle);
 }
-
-val_ptr fun_ge(tree_ptr t) {
+static val_ptr run_ge(val_ptr v[]) {
   int isge(int i) { return i >= 0; }
-  return fun_cmp(t, isge);
+  return fun_cmp(v, isge);
 }
-
-val_ptr fun_lt(tree_ptr t) {
+static val_ptr run_lt(val_ptr v[]) {
   int islt(int i) { return i < 0; }
-  return fun_cmp(t, islt);
+  return fun_cmp(v, islt);
 }
-
-val_ptr fun_gt(tree_ptr t) {
+static val_ptr run_gt(val_ptr v[]) {
   int isgt(int i) { return i > 0; }
-  return fun_cmp(t, isgt);
+  return fun_cmp(v, isgt);
 }
 
-static val_ptr eval_self(tree_ptr t) {
+static fun_t fun_eq = {{ "==", run_eq, 2, sig_elem_elem }};
+static fun_t fun_ne = {{ "!=", run_ne, 2, sig_elem_elem }};
+static fun_t fun_le = {{ "<=", run_le, 2, sig_elem_elem }};
+static fun_t fun_ge = {{ ">=", run_ge, 2, sig_elem_elem }};
+static fun_t fun_lt = {{ "<", run_lt, 2, sig_elem_elem }};
+static fun_t fun_gt = {{ ">", run_gt, 2, sig_elem_elem }};
+
+static val_ptr eval_elem(tree_ptr t) {
   // TODO: Write element_clone(), or at least element_new().
   element_ptr e = pbc_malloc(sizeof(*e));
   element_init_same_as(e, t->elem);
@@ -296,26 +309,30 @@ static val_ptr eval_id(tree_ptr t) {
   return x->type->eval(x);
 }
 
-static val_ptr eval_fun(tree_ptr t) {
-  val_ptr x = tree_eval(t->tree);
+static val_ptr eval_funcall(tree_ptr t) {
+  val_ptr x = tree_eval(darray_last(t->child));
   return x->type->funcall(x, t);
 }
 
-val_ptr fun_uminus(tree_ptr t) {
-  val_ptr v = tree_eval(t->tree);
-  // TODO: Check v is an element.
-  element_neg(v->elem, v->elem);
-  return v;
+static val_ptr eval_fun(tree_ptr t) {
+  return val_new_fun(t->fun);
 }
 
-val_ptr eval_assign(tree_ptr t) {
-  val_ptr v = tree_eval(darray_at(t->child, 0));
+static val_ptr run_neg(val_ptr v[]) {
+  element_neg(v[0]->elem, v[0]->elem);
+  return v[0];
+}
+static fun_t fun_neg = {{ "neg", run_neg, 1, sig_elem }};
+
+static val_ptr eval_assign(tree_ptr t) {
+  tree_ptr tid = darray_at(t->child, 0);
+  val_ptr v = tree_eval(darray_at(t->child, 1));
   // TODO: Check ID is not reserved.
-  symtab_put(tab, v, t->id);
+  symtab_put(tab, v, tid->id);
   return v;
 }
 
-void assign_field(field_ptr f, const char* s) {
+static void assign_field(field_ptr f, const char* s) {
   symtab_put(tab, val_new_field(f), s);
 }
 
@@ -333,7 +350,7 @@ tree_ptr tree_new_z(const char* s) {
   element_ptr e = pbc_malloc(sizeof(*e));
   element_init(e, M);
   element_set_str(e, s, 0);
-  tree_ptr t = tree_new(eval_self);
+  tree_ptr t = tree_new(eval_elem);
   t->elem = e;
   return t;
 }
@@ -352,38 +369,82 @@ tree_ptr tree_new_id(const char* s) {
 }
 
 tree_ptr tree_new_funcall(void) {
-  tree_ptr t = tree_new(eval_fun);
+  tree_ptr t = tree_new(eval_funcall);
   t->child = darray_new();
   return t;
 }
 
-tree_ptr tree_new_uminus(tree_ptr x) {
-  tree_ptr t = tree_new(fun_uminus);
-  t->tree = x;
+tree_ptr tree_new_fun(fun_ptr fun) {
+  tree_ptr t = tree_new(eval_fun);
+  t->fun = fun;
   return t;
 }
 
-void tree_set_fun(tree_ptr t, tree_ptr src) {
-  t->tree = src;
+void tree_set_fun(tree_ptr f, tree_ptr src) {
+  darray_append(f->child, src);
 }
 
 void tree_fun_append(tree_ptr f, tree_ptr p) {
   darray_append(f->child, p);
 }
 
-tree_ptr tree_new_bin(val_ptr (*fun)(tree_ptr), tree_ptr x, tree_ptr y) {
-  tree_ptr t = tree_new(fun);
-  t->child = darray_new();
-  darray_append(t->child, x);
-  darray_append(t->child, y);
+tree_ptr tree_new_binary(fun_ptr fun, tree_ptr x, tree_ptr y) {
+  tree_ptr t = tree_new_funcall();
+  tree_fun_append(t, x);
+  tree_fun_append(t, y);
+  tree_set_fun(t, tree_new_fun(fun));
   return t;
+}
+
+static tree_ptr tree_new_unary(fun_ptr fun, tree_ptr x) {
+  tree_ptr t = tree_new_funcall();
+  tree_fun_append(t, x);
+  tree_set_fun(t, tree_new_fun(fun));
+  return t;
+}
+
+tree_ptr tree_new_neg(tree_ptr t) {
+  return tree_new_unary(fun_neg, t);
+}
+tree_ptr tree_new_add(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_add, x, y);
+}
+tree_ptr tree_new_sub(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_sub, x, y);
+}
+tree_ptr tree_new_mul(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_mul, x, y);
+}
+tree_ptr tree_new_div(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_div, x, y);
+}
+tree_ptr tree_new_pow(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_pow, x, y);
+}
+tree_ptr tree_new_eq(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_eq, x, y);
+}
+tree_ptr tree_new_ne(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_ne, x, y);
+}
+tree_ptr tree_new_le(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_le, x, y);
+}
+tree_ptr tree_new_ge(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_ge, x, y);
+}
+tree_ptr tree_new_lt(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_lt, x, y);
+}
+tree_ptr tree_new_gt(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_gt, x, y);
 }
 
 tree_ptr tree_new_assign(tree_ptr l, tree_ptr r) {
   // TODO: Check l's type.
   tree_ptr t = tree_new(eval_assign);
-  t->id = l->id;
   t->child = darray_new();
+  darray_append(t->child, l);
   darray_append(t->child, r);
   return t;
 }
@@ -613,10 +674,7 @@ static fun_t fun_init_pairing_g = {{
     }};
 
 static void builtin(fun_ptr fun, const char *s) {
-  val_ptr v = pbc_malloc(sizeof(*v));
-  v->type = v_fun;
-  v->fun = fun;
-  symtab_put(reserved, v, s);
+  symtab_put(reserved, val_new_fun(fun), s);
 }
 
 int end_of_input;
