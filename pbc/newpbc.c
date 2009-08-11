@@ -40,16 +40,22 @@ static pairing_t pairing;
 // Syntax tree node.
 struct tree_s {
   // Evaluates this node.
-  val_ptr (*fun)(tree_ptr);
+  val_ptr (*eval)(tree_ptr);
   void *data;
   // Child nodes; NULL if no children.
   darray_ptr child;
 };
 
-// Evaluates syntax tree node.
-static val_ptr tree_eval(tree_ptr t) {
-  return t->fun(t);
-}
+enum {
+  ARITY_VARIABLE = -1,
+};
+
+struct fun_s {
+  int arity;
+  val_ptr (*run)(tree_ptr);
+};
+typedef struct fun_s fun_t[1];
+typedef struct fun_s *fun_ptr;
 
 // The interface of a val_ptr shared amongst many val_ptr objects.
 // Analog of C++ class.
@@ -64,20 +70,31 @@ struct val_type_s {
 // its children then returns a val_ptr.
 struct val_s {
   struct val_type_s *type;
-  void *data;
+  union {
+    element_ptr elem;
+    //fun_ptr fun;
+  val_ptr (*run)(tree_ptr);
+    field_ptr field;
+    const char *msg;
+  };
 };
 
 static val_ptr val_new_element(element_ptr e);
 static val_ptr val_new_field(field_ptr e);
 
+// Evaluates syntax tree node.
+static val_ptr tree_eval(tree_ptr t) {
+  return t->eval(t);
+}
+
 static void v_elem_out(FILE* stream, val_ptr v) {
-  element_out_str(stream, 0, v->data);
+  element_out_str(stream, 0, v->elem);
 }
 
 static val_ptr v_elem_eval(val_ptr v) {
   element_ptr e = pbc_malloc(sizeof(*e));
-  element_init_same_as(e, v->data);
-  element_set(e, v->data);
+  element_init_same_as(e, v->elem);
+  element_set(e, v->elem);
   return val_new_element(e);
 }
 
@@ -87,28 +104,32 @@ static void v_fun_out(FILE* stream, val_ptr v) {
 }
 
 static val_ptr v_fun_call(val_ptr v, tree_ptr t) {
-  val_ptr(*fun)(tree_ptr) = v->data;
+  val_ptr(*fun)(tree_ptr) = v->fun;
   return fun(t);
+  /*
+  fun_ptr fun = v->fun;
+  return fun->run(t);
+  */
 }
 
 static val_ptr v_field_cast(val_ptr v, tree_ptr t) {
   // TODO: Check args, x is an element.
   val_ptr x = tree_eval(darray_at(t->child, 0));
-  element_ptr e = x->data;
+  element_ptr e = x->elem;
   if (e->field == M) {
-    if (v->data == M) return x;
-    element_ptr e2 = element_new(v->data);
+    if (v->field == M) return x;
+    element_ptr e2 = element_new(v->field);
     element_set_multiz(e2, e->data);
-    x->data = e2;
+    x->elem = e2;
     return x;
   }
-  if (v->data == M) {
+  if (v->field == M) {
     // Map to/from integer. TODO: Map to/from multiz instead.
     mpz_t z;
     mpz_init(z);
     element_to_mpz(z, e);
     element_clear(e);
-    element_init(e, v->data);
+    element_init(e, v->field);
     element_set_mpz(e, z);
     mpz_clear(z);
   }
@@ -116,7 +137,7 @@ static val_ptr v_field_cast(val_ptr v, tree_ptr t) {
 }
 
 static void v_field_out(FILE* stream, val_ptr v) {
-  field_out_info(stream, v->data);
+  field_out_info(stream, v->field);
 }
 
 static val_ptr v_self(val_ptr v) {
@@ -124,7 +145,7 @@ static val_ptr v_self(val_ptr v) {
 }
 
 static void v_err_out(FILE* stream, val_ptr v) {
-  fprintf(stream, "%s", (const char *) v->data);
+  fprintf(stream, "%s", v->msg);
 }
 
 static val_ptr v_err_call(val_ptr v, tree_ptr t) {
@@ -141,21 +162,21 @@ static struct val_type_s
 static val_ptr val_new_element(element_ptr e) {
   val_ptr v = pbc_malloc(sizeof(*v));
   v->type = v_elem;
-  v->data = e;
+  v->elem = e;
   return v;
 }
 
 static val_ptr val_new_field(field_ptr f) {
   val_ptr v = pbc_malloc(sizeof(*v));
   v->type = v_field;
-  v->data = f;
+  v->field = f;
   return v;
 }
 
 static val_ptr val_new_error(const char *msg) {
   val_ptr v = pbc_malloc(sizeof(*v));
   v->type = v_error;
-  v->data = strdup(msg);
+  v->msg = strdup(msg);
   return v;
 }
 
@@ -165,7 +186,7 @@ static val_ptr fun_bin(
   // TODO: Check there are two args, types match.
   val_ptr v0 = tree_eval(darray_at(t->child, 0));
   val_ptr v1 = tree_eval(darray_at(t->child, 1));
-  binop(v0->data, v0->data, v1->data);
+  binop(v0->elem, v0->elem, v1->elem);
   return v0;
 }
 
@@ -179,11 +200,11 @@ static val_ptr fun_cmp(tree_ptr t, int (*fun)(int)) {
   // TODO: Check there are two args, types match.
   val_ptr v0 = tree_eval(darray_at(t->child, 0));
   val_ptr v1 = tree_eval(darray_at(t->child, 1));
-  int i = element_cmp(v0->data, v1->data);
+  int i = element_cmp(v0->elem, v1->elem);
   element_ptr e = pbc_malloc(sizeof(*e));
   element_init(e, M);
   element_set_si(e, fun(i));
-  v0->data = e;
+  v0->elem = e;
   return v0;
 }
 
@@ -217,7 +238,7 @@ val_ptr fun_gt(tree_ptr t) {
   return fun_cmp(t, isgt);
 }
 
-val_ptr fun_self(tree_ptr t) {
+static val_ptr eval_self(tree_ptr t) {
   // TODO: Write element_clone(), or at least element_new().
   element_ptr e = pbc_malloc(sizeof(*e));
   element_init_same_as(e, t->data);
@@ -225,20 +246,20 @@ val_ptr fun_self(tree_ptr t) {
   return val_new_element(e);
 }
 
-val_ptr fun_list(tree_ptr t) {
+static val_ptr eval_list(tree_ptr t) {
   element_ptr e = NULL;
   int n = darray_count(t->child);
   int i;
   for(i = 0; i < n; i++) {
     val_ptr x = tree_eval(darray_at(t->child, i));
     // TODO: Check x is element.
-    if (!i) e = multiz_new_list(x->data);
-    else multiz_append(e, x->data);
+    if (!i) e = multiz_new_list(x->elem);
+    else multiz_append(e, x->elem);
   }
   return val_new_element(e);
 }
 
-static val_ptr fun_id(tree_ptr t) {
+static val_ptr eval_id(tree_ptr t) {
   val_ptr x = symtab_at(reserved, t->data);
   if (!x) x = symtab_at(tab, t->data);
   if (!x) {
@@ -250,7 +271,7 @@ static val_ptr fun_id(tree_ptr t) {
   return x->type->eval(x);
 }
 
-static val_ptr fun_fun(tree_ptr t) {
+static val_ptr eval_fun(tree_ptr t) {
   val_ptr x = tree_eval(t->data);
   return x->type->funcall(x, t);
 }
@@ -258,11 +279,11 @@ static val_ptr fun_fun(tree_ptr t) {
 val_ptr fun_uminus(tree_ptr t) {
   val_ptr v = tree_eval(t->data);
   // TODO: Check v is an element.
-  element_neg(v->data, v->data);
+  element_neg(v->elem, v->elem);
   return v;
 }
 
-val_ptr fun_assign(tree_ptr t) {
+val_ptr eval_assign(tree_ptr t) {
   val_ptr v = tree_eval(darray_at(t->child, 0));
   // TODO: Check ID is not reserved.
   symtab_put(tab, v, t->data);
@@ -277,9 +298,9 @@ void tree_append_multiz(tree_ptr t, tree_ptr m) {
   darray_append(t->child, m);
 }
 
-tree_ptr tree_new(val_ptr (*fun)(tree_ptr), void *data) {
+tree_ptr tree_new(val_ptr (*eval)(tree_ptr), void *data) {
   tree_ptr res = pbc_malloc(sizeof(*res));
-  res->fun = fun;
+  res->eval = eval;
   res->data = data;
   res->child = NULL;
   return res;
@@ -289,22 +310,22 @@ tree_ptr tree_new_z(const char* s) {
   element_ptr e = pbc_malloc(sizeof(*e));
   element_init(e, M);
   element_set_str(e, s, 0);
-  return tree_new(fun_self, e);
+  return tree_new(eval_self, e);
 }
 
 tree_ptr tree_new_list(tree_ptr first) {
-  tree_ptr t = tree_new(fun_list, NULL);
+  tree_ptr t = tree_new(eval_list, NULL);
   t->child = darray_new();
   darray_append(t->child, first);
   return t;
 }
 
 tree_ptr tree_new_id(const char* s) {
-  return tree_new(fun_id, pbc_strdup(s));
+  return tree_new(eval_id, pbc_strdup(s));
 }
 
 tree_ptr tree_new_funcall(void) {
-  tree_ptr t = tree_new(fun_fun, NULL);
+  tree_ptr t = tree_new(eval_fun, NULL);
   t->child = darray_new();
   return t;
 }
@@ -333,7 +354,7 @@ tree_ptr tree_new_bin(val_ptr (*fun)(tree_ptr), tree_ptr x, tree_ptr y) {
 
 tree_ptr tree_new_assign(tree_ptr l, tree_ptr r) {
   // TODO: Check l's type.
-  tree_ptr t = tree_new(fun_assign, l->data);
+  tree_ptr t = tree_new(eval_assign, l->data);
   t->child = darray_new();
   darray_append(t->child, r);
   return t;
@@ -343,7 +364,7 @@ tree_ptr tree_new_assign(tree_ptr l, tree_ptr r) {
 void tree_eval_stmt(tree_ptr t) {
   if (!t) return;
   val_ptr v = tree_eval(t);
-  if (t->fun != fun_assign && v) {
+  if (t->eval != eval_assign && v) {
     v->type->out_str(stdout, v);
     putchar('\n');
   }
@@ -352,7 +373,7 @@ void tree_eval_stmt(tree_ptr t) {
 static val_ptr fun_nextprime(tree_ptr t) {
   // TODO: Check args, x is an element.
   val_ptr x = tree_eval(darray_at(t->child, 0));
-  element_ptr e = x->data;
+  element_ptr e = x->elem;
   mpz_t z;
   mpz_init(z);
   element_to_mpz(z, e);
@@ -364,39 +385,33 @@ static val_ptr fun_nextprime(tree_ptr t) {
 static val_ptr fun_order(tree_ptr t) {
   // TODO: Check args, x is a field.
   val_ptr x = tree_eval(darray_at(t->child, 0));
-  val_ptr v = pbc_malloc(sizeof(*v));
-  field_ptr f = x->data;
+  field_ptr f = x->field;
   element_ptr e = pbc_malloc(sizeof(*e));
   element_init(e, M);
   element_set_mpz(e, f->order);
-  v->type = v_elem;
-  v->data = e;
-  return v;
+  return val_new_element(e);
 }
 
 static val_ptr fun_random(tree_ptr t) {
   // TODO: Check args, x is a field.
   val_ptr x = tree_eval(darray_at(t->child, 0));
-  val_ptr v = pbc_malloc(sizeof(*v));
   element_ptr e = pbc_malloc(sizeof(*e));
-  element_init(e, x->data);
+  element_init(e, x->field);
   element_random(e);
-  v->type = v_elem;
-  v->data = e;
-  return v;
+  return val_new_element(e);
 }
 
 static val_ptr fun_sqrt(tree_ptr t) {
   // TODO: Check args, x is element, x is square.
   val_ptr x = tree_eval(darray_at(t->child, 0));
-  element_sqrt(x->data, x->data);
+  element_sqrt(x->elem, x->elem);
   return x;
 }
 
 static val_ptr fun_inv(tree_ptr t) {
   // TODO: Check args, x is element, x is invertible.
   val_ptr x = tree_eval(darray_at(t->child, 0));
-  element_invert(x->data, x->data);
+  element_invert(x->elem, x->elem);
   return x;
 }
 
@@ -411,16 +426,16 @@ static val_ptr fun_pairing(tree_ptr t) {
   // TODO: Check args.
   val_ptr x = tree_eval(darray_at(t->child, 0));
   val_ptr y = tree_eval(darray_at(t->child, 1));
-  element_ptr xe = x->data;
+  element_ptr xe = x->elem;
   element_ptr e = element_new(xe->field->pairing->GT);
-  bilinear_map(e, xe, y->data);
+  bilinear_map(e, xe, y->elem);
   return val_new_element(e);
 }
 
 static val_ptr fun_zmod(tree_ptr t) {
   // TODO: Check args, x is an element.
   val_ptr x = tree_eval(darray_at(t->child, 0));
-  element_ptr e = x->data;
+  element_ptr e = x->elem;
   mpz_t z;
   mpz_init(z);
   element_to_mpz(z, e);
@@ -434,7 +449,7 @@ static val_ptr fun_poly(tree_ptr t) {
   // TODO: Check args, x is a field.
   val_ptr x = tree_eval(darray_at(t->child, 0));
   field_ptr f = pbc_malloc(sizeof(*f));
-  field_init_poly(f, x->data);
+  field_init_poly(f, x->field);
   return val_new_field(f);
 }
 
@@ -442,7 +457,7 @@ static val_ptr fun_polymod(tree_ptr t) {
   // TODO: Check args, x is a poly.
   val_ptr x = tree_eval(darray_at(t->child, 0));
   field_ptr f = pbc_malloc(sizeof(*f));
-  field_init_polymod(f, x->data);
+  field_init_polymod(f, x->elem);
   return val_new_field(f);
 }
 
@@ -451,9 +466,9 @@ static val_ptr fun_extend(tree_ptr t) {
   val_ptr x = tree_eval(darray_at(t->child, 0));
   val_ptr y = tree_eval(darray_at(t->child, 1));
   field_ptr fx = pbc_malloc(sizeof(*fx));
-  field_init_poly(fx, x->data);
+  field_init_poly(fx, x->field);
   element_ptr poly = element_new(fx);
-  element_set_multiz(poly, ((element_ptr) y->data)->data);
+  element_set_multiz(poly, y->elem->data);
   field_ptr f = pbc_malloc(sizeof(*f));
   field_init_polymod(f, poly);
   element_free(poly);
@@ -566,7 +581,7 @@ static val_ptr fun_init_pairing_g(tree_ptr t) {
 static void builtin(val_ptr(*fun)(tree_ptr), const char *s) {
   val_ptr v = pbc_malloc(sizeof(*v));
   v->type = v_fun;
-  v->data = fun;
+  v->fun = fun;
   symtab_put(reserved, v, s);
 }
 
