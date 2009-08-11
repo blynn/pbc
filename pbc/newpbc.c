@@ -22,10 +22,7 @@ const char *option_prompt;
 
 char *pbc_getline(const char *prompt);
 
-void yyerror(char *s) {
-  fprintf(stderr, "%s\n", s);
-}
-
+void yyerror(char *s) { fprintf(stderr, "%s\n", s); }
 int yyparse(void);
 
 // Symbol table holding built-in functions and variables.
@@ -50,13 +47,6 @@ enum {
   ARITY_VARIABLE = -1,
 };
 
-struct fun_s {
-  int arity;
-  val_ptr (*run)(tree_ptr);
-};
-typedef struct fun_s fun_t[1];
-typedef struct fun_s *fun_ptr;
-
 // The interface of a val_ptr shared amongst many val_ptr objects.
 // Analog of C++ class.
 struct val_type_s {
@@ -66,14 +56,22 @@ struct val_type_s {
   val_ptr (*funcall)(val_ptr, tree_ptr);
 };
 
+struct fun_s {
+  const char *name;
+  val_ptr (*run)(val_ptr[]);
+  int arity;
+  const struct val_type_s **type;
+};
+typedef struct fun_s fun_t[1];
+typedef struct fun_s *fun_ptr;
+
 // When interpreting, each node of the syntax tree recursively evaluates
 // its children then returns a val_ptr.
 struct val_s {
   struct val_type_s *type;
   union {
     element_ptr elem;
-    //fun_ptr fun;
-  val_ptr (*run)(tree_ptr);
+    fun_ptr fun;
     field_ptr field;
     const char *msg;
   };
@@ -81,6 +79,7 @@ struct val_s {
 
 static val_ptr val_new_element(element_ptr e);
 static val_ptr val_new_field(field_ptr e);
+static val_ptr val_new_error(const char *msg);
 
 // Evaluates syntax tree node.
 static val_ptr tree_eval(tree_ptr t) {
@@ -99,17 +98,29 @@ static val_ptr v_elem_eval(val_ptr v) {
 }
 
 static void v_fun_out(FILE* stream, val_ptr v) {
-  UNUSED_VAR(v);
-  fprintf(stream, "function");
+  // TODO: Print types of arguments.
+  fprintf(stream, "function %s, arity %d", v->fun->name, v->fun->arity);
 }
 
 static val_ptr v_fun_call(val_ptr v, tree_ptr t) {
-  val_ptr(*fun)(tree_ptr) = v->fun;
-  return fun(t);
-  /*
   fun_ptr fun = v->fun;
-  return fun->run(t);
-  */
+  int n = fun->arity;
+  if (n != darray_count(t->child)) {
+    char buf[80];
+    snprintf(buf, 80, "%s: wrong number of arguments", fun->name);
+    return val_new_error(buf);
+  }
+  val_ptr arg[n];
+  int i;
+  for(i = 0; i < n; i++) {
+    arg[i] = tree_eval(darray_at(t->child, i));
+    if (fun->type[i] && arg[i]->type != fun->type[i]) {
+      char buf[80];
+      snprintf(buf, 80, "%s: argument %d type mismatch", fun->name, i + 1);
+      return val_new_error(buf);
+    }
+  }
+  return fun->run(arg);
 }
 
 static val_ptr v_field_cast(val_ptr v, tree_ptr t) {
@@ -154,10 +165,18 @@ static val_ptr v_err_call(val_ptr v, tree_ptr t) {
 }
 
 static struct val_type_s
+  // TODO: Replace NULL with error or something else.
   v_elem[1]  = {{  "element",  v_elem_out, v_elem_eval, NULL }},
   v_field[1] = {{    "field", v_field_out,      v_self, v_field_cast }},
   v_fun[1]   = {{ "function",   v_fun_out,      v_self, v_fun_call }},
   v_error[1] = {{    "error",   v_err_out,      v_self, v_err_call }};
+
+// Function signature constants for type checking.
+const struct val_type_s *sig_field[] = { v_field };
+const struct val_type_s *sig_elem[] = { v_elem };
+const struct val_type_s *sig_any[] = { NULL };
+const struct val_type_s *sig_elem_elem[] = { v_elem, v_elem };
+const struct val_type_s *sig_field_elem[] = { v_field, v_elem };
 
 static val_ptr val_new_element(element_ptr e) {
   val_ptr v = pbc_malloc(sizeof(*v));
@@ -370,72 +389,64 @@ void tree_eval_stmt(tree_ptr t) {
   }
 }
 
-static val_ptr fun_nextprime(tree_ptr t) {
-  // TODO: Check args, x is an element.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
-  element_ptr e = x->elem;
+static val_ptr run_nextprime(val_ptr v[]) {
+  element_ptr e = v[0]->elem;
   mpz_t z;
   mpz_init(z);
   element_to_mpz(z, e);
   mpz_nextprime(z, z);
   element_set_mpz(e, z);
-  return x;
+  return v[0];
 }
+static fun_t fun_nextprime = {{ "nextprime", run_nextprime, 1, sig_elem }};
 
-static val_ptr fun_order(tree_ptr t) {
-  // TODO: Check args, x is a field.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
-  field_ptr f = x->field;
+static val_ptr run_order(val_ptr v[]) {
+  field_ptr f = v[0]->field;
   element_ptr e = pbc_malloc(sizeof(*e));
   element_init(e, M);
   element_set_mpz(e, f->order);
   return val_new_element(e);
 }
+static fun_t fun_order = {{ "ord", run_order, 1, sig_field }};
 
-static val_ptr fun_random(tree_ptr t) {
-  // TODO: Check args, x is a field.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
+static val_ptr run_random(val_ptr v[]) {
   element_ptr e = pbc_malloc(sizeof(*e));
-  element_init(e, x->field);
+  element_init(e, v[0]->field);
   element_random(e);
   return val_new_element(e);
 }
+static fun_t fun_random = {{ "rnd", run_random, 1, sig_field }};
 
-static val_ptr fun_sqrt(tree_ptr t) {
-  // TODO: Check args, x is element, x is square.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
-  element_sqrt(x->elem, x->elem);
-  return x;
+static val_ptr run_sqrt(val_ptr v[]) {
+  // TODO: Check v[0] is square.
+  element_sqrt(v[0]->elem, v[0]->elem);
+  return v[0];
 }
+static fun_t fun_sqrt = {{ "sqrt", run_sqrt, 1, sig_elem }};
 
-static val_ptr fun_inv(tree_ptr t) {
-  // TODO: Check args, x is element, x is invertible.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
-  element_invert(x->elem, x->elem);
-  return x;
+static val_ptr run_invert(val_ptr v[]) {
+  // TODO: Check v[0] is invertible.
+  element_invert(v[0]->elem, v[0]->elem);
+  return v[0];
 }
+static fun_t fun_inv = {{ "inv", run_invert, 1, sig_elem }};
 
-static val_ptr fun_type(tree_ptr t) {
-  // TODO: Check args.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
-  puts(x->type->name);
-  return x;
+static val_ptr run_type(val_ptr v[]) {
+  puts(v[0]->type->name);
+  return v[0];
 }
+static fun_t fun_type = {{ "type", run_type, 1, sig_any }};
 
-static val_ptr fun_pairing(tree_ptr t) {
-  // TODO: Check args.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
-  val_ptr y = tree_eval(darray_at(t->child, 1));
-  element_ptr xe = x->elem;
-  element_ptr e = element_new(xe->field->pairing->GT);
-  bilinear_map(e, xe, y->elem);
+static val_ptr run_pairing(val_ptr v[]) {
+  element_ptr x = v[0]->elem;
+  element_ptr e = element_new(x->field->pairing->GT);
+  bilinear_map(e, x, v[1]->elem);
   return val_new_element(e);
 }
+static fun_t fun_pairing = {{ "pairing", run_pairing, 2, sig_elem_elem }};
 
-static val_ptr fun_zmod(tree_ptr t) {
-  // TODO: Check args, x is an element.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
-  element_ptr e = x->elem;
+static val_ptr run_zmod(val_ptr v[]) {
+  element_ptr e = v[0]->elem;
   mpz_t z;
   mpz_init(z);
   element_to_mpz(z, e);
@@ -444,36 +455,35 @@ static val_ptr fun_zmod(tree_ptr t) {
   mpz_clear(z);
   return val_new_field(f);
 }
+static fun_t fun_zmod = {{ "zmod", run_zmod, 1, sig_elem }};
 
-static val_ptr fun_poly(tree_ptr t) {
-  // TODO: Check args, x is a field.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
+static val_ptr run_poly(val_ptr v[]) {
   field_ptr f = pbc_malloc(sizeof(*f));
-  field_init_poly(f, x->field);
+  field_init_poly(f, v[0]->field);
   return val_new_field(f);
 }
+static fun_t fun_poly = {{ "poly", run_poly, 1, sig_field }};
 
-static val_ptr fun_polymod(tree_ptr t) {
-  // TODO: Check args, x is a poly.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
+static val_ptr run_polymod(val_ptr v[]) {
+  // TODO: Check v[0] is a poly.
   field_ptr f = pbc_malloc(sizeof(*f));
-  field_init_polymod(f, x->elem);
+  field_init_polymod(f, v[0]->elem);
   return val_new_field(f);
 }
+static fun_t fun_polymod = {{ "polymod", run_polymod, 1, sig_elem }};
 
-static val_ptr fun_extend(tree_ptr t) {
-  // TODO: Check args, x is a field, y is multiz poly.
-  val_ptr x = tree_eval(darray_at(t->child, 0));
-  val_ptr y = tree_eval(darray_at(t->child, 1));
+static val_ptr run_extend(val_ptr v[]) {
+  // TODO: Check v[1] is multiz poly.
   field_ptr fx = pbc_malloc(sizeof(*fx));
-  field_init_poly(fx, x->field);
+  field_init_poly(fx, v[0]->field);
   element_ptr poly = element_new(fx);
-  element_set_multiz(poly, y->elem->data);
+  element_set_multiz(poly, v[1]->elem->data);
   field_ptr f = pbc_malloc(sizeof(*f));
   field_init_polymod(f, poly);
   element_free(poly);
   return val_new_field(f);
 }
+static fun_t fun_extend = {{ "extend", run_extend, 1, sig_field_elem }};
 
 static void init_pairing(const char *s) {
   pairing_init_set_str(pairing, s);
@@ -548,37 +558,52 @@ static char *gparam =
 "coeff4 405367866213598664862417230702935310328613596\n"
 "nqr 22204504160560785687198080413579021865783099\n";
 
-static val_ptr fun_init_pairing_a(tree_ptr t) {
-  UNUSED_VAR(t);
+static val_ptr run_init_pairing_a(val_ptr v[]) {
+  UNUSED_VAR(v);
   init_pairing(aparam);
   return NULL;
 }
+static fun_t fun_init_pairing_a = {{
+    "init_pairing_a", run_init_pairing_a, 0, NULL
+    }};
 
-static val_ptr fun_init_pairing_d(tree_ptr t) {
-  UNUSED_VAR(t);
+static val_ptr run_init_pairing_d(val_ptr v[]) {
+  UNUSED_VAR(v);
   init_pairing(dparam);
   return NULL;
 }
+static fun_t fun_init_pairing_d = {{
+    "init_pairing_d", run_init_pairing_d, 0, NULL
+    }};
 
-static val_ptr fun_init_pairing_e(tree_ptr t) {
-  UNUSED_VAR(t);
+static val_ptr run_init_pairing_e(val_ptr v[]) {
+  UNUSED_VAR(v);
   init_pairing(eparam);
   return NULL;
 }
+static fun_t fun_init_pairing_e = {{
+    "init_pairing_e", run_init_pairing_e, 0, NULL
+    }};
 
-static val_ptr fun_init_pairing_f(tree_ptr t) {
-  UNUSED_VAR(t);
+static val_ptr run_init_pairing_f(val_ptr v[]) {
+  UNUSED_VAR(v);
   init_pairing(fparam);
   return NULL;
 }
+static fun_t fun_init_pairing_f = {{
+    "init_pairing_f", run_init_pairing_f, 0, NULL
+    }};
 
-static val_ptr fun_init_pairing_g(tree_ptr t) {
-  UNUSED_VAR(t);
+static val_ptr run_init_pairing_g(val_ptr v[]) {
+  UNUSED_VAR(v);
   init_pairing(gparam);
   return NULL;
 }
+static fun_t fun_init_pairing_g = {{
+    "init_pairing_g", run_init_pairing_g, 0, NULL
+    }};
 
-static void builtin(val_ptr(*fun)(tree_ptr), const char *s) {
+static void builtin(fun_ptr fun, const char *s) {
   val_ptr v = pbc_malloc(sizeof(*v));
   v->type = v_fun;
   v->fun = fun;
@@ -643,7 +668,7 @@ int main(int argc, char **argv) {
   builtin(fun_init_pairing_e, "init_pairing_e");
   builtin(fun_init_pairing_f, "init_pairing_f");
   builtin(fun_init_pairing_g, "init_pairing_g");
-  fun_init_pairing_a(NULL);
+  run_init_pairing_a(NULL);
   symtab_put(reserved, val_new_field(M), "M");
   symtab_put(reserved, val_new_field(Z), "Z");
 
