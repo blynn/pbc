@@ -8,7 +8,7 @@
 #include <stdarg.h>
 #include <unistd.h> //for getopt
 #include "pbc.h"
-#include "pbc_fieldmpz.h"
+#include "pbc_z.h"
 #include "pbc_fp.h"
 
 #include "misc/darray.h"

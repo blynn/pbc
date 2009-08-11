@@ -811,3 +811,8 @@ element_ptr element_new(field_ptr f) {
   element_init(e, f);
   return e;
 }
+
+void element_free(element_ptr e) {
+  element_clear(e);
+  pbc_free(e);
+}

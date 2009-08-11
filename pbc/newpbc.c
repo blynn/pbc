@@ -5,6 +5,7 @@
 
 #include "pbc.h"
 #include "pbc_fp.h"
+#include "pbc_z.h"
 #include "pbc_multiz.h"
 #include "pbc_poly.h"
 
@@ -32,6 +33,7 @@ static symtab_t reserved;
 // Symbol table holding user-defined variable and function names.
 static symtab_t tab;
 
+static field_t M;
 static field_t Z;
 static pairing_t pairing;
 
@@ -93,14 +95,14 @@ static val_ptr v_field_cast(val_ptr v, tree_ptr t) {
   // TODO: Check args, x is an element.
   val_ptr x = tree_eval(darray_at(t->child, 0));
   element_ptr e = x->data;
-  if (e->field == Z) {
-    if (v->data == Z) return x;
+  if (e->field == M) {
+    if (v->data == M) return x;
     element_ptr e2 = element_new(v->data);
     element_set_multiz(e2, e->data);
     x->data = e2;
     return x;
   }
-  if (v->data == Z) {
+  if (v->data == M) {
     // Map to/from integer. TODO: Map to/from multiz instead.
     mpz_t z;
     mpz_init(z);
@@ -150,6 +152,13 @@ static val_ptr val_new_field(field_ptr f) {
   return v;
 }
 
+static val_ptr val_new_error(const char *msg) {
+  val_ptr v = pbc_malloc(sizeof(*v));
+  v->type = v_error;
+  v->data = strdup(msg);
+  return v;
+}
+
 static val_ptr fun_bin(
     void (*binop)(element_ptr, element_ptr, element_ptr),
     tree_ptr t) {
@@ -172,7 +181,7 @@ static val_ptr fun_cmp(tree_ptr t, int (*fun)(int)) {
   val_ptr v1 = tree_eval(darray_at(t->child, 1));
   int i = element_cmp(v0->data, v1->data);
   element_ptr e = pbc_malloc(sizeof(*e));
-  element_init(e, Z);
+  element_init(e, M);
   element_set_si(e, fun(i));
   v0->data = e;
   return v0;
@@ -232,7 +241,12 @@ val_ptr fun_list(tree_ptr t) {
 static val_ptr fun_id(tree_ptr t) {
   val_ptr x = symtab_at(reserved, t->data);
   if (!x) x = symtab_at(tab, t->data);
-  if (!x) return NULL;  // TODO: Return error.
+  if (!x) {
+    char buf[80];
+    snprintf(buf, 80, "undefined variable %s", (const char *) t->data);
+    return val_new_error(buf);
+  }
+
   return x->type->eval(x);
 }
 
@@ -273,7 +287,7 @@ tree_ptr tree_new(val_ptr (*fun)(tree_ptr), void *data) {
 
 tree_ptr tree_new_z(const char* s) {
   element_ptr e = pbc_malloc(sizeof(*e));
-  element_init(e, Z);
+  element_init(e, M);
   element_set_str(e, s, 0);
   return tree_new(fun_self, e);
 }
@@ -353,7 +367,7 @@ static val_ptr fun_order(tree_ptr t) {
   val_ptr v = pbc_malloc(sizeof(*v));
   field_ptr f = x->data;
   element_ptr e = pbc_malloc(sizeof(*e));
-  element_init(e, Z);
+  element_init(e, M);
   element_set_mpz(e, f->order);
   v->type = v_elem;
   v->data = e;
@@ -403,7 +417,7 @@ static val_ptr fun_pairing(tree_ptr t) {
   return val_new_element(e);
 }
 
-static val_ptr fun_gf(tree_ptr t) {
+static val_ptr fun_zmod(tree_ptr t) {
   // TODO: Check args, x is an element.
   val_ptr x = tree_eval(darray_at(t->child, 0));
   element_ptr e = x->data;
@@ -421,6 +435,28 @@ static val_ptr fun_poly(tree_ptr t) {
   val_ptr x = tree_eval(darray_at(t->child, 0));
   field_ptr f = pbc_malloc(sizeof(*f));
   field_init_poly(f, x->data);
+  return val_new_field(f);
+}
+
+static val_ptr fun_polymod(tree_ptr t) {
+  // TODO: Check args, x is a poly.
+  val_ptr x = tree_eval(darray_at(t->child, 0));
+  field_ptr f = pbc_malloc(sizeof(*f));
+  field_init_polymod(f, x->data);
+  return val_new_field(f);
+}
+
+static val_ptr fun_extend(tree_ptr t) {
+  // TODO: Check args, x is a field, y is multiz poly.
+  val_ptr x = tree_eval(darray_at(t->child, 0));
+  val_ptr y = tree_eval(darray_at(t->child, 1));
+  field_ptr fx = pbc_malloc(sizeof(*fx));
+  field_init_poly(fx, x->data);
+  element_ptr poly = element_new(fx);
+  element_set_multiz(poly, ((element_ptr) y->data)->data);
+  field_ptr f = pbc_malloc(sizeof(*f));
+  field_init_polymod(f, poly);
+  element_free(poly);
   return val_new_field(f);
 }
 
@@ -570,7 +606,8 @@ int main(int argc, char **argv) {
     }
   }
 
-  field_init_multiz(Z);
+  field_init_z(Z);
+  field_init_multiz(M);
   symtab_init(tab);
 
   builtin(fun_random, "rnd");
@@ -582,14 +619,17 @@ int main(int argc, char **argv) {
   builtin(fun_inv, "inv");
   builtin(fun_type, "type");
   builtin(fun_pairing, "pairing");
-  builtin(fun_gf, "GF");
+  builtin(fun_zmod, "zmod");
   builtin(fun_poly, "poly");
+  builtin(fun_polymod, "polymod");
+  builtin(fun_extend, "extend");
   builtin(fun_init_pairing_a, "init_pairing_a");
   builtin(fun_init_pairing_d, "init_pairing_d");
   builtin(fun_init_pairing_e, "init_pairing_e");
   builtin(fun_init_pairing_f, "init_pairing_f");
   builtin(fun_init_pairing_g, "init_pairing_g");
   fun_init_pairing_a(NULL);
+  symtab_put(reserved, val_new_field(M), "M");
   symtab_put(reserved, val_new_field(Z), "Z");
 
   yywrap();
@@ -599,6 +639,6 @@ int main(int argc, char **argv) {
   putchar('\n');
 
   symtab_clear(tab);
-  field_clear(Z);
+  field_clear(M);
   return 0;
 }

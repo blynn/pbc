@@ -20,7 +20,7 @@ include/pbc_curve.h \
 include/pbc_d_param.h \
 include/pbc_e_param.h \
 include/pbc_field.h \
-include/pbc_fieldmpz.h \
+include/pbc_z.h \
 include/pbc_fieldquadratic.h \
 include/pbc_f_param.h \
 include/pbc_g_param.h \
@@ -38,7 +38,7 @@ include/pbc_test.h \
 include/pbc_utils.h
 
 libpbc_la_CPPFLAGS = -Iinclude
-libpbc_la_SOURCES = arith/field.c arith/fieldmpz.c \
+libpbc_la_SOURCES = arith/field.c arith/z.c \
 	arith/naivefp.c arith/fastfp.c \
 	arith/fp.c arith/fasterfp.c arith/montfp.c \
 	arith/dlog.c \

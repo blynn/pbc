@@ -1,12 +1,13 @@
-// The ring Z as a field_t.
+// The ring Z.
+//
 // Wrappers around GMP mpz functions.
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"
+#include "pbc_z.h"
 #include "pbc_random.h"
 #include "pbc_fp.h"
 #include "pbc_memory.h"

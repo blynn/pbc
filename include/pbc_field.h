@@ -109,6 +109,7 @@ static inline void element_init(element_t e, field_ptr f) {
 }
 
 element_ptr element_new(field_ptr f);
+void element_free(element_ptr e);
 
 /*@manual einit
 Initialize 'e' to be an element of the algebraic structure that 'e2'

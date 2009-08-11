@@ -33,7 +33,7 @@ endif
 
 libpbc_srcs := \
   $(addsuffix .c,$(addprefix arith/, \
-    field fp montfp naivefp fastfp fasterfp multiz fieldmpz fieldquadratic poly \
+    field fp montfp naivefp fastfp fasterfp multiz z fieldquadratic poly \
     random dlog)) \
   $(addsuffix .c,$(addprefix ecc/, \
     curve singular pairing param \
@@ -129,7 +129,8 @@ depend:
 
 # DO NOT DELETE
 
-arith/field.o: include/pbc_utils.h include/pbc_field.h include/pbc_memory.h
+arith/field.o: include/pbc_utils.h include/pbc_field.h include/pbc_multiz.h
+arith/field.o: include/pbc_memory.h
 arith/fp.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
 arith/montfp.o: include/pbc_utils.h include/pbc_field.h include/pbc_random.h
 arith/montfp.o: include/pbc_fp.h include/pbc_memory.h
@@ -139,20 +140,22 @@ arith/fastfp.o: include/pbc_utils.h include/pbc_field.h include/pbc_random.h
 arith/fastfp.o: include/pbc_fp.h include/pbc_memory.h
 arith/fasterfp.o: include/pbc_utils.h include/pbc_field.h
 arith/fasterfp.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
-arith/multiz.o: include/pbc_utils.h include/pbc_field.h include/pbc_random.h
-arith/multiz.o: include/pbc_fp.h include/pbc_memory.h misc/darray.h
-arith/fieldmpz.o: include/pbc_utils.h include/pbc_field.h
-arith/fieldmpz.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
+arith/multiz.o: include/pbc_utils.h include/pbc_field.h include/pbc_multiz.h
+arith/multiz.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
+arith/multiz.o: misc/darray.h
+arith/z.o: include/pbc_utils.h include/pbc_field.h include/pbc_z.h
+arith/z.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
 arith/fieldquadratic.o: include/pbc_utils.h include/pbc_field.h
-arith/fieldquadratic.o: include/pbc_fieldquadratic.h include/pbc_memory.h
-arith/poly.o: include/pbc_utils.h include/pbc_field.h include/pbc_poly.h
-arith/poly.o: include/pbc_memory.h misc/darray.h
+arith/fieldquadratic.o: include/pbc_multiz.h include/pbc_fieldquadratic.h
+arith/fieldquadratic.o: include/pbc_memory.h
+arith/poly.o: include/pbc_utils.h include/pbc_field.h include/pbc_multiz.h
+arith/poly.o: include/pbc_poly.h include/pbc_memory.h misc/darray.h
 arith/random.o: include/pbc_random.h include/pbc_utils.h include/pbc_memory.h
 arith/dlog.o: include/pbc_utils.h include/pbc_field.h include/pbc_memory.h
 arith/dlog.o: misc/darray.h
-ecc/curve.o: include/pbc_utils.h include/pbc_field.h include/pbc_poly.h
-ecc/curve.o: include/pbc_curve.h include/pbc_memory.h include/pbc_random.h
-ecc/curve.o: misc/darray.h
+ecc/curve.o: include/pbc_utils.h include/pbc_field.h include/pbc_multiz.h
+ecc/curve.o: include/pbc_poly.h include/pbc_curve.h include/pbc_memory.h
+ecc/curve.o: include/pbc_random.h misc/darray.h
 ecc/singular.o: include/pbc_utils.h include/pbc_field.h include/pbc_curve.h
 ecc/singular.o: include/pbc_param.h include/pbc_pairing.h include/pbc_fp.h
 ecc/singular.o: include/pbc_memory.h

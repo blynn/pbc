@@ -41,7 +41,7 @@ assign_expr
 
 expr
   : multinomial
-  | subexpr LPAR exprlist RPAR  { $$ = $3; tree_set_fun($$, $1); }
+  | molecule
   | expr EQ expr     { $$ = tree_new_bin(fun_eq, $1, $3); }
   | expr NE expr     { $$ = tree_new_bin(fun_ne, $1, $3); }
   | expr LE expr     { $$ = tree_new_bin(fun_le, $1, $3); }
@@ -54,12 +54,12 @@ expr
   | expr DIVIDE expr { $$ = tree_new_bin(fun_div, $1, $3); }
   | expr POW expr    { $$ = tree_new_bin(fun_pow, $1, $3); }
   | MINUS expr %prec UMINUS  { $$ = tree_new_uminus($2); }
-  | subexpr
   ;
 
-// Expressions that are also valid for function calls.
-subexpr
-  : LPAR expr RPAR   { $$ = $2 }
+// Not quite atoms.
+molecule
+  : molecule LPAR exprlist RPAR  { $$ = $3; tree_set_fun($$, $1); }
+  | LPAR expr RPAR   { $$ = $2 }
   | ID
   ;
 
