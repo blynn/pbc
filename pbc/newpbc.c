@@ -38,7 +38,12 @@ static pairing_t pairing;
 struct tree_s {
   // Evaluates this node.
   val_ptr (*eval)(tree_ptr);
-  void *data;
+  union {
+    const char *id;
+    element_ptr elem;
+
+    tree_ptr tree;
+  };
   // Child nodes; NULL if no children.
   darray_ptr child;
 };
@@ -56,6 +61,7 @@ struct val_type_s {
   val_ptr (*funcall)(val_ptr, tree_ptr);
 };
 
+// Functions plus type checking data.
 struct fun_s {
   const char *name;
   val_ptr (*run)(val_ptr[]);
@@ -260,8 +266,8 @@ val_ptr fun_gt(tree_ptr t) {
 static val_ptr eval_self(tree_ptr t) {
   // TODO: Write element_clone(), or at least element_new().
   element_ptr e = pbc_malloc(sizeof(*e));
-  element_init_same_as(e, t->data);
-  element_set(e, t->data);
+  element_init_same_as(e, t->elem);
+  element_set(e, t->elem);
   return val_new_element(e);
 }
 
@@ -279,11 +285,11 @@ static val_ptr eval_list(tree_ptr t) {
 }
 
 static val_ptr eval_id(tree_ptr t) {
-  val_ptr x = symtab_at(reserved, t->data);
-  if (!x) x = symtab_at(tab, t->data);
+  val_ptr x = symtab_at(reserved, t->id);
+  if (!x) x = symtab_at(tab, t->id);
   if (!x) {
     char buf[80];
-    snprintf(buf, 80, "undefined variable %s", (const char *) t->data);
+    snprintf(buf, 80, "undefined variable %s", t->id);
     return val_new_error(buf);
   }
 
@@ -291,12 +297,12 @@ static val_ptr eval_id(tree_ptr t) {
 }
 
 static val_ptr eval_fun(tree_ptr t) {
-  val_ptr x = tree_eval(t->data);
+  val_ptr x = tree_eval(t->tree);
   return x->type->funcall(x, t);
 }
 
 val_ptr fun_uminus(tree_ptr t) {
-  val_ptr v = tree_eval(t->data);
+  val_ptr v = tree_eval(t->tree);
   // TODO: Check v is an element.
   element_neg(v->elem, v->elem);
   return v;
@@ -305,7 +311,7 @@ val_ptr fun_uminus(tree_ptr t) {
 val_ptr eval_assign(tree_ptr t) {
   val_ptr v = tree_eval(darray_at(t->child, 0));
   // TODO: Check ID is not reserved.
-  symtab_put(tab, v, t->data);
+  symtab_put(tab, v, t->id);
   return v;
 }
 
@@ -317,11 +323,9 @@ void tree_append_multiz(tree_ptr t, tree_ptr m) {
   darray_append(t->child, m);
 }
 
-tree_ptr tree_new(val_ptr (*eval)(tree_ptr), void *data) {
+tree_ptr tree_new(val_ptr (*eval)(tree_ptr)) {
   tree_ptr res = pbc_malloc(sizeof(*res));
   res->eval = eval;
-  res->data = data;
-  res->child = NULL;
   return res;
 }
 
@@ -329,34 +333,38 @@ tree_ptr tree_new_z(const char* s) {
   element_ptr e = pbc_malloc(sizeof(*e));
   element_init(e, M);
   element_set_str(e, s, 0);
-  return tree_new(eval_self, e);
+  tree_ptr t = tree_new(eval_self);
+  t->elem = e;
+  return t;
 }
 
 tree_ptr tree_new_list(tree_ptr first) {
-  tree_ptr t = tree_new(eval_list, NULL);
+  tree_ptr t = tree_new(eval_list);
   t->child = darray_new();
   darray_append(t->child, first);
   return t;
 }
 
 tree_ptr tree_new_id(const char* s) {
-  return tree_new(eval_id, pbc_strdup(s));
+  tree_ptr t = tree_new(eval_id);
+  t->id = pbc_strdup(s);
+  return t;
 }
 
 tree_ptr tree_new_funcall(void) {
-  tree_ptr t = tree_new(eval_fun, NULL);
+  tree_ptr t = tree_new(eval_fun);
   t->child = darray_new();
   return t;
 }
 
 tree_ptr tree_new_uminus(tree_ptr x) {
-  tree_ptr t = tree_new(fun_uminus, x);
+  tree_ptr t = tree_new(fun_uminus);
+  t->tree = x;
   return t;
 }
 
 void tree_set_fun(tree_ptr t, tree_ptr src) {
-  free(t->data);
-  t->data = src;
+  t->tree = src;
 }
 
 void tree_fun_append(tree_ptr f, tree_ptr p) {
@@ -364,7 +372,7 @@ void tree_fun_append(tree_ptr f, tree_ptr p) {
 }
 
 tree_ptr tree_new_bin(val_ptr (*fun)(tree_ptr), tree_ptr x, tree_ptr y) {
-  tree_ptr t = tree_new(fun, NULL);
+  tree_ptr t = tree_new(fun);
   t->child = darray_new();
   darray_append(t->child, x);
   darray_append(t->child, y);
@@ -373,7 +381,8 @@ tree_ptr tree_new_bin(val_ptr (*fun)(tree_ptr), tree_ptr x, tree_ptr y) {
 
 tree_ptr tree_new_assign(tree_ptr l, tree_ptr r) {
   // TODO: Check l's type.
-  tree_ptr t = tree_new(eval_assign, l->data);
+  tree_ptr t = tree_new(eval_assign);
+  t->id = l->id;
   t->child = darray_new();
   darray_append(t->child, r);
   return t;
