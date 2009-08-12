@@ -297,6 +297,15 @@ static val_ptr eval_list(tree_ptr t) {
   return val_new_element(e);
 }
 
+static val_ptr eval_ternary(tree_ptr t) {
+  // TODO: Check x is element.
+  val_ptr x = tree_eval(darray_at(t->child, 0));
+  if (!element_is0(x->elem)) {
+    return tree_eval(darray_at(t->child, 1));
+  }
+  return tree_eval(darray_at(t->child, 2));
+}
+
 static val_ptr eval_id(tree_ptr t) {
   val_ptr x = symtab_at(reserved, t->id);
   if (!x) x = symtab_at(tab, t->id);
@@ -362,6 +371,15 @@ tree_ptr tree_new_list(tree_ptr first) {
   return t;
 }
 
+tree_ptr tree_new_ternary(tree_ptr cond, tree_ptr t1, tree_ptr t2) {
+  tree_ptr t = tree_new(eval_ternary);
+  t->child = darray_new();
+  darray_append(t->child, cond);
+  darray_append(t->child, t1);
+  darray_append(t->child, t2);
+  return t;
+}
+
 tree_ptr tree_new_id(const char* s) {
   tree_ptr t = tree_new(eval_id);
   t->id = pbc_strdup(s);
@@ -374,7 +392,7 @@ tree_ptr tree_new_funcall(void) {
   return t;
 }
 
-tree_ptr tree_new_fun(fun_ptr fun) {
+static tree_ptr tree_new_fun(fun_ptr fun) {
   tree_ptr t = tree_new(eval_fun);
   t->fun = fun;
   return t;

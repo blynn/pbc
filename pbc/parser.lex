@@ -10,11 +10,17 @@
 #include "parser.tab.h"
 
 extern int option_easy;
+
 %}
 
+%x COMMENT
 %%
-#.*$        // Comment.
-[ \t\r]*    // Whitespace.
+\/\*                    BEGIN(COMMENT);  // Open C-style comment.
+<COMMENT>\*\/           BEGIN(0);        // Close C-style comment.
+<COMMENT>.              // Within a C-style comment.
+<COMMENT>\n             // Within a C-style comment.
+#.*$                    // Comment.
+[ \t\r]*                // Whitespace.
 
 [0-9]+                  yylval = tree_new_z(yytext);  return NUM;
 [a-zA-Z_][a-zA-Z0-9_]*  yylval = tree_new_id(yytext); return ID;
@@ -31,7 +37,9 @@ extern int option_easy;
 \*                      return TIMES;
 \^                      return POW;
 ;                       return TERMINATOR;
-,                       return COMMA;
+\,                      return COMMA;
+\?                      return QUESTION;
+:                       return COLON;
 \(                      return LPAR;
 \)                      return RPAR;
 \[                      return LSQU;

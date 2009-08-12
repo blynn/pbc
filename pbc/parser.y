@@ -7,13 +7,17 @@
 
 #include "pbc_tree.h"
 #define YYSTYPE tree_ptr
+void yyerror(char *s);
+int yylex(void);
+
 extern int option_easy;
 %}
 
 %error-verbose
+%token TERMINATOR
 %token NUM ID
 %token LPAR RPAR LSQU RSQU COMMA
-%token TERMINATOR
+%right QUESTION COLON
 %left EQ NE LT T_GT LE GE
 %right ASSIGN
 %left PLUS MINUS
@@ -31,16 +35,12 @@ input
 stmt
   : { $$ = NULL; }  // Empty.
   | expr
-  | assign_expr
-  ;
-
-assign_expr
-  : ID ASSIGN expr         { $$ = tree_new_assign($1, $3); }
-  | ID ASSIGN assign_expr  { $$ = tree_new_assign($1, $3); }
   ;
 
 expr
   : multinomial
+  | ID ASSIGN expr   { $$ = tree_new_assign($1, $3); }
+  | expr QUESTION expr COLON expr  { $$ = tree_new_ternary($1, $3, $5); }
   | molecule
   | expr EQ expr     { $$ = tree_new_eq($1, $3); }
   | expr NE expr     { $$ = tree_new_ne($1, $3); }
@@ -59,7 +59,7 @@ expr
 // Not quite atoms.
 molecule
   : molecule LPAR exprlist RPAR  { $$ = $3; tree_set_fun($$, $1); }
-  | LPAR expr RPAR   { $$ = $2 }
+  | LPAR expr RPAR        { $$ = $2 }
   | ID
   ;
 
@@ -69,8 +69,8 @@ exprlist
   ;
 
 nonemptyexprlist
-  : expr  { tree_fun_append($$ = tree_new_funcall(), $1); }
-  | nonemptyexprlist COMMA expr  { tree_fun_append($1, $3); }
+  : expr   { tree_fun_append($$ = tree_new_funcall(), $1); }
+  | nonemptyexprlist COMMA expr { tree_fun_append($1, $3); }
   ;
 
 multinomial
