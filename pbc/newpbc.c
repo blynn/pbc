@@ -89,7 +89,7 @@ struct val_s {
 
 static val_ptr val_new_element(element_ptr e);
 static val_ptr val_new_field(field_ptr e);
-static val_ptr val_new_error(const char *msg);
+static val_ptr val_new_error(const char *msg, ...);
 
 // Evaluates syntax tree node.
 static val_ptr tree_eval(tree_ptr t) {
@@ -116,18 +116,14 @@ static val_ptr v_funcall(val_ptr v, tree_ptr t) {
   fun_ptr fun = v->fun;
   int n = fun->arity;
   if (1 + n != darray_count(t->child)) {
-    char buf[80];
-    snprintf(buf, 80, "%s: wrong number of arguments", fun->name);
-    return val_new_error(buf);
+    return val_new_error("%s: wrong number of arguments", fun->name);
   }
   val_ptr arg[n];
   int i;
   for(i = 0; i < n; i++) {
     arg[i] = tree_eval(darray_at(t->child, i));
     if (fun->sig[i] && arg[i]->type != fun->sig[i]) {
-      char buf[80];
-      snprintf(buf, 80, "%s: argument %d type mismatch", fun->name, i + 1);
-      return val_new_error(buf);
+      return val_new_error("%s: argument %d type mismatch", fun->name, i + 1);
     }
   }
   return fun->run(arg);
@@ -202,10 +198,17 @@ static val_ptr val_new_field(field_ptr f) {
   return v;
 }
 
-static val_ptr val_new_error(const char *msg) {
+static val_ptr val_new_error(const char *msg, ...) {
+  va_list params;
+  char buf[80];
+
+  va_start(params, msg);
+  vsnprintf(buf, 80, msg, params);
+  va_end(params);
+
   val_ptr v = pbc_malloc(sizeof(*v));
   v->type = v_error;
-  v->msg = strdup(msg);
+  v->msg = pbc_strdup(buf);
   return v;
 }
 
@@ -290,7 +293,13 @@ static val_ptr eval_list(tree_ptr t) {
   int i;
   for(i = 0; i < n; i++) {
     val_ptr x = tree_eval(darray_at(t->child, i));
-    // TODO: Check x is element.
+    // TODO: Also check x is a multiz.
+    if (v_error == x->type) {
+      return x;
+    }
+    if (v_elem != x->type) {
+      return val_new_error("element expected in list");
+    }
     if (!i) e = multiz_new_list(x->elem);
     else multiz_append(e, x->elem);
   }
@@ -298,8 +307,13 @@ static val_ptr eval_list(tree_ptr t) {
 }
 
 static val_ptr eval_ternary(tree_ptr t) {
-  // TODO: Check x is element.
   val_ptr x = tree_eval(darray_at(t->child, 0));
+  if (v_error == x->type) {
+    return x;
+  }
+  if (x->type != v_elem) {
+    return val_new_error("element expected in ternary operator");
+  }
   if (!element_is0(x->elem)) {
     return tree_eval(darray_at(t->child, 1));
   }
@@ -310,9 +324,7 @@ static val_ptr eval_id(tree_ptr t) {
   val_ptr x = symtab_at(reserved, t->id);
   if (!x) x = symtab_at(tab, t->id);
   if (!x) {
-    char buf[80];
-    snprintf(buf, 80, "undefined variable %s", t->id);
-    return val_new_error(buf);
+    return val_new_error("undefined variable %s", t->id);
   }
 
   return x->type->eval(x);
@@ -336,7 +348,9 @@ static fun_t fun_neg = {{ "neg", run_neg, 1, sig_elem }};
 static val_ptr eval_assign(tree_ptr t) {
   tree_ptr tid = darray_at(t->child, 0);
   val_ptr v = tree_eval(darray_at(t->child, 1));
-  // TODO: Check ID is not reserved.
+  if (symtab_at(reserved, tid->id)) {
+    return val_new_error("undefined variable %s", t->id);
+  }
   symtab_put(tab, v, tid->id);
   return v;
 }
