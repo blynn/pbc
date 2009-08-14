@@ -8,7 +8,7 @@ ChangeLog :
 CLEANFILES = *~
 maintainer-clean-local:
 	-rm -rf Makefile.in depcomp ltmain.sh config.h.in configure compile config.guess config.sub \
-		missing install-sh autom4te.cache aclocal.m4 tmp key2.stor system.stor
+	missing install-sh autom4te.cache aclocal.m4 tmp
 
 lib_LTLIBRARIES = libpbc.la 
 
@@ -20,6 +20,7 @@ include/pbc_curve.h \
 include/pbc_d_param.h \
 include/pbc_e_param.h \
 include/pbc_field.h \
+include/pbc_multiz.h \
 include/pbc_z.h \
 include/pbc_fieldquadratic.h \
 include/pbc_f_param.h \
@@ -41,6 +42,7 @@ libpbc_la_CPPFLAGS = -Iinclude
 libpbc_la_SOURCES = arith/field.c arith/z.c \
 	arith/naivefp.c arith/fastfp.c \
 	arith/fp.c arith/fasterfp.c arith/montfp.c \
+	arith/multiz.c \
 	arith/dlog.c \
 	arith/fieldquadratic.c arith/poly.c \
 	arith/random.c arith/init_random.c \
@@ -55,7 +57,7 @@ libpbc_la_LDFLAGS =  -lgmp -lm -version-info $(SO_VERSION)
 noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa benchmark/ellnet
 pbc_pbc_CPPFLAGS = -I include
 pbc_pbc_LDADD = libpbc.la
-pbc_pbc_SOURCES = pbc/pbc.c pbc/pbc_getline.c misc/darray.c misc/symtab.c
+pbc_pbc_SOURCES = pbc/parser.tab.c pbc/lex.yy.c pbc/pbc.c pbc/pbc_getline.c misc/darray.c misc/symtab.c
 benchmark_benchmark_CPPFLAGS = -I include
 benchmark_benchmark_LDADD = libpbc.la
 benchmark_benchmark_SOURCES = benchmark/benchmark.c

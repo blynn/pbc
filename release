@@ -13,7 +13,7 @@ if [[ ! -z $(git diff) ]]; then
 fi
 git log > ChangeLog
 cat ChangeLog | head -20 | grep pbc-$GREPVER > /dev/null || {
-    echo git log does not mention release 
+    echo git log does not mention release
     if [[ $TESTRUN ]]; then
 	echo test run: continuing anyway...
     else
@@ -28,10 +28,12 @@ PBCDIR=$TMPDIR/pbc-$VER
 echo Running setup...
 git archive --format=tar --prefix=pbc-$VER/ HEAD | tar xvC $TMPDIR
 HERE=`pwd`
+make -f simple.make pbc/parser.tab.c pbc/lex.yy.c
+cp pbc/parser.tab.[ch] pbc/lex.yy.[ch] $PBCDIR/pbc
 cp ChangeLog $PBCDIR
 cd $PBCDIR
 grep $GREPVER NEWS > /dev/null || {
-    echo NEWS does not mention release 
+    echo NEWS does not mention release
     if [[ $TESTRUN ]]; then
 	echo test run: continuing anyway...
     else

@@ -78,7 +78,7 @@ AC_ARG_ENABLE( optimized,
 	 [with_enable_optimized="no"])
 
 CFLAGS="$CFLAGS -Wall -W -Wfloat-equal -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wredundant-decls \
--Wendif-labels -Wshadow -pipe -ffast-math -U__STRICT_ANSI__ -std=c99"
+-Wendif-labels -Wshadow -pipe -ffast-math -U__STRICT_ANSI__ -std=gnu99"
 if test "x$with_enable_optimized" != "no"; then
    	CFLAGS="$CFLAGS -g -O2"
 else
