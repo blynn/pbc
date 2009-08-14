@@ -171,7 +171,7 @@ static val_ptr v_errcall(val_ptr v, tree_ptr t) {
 }
 
 static struct val_type_s
-  // TODO: Replace NULL with error or something else.
+  // TODO: Replace NULL with get_coeff.
   v_elem[1]  = {{  "element",  v_elem_out, v_elem_eval, NULL }},
   v_field[1] = {{    "field", v_field_out,      v_self, v_field_cast }},
   v_fun[1]   = {{ "function",   v_fun_out,      v_self, v_funcall }},
@@ -595,6 +595,22 @@ static void init_pairing(const char *s) {
   assign_field(pairing->Zr, "Zr");
 }
 
+static val_ptr run_exit(val_ptr v[]) {
+  mpz_t z;
+  mpz_init(z);
+  element_to_mpz(z, v[0]->elem);
+  exit(mpz_get_si(z));
+}
+static fun_t fun_exit = {{ "exit", run_exit, 1, sig_elem }};
+
+static val_ptr run_CHECK(val_ptr v[]) {
+  if (element_is0(v[0]->elem)) {
+    pbc_die("CHECK failed");
+  }
+  return v[0];
+}
+static fun_t fun_CHECK = {{ "CHECK", run_CHECK, 1, sig_elem }};
+
 static char *aparam =
 "type a\n"
 "q 8780710799663312522437781984754049815806883199414208211028653399266475630880222957078625179422662221423155858769582317459277713367317481324925129998224791\n"
@@ -762,6 +778,8 @@ int main(int argc, char **argv) {
   builtin(fun_poly, "poly");
   builtin(fun_polymod, "polymod");
   builtin(fun_extend, "extend");
+  builtin(fun_exit, "exit");
+  builtin(fun_CHECK, "CHECK");
   builtin(fun_init_pairing_a, "init_pairing_a");
   builtin(fun_init_pairing_d, "init_pairing_d");
   builtin(fun_init_pairing_e, "init_pairing_e");

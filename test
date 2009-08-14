@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#make test
+make out/newpbc
+t=pbc/pairing_test.pbc
+out/newpbc < $t
+
+red=$'\e'"[31m"
+green=$'\e'"[32;1m"
+normal=$'\e'"[0m"
+if [[ $? != 0 ]]; then
+  echo $t $red"[FAILED]"$normal
+else
+  echo $t $green"[PASSED]"$normal
+fi
