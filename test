@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #make test
-make out/newpbc
+make out/pbc
 t=pbc/pairing_test.pbc
-out/newpbc < $t
+out/pbc < $t
 
 red=$'\e'"[31m"
 green=$'\e'"[32;1m"
