@@ -1,12 +1,13 @@
-// The ring Z as a field_t.
+// The ring Z.
+//
 // Wrappers around GMP mpz functions.
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"
+#include "pbc_z.h"
 #include "pbc_random.h"
 #include "pbc_fp.h"
 #include "pbc_memory.h"
@@ -204,7 +205,16 @@ static int z_length_in_bytes(element_ptr a) {
 
 static void z_out_info(FILE *out, field_ptr f) {
   UNUSED_VAR(f);
-  fprintf(out, "Z: wrapped GMP\n");
+  fprintf(out, "Z: wrapped GMP");
+}
+
+static int z_set_str(element_ptr e, const char *s, int base) {
+  mpz_t z;
+  mpz_init(z);
+  int result = pbc_mpz_set_str(z, s, base);
+  z_set_mpz(e, z);
+  mpz_clear(z);
+  return result;
 }
 
 void field_init_z(field_ptr f) {
@@ -213,6 +223,7 @@ void field_init_z(field_ptr f) {
   f->clear = z_clear;
   f->set_si = z_set_si;
   f->set_mpz = z_set_mpz;
+  f->set_str = z_set_str;
   f->out_str = z_out_str;
   f->sign = z_sgn;
   f->add = z_add;

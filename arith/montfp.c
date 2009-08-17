@@ -182,7 +182,7 @@ static int fp_snprint(char *s, size_t n, element_ptr e) {
   return result;
 }
 
-static int fp_set_str(element_ptr e, char *s, int base) {
+static int fp_set_str(element_ptr e, const char *s, int base) {
   mpz_t z;
   mpz_init(z);
   int result = pbc_mpz_set_str(z, s, base);
@@ -522,8 +522,7 @@ static void fp_field_clear(field_t f) {
 // The only public functions. All the above should be static.
 
 static void fp_out_info(FILE * out, field_ptr f) {
-  element_fprintf(out, "F_p: Montgomery representation,\nmodulus = %Zd\n",
-                  f->order);
+  element_fprintf(out, "GF(%Zd): Montgomery representation", f->order);
 }
 
 void field_init_mont_fp(field_ptr f, mpz_t prime) {

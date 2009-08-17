@@ -488,8 +488,7 @@ static int fp_from_bytes(element_t a, unsigned char *data) {
 }
 
 static void fp_out_info(FILE* str, field_ptr f) {
-  fprintf(str, "F_p: zero flag + mpn,\n");
-  element_fprintf(str, "modulus = %Zd\n", f->order);
+  element_fprintf(str, "GF(%Zd): zero flag + mpn", f->order);
 }
 
 static void fp_field_clear(field_t f) {

@@ -72,6 +72,11 @@ void darray_clear(darray_t a)
     a->count = 0;
 }
 
+void darray_free(darray_ptr a) {
+  darray_clear(a);
+  pbc_free(a);
+}
+
 void darray_remove_index(darray_ptr a, int n)
 {
     assert(a->count >= n-1);

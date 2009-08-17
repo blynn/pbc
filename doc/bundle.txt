@@ -14,54 +14,61 @@ from files such as these on standard input, for example:
 [[pbcref]]
 === Pairing-based calculator ===
 
-The `pbc` subdirectory contains a program also named
-`pbc` which allows interactive testing of the PBC library.
+The `pbc` subdirectory contains the pairing-based calculator, `pbc`,
+which is loosely based on `bc`, a well-known arbitrary precision
+calculator.
 
-Its syntax is loosely based on that of `bc`, a well-known arbitrary precision
-calculator language. I do not intend for `pbc` to be a fully-fledged scripting
-language. If this were the aim I would add a module to an extant popular
-language.  Instead, pbc is meant to be a test program.  (Nonetheless, it
-possesses enough functionality to be used to implement cryptosystems in shell
-scripts.)
+See `pairing_test.pbc` for an example script. Some differences: the assignment
+operator is `:=`, and newlines are ordinary whitespace and not statement
+terminators.
 
-Four pairings named A, D, E and F are initialized during startup, and
-furthermore, the variables G1, G2, GT and Zr are setup to represent groups
-associated with the A pairing. To use a different pairing, call the
-init_pairing funciton.
+If started with the `-y` option, the syntax is compatible with `bc`: newlines
+are treated as statement terminators and `=` is assignment. Additionally,
+`pbc` displays a prompt. This mode may be easier for beginners.
 
-Assignments have a C-like syntax "variable = expression", and return the value
-of the variable.  Function calls and expressions also resemble C.  The
-arithmetic operators +, -, /, *, ^ have the standard precedence.  Perhaps the
-only significant difference is that no terminating semicolon is required.
+Initially, the variables G1, G2, GT and Zr are represent groups associated with
+a particular A pairing.
 
-Comments begin with "#" and end at a newline. Strings are double quoted. On
-error, pbc prints the error code which I have yet to translate to English.
+An element is represented with a tree of integers, such as `[[1,2], 3]`, or
+`4`.
+
+Assignments such as `variable := expression;` return the value of the variable.
+
+The arithmetic operators `+, -, /, *, ^` have the standard precedence.
+The C comparison operators and ternary operator are available.
+
+Each statement should be terminated by a semicolon.
+
+Comments are the same as in (original) C, or begin with "#" and end at a
+newline.
 
 Some of the pbc functions:
 
-+init_pairing(pairing)+::
-Set the variables G1, G2, GT and Zr to the groups in +pairing+, e.g:
++init_pairing_A()+::
+Set the variables G1, G2, GT and Zr to the groups in a particular A pairing:
 +
-  init_pairing(D)
+  init_pairing_A();
++
+Other sample pairings can be used by replacing `A` with one of `D, E, F, G`.
 
-+rnd(G)+::
-Returns a random element of the group G, e.g:
++rnd(+'G'+)+::
+Returns a random element of an algebraic structure 'G', e.g:
 +
-  g = rnd(Zr)
+  g := rnd(Zr);
 +
-Has synonyms `rand` and `random`.
+Synonym: `random`.
 
-+pairing(g, h)+::
-
-Returns the pairing applied to +g+ and +h+.
-The element +g+ must be an element of G1 and +h+ of G2, e.g:
++pairing(+'g, h'+)+::
+Returns the pairing applied to 'g' and 'h'.
+The element 'g' must be an element of G1 and 'h' of G2, e.g:
 +
-  pairing(rnd(G1), rnd(G2))
+  pairing(rnd(G1), rnd(G2));
 
-+fromstr(string, G)+::
-Returns +string+ converted to an element of +G+, e.g.
+'G'+(+'g'+)+::
+Maps an element 'g' to element of the field 'G', e.g:
 +
-  x = fromstr("[123,456]", GT)
+  Zr(123);
+  GT([456, 789]);
 
 === Parameter generation ===
 

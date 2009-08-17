@@ -32,6 +32,9 @@ void pbc_assert_match2(element_ptr a, element_ptr b, const char *func);
 void pbc_assert_match3(element_ptr a, element_ptr b, element_ptr c,
                        const char *func);
 
+struct multiz_s;
+typedef struct multiz_s *multiz;
+
 struct pairing_s;
 struct field_s {
   void (*field_clear)(struct field_s *f);
@@ -39,10 +42,11 @@ struct field_s {
   void (*clear)(element_ptr);
 
   void (*set_mpz)(element_ptr, mpz_ptr);
+  void (*set_multiz)(element_ptr, multiz);
   void (*set)(element_ptr, element_ptr);
   void (*set0)(element_ptr);
   void (*set1)(element_ptr);
-  int (*set_str)(element_ptr e, char *s, int base);
+  int (*set_str)(element_ptr e, const char *s, int base);
   size_t(*out_str)(FILE *stream, int base, element_ptr);
   void (*add)(element_ptr, element_ptr, element_ptr);
   void (*sub)(element_ptr, element_ptr, element_ptr);
@@ -104,6 +108,9 @@ static inline void element_init(element_t e, field_ptr f) {
   f->init(e);
 }
 
+element_ptr element_new(field_ptr f);
+void element_free(element_ptr e);
+
 /*@manual einit
 Initialize 'e' to be an element of the algebraic structure that 'e2'
 lies in.
@@ -161,6 +168,10 @@ static inline int element_snprint(char *s, size_t n, element_t e) {
   return e->field->snprint(s, n, e);
 }
 
+static inline void element_set_multiz(element_t e, multiz m) {
+  e->field->set_multiz(e, m);
+}
+
 /*@manual eio
 Set the element 'e' from 's', a null-terminated C string in base 'base'.
 Whitespace is ignored. Points have the form "['x,y']" or "'O'",
@@ -169,7 +180,7 @@ Returns number of characters read (unlike GMP's mpz_set_str).
 A return code of zero means PBC could not find a well-formed string
 describing an element.
 */
-static inline int element_set_str(element_t e, char *s, int base) {
+static inline int element_set_str(element_t e, const char *s, int base) {
   return e->field->set_str(e, s, base);
 }
 

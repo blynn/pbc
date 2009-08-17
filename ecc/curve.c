@@ -6,6 +6,7 @@
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"
+#include "pbc_multiz.h"
 #include "pbc_poly.h"
 #include "pbc_curve.h"
 #include "pbc_memory.h"
@@ -351,9 +352,29 @@ static int curve_snprint(char *s, size_t n, element_ptr a) {
   return result + status;
 }
 
-static int curve_set_str(element_ptr e, char *s, int base) {
+static void curve_set_multiz(element_ptr a, multiz m) {
+  if (multiz_is_z(m)) {
+    if (multiz_is0(m)) {
+      element_set0(a);
+      return;
+    }
+    pbc_warn("bad multiz");
+    return;
+  } else {
+    if (multiz_count(m) < 2) {
+      pbc_warn("multiz has too few coefficients");
+      return;
+    }
+    point_ptr p = a->data;
+    p->inf_flag = 0;
+    element_set_multiz(p->x, multiz_at(m, 0));
+    element_set_multiz(p->y, multiz_at(m, 1));
+  }
+}
+
+static int curve_set_str(element_ptr e, const char *s, int base) {
   point_ptr p = e->data;
-  char *cp = s;
+  const char *cp = s;
   element_set0(e);
   while (*cp && isspace(*cp)) cp++;
   if (*cp == 'O') {
@@ -419,11 +440,11 @@ static int curve_from_bytes(element_t e, unsigned char *data) {
 
 static void curve_out_info(FILE *out, field_t f) {
   int len;
-  fprintf(out, "Group of points on elliptic curve");
+  fprintf(out, "elliptic curve");
   if ((len = f->fixed_length_in_bytes)) {
-    fprintf(out, ", bits per coord = %d\n", len * 8 / 2);
+    fprintf(out, ", bits per coord = %d", len * 8 / 2);
   } else {
-    fprintf(out, "variable-length representation\n");
+    fprintf(out, "variable-length");
   }
 }
 
@@ -484,6 +505,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
   f->from_hash = curve_from_hash;
   f->out_str = curve_out_str;
   f->snprint = curve_snprint;
+  f->set_multiz = curve_set_multiz;
   f->set_str = curve_set_str;
   f->field_clear = field_clear_curve;
   if (cdp->field->fixed_length_in_bytes < 0) {

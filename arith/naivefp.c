@@ -48,7 +48,7 @@ static int zp_snprint(char *s, size_t n, element_ptr e) {
   return gmp_snprintf(s, n, "%Zd", e->data);
 }
 
-static int zp_set_str(element_ptr e, char *s, int base) {
+static int zp_set_str(element_ptr e, const char *s, int base) {
   int result = pbc_mpz_set_str(e->data, s, base);
   mpz_mod(e->data, e->data, e->field->order);
   return result;
@@ -222,8 +222,7 @@ static void zp_to_mpz(mpz_ptr z, element_ptr a) {
 }
 
 static void zp_out_info(FILE * out, field_ptr f) {
-  fprintf(out, "F_p: GMP wrapped version,\n");
-  element_fprintf(out, "modulus = %Zd\n", f->order);
+  element_fprintf(out, "GF(%Zd), GMP wrapped", f->order);
 }
 
 void field_init_naive_fp(field_ptr f, mpz_t prime) {

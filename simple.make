@@ -33,7 +33,7 @@ endif
 
 libpbc_srcs := \
   $(addsuffix .c,$(addprefix arith/, \
-    field fp montfp naivefp fastfp fasterfp fieldmpz fieldquadratic poly \
+    field fp montfp naivefp fastfp fasterfp multiz z fieldquadratic poly \
     random dlog)) \
   $(addsuffix .c,$(addprefix ecc/, \
     curve singular pairing param \
@@ -63,9 +63,18 @@ endef
 
 $(foreach x,$(bin_srcs:.c=.o),$(eval $(call demo_tmpl,$(x))))
 
-pbc_objs := pbc/pbc.o $(pbc_getline_objs)
+pbc/parser.tab.c pbc/parser.tab.h : pbc/parser.y
+	bison -d -b pbc/parser $^
+
+pbc/parser.tab.o : pbc/parser.tab.c pbc/parser.tab.h
+
+pbc/lex.yy.c : pbc/parser.lex
+	flex -o $@ --header-file=pbc/lex.yy.h $^
+
+pbc_objs := pbc/pbc.o $(pbc_getline_objs) pbc/parser.tab.o pbc/lex.yy.o libpbc.a
 
 pbc_bin := out/pbc$(exe_suffix)
+
 $(pbc_bin) : $(pbc_objs) libpbc.a
 	$(CC) -o $@ $(LDFLAGS) $^ $(LOADLIBES) $(LDLIBS) $(pbc_pbc_libs)
 
@@ -73,23 +82,23 @@ binaries : $(examples) $(pbc_bin)
 
 test_srcs := \
   $(addsuffix .c,$(addprefix guru/, \
-    fp_test quadratic_test poly_test exp_test pairing_test))
+    fp_test quadratic_test poly_test exp_test))
 
 tests := $(test_srcs:.c=)
 
 # Object files needed to test Fp.
 fp_objs := $(addsuffix .o, \
-  arith/field arith/fp arith/naivefp arith/fastfp arith/fasterfp arith/montfp arith/random arith/init_random misc/extend_printf misc/memory misc/utils)
+  arith/field arith/fp arith/naivefp arith/fastfp arith/fasterfp arith/montfp arith/random arith/init_random misc/extend_printf misc/memory misc/utils \
+  arith/multiz misc/darray )
 
 guru/exp_test: guru/exp_test.o libpbc.a
-guru/pairing_test: guru/pairing_test.o libpbc.a
 guru/fp_test: guru/fp_test.o $(fp_objs)
 guru/poly_test: guru/poly_test.o $(fp_objs) arith/poly.o misc/darray.o
 guru/quadratic_test: guru/quadratic_test.o $(fp_objs) arith/fieldquadratic.o
 
 test : $(tests)
 
-out: ; mkdir out
+out: ; -mkdir out
 
 srcs := $(libpbc_srcs) $(bin_srcs) $(test_srcs)
 objs := $(srcs:.c=.o) $(pbc_objs)
@@ -118,7 +127,8 @@ depend:
 
 # DO NOT DELETE
 
-arith/field.o: include/pbc_utils.h include/pbc_field.h include/pbc_memory.h
+arith/field.o: include/pbc_utils.h include/pbc_field.h include/pbc_multiz.h
+arith/field.o: include/pbc_memory.h
 arith/fp.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
 arith/montfp.o: include/pbc_utils.h include/pbc_field.h include/pbc_random.h
 arith/montfp.o: include/pbc_fp.h include/pbc_memory.h
@@ -128,16 +138,22 @@ arith/fastfp.o: include/pbc_utils.h include/pbc_field.h include/pbc_random.h
 arith/fastfp.o: include/pbc_fp.h include/pbc_memory.h
 arith/fasterfp.o: include/pbc_utils.h include/pbc_field.h
 arith/fasterfp.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
-arith/fieldmpz.o: include/pbc_utils.h include/pbc_field.h
-arith/fieldmpz.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
+arith/multiz.o: include/pbc_utils.h include/pbc_field.h include/pbc_multiz.h
+arith/multiz.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
+arith/multiz.o: misc/darray.h
+arith/z.o: include/pbc_utils.h include/pbc_field.h include/pbc_z.h
+arith/z.o: include/pbc_random.h include/pbc_fp.h include/pbc_memory.h
 arith/fieldquadratic.o: include/pbc_utils.h include/pbc_field.h
-arith/fieldquadratic.o: include/pbc_fieldquadratic.h include/pbc_memory.h
-arith/poly.o: include/pbc_utils.h include/pbc_field.h include/pbc_poly.h
-arith/poly.o: include/pbc_memory.h
+arith/fieldquadratic.o: include/pbc_multiz.h include/pbc_fieldquadratic.h
+arith/fieldquadratic.o: include/pbc_memory.h
+arith/poly.o: include/pbc_utils.h include/pbc_field.h include/pbc_multiz.h
+arith/poly.o: include/pbc_poly.h include/pbc_memory.h misc/darray.h
 arith/random.o: include/pbc_random.h include/pbc_utils.h include/pbc_memory.h
 arith/dlog.o: include/pbc_utils.h include/pbc_field.h include/pbc_memory.h
-ecc/curve.o: include/pbc_utils.h include/pbc_field.h include/pbc_poly.h
-ecc/curve.o: include/pbc_curve.h include/pbc_memory.h include/pbc_random.h
+arith/dlog.o: misc/darray.h
+ecc/curve.o: include/pbc_utils.h include/pbc_field.h include/pbc_multiz.h
+ecc/curve.o: include/pbc_poly.h include/pbc_curve.h include/pbc_memory.h
+ecc/curve.o: include/pbc_random.h misc/darray.h
 ecc/singular.o: include/pbc_utils.h include/pbc_field.h include/pbc_curve.h
 ecc/singular.o: include/pbc_param.h include/pbc_pairing.h include/pbc_fp.h
 ecc/singular.o: include/pbc_memory.h
@@ -148,7 +164,7 @@ ecc/param.o: include/pbc_utils.h include/pbc_memory.h include/pbc_param.h
 ecc/param.o: include/pbc_a_param.h include/pbc_mnt.h include/pbc_d_param.h
 ecc/param.o: include/pbc_e_param.h include/pbc_f_param.h
 ecc/param.o: include/pbc_a1_param.h include/pbc_g_param.h misc/symtab.h
-ecc/param.o: ecc/param.h
+ecc/param.o: misc/darray.h ecc/param.h
 ecc/a_param.o: include/pbc_utils.h include/pbc_field.h include/pbc_fp.h
 ecc/a_param.o: include/pbc_fieldquadratic.h include/pbc_param.h
 ecc/a_param.o: include/pbc_pairing.h include/pbc_curve.h include/pbc_random.h
@@ -173,12 +189,14 @@ ecc/g_param.o: include/pbc_fieldquadratic.h include/pbc_mnt.h
 ecc/g_param.o: include/pbc_curve.h include/pbc_param.h include/pbc_pairing.h
 ecc/g_param.o: include/pbc_memory.h include/pbc_g_param.h ecc/param.h
 ecc/hilbert.o: include/pbc_utils.h include/pbc_field.h include/pbc_poly.h
-ecc/hilbert.o: include/pbc_hilbert.h include/pbc_memory.h ecc/mpc.h
+ecc/hilbert.o: include/pbc_hilbert.h include/pbc_memory.h misc/darray.h
+ecc/hilbert.o: ecc/mpc.h
 ecc/mnt.o: include/pbc_mnt.h include/pbc_memory.h include/pbc_utils.h
+ecc/mnt.o: misc/darray.h
 ecc/mpc.o: ecc/mpc.h
 misc/utils.o: include/pbc_utils.h include/pbc_field.h
-misc/darray.o: include/pbc_memory.h
-misc/symtab.o: include/pbc_memory.h misc/symtab.h
+misc/darray.o: include/pbc_memory.h misc/darray.h
+misc/symtab.o: include/pbc_memory.h misc/symtab.h misc/darray.h
 misc/extend_printf.o: include/pbc_utils.h include/pbc_field.h
 misc/extend_printf.o: include/pbc_memory.h
 misc/memory.o: include/pbc_utils.h include/pbc_memory.h
@@ -275,8 +293,7 @@ gen/gengparam.o: include/pbc_a_param.h include/pbc_d_param.h
 gen/gengparam.o: include/pbc_e_param.h include/pbc_f_param.h
 gen/gengparam.o: include/pbc_g_param.h include/pbc_random.h
 gen/gengparam.o: include/pbc_memory.h
-gen/hilbertpoly.o: include/pbc_utils.h include/pbc_field.h include/pbc_poly.h
-gen/hilbertpoly.o: include/pbc_memory.h include/pbc_hilbert.h
+gen/hilbertpoly.o: include/pbc_utils.h include/pbc_hilbert.h
 gen/listmnt.o: include/pbc.h include/pbc_utils.h include/pbc_field.h
 gen/listmnt.o: include/pbc_param.h include/pbc_pairing.h include/pbc_curve.h
 gen/listmnt.o: include/pbc_mnt.h include/pbc_a1_param.h include/pbc_a_param.h
@@ -337,7 +354,7 @@ guru/poly_test.o: include/pbc_a1_param.h include/pbc_a_param.h
 guru/poly_test.o: include/pbc_d_param.h include/pbc_e_param.h
 guru/poly_test.o: include/pbc_f_param.h include/pbc_g_param.h
 guru/poly_test.o: include/pbc_random.h include/pbc_memory.h include/pbc_fp.h
-guru/poly_test.o: include/pbc_poly.h include/pbc_test.h
+guru/poly_test.o: include/pbc_poly.h include/pbc_test.h misc/darray.h
 guru/exp_test.o: include/pbc.h include/pbc_utils.h include/pbc_field.h
 guru/exp_test.o: include/pbc_param.h include/pbc_pairing.h
 guru/exp_test.o: include/pbc_curve.h include/pbc_mnt.h include/pbc_a1_param.h
@@ -345,11 +362,3 @@ guru/exp_test.o: include/pbc_a_param.h include/pbc_d_param.h
 guru/exp_test.o: include/pbc_e_param.h include/pbc_f_param.h
 guru/exp_test.o: include/pbc_g_param.h include/pbc_random.h
 guru/exp_test.o: include/pbc_memory.h include/pbc_test.h
-guru/pairing_test.o: include/pbc.h include/pbc_utils.h include/pbc_field.h
-guru/pairing_test.o: include/pbc_param.h include/pbc_pairing.h
-guru/pairing_test.o: include/pbc_curve.h include/pbc_mnt.h
-guru/pairing_test.o: include/pbc_a1_param.h include/pbc_a_param.h
-guru/pairing_test.o: include/pbc_d_param.h include/pbc_e_param.h
-guru/pairing_test.o: include/pbc_f_param.h include/pbc_g_param.h
-guru/pairing_test.o: include/pbc_random.h include/pbc_memory.h
-guru/pairing_test.o: include/pbc_test.h

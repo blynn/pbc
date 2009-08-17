@@ -6,6 +6,7 @@
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"
+#include "pbc_multiz.h"
 #include "pbc_memory.h"
 
 // returns recommended window size.  n is exponent.
@@ -424,6 +425,14 @@ static void generic_set_si(element_ptr a, long int si) {
   mpz_clear(z);
 }
 
+static void generic_set_multiz(element_ptr a, multiz m) {
+  mpz_t z;
+  mpz_init(z);
+  multiz_to_mpz(z, m);
+  element_set_mpz(a, z);
+  mpz_clear(z);
+}
+
 static void generic_sub(element_ptr c, element_ptr a, element_ptr b) {
   if (c != a) {
     element_neg(c, b);
@@ -500,8 +509,7 @@ static int generic_is1(element_ptr a) {
 }
 
 static void generic_out_info(FILE * out, field_ptr f) {
-  element_fprintf(out, "field %p unknown\n", f);
-  element_fprintf(out, "order = %Zd\n", f->order);
+  element_fprintf(out, "unknown field %p, order = %Zd", f, f->order);
 }
 
 static int default_element_snprint(char *s, size_t n, element_t e) {
@@ -515,7 +523,7 @@ static int default_element_snprint(char *s, size_t n, element_t e) {
   return 1;
 }
 
-static int default_element_set_str(element_t e, char *s, int base) {
+static int default_element_set_str(element_t e, const char *s, int base) {
   UNUSED_VAR(s);
   UNUSED_VAR(base);
   element_set0(e);
@@ -558,6 +566,7 @@ void field_init(field_ptr f) {
   // random always outputs 0
   f->to_mpz = zero_to_mpz;
   f->set_mpz = zero_set_mpz;
+  f->set_multiz = generic_set_multiz;
   f->random = zero_random;
   f->set_si = generic_set_si;
   f->is1 = generic_is1;
@@ -679,7 +688,7 @@ void element_tonelli(element_ptr x, element_ptr a) {
 // Like mpz_set_str except returns number of bytes read and allows trailing
 // junk. This simplifies code for parsing elements like "[123, 456]".
 // TODO: Handle 0x, 0X and 0 conventions for hexadecimal and octal.
-int pbc_mpz_set_str(mpz_t z, char *s, int base) {
+int pbc_mpz_set_str(mpz_t z, const char *s, int base) {
   int b, i = 0;
   mpz_set_ui(z, 0);
   if (!base) b = 10;
@@ -795,4 +804,15 @@ clean:
   mpz_clear(z);
   mpz_clear(d);
   return res;
+}
+
+element_ptr element_new(field_ptr f) {
+  element_ptr e = pbc_malloc(sizeof(*e));
+  element_init(e, f);
+  return e;
+}
+
+void element_free(element_ptr e) {
+  element_clear(e);
+  pbc_free(e);
 }
