@@ -1,3 +1,9 @@
+libpbc (0.5.3-1) unstable; urgency=low
+
+    * Revamped pairing-based calculator.
+
+ -- Paul Miller <jettero@gmail.com>  Mon, 17 Aug 2009 16:00:00 -0400
+
 libpbc (0.5.2-1) unstable; urgency=low
 
     * Fixed pbc_param_set_str().
