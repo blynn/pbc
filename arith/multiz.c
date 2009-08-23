@@ -358,6 +358,22 @@ static int f_is0(element_ptr n) {
   return multiz_is0(n->data);
 }
 
+static int f_item_count(element_ptr e) {
+  multiz z = e->data;
+  if (T_MPZ == z->type) return 0;
+  return darray_count(z->a);
+}
+
+// TODO: Redesign multiz so this doesn't leak.
+static element_ptr f_item(element_ptr e, int i) {
+  multiz z = e->data;
+  if (T_MPZ == z->type) return NULL;
+  element_ptr r = malloc(sizeof(*r));
+  r->field = e->field;
+  r->data = darray_at(z->a, i);
+  return r;
+}
+
 // Usual meaning when both are integers.
 // Otherwise, compare coefficients.
 static int multiz_cmp(multiz a, multiz b) {
@@ -521,6 +537,8 @@ void field_init_multiz(field_ptr f) {
   f->from_bytes = z_from_bytes;
   f->to_mpz = f_to_mpz;
   f->length_in_bytes = z_length_in_bytes;
+  f->item = f_item;
+  f->item_count = f_item_count;
 
   f->out_info = f_out_info;
 

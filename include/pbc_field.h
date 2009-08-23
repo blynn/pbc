@@ -627,6 +627,13 @@ static inline element_ptr element_item(element_t e, int i) {
   return e->field->item(e, i);
 }
 
+// Returns the field containing the items.
+// Returns NULL if there are no items.
+static inline field_ptr element_item_field(element_t e) {
+  if (!element_item_count(e)) return NULL;
+  return element_item(e, 0)->field;
+}
+
 // In K[a], each element has the form x + ya.
 // When a = sqrt(-1) these are the real and imaginary parts.
 // Return x.

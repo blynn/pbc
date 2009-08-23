@@ -147,6 +147,14 @@ static int mulg_set_str(element_ptr e, const char *s, int base) {
   return element_set_str(e->data, s, base);
 }
 
+static int mulg_item_count(element_ptr e) {
+  return element_item_count(e->data);
+}
+
+static element_ptr mulg_item(element_ptr e, int i) {
+  return element_item(e->data, i);
+}
+
 static int mulg_to_bytes(unsigned char *data, element_ptr e) {
   return element_to_bytes(data, e->data);
 }
@@ -230,6 +238,8 @@ void pairing_GT_init(pairing_ptr pairing, field_t f) {
   gt->fixed_length_in_bytes = f->fixed_length_in_bytes;
   gt->to_mpz = mulg_to_mpz;
   gt->snprint = mulg_snprint;
+  gt->item = mulg_item;
+  gt->item_count = mulg_item_count;
 
   // TODO: set gt->nqr to something?
   // set is_sqr, sqrt to something?
