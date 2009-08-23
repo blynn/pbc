@@ -94,10 +94,10 @@ static inline void d_miller_evalfn(element_t e0,
   int i;
   int d = polymod_field_degree(re_out->field);
   for (i=0; i<d; i++) {
-    element_mul(polymod_coeff(re_out, i), polymod_coeff(Qx, i), a);
-    element_mul(polymod_coeff(im_out, i), polymod_coeff(Qy, i), b);
+    element_mul(element_item(re_out, i), element_item(Qx, i), a);
+    element_mul(element_item(im_out, i), element_item(Qy, i), b);
   }
-  element_add(polymod_coeff(re_out, 0), polymod_coeff(re_out, 0), c);
+  element_add(element_item(re_out, 0), element_item(re_out, 0), c);
 }
 
 static void cc_miller_no_denom_proj(element_t res, mpz_t q, element_t P,
@@ -883,16 +883,16 @@ static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
 
   element_mul(element_re(d0), x2, p->nqrinv);
   element_neg(A, d0);
-  element_add(polymod_coeff(element_re(A), 0), polymod_coeff(element_re(A), 0), x);
+  element_add(element_item(element_re(A), 0), element_item(element_re(A), 0), x);
 
   element_double(C, x);
-  element_add(polymod_coeff(element_re(d0), 0), polymod_coeff(element_re(d0), 0), C);
+  element_add(element_item(element_re(d0), 0), element_item(element_re(d0), 0), C);
 
   element_square(dm1, A);
   element_mul(dm1, d0, dm1);
 
   element_mul(element_im(d1), y2, p->nqrinv2);
-  element_set(polymod_coeff(element_re(d1), 0), y);
+  element_set(element_item(element_re(d1), 0), y);
 
   element_square(d1, d1);
   element_sub(d1, dm1, d1);
@@ -902,7 +902,7 @@ static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
 
   element_mul(element_im(d1), y2, p->nqrinv2);
   element_set0(element_re(d1));
-  element_neg(polymod_coeff(element_re(d1), 0), y);
+  element_neg(element_item(element_re(d1), 0), y);
   element_mul(d1, d1, A);
   element_square(d1, d1);
   element_sub(d1, d0, d1);
@@ -1182,11 +1182,11 @@ static void compute_cm_curve(g_param_ptr param, pbc_cm_ptr cm) {
   int n = pbc_hilbert(&coefflist, cm->D);
 
   // Temporarily set the coefficient of x^{n-1} to 1 so hp has degree n - 1,
-  // allowing us to use poly_coeff().
+  // allowing us to use element_item().
   poly_set_coeff1(hp, n - 1);
   int i;
   for (i = 0; i < n; i++) {
-    element_set_mpz(poly_coeff(hp, i), coefflist[i]);
+    element_set_mpz(element_item(hp, i), coefflist[i]);
   }
   pbc_hilbert_free(coefflist, n);
 
@@ -1268,11 +1268,11 @@ static void g_init_pairing(pairing_t pairing, void *data) {
   field_init_poly(p->Fqx, p->Fq);
   element_init(irred, p->Fqx);
 
-  // First set the coefficient of x^5 to 1 so we can call poly_coeff()
+  // First set the coefficient of x^5 to 1 so we can call element_item()
   // for the other coefficients.
   poly_set_coeff1(irred, 5);
   for (i=0; i<5; i++) {
-    element_set_mpz(poly_coeff(irred, i), param->coeff[i]);
+    element_set_mpz(element_item(irred, i), param->coeff[i]);
   }
 
   field_init_polymod(p->Fqd, irred);
@@ -1415,7 +1415,7 @@ void pbc_param_init_g_gen(pbc_param_t p, pbc_cm_ptr cm) {
 
   for (i=0; i<5; i++) {
     mpz_init(param->coeff[i]);
-    element_to_mpz(param->coeff[i], poly_coeff(irred, i));
+    element_to_mpz(param->coeff[i], element_item(irred, i));
   }
   element_to_mpz(param->nqr, ((element_t *) nqr->data)[0]);
 

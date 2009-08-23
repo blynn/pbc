@@ -103,10 +103,10 @@ static inline void d_miller_evalfn(element_t e0,
   int i;
   int d = polymod_field_degree(re_out->field);
   for (i = 0; i < d; i++) {
-    element_mul(polymod_coeff(re_out, i), polymod_coeff(Qx, i), a);
-    element_mul(polymod_coeff(im_out, i), polymod_coeff(Qy, i), b);
+    element_mul(element_item(re_out, i), element_item(Qx, i), a);
+    element_mul(element_item(im_out, i), element_item(Qy, i), b);
   }
-  element_add(polymod_coeff(re_out, 0), polymod_coeff(re_out, 0), c);
+  element_add(element_item(re_out, 0), element_item(re_out, 0), c);
 }
 
 // Miller's algorithm, assuming we can ignore the denominator. We can do this
@@ -852,7 +852,7 @@ static void d_init_pairing(pairing_ptr pairing, void *data) {
   element_init(irred, p->Fqx);
   poly_set_coeff1(irred, d);
   for (i = 0; i < d; i++) {
-    element_set_mpz(poly_coeff(irred, i), param->coeff[i]);
+    element_set_mpz(element_item(irred, i), param->coeff[i]);
   }
 
   field_init_polymod(p->Fqd, irred);
@@ -934,7 +934,7 @@ static void compute_cm_curve(d_param_ptr param, pbc_cm_ptr cm) {
   poly_set_coeff1(hp, n - 1);
   int i;
   for (i = 0; i < n; i++) {
-    element_set_mpz(poly_coeff(hp, i), coefflist[i]);
+    element_set_mpz(element_item(hp, i), coefflist[i]);
   }
   pbc_hilbert_free(coefflist, n);
 
@@ -1072,7 +1072,7 @@ void pbc_param_init_d_gen(pbc_param_ptr p, pbc_cm_ptr cm) {
 
   for (i=0; i<d; i++) {
     mpz_init(param->coeff[i]);
-    element_to_mpz(param->coeff[i], poly_coeff(irred, i));
+    element_to_mpz(param->coeff[i], element_item(irred, i));
   }
   element_to_mpz(param->nqr, ((element_t *) nqr->data)[0]);
 

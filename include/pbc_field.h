@@ -55,13 +55,15 @@ struct field_s {
   int (*is_sqr)(element_ptr);
   void (*sqrt)(element_ptr, element_ptr);
 
-  // defaults exist for these
+  // Defaults exist for these functions.
+  int (*item_count)(element_ptr);
+  element_ptr (*item)(element_ptr, int);
   void (*set_si)(element_ptr, signed long int);
   void (*add_ui)(element_ptr, element_ptr, unsigned long int);
   void (*mul_mpz)(element_ptr, element_ptr, mpz_ptr);
   void (*mul_si)(element_ptr, element_ptr, signed long int);
   void (*div)(element_ptr, element_ptr, element_ptr);
-  void (*doub)(element_ptr, element_ptr);  // can't call it "double"!
+  void (*doub)(element_ptr, element_ptr);  // Can't call it "double"!
   void (*halve)(element_ptr, element_ptr);
   void (*square)(element_ptr, element_ptr);
 
@@ -604,6 +606,24 @@ static inline void element_pp_pow_zn(element_t out, element_t power,
 void pbc_mpz_out_raw_n(unsigned char *data, int n, mpz_t z);
 void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
                        unsigned char *data, unsigned int len);
+
+// For points, returns the number of coordinates.
+// For polynomials, returns the number of coefficients.
+// Otherwise returns zero.
+static inline int element_item_count(element_t e) {
+  return e->field->item_count(e);
+}
+
+// For points, returns nth coordinate.
+// For polynomials, returns coefficient of x^n in f.
+// Otherwise returns NULL.
+// The element the return value points to may be modified.
+// For polynomials, never zero the leading coefficient, e.g. never write:
+//   element_set0(element_item(f, poly_degree(f)));
+// Use poly_set_coeff0() to zero the leading coefficient.
+static inline element_ptr element_item(element_t e, int i) {
+  return e->field->item(e, i);
+}
 
 /*@manual epow
 Computes 'x' such that 'g^x^ = h' by brute force, where
