@@ -609,21 +609,26 @@ void pbc_mpz_out_raw_n(unsigned char *data, int n, mpz_t z);
 void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
                        unsigned char *data, unsigned int len);
 
-// For points, returns the number of coordinates.
-// For polynomials, returns the number of coefficients.
-// Otherwise returns zero.
+/*@manual etrade
+For points, returns the number of coordinates.
+For polynomials, returns the number of coefficients.
+Otherwise returns zero.
+*/
 static inline int element_item_count(element_t e) {
   return e->field->item_count(e);
 }
 
-// For points, returns nth coordinate.
-// For polynomials, returns coefficient of x^n in f.
-// Otherwise returns NULL.
-// The element the return value points to may be modified.
-// For polynomials, never zero the leading coefficient, e.g. never write:
-//   element_set0(element_item(f, poly_degree(f)));
-// Use poly_set_coeff0() to zero the leading coefficient.
+/*@manual etrade
+For points, returns 'n'#th# coordinate.
+For polynomials, returns coefficient of 'x^n^'.
+Otherwise returns NULL.
+The element the return value points to may be modified.
+*/
 static inline element_ptr element_item(element_t e, int i) {
+  // TODO: Document the following:
+  // For polynomials, never zero the leading coefficient, e.g. never write:
+  //  element_set0(element_item(f, poly_degree(f)));
+  // Use poly_set_coeff0() to zero the leading coefficient.
   return e->field->item(e, i);
 }
 
@@ -634,13 +639,15 @@ static inline field_ptr element_item_field(element_t e) {
   return element_item(e, 0)->field;
 }
 
-// In K[a], each element has the form x + ya.
-// When a = sqrt(-1) these are the real and imaginary parts.
-// Return x.
+/*@manual etrade
+Equivalent to `element_item(a, 0)`.
+*/
 static inline element_ptr element_x(element_ptr a) {
   return a->field->get_x(a);
 }
-// Return y.
+/*@manual etrade
+Equivalent to `element_item(a, 1)`.
+*/
 static inline element_ptr element_y(element_ptr a) {
   return a->field->get_y(a);
 }
