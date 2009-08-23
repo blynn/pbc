@@ -491,6 +491,16 @@ static element_ptr curve_item(element_ptr e, int i) {
   }
 }
 
+static element_ptr curve_get_x(element_ptr e) {
+  point_ptr P = e->data;
+  return P->x;
+}
+
+static element_ptr curve_get_y(element_ptr e) {
+  point_ptr P = e->data;
+  return P->y;
+}
+
 void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order, mpz_t cofac) {
   /*
   if (element_is0(a)) {
@@ -538,6 +548,8 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
   f->out_info = curve_out_info;
   f->item_count = curve_item_count;
   f->item = curve_item;
+  f->get_x = curve_get_x;
+  f->get_y = curve_get_y;
 
   if (mpz_odd_p(order)) {
     f->is_sqr = odd_curve_is_sqr;

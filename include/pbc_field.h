@@ -58,6 +58,8 @@ struct field_s {
   // Defaults exist for these functions.
   int (*item_count)(element_ptr);
   element_ptr (*item)(element_ptr, int);
+  element_ptr (*get_x)(element_ptr);
+  element_ptr (*get_y)(element_ptr);
   void (*set_si)(element_ptr, signed long int);
   void (*add_ui)(element_ptr, element_ptr, unsigned long int);
   void (*mul_mpz)(element_ptr, element_ptr, mpz_ptr);
@@ -623,6 +625,17 @@ static inline int element_item_count(element_t e) {
 // Use poly_set_coeff0() to zero the leading coefficient.
 static inline element_ptr element_item(element_t e, int i) {
   return e->field->item(e, i);
+}
+
+// In K[a], each element has the form x + ya.
+// When a = sqrt(-1) these are the real and imaginary parts.
+// Return x.
+static inline element_ptr element_x(element_ptr a) {
+  return a->field->get_x(a);
+}
+// Return y.
+static inline element_ptr element_y(element_ptr a) {
+  return a->field->get_y(a);
 }
 
 /*@manual epow
