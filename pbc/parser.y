@@ -42,6 +42,7 @@ expr
   | ID ASSIGN expr   { $$ = tree_new_assign($1, $3); }
   | expr QUESTION expr COLON expr  { $$ = tree_new_ternary($1, $3, $5); }
   | molecule
+  | molecule LSQU expr RSQU  { $$ = tree_new_item($1, $3); }
   | expr EQ expr     { $$ = tree_new_eq($1, $3); }
   | expr NE expr     { $$ = tree_new_ne($1, $3); }
   | expr LE expr     { $$ = tree_new_le($1, $3); }
@@ -59,7 +60,7 @@ expr
 // Not quite atoms.
 molecule
   : molecule LPAR exprlist RPAR  { $$ = $3; tree_set_fun($$, $1); }
-  | LPAR expr RPAR        { $$ = $2 }
+  | LPAR expr RPAR               { $$ = $2 }
   | ID
   ;
 

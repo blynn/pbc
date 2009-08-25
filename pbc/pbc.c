@@ -472,6 +472,23 @@ tree_ptr tree_new_gt(tree_ptr x, tree_ptr y) {
   return tree_new_binary(fun_gt, x, y);
 }
 
+static val_ptr run_item(val_ptr v[]) {
+  mpz_t z;
+  mpz_init(z);
+  element_to_mpz(z, v[1]->elem);
+  int i = mpz_get_si(z);
+  mpz_clear(z);
+  element_ptr a = element_item(v[0]->elem, i);
+  element_ptr e = pbc_malloc(sizeof(*e));
+  element_init_same_as(e, a);
+  element_set(e, a);
+  return val_new_element(e);
+}
+static fun_t fun_item = {{ "item", run_item, 2, sig_elem_elem }};
+tree_ptr tree_new_item(tree_ptr x, tree_ptr y) {
+  return tree_new_binary(fun_item, x, y);
+}
+
 tree_ptr tree_new_assign(tree_ptr l, tree_ptr r) {
   // TODO: Check l's type.
   tree_ptr t = tree_new(eval_assign);

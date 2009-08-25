@@ -512,6 +512,25 @@ static void generic_out_info(FILE * out, field_ptr f) {
   element_fprintf(out, "unknown field %p, order = %Zd", f, f->order);
 }
 
+static int generic_item_count(element_ptr e) {
+  UNUSED_VAR(e);
+  return 0;
+}
+
+static element_ptr generic_item(element_ptr e, int i) {
+  UNUSED_VAR(e);
+  UNUSED_VAR(i);
+  return NULL;
+}
+
+static element_ptr generic_get_x(element_ptr e) {
+  return element_item(e, 0);
+}
+
+static element_ptr generic_get_y(element_ptr e) {
+  return element_item(e, 1);
+}
+
 static int default_element_snprint(char *s, size_t n, element_t e) {
   UNUSED_VAR(e);
   if (n == 1) {
@@ -571,6 +590,12 @@ void field_init(field_ptr f) {
   f->set_si = generic_set_si;
   f->is1 = generic_is1;
   f->is0 = generic_is0;
+
+  // By default, an element has no components.
+  f->item_count = generic_item_count;
+  f->item = generic_item;
+  f->get_x = generic_get_x;
+  f->get_y = generic_get_y;
 
   // these are fast, thanks to Hovav
   f->pow_mpz = generic_pow_mpz;

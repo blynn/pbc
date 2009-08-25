@@ -391,6 +391,23 @@ static void fq_sqrt(element_ptr n, element_ptr e) {
   element_clear(e2);
 }
 
+static int fq_item_count(element_ptr e) {
+  UNUSED_VAR(e);
+  return 2;
+}
+
+static element_ptr fq_item(element_ptr e, int i) {
+  eptr p = e->data;
+  switch(i) {
+    case 0:
+      return p->x;
+    case 1:
+      return p->y;
+    default:
+      return NULL;
+  }
+}
+
 static void field_clear_fq(field_ptr f) {
   UNUSED_VAR(f);
   //f->order gets cleared automatically
@@ -563,11 +580,11 @@ void element_field_to_fi(element_ptr a, element_ptr b) {
   element_field_to_quadratic(a, b);
 }
 
-element_ptr element_re(element_ptr a) {
+static element_ptr fq_get_x(element_ptr a) {
   return ((eptr) a->data)->x;
 }
 
-element_ptr element_im(element_ptr a) {
+static element_ptr fq_get_y(element_ptr a) {
   return ((eptr) a->data)->y;
 }
 
@@ -609,6 +626,10 @@ void field_init_quadratic(field_ptr f, field_ptr fbase) {
   f->to_bytes = fq_to_bytes;
   f->from_bytes = fq_from_bytes;
   f->out_info = fq_out_info;
+  f->item_count = fq_item_count;
+  f->item = fq_item;
+  f->get_x = fq_get_x;
+  f->get_y = fq_get_y;
 
   mpz_mul(f->order, fbase->order, fbase->order);
   if (fbase->fixed_length_in_bytes < 0) {
@@ -655,6 +676,10 @@ void field_init_fi(field_ptr f, field_ptr fbase) {
   f->to_bytes = fq_to_bytes;
   f->from_bytes = fq_from_bytes;
   f->out_info = fi_out_info;
+  f->item_count = fq_item_count;
+  f->item = fq_item;
+  f->get_x = fq_get_x;
+  f->get_y = fq_get_y;
 
   mpz_mul(f->order, fbase->order, fbase->order);
   if (fbase->fixed_length_in_bytes < 0) {

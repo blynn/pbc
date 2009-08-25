@@ -88,16 +88,16 @@ static inline void d_miller_evalfn(element_t e0,
   //a, b, c are in Fq
   //point Q is (Qx, Qy * sqrt(nqr)) where nqr is used to construct
   //the quadratic field extension Fqk of Fqd
-  element_ptr re_out = element_re(e0);
-  element_ptr im_out = element_im(e0);
+  element_ptr re_out = element_x(e0);
+  element_ptr im_out = element_y(e0);
 
   int i;
   int d = polymod_field_degree(re_out->field);
   for (i=0; i<d; i++) {
-    element_mul(polymod_coeff(re_out, i), polymod_coeff(Qx, i), a);
-    element_mul(polymod_coeff(im_out, i), polymod_coeff(Qy, i), b);
+    element_mul(element_item(re_out, i), element_item(Qx, i), a);
+    element_mul(element_item(im_out, i), element_item(Qy, i), b);
   }
-  element_add(polymod_coeff(re_out, 0), polymod_coeff(re_out, 0), c);
+  element_add(element_item(re_out, 0), element_item(re_out, 0), c);
 }
 
 static void cc_miller_no_denom_proj(element_t res, mpz_t q, element_t P,
@@ -412,12 +412,12 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, element_t P,
 static void lucas_even(element_ptr out, element_ptr in, mpz_t cofactor) {
   element_t temp;
   element_init_same_as(temp, out);
-  element_ptr in0 = element_re(in);
-  element_ptr in1 = element_im(in);
-  element_ptr v0 = element_re(out);
-  element_ptr v1 = element_im(out);
-  element_ptr t0 = element_re(temp);
-  element_ptr t1 = element_im(temp);
+  element_ptr in0 = element_x(in);
+  element_ptr in1 = element_y(in);
+  element_ptr v0 = element_x(out);
+  element_ptr v1 = element_y(out);
+  element_ptr t0 = element_x(temp);
+  element_ptr t1 = element_y(temp);
   int j;
 
   element_set_si(t0, 2);
@@ -474,12 +474,12 @@ static void tatepower10(element_ptr out, element_ptr in, pairing_t pairing) {
   element_init(e1, p->Fqd);
   element_init(e2, p->Fqd);
   element_init(e3, p->Fqk);
-  element_ptr e0re = element_re(e0);
-  element_ptr e0im = element_im(e0);
+  element_ptr e0re = element_x(e0);
+  element_ptr e0im = element_y(e0);
   element_ptr e0re0 = ((element_t *) e0re->data)[0];
   element_ptr e0im0 = ((element_t *) e0im->data)[0];
-  element_t *inre = element_re(in)->data;
-  element_t *inim = element_im(in)->data;
+  element_t *inre = element_x(in)->data;
+  element_t *inim = element_y(in)->data;
   //see thesis
   void qpower(int sign) {
     polymod_const_mul(e2, inre[1], p->xpowq);
@@ -516,8 +516,8 @@ static void tatepower10(element_ptr out, element_ptr in, pairing_t pairing) {
   }
   qpower(1);
   element_set(e3, e0);
-  element_set(e0re, element_re(in));
-  element_neg(e0im, element_im(in));
+  element_set(e0re, element_x(in));
+  element_neg(e0im, element_y(in));
   element_mul(e3, e3, e0);
   qpower(-1);
   element_mul(e0, e0, in);
@@ -881,18 +881,18 @@ static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
 
   //compute A, B, d1
 
-  element_mul(element_re(d0), x2, p->nqrinv);
+  element_mul(element_x(d0), x2, p->nqrinv);
   element_neg(A, d0);
-  element_add(polymod_coeff(element_re(A), 0), polymod_coeff(element_re(A), 0), x);
+  element_add(element_item(element_x(A), 0), element_item(element_x(A), 0), x);
 
   element_double(C, x);
-  element_add(polymod_coeff(element_re(d0), 0), polymod_coeff(element_re(d0), 0), C);
+  element_add(element_item(element_x(d0), 0), element_item(element_x(d0), 0), C);
 
   element_square(dm1, A);
   element_mul(dm1, d0, dm1);
 
-  element_mul(element_im(d1), y2, p->nqrinv2);
-  element_set(polymod_coeff(element_re(d1), 0), y);
+  element_mul(element_y(d1), y2, p->nqrinv2);
+  element_set(element_item(element_x(d1), 0), y);
 
   element_square(d1, d1);
   element_sub(d1, dm1, d1);
@@ -900,9 +900,9 @@ static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
 
   element_invert(A, A);
 
-  element_mul(element_im(d1), y2, p->nqrinv2);
-  element_set0(element_re(d1));
-  element_neg(polymod_coeff(element_re(d1), 0), y);
+  element_mul(element_y(d1), y2, p->nqrinv2);
+  element_set0(element_x(d1));
+  element_neg(element_item(element_x(d1), 0), y);
   element_mul(d1, d1, A);
   element_square(d1, d1);
   element_sub(d1, d0, d1);
@@ -999,23 +999,23 @@ static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
       element_mul(e1, t2, s3);
       element_sub(c4, e0, e1);
 
-      polymod_const_mul(element_re(out), t0, element_re(u));
-      polymod_const_mul(element_im(out), t0, element_im(u));
-      polymod_const_mul(element_re(dm1), s0, element_re(v));
-      polymod_const_mul(element_im(dm1), s0, element_im(v));
+      polymod_const_mul(element_x(out), t0, element_x(u));
+      polymod_const_mul(element_y(out), t0, element_y(u));
+      polymod_const_mul(element_x(dm1), s0, element_x(v));
+      polymod_const_mul(element_y(dm1), s0, element_y(v));
       element_sub(dm1, dm1, out);
 
-      polymod_const_mul(element_re(out), t1, element_re(u));
-      polymod_const_mul(element_im(out), t1, element_im(u));
-      polymod_const_mul(element_re(d0), s1, element_re(v));
-      polymod_const_mul(element_im(d0), s1, element_im(v));
+      polymod_const_mul(element_x(out), t1, element_x(u));
+      polymod_const_mul(element_y(out), t1, element_y(u));
+      polymod_const_mul(element_x(d0), s1, element_x(v));
+      polymod_const_mul(element_y(d0), s1, element_y(v));
       element_sub(d0, d0, out);
       element_mul(d0, d0, A);
 
-      polymod_const_mul(element_re(out), t2, element_re(u));
-      polymod_const_mul(element_im(out), t2, element_im(u));
-      polymod_const_mul(element_re(d1), s2, element_re(v));
-      polymod_const_mul(element_im(d1), s2, element_im(v));
+      polymod_const_mul(element_x(out), t2, element_x(u));
+      polymod_const_mul(element_y(out), t2, element_y(u));
+      polymod_const_mul(element_x(d1), s2, element_x(v));
+      polymod_const_mul(element_y(d1), s2, element_y(v));
       element_sub(d1, d1, out);
       element_mul(d1, d1, B);
     } else {
@@ -1056,22 +1056,22 @@ static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
       element_sub(c4, e0, e1);
       element_mul(c4, c4, C);
 
-      polymod_const_mul(element_re(out), tm1, element_re(u));
-      polymod_const_mul(element_im(out), tm1, element_im(u));
-      polymod_const_mul(element_re(dm1), sm1, element_re(v));
-      polymod_const_mul(element_im(dm1), sm1, element_im(v));
+      polymod_const_mul(element_x(out), tm1, element_x(u));
+      polymod_const_mul(element_y(out), tm1, element_y(u));
+      polymod_const_mul(element_x(dm1), sm1, element_x(v));
+      polymod_const_mul(element_y(dm1), sm1, element_y(v));
       element_sub(dm1, dm1, out);
 
-      polymod_const_mul(element_re(out), t0, element_re(u));
-      polymod_const_mul(element_im(out), t0, element_im(u));
-      polymod_const_mul(element_re(d0), s0, element_re(v));
-      polymod_const_mul(element_im(d0), s0, element_im(v));
+      polymod_const_mul(element_x(out), t0, element_x(u));
+      polymod_const_mul(element_y(out), t0, element_y(u));
+      polymod_const_mul(element_x(d0), s0, element_x(v));
+      polymod_const_mul(element_y(d0), s0, element_y(v));
       element_sub(d0, d0, out);
 
-      polymod_const_mul(element_re(out), t1, element_re(u));
-      polymod_const_mul(element_im(out), t1, element_im(u));
-      polymod_const_mul(element_re(d1), s1, element_re(v));
-      polymod_const_mul(element_im(d1), s1, element_im(v));
+      polymod_const_mul(element_x(out), t1, element_x(u));
+      polymod_const_mul(element_y(out), t1, element_y(u));
+      polymod_const_mul(element_x(d1), s1, element_x(v));
+      polymod_const_mul(element_y(d1), s1, element_y(v));
       element_sub(d1, d1, out);
       element_mul(d1, d1, A);
     }
@@ -1081,8 +1081,8 @@ static void g_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
   // since c_k lies base field
   // it gets killed by the final powering
   //element_invert(c1, c1);
-  //element_mul(element_re(d1), element_re(d1), c1);
-  //element_mul(element_im(d1), element_im(d1), c1);
+  //element_mul(element_x(d1), element_x(d1), c1);
+  //element_mul(element_y(d1), element_y(d1), c1);
 
   tatepower10(out, d1, pairing);
 
@@ -1182,11 +1182,11 @@ static void compute_cm_curve(g_param_ptr param, pbc_cm_ptr cm) {
   int n = pbc_hilbert(&coefflist, cm->D);
 
   // Temporarily set the coefficient of x^{n-1} to 1 so hp has degree n - 1,
-  // allowing us to use poly_coeff().
+  // allowing us to use element_item().
   poly_set_coeff1(hp, n - 1);
   int i;
   for (i = 0; i < n; i++) {
-    element_set_mpz(poly_coeff(hp, i), coefflist[i]);
+    element_set_mpz(element_item(hp, i), coefflist[i]);
   }
   pbc_hilbert_free(coefflist, n);
 
@@ -1268,11 +1268,11 @@ static void g_init_pairing(pairing_t pairing, void *data) {
   field_init_poly(p->Fqx, p->Fq);
   element_init(irred, p->Fqx);
 
-  // First set the coefficient of x^5 to 1 so we can call poly_coeff()
+  // First set the coefficient of x^5 to 1 so we can call element_item()
   // for the other coefficients.
   poly_set_coeff1(irred, 5);
   for (i=0; i<5; i++) {
-    element_set_mpz(poly_coeff(irred, i), param->coeff[i]);
+    element_set_mpz(element_item(irred, i), param->coeff[i]);
   }
 
   field_init_polymod(p->Fqd, irred);
@@ -1415,7 +1415,7 @@ void pbc_param_init_g_gen(pbc_param_t p, pbc_cm_ptr cm) {
 
   for (i=0; i<5; i++) {
     mpz_init(param->coeff[i]);
-    element_to_mpz(param->coeff[i], poly_coeff(irred, i));
+    element_to_mpz(param->coeff[i], element_item(irred, i));
   }
   element_to_mpz(param->nqr, ((element_t *) nqr->data)[0]);
 

@@ -471,6 +471,36 @@ static int even_curve_is_sqr(element_ptr e) {
   return result;
 }
 
+static int curve_item_count(element_ptr e) {
+  if (element_is0(e)) {
+    return 0;
+  }
+  return 2;
+}
+
+static element_ptr curve_item(element_ptr e, int i) {
+  if (element_is0(e)) return NULL;
+  point_ptr P = e->data;
+  switch(i) {
+    case 0:
+      return P->x;
+    case 1:
+      return P->y;
+    default:
+      return NULL;
+  }
+}
+
+static element_ptr curve_get_x(element_ptr e) {
+  point_ptr P = e->data;
+  return P->x;
+}
+
+static element_ptr curve_get_y(element_ptr e) {
+  point_ptr P = e->data;
+  return P->y;
+}
+
 void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order, mpz_t cofac) {
   /*
   if (element_is0(a)) {
@@ -516,6 +546,10 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
   f->to_bytes = curve_to_bytes;
   f->from_bytes = curve_from_bytes;
   f->out_info = curve_out_info;
+  f->item_count = curve_item_count;
+  f->item = curve_item;
+  f->get_x = curve_get_x;
+  f->get_y = curve_get_y;
 
   if (mpz_odd_p(order)) {
     f->is_sqr = odd_curve_is_sqr;

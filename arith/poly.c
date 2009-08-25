@@ -171,6 +171,16 @@ static void poly_set(element_ptr dst, element_ptr src) {
   }
 }
 
+static int poly_coeff_count(element_ptr e) {
+  return ((peptr) e->data)->coeff->count;
+}
+
+static element_ptr poly_coeff(element_ptr e, int n) {
+  peptr ep = e->data;
+  PBC_ASSERT(n < poly_coeff_count(e), "coefficient out of range");
+  return (element_ptr) ep->coeff->item[n];
+}
+
 static int poly_sgn(element_ptr f) {
   int res = 0;
   int i;
@@ -1270,6 +1280,17 @@ static int polymod_set_str(element_ptr e, const char *s, int base) {
   return cp - s;
 }
 
+static int polymod_coeff_count(element_ptr e) {
+  UNUSED_VAR(e);
+  mfptr p = e->field->data;
+  return p->n;
+}
+
+static element_ptr polymod_coeff(element_ptr e, int i) {
+  element_t *coeff = e->data;
+  return coeff[i];
+}
+
 static void polymod_to_mpz(mpz_t z, element_ptr e) {
   element_to_mpz(z, polymod_coeff(e, 0));
 }
@@ -1385,6 +1406,8 @@ void field_init_poly(field_ptr f, field_ptr base_field) {
   f->mul_si = poly_mul_si;
   f->cmp = poly_cmp;
   f->out_info = poly_out_info;
+  f->item_count = poly_coeff_count;
+  f->item = poly_coeff;
 
   f->to_bytes = poly_to_bytes;
   f->from_bytes = poly_from_bytes;
@@ -1442,12 +1465,6 @@ void poly_random_monic(element_ptr f, int deg) {
   element_set1(poly_coeff(f, i));
 }
 
-element_ptr polymod_coeff(element_ptr e, int i) {
-  element_t *coeff = e->data;
-
-  return coeff[i];
-}
-
 int polymod_field_degree(field_t f) {
   mfptr p = f->data;
   return p->n;
@@ -1483,6 +1500,8 @@ void field_init_polymod(field_ptr f, element_ptr poly) {
   f->set1 = polymod_set1;
   f->cmp = polymod_cmp;
   f->to_mpz = polymod_to_mpz;
+  f->item_count = polymod_coeff_count;
+  f->item = polymod_coeff;
   switch(n) {
     case 3:
       f->mul = polymod_mul_degree3;
@@ -1519,16 +1538,6 @@ void field_init_polymod(field_ptr f, element_ptr poly) {
 
   p->xpwr = pbc_malloc(sizeof(element_t) * n);
   compute_x_powers(f, poly);
-}
-
-int poly_coeff_count(element_ptr e) {
-  return ((peptr) e->data)->coeff->count;
-}
-
-element_ptr poly_coeff(element_ptr e, int n) {
-  peptr ep = e->data;
-  PBC_ASSERT(n < poly_coeff_count(e), "coefficient out of range");
-  return (element_ptr) ep->coeff->item[n];
 }
 
 field_ptr poly_base_field(element_t f) {

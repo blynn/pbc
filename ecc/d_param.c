@@ -97,16 +97,16 @@ static void d_out_str(FILE *stream, void *data) {
 // used to construct the quadratic field extension Fqk of Fqd.
 static inline void d_miller_evalfn(element_t e0,
     element_t a, element_t b, element_t c, element_t Qx, element_t Qy) {
-  element_ptr re_out = element_re(e0);
-  element_ptr im_out = element_im(e0);
+  element_ptr re_out = element_x(e0);
+  element_ptr im_out = element_y(e0);
 
   int i;
   int d = polymod_field_degree(re_out->field);
   for (i = 0; i < d; i++) {
-    element_mul(polymod_coeff(re_out, i), polymod_coeff(Qx, i), a);
-    element_mul(polymod_coeff(im_out, i), polymod_coeff(Qy, i), b);
+    element_mul(element_item(re_out, i), element_item(Qx, i), a);
+    element_mul(element_item(im_out, i), element_item(Qy, i), b);
   }
-  element_add(polymod_coeff(re_out, 0), polymod_coeff(re_out, 0), c);
+  element_add(element_item(re_out, 0), element_item(re_out, 0), c);
 }
 
 // Miller's algorithm, assuming we can ignore the denominator. We can do this
@@ -436,12 +436,12 @@ static void lucas_even(element_ptr out, element_ptr in, mpz_t cofactor) {
   }
   element_t temp;
   element_init_same_as(temp, out);
-  element_ptr in0 = element_re(in);
-  element_ptr in1 = element_im(in);
-  element_ptr v0 = element_re(out);
-  element_ptr v1 = element_im(out);
-  element_ptr t0 = element_re(temp);
-  element_ptr t1 = element_im(temp);
+  element_ptr in0 = element_x(in);
+  element_ptr in1 = element_y(in);
+  element_ptr v0 = element_x(out);
+  element_ptr v1 = element_y(out);
+  element_ptr t0 = element_x(temp);
+  element_ptr t1 = element_y(temp);
   int j;
 
   element_set_si(t0, 2);
@@ -503,12 +503,12 @@ static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing) {
     element_init(e0, p->Fqk);
     element_init(e2, p->Fqd);
     element_init(e3, p->Fqk);
-    element_ptr e0re = element_re(e0);
-    element_ptr e0im = element_im(e0);
+    element_ptr e0re = element_x(e0);
+    element_ptr e0im = element_y(e0);
     element_ptr e0re0 = ((element_t *) e0re->data)[0];
     element_ptr e0im0 = ((element_t *) e0im->data)[0];
-    element_t *inre = element_re(in)->data;
-    element_t *inim = element_im(in)->data;
+    element_t *inre = element_x(in)->data;
+    element_t *inim = element_y(in)->data;
     // Expressions in the formula are similar, hence the following function.
     void qpower(int sign) {
       polymod_const_mul(e2, inre[1], p->xpowq);
@@ -533,8 +533,8 @@ static void cc_tatepower(element_ptr out, element_ptr in, pairing_t pairing) {
     }
     qpower(1);
     element_set(e3, e0);
-    element_set(e0re, element_re(in));
-    element_neg(e0im, element_im(in));
+    element_set(e0re, element_x(in));
+    element_neg(e0im, element_y(in));
     element_mul(e3, e3, e0);
     qpower(-1);
     element_mul(e0, e0, in);
@@ -852,7 +852,7 @@ static void d_init_pairing(pairing_ptr pairing, void *data) {
   element_init(irred, p->Fqx);
   poly_set_coeff1(irred, d);
   for (i = 0; i < d; i++) {
-    element_set_mpz(poly_coeff(irred, i), param->coeff[i]);
+    element_set_mpz(element_item(irred, i), param->coeff[i]);
   }
 
   field_init_polymod(p->Fqd, irred);
@@ -934,7 +934,7 @@ static void compute_cm_curve(d_param_ptr param, pbc_cm_ptr cm) {
   poly_set_coeff1(hp, n - 1);
   int i;
   for (i = 0; i < n; i++) {
-    element_set_mpz(poly_coeff(hp, i), coefflist[i]);
+    element_set_mpz(element_item(hp, i), coefflist[i]);
   }
   pbc_hilbert_free(coefflist, n);
 
@@ -1072,7 +1072,7 @@ void pbc_param_init_d_gen(pbc_param_ptr p, pbc_cm_ptr cm) {
 
   for (i=0; i<d; i++) {
     mpz_init(param->coeff[i]);
-    element_to_mpz(param->coeff[i], poly_coeff(irred, i));
+    element_to_mpz(param->coeff[i], element_item(irred, i));
   }
   element_to_mpz(param->nqr, ((element_t *) nqr->data)[0]);
 

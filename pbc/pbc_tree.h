@@ -25,3 +25,4 @@ tree_ptr tree_new_ge(tree_ptr x, tree_ptr y);
 tree_ptr tree_new_lt(tree_ptr x, tree_ptr y);
 tree_ptr tree_new_gt(tree_ptr x, tree_ptr y);
 tree_ptr tree_new_ternary(tree_ptr cond, tree_ptr t1, tree_ptr t2);
+tree_ptr tree_new_item(tree_ptr x, tree_ptr y);
