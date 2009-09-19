@@ -1,3 +1,5 @@
+# Exercises bug found by Zhang Ye.
+
 init_pairing_a();
 
 CHECK(random(G2) != G2(0));
@@ -27,3 +29,21 @@ init_pairing_g();
 CHECK(random(G2) != G2(0));
 CHECK(G2(0) != random(G2));
 CHECK(G2(0) == G2(0));
+
+# Exercises a bug found by Mario Di Raimondo.
+
+init_pairing_d();
+a := rnd(G2);
+m := rnd(Zr);
+n := rnd(Zr);
+CHECK((a^m)^n == a^(m*n));
+CHECK(a != a^m);
+CHECK(a != a^n);
+
+init_pairing_g();
+a := rnd(G2);
+m := rnd(Zr);
+n := rnd(Zr);
+CHECK((a^m)^n == a^(m*n));
+CHECK(a != a^m);
+CHECK(a != a^n);

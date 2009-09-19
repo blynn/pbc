@@ -4,11 +4,12 @@
 make out/pbc
 for t in pbc/pairing_test.pbc pbc/g2_test.pbc ; do
   out/pbc < $t > /dev/null
+  retcode=$?
 
   red=$'\e'"[31m"
   green=$'\e'"[32;1m"
   normal=$'\e'"[0m"
-  if [[ $? != 0 ]]; then
+  if [[ $retcode != 0 ]]; then
     echo $red"[FAILED]"$normal $t
   else
     echo $green"[PASSED]"$normal $t

@@ -1323,6 +1323,18 @@ static void g_init_pairing(pairing_t pairing, void *data) {
   element_init(p->nqrinv2, p->Fqd);
   element_square(p->nqrinv2, p->nqrinv);
 
+  mpz_t ndonr;
+  mpz_init(ndonr);
+  // ndonr temporarily holds the trace.
+  mpz_sub(ndonr, param->q, param->n);
+  mpz_add_ui(ndonr, ndonr, 1);
+  // Negate because we want the order of the twist.
+  mpz_neg(ndonr, ndonr);
+  pbc_mpz_curve_order_extn(ndonr, param->q, ndonr, 5);
+  mpz_divexact(ndonr, ndonr, param->r);
+  field_curve_set_quotient_cmp(p->Etwist, ndonr);
+  mpz_clear(ndonr);
+
   pairing->G1 = p->Eq;
   pairing->G2 = p->Etwist;
   pairing_GT_init(pairing, p->Fqk);

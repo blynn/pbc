@@ -25,6 +25,11 @@ typedef struct {
   element_t gen_no_cofac;
   // A generator of the subgroup.
   element_t gen;
+  // A non-NULL quotient_cmp means we are working with the quotient group of
+  // order #E / quotient_cmp, and the points are actually coset
+  // representatives. Thus for a comparison, we must multiply by quotient_cmp
+  // before comparing.
+  mpz_ptr quotient_cmp;
 } *curve_data_ptr;
 
 // Per-element data. Elements of this group are points on the elliptic curve.
@@ -200,16 +205,30 @@ static void curve_mul(element_ptr c, element_ptr a, element_ptr b) {
   }
 }
 
+static inline int point_cmp(point_ptr p, point_ptr q) {
+  if (p->inf_flag || q->inf_flag) {
+    return !(p->inf_flag && q->inf_flag);
+  }
+  return element_cmp(p->x, q->x) || element_cmp(p->y, q->y);
+}
+
 static int curve_cmp(element_ptr a, element_ptr b) {
   if (a == b) {
     return 0;
   } else {
-    point_ptr p = a->data;
-    point_ptr q = b->data;
-    if (p->inf_flag || q->inf_flag) {
-      return !(p->inf_flag && q->inf_flag);
+    // If we're working with a quotient group we must account for different
+    // representatives of the same coset.
+    curve_data_ptr cdp = a->field->data;
+    if (cdp->quotient_cmp) {
+      element_t e;
+      element_init_same_as(e, a);
+      element_div(e, a, b);
+      element_pow_mpz(e, e, cdp->quotient_cmp);
+      int result = !element_is1(e);
+      element_clear(e);
+      return result;
     }
-    return element_cmp(p->x, q->x) || element_cmp(p->y, q->y);
+    return point_cmp(a->data, b->data);
   }
 }
 
@@ -406,6 +425,10 @@ static void field_clear_curve(field_t f) {
     mpz_clear(cdp->cofac);
     pbc_free(cdp->cofac);
   }
+  if (cdp->quotient_cmp) {
+    mpz_clear(cdp->quotient_cmp);
+    pbc_free(cdp->quotient_cmp);
+  }
   element_clear(cdp->a);
   element_clear(cdp->b);
   pbc_free(cdp);
@@ -569,6 +592,7 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
     cdp->cofac = NULL;
     element_set(cdp->gen, cdp->gen_no_cofac);
   }
+  cdp->quotient_cmp = NULL;
 }
 
 // Requires e to be a point on an elliptic curve.
@@ -713,6 +737,14 @@ void field_reinit_curve_twist(field_ptr c) {
   }
 }
 
+// I could generalize this for all fields, but is there any point?
+void field_curve_set_quotient_cmp(field_ptr c, mpz_t quotient_cmp) {
+  curve_data_ptr cdp = c->data;
+  cdp->quotient_cmp = pbc_malloc(sizeof(mpz_t));
+  mpz_init(cdp->quotient_cmp);
+  mpz_set(cdp->quotient_cmp, quotient_cmp);
+}
+
 // Requires j != 0, 1728.
 void field_init_curve_j(field_ptr f, element_ptr j, mpz_t order, mpz_t cofac) {
   element_t a, b;
@@ -767,6 +799,21 @@ void pbc_mpz_trace_n(mpz_t res, mpz_t q, mpz_t trace, int n) {
   mpz_clear(c2);
   mpz_clear(c1);
   mpz_clear(c0);
+}
+
+// Given q, t such that #E(F_q) = q - t + 1, compute #E(F_q^k).
+void pbc_mpz_curve_order_extn(mpz_t res, mpz_t q, mpz_t t, int k) {
+  mpz_t z;
+  mpz_t tk;
+  mpz_init(z);
+  mpz_init(tk);
+  mpz_pow_ui(z, q, k);
+  mpz_add_ui(z, z, 1);
+  pbc_mpz_trace_n(tk, q, t, k);
+  mpz_sub(z, z, tk);
+  mpz_set(res, z);
+  mpz_clear(z);
+  mpz_clear(tk);
 }
 
 void curve_set_si(element_t R, long int x, long int y) {

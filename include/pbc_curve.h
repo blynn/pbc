@@ -46,6 +46,9 @@ void field_reinit_curve_twist(field_t f);
 // Compute trace of Frobenius at q^n given trace at q.
 void pbc_mpz_trace_n(mpz_t res, mpz_t q, mpz_t trace, int n);
 
+// Given q, t such that #E(F_q) = q - t + 1, compute #E(F_q^k).
+void pbc_mpz_curve_order_extn(mpz_t res, mpz_t q, mpz_t t, int k);
+
 void field_init_curve_with_map(field_ptr cnew, field_ptr c,
   field_ptr dstfield, fieldmap map);
 

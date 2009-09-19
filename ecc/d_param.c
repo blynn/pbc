@@ -864,6 +864,7 @@ static void d_init_pairing(pairing_ptr pairing, void *data) {
 
   field_init_quadratic(p->Fqk, p->Fqd);
 
+  // Compute constants involved in the final powering.
   if (param->k == 6) {
     mpz_ptr q = param->q;
     mpz_ptr z = pairing->phikonr;
@@ -888,6 +889,18 @@ static void d_init_pairing(pairing_ptr pairing, void *data) {
 
   field_init_curve_ab_map(p->Etwist, p->Eq, element_field_to_polymod, p->Fqd, pairing->r, NULL);
   field_reinit_curve_twist(p->Etwist);
+
+  mpz_t ndonr;
+  mpz_init(ndonr);
+  // ndonr temporarily holds the trace.
+  mpz_sub(ndonr, param->q, param->n);
+  mpz_add_ui(ndonr, ndonr, 1);
+  // Negate it because we want the trace of the twist.
+  mpz_neg(ndonr, ndonr);
+  pbc_mpz_curve_order_extn(ndonr, param->q, ndonr, d);
+  mpz_divexact(ndonr, ndonr, param->r);
+  field_curve_set_quotient_cmp(p->Etwist, ndonr);
+  mpz_clear(ndonr);
 
   element_init(p->nqrinv, p->Fqd);
   element_invert(p->nqrinv, field_get_nqr(p->Fqd));
