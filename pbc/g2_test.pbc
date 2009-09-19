@@ -1,0 +1,29 @@
+init_pairing_a();
+
+CHECK(random(G2) != G2(0));
+CHECK(G2(0) != random(G2));
+CHECK(G2(0) == G2(0));
+
+init_pairing_d();
+
+CHECK(random(G2) != G2(0));
+CHECK(G2(0) != random(G2));
+CHECK(G2(0) == G2(0));
+
+init_pairing_e();
+
+CHECK(random(G2) != G2(0));
+CHECK(G2(0) != random(G2));
+CHECK(G2(0) == G2(0));
+
+init_pairing_f();
+
+CHECK(random(G2) != G2(0));
+CHECK(G2(0) != random(G2));
+CHECK(G2(0) == G2(0));
+
+init_pairing_g();
+
+CHECK(random(G2) != G2(0));
+CHECK(G2(0) != random(G2));
+CHECK(G2(0) == G2(0));

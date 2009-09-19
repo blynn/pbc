@@ -2,14 +2,15 @@
 
 #make test
 make out/pbc
-t=pbc/pairing_test.pbc
-out/pbc < $t
+for t in pbc/pairing_test.pbc pbc/g2_test.pbc ; do
+  out/pbc < $t > /dev/null
 
-red=$'\e'"[31m"
-green=$'\e'"[32;1m"
-normal=$'\e'"[0m"
-if [[ $? != 0 ]]; then
-  echo $t $red"[FAILED]"$normal
-else
-  echo $t $green"[PASSED]"$normal
-fi
+  red=$'\e'"[31m"
+  green=$'\e'"[32;1m"
+  normal=$'\e'"[0m"
+  if [[ $? != 0 ]]; then
+    echo $red"[FAILED]"$normal $t
+  else
+    echo $green"[PASSED]"$normal $t
+  fi
+done

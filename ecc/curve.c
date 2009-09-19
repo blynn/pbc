@@ -206,8 +206,8 @@ static int curve_cmp(element_ptr a, element_ptr b) {
   } else {
     point_ptr p = a->data;
     point_ptr q = b->data;
-    if (p->inf_flag) {
-      return q->inf_flag;
+    if (p->inf_flag || q->inf_flag) {
+      return !(p->inf_flag && q->inf_flag);
     }
     return element_cmp(p->x, q->x) || element_cmp(p->y, q->y);
   }
