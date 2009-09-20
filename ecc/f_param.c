@@ -344,8 +344,6 @@ static void f_init_pairing(pairing_t pairing, void *data) {
   element_init(p->Fq->nqr, p->Fq);
   element_set_mpz(p->Fq->nqr, param->beta);
   field_init_quadratic(p->Fq2, p->Fq);
-  field_clear(p->Fq2);
-  field_init_quadratic(p->Fq2, p->Fq);
   field_init_poly(p->Fq2x, p->Fq2);
   element_init(irred, p->Fq2x);
   // Call poly_set_coeff1() first so we can use element_item() for the other
@@ -367,8 +365,11 @@ static void f_init_pairing(pairing_t pairing, void *data) {
   element_init(e1, p->Fq);
   element_init(e2, p->Fq2);
 
+  // Initialize the curve Y^2 = X^3 + b.
   element_set_mpz(e1, param->b);
   field_init_curve_ab(p->Eq, e0, e1, pairing->r, NULL);
+
+  // Initialize the curve Y^2 = X^3 - alpha0 b - alpha1 sqrt(beta) b.
   element_set_mpz(e0, param->alpha0);
   element_neg(e0, e0);
   element_mul(element_x(e2), e0, e1);
@@ -381,6 +382,19 @@ static void f_init_pairing(pairing_t pairing, void *data) {
   element_clear(e0);
   element_clear(e1);
   element_clear(e2);
+
+  mpz_t ndonr;
+  mpz_init(ndonr);
+  // ndonr temporarily holds the trace.
+  mpz_sub(ndonr, param->q, param->r);
+  mpz_add_ui(ndonr, ndonr, 1);
+  // TODO: We can use a smaller quotient_cmp, but I have to figure out
+  // BN curves again.
+  pbc_mpz_curve_order_extn(ndonr, param->q, ndonr, 12);
+  mpz_divexact(ndonr, ndonr, param->r);
+  mpz_divexact(ndonr, ndonr, param->r);
+  field_curve_set_quotient_cmp(p->Etwist, ndonr);
+  mpz_clear(ndonr);
 
   pairing->G1 = p->Eq;
   pairing->G2 = p->Etwist;

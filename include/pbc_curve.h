@@ -58,6 +58,8 @@ void field_init_curve_ab_map(field_t cnew, field_t c,
 
 void field_curve_use_random_solvefory(field_ptr f);
 
+void field_curve_set_quotient_cmp(field_ptr c, mpz_t quotient_cmp);
+
 #pragma GCC visibility push(hidden)
 // Internal:
 

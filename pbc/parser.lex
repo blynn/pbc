@@ -22,6 +22,7 @@ extern int option_easy;
 #.*$                    // Comment.
 [ \t\r]*                // Whitespace.
 
+define                  return DEFINE;
 [0-9]+                  yylval = tree_new_z(yytext);  return NUM;
 [a-zA-Z_][a-zA-Z0-9_]*  yylval = tree_new_id(yytext); return ID;
 :=                      return ASSIGN;

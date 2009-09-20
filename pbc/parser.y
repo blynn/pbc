@@ -14,6 +14,7 @@ extern int option_easy;
 %}
 
 %error-verbose
+%token DEFINE
 %token TERMINATOR
 %token NUM ID
 %token LPAR RPAR LSQU RSQU COMMA

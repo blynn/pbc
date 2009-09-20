@@ -40,6 +40,14 @@ CHECK((a^m)^n == a^(m*n));
 CHECK(a != a^m);
 CHECK(a != a^n);
 
+init_pairing_f();
+a := rnd(G2);
+m := rnd(Zr);
+n := rnd(Zr);
+CHECK((a^m)^n == a^(m*n));
+CHECK(a != a^m);
+CHECK(a != a^n);
+
 init_pairing_g();
 a := rnd(G2);
 m := rnd(Zr);
