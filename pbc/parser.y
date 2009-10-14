@@ -10,6 +10,9 @@
 void yyerror(char *s);
 int yylex(void);
 
+#define YY_NO_INPUT
+#define YY_NO_UNPUT
+
 extern int option_easy;
 %}
 
@@ -17,7 +20,7 @@ extern int option_easy;
 %token DEFINE
 %token TERMINATOR
 %token NUM ID
-%token LPAR RPAR LSQU RSQU COMMA
+%token LPAR RPAR LSQU RSQU LBRACE RBRACE COMMA
 %right QUESTION COLON
 %left EQ NE LT T_GT LE GE
 %right ASSIGN
@@ -30,12 +33,29 @@ extern int option_easy;
 %%
 input
   : // Empty.
-  | input stmt TERMINATOR { tree_eval_stmt($2); }
+  | input stmt { tree_eval_stmt($2); }
   ;
 
 stmt
-  : { $$ = NULL; }  // Empty.
-  | expr
+  : expr TERMINATOR
+  | DEFINE ID LPAR parms RPAR LBRACE stmtlist RBRACE {
+      $$ = tree_new_define($2, $4, $7);
+    }
+  ;
+
+stmtlist
+  : { $$ = tree_new_empty_stmt_list(); }  // Empty.
+  | stmtlist stmt { tree_append($1, $2); }
+  ;
+
+parms
+  : { $$ = tree_new_empty_parms(); }  // Empty.
+  | parms1
+  ;
+
+parms1
+  : ID { $$ = tree_new_empty_parms(); tree_append($$, $1); }
+  | parms1 COMMA ID { tree_append($1, $3); }
   ;
 
 expr
@@ -71,8 +91,8 @@ exprlist
   ;
 
 nonemptyexprlist
-  : expr   { tree_fun_append($$ = tree_new_funcall(), $1); }
-  | nonemptyexprlist COMMA expr { tree_fun_append($1, $3); }
+  : expr   { tree_append($$ = tree_new_funcall(), $1); }
+  | nonemptyexprlist COMMA expr { tree_append($1, $3); }
   ;
 
 multinomial
@@ -86,6 +106,6 @@ numlist
 
 sequence
   : expr { $$ = tree_new_list($1); }
-  | sequence COMMA expr { tree_append_multiz($1, $3); }
+  | sequence COMMA expr { tree_append($1, $3); }
   ;
 %%

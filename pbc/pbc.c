@@ -1,6 +1,8 @@
 // Pairing-Based Calculator.
 
 // TODO: Garbage collection.
+// TODO: Recursion (stack frames), anonymous functions.
+
 #include <unistd.h>  // For getopt.
 
 #include "pbc.h"
@@ -47,6 +49,7 @@ struct tree_s {
   union {
     const char *id;
     element_ptr elem;
+    // Built-in function.
     fun_ptr fun;
     // Child nodes.
     darray_ptr child;
@@ -60,9 +63,13 @@ enum {
 // The interface of a val_ptr shared amongst many val_ptr objects.
 // Analog of C++ class.
 struct val_type_s {
+  // One of element, field, function, error.
   char *name;
+  // Print out current value.
   void (*out_str)(FILE *, val_ptr);
+  // Called when a variable is evaluated, e.g. "foo;".
   val_ptr (*eval)(val_ptr);
+  // Called when a variable is used as a function, e.g. "foo();".
   val_ptr (*funcall)(val_ptr, tree_ptr);
 };
 
@@ -81,6 +88,9 @@ struct val_s {
   struct val_type_s *type;
   union {
     element_ptr elem;
+    // User-defined function.
+    tree_ptr def;
+    // Built-in function.
     fun_ptr fun;
     field_ptr field;
     const char *msg;
@@ -107,12 +117,18 @@ static val_ptr v_elem_eval(val_ptr v) {
   return val_new_element(e);
 }
 
-static void v_fun_out(FILE* stream, val_ptr v) {
+static void v_builtin_out(FILE* stream, val_ptr v) {
   // TODO: Print types of arguments.
-  fprintf(stream, "function %s, arity %d", v->fun->name, v->fun->arity);
+  fprintf(stream, "built-in function %s, arity %d",
+      v->fun->name, v->fun->arity);
 }
 
-static val_ptr v_funcall(val_ptr v, tree_ptr t) {
+static void v_define_out(FILE* stream, val_ptr v) {
+  fprintf(stream, "user-defined function %s",
+      ((tree_ptr) darray_at(v->def->child, 0))->id);
+}
+
+static val_ptr v_builtin(val_ptr v, tree_ptr t) {
   fun_ptr fun = v->fun;
   int n = fun->arity;
   if (1 + n != darray_count(t->child)) {
@@ -127,6 +143,29 @@ static val_ptr v_funcall(val_ptr v, tree_ptr t) {
     }
   }
   return fun->run(arg);
+}
+
+static val_ptr v_def_call(val_ptr v, tree_ptr t) {
+  int i;
+  const char* name = ((tree_ptr) darray_at(v->def->child, 0))->id;
+  darray_ptr parm = ((tree_ptr) darray_at(v->def->child, 1))->child;
+  int n = darray_count(parm);
+  if (1 + n != darray_count(t->child)) {
+    return val_new_error("%s: wrong number of arguments", name);
+  }
+  for(i = 0; i < n; i++) {
+    const char *id = ((tree_ptr) darray_at(parm, i))->id;
+    val_ptr v1 = tree_eval(darray_at(t->child, i));
+    // TODO: Stack frames for recursion.
+    symtab_put(tab, v1, id);
+  }
+  // Evaluate function body.
+  darray_ptr a = ((tree_ptr) darray_at(v->def->child, 2))->child;
+  void eval_stmt(void *ptr) {
+    tree_eval(ptr);
+  }
+  darray_forall(a, eval_stmt);
+  return NULL;
 }
 
 static val_ptr v_field_cast(val_ptr v, tree_ptr t) {
@@ -172,10 +211,11 @@ static val_ptr v_errcall(val_ptr v, tree_ptr t) {
 
 static struct val_type_s
   // TODO: Replace NULL with get_coeff.
-  v_elem[1]  = {{  "element",  v_elem_out, v_elem_eval, NULL }},
-  v_field[1] = {{    "field", v_field_out,      v_self, v_field_cast }},
-  v_fun[1]   = {{ "function",   v_fun_out,      v_self, v_funcall }},
-  v_error[1] = {{    "error",   v_err_out,      v_self, v_errcall }};
+  v_elem[1]  = {{  "element",    v_elem_out, v_elem_eval, NULL }},
+  v_field[1] = {{    "field",   v_field_out,      v_self, v_field_cast }},
+  v_fun[1]   = {{  "builtin", v_builtin_out,      v_self, v_builtin }},
+  v_def[1]   = {{ "function",  v_define_out,      v_self, v_def_call }},
+  v_error[1] = {{    "error",     v_err_out,      v_self, v_errcall }};
 
 // Function signature constants for type checking.
 const struct val_type_s *sig_field[] = { v_field };
@@ -326,7 +366,6 @@ static val_ptr eval_id(tree_ptr t) {
   if (!x) {
     return val_new_error("undefined variable %s", t->id);
   }
-
   return x->type->eval(x);
 }
 
@@ -349,7 +388,7 @@ static val_ptr eval_assign(tree_ptr t) {
   tree_ptr tid = darray_at(t->child, 0);
   val_ptr v = tree_eval(darray_at(t->child, 1));
   if (symtab_at(reserved, tid->id)) {
-    return val_new_error("undefined variable %s", t->id);
+    return val_new_error("%s is reserved", tid->id);
   }
   symtab_put(tab, v, tid->id);
   return v;
@@ -357,10 +396,6 @@ static val_ptr eval_assign(tree_ptr t) {
 
 static void assign_field(field_ptr f, const char* s) {
   symtab_put(tab, val_new_field(f), s);
-}
-
-void tree_append_multiz(tree_ptr t, tree_ptr m) {
-  darray_append(t->child, m);
 }
 
 tree_ptr tree_new(val_ptr (*eval)(tree_ptr)) {
@@ -375,6 +410,40 @@ tree_ptr tree_new_z(const char* s) {
   element_set_str(e, s, 0);
   tree_ptr t = tree_new(eval_elem);
   t->elem = e;
+  return t;
+}
+
+static val_ptr eval_err(tree_ptr t) {
+  UNUSED_VAR(t);
+  pbc_die("BUG: shouldn't reach here!");
+}
+
+tree_ptr tree_new_empty_stmt_list() {
+  tree_ptr t = tree_new(eval_err);
+  t->child = darray_new();
+  return t;
+}
+
+tree_ptr tree_new_empty_parms() {
+  tree_ptr t = tree_new(eval_err);
+  t->child = darray_new();
+  return t;
+}
+
+static val_ptr eval_define(tree_ptr t) {
+  val_ptr v = pbc_malloc(sizeof(*v));
+  v->type = v_def;
+  v->def = t;
+  symtab_put(tab, v, ((tree_ptr) darray_at(t->child, 0))->id);
+  return v;
+}
+
+tree_ptr tree_new_define(tree_ptr id, tree_ptr parm, tree_ptr body) {
+  tree_ptr t = tree_new(eval_define);
+  t->child = darray_new();
+  darray_append(t->child, id);
+  darray_append(t->child, parm);
+  darray_append(t->child, body);
   return t;
 }
 
@@ -416,21 +485,21 @@ void tree_set_fun(tree_ptr f, tree_ptr src) {
   darray_append(f->child, src);
 }
 
-void tree_fun_append(tree_ptr f, tree_ptr p) {
+void tree_append(tree_ptr f, tree_ptr p) {
   darray_append(f->child, p);
 }
 
 tree_ptr tree_new_binary(fun_ptr fun, tree_ptr x, tree_ptr y) {
   tree_ptr t = tree_new_funcall();
-  tree_fun_append(t, x);
-  tree_fun_append(t, y);
+  tree_append(t, x);
+  tree_append(t, y);
   tree_set_fun(t, tree_new_fun(fun));
   return t;
 }
 
 static tree_ptr tree_new_unary(fun_ptr fun, tree_ptr x) {
   tree_ptr t = tree_new_funcall();
-  tree_fun_append(t, x);
+  tree_append(t, x);
   tree_set_fun(t, tree_new_fun(fun));
   return t;
 }
@@ -498,11 +567,13 @@ tree_ptr tree_new_assign(tree_ptr l, tree_ptr r) {
   return t;
 }
 
-// Top-level evaluation of a syntax tree node.
-void tree_eval_stmt(tree_ptr t) {
-  if (!t) return;
-  val_ptr v = tree_eval(t);
-  if (t->eval != eval_assign && v) {
+// Evaluate statement.
+void tree_eval_stmt(tree_ptr stmt) {
+  val_ptr v = tree_eval(stmt);
+  if (v && v_error == v->type) {
+    v->type->out_str(stdout, v);
+    putchar('\n');
+  } else if (stmt->eval != eval_assign && v) {
     v->type->out_str(stdout, v);
     putchar('\n');
   }

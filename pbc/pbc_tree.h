@@ -3,12 +3,14 @@
 struct tree_s;
 typedef struct tree_s *tree_ptr;
 tree_ptr tree_new_z(const char* s);
+tree_ptr tree_new_empty_stmt_list(void);
+tree_ptr tree_new_empty_parms(void);
+tree_ptr tree_new_define(tree_ptr id, tree_ptr parm, tree_ptr body);
 tree_ptr tree_new_list(tree_ptr t);
-void tree_append_multiz(tree_ptr t, tree_ptr m);
 tree_ptr tree_new_id(const char* s);
 tree_ptr tree_new_assign(tree_ptr l, tree_ptr r);
 tree_ptr tree_new_funcall(void);
-void tree_fun_append(tree_ptr f, tree_ptr p);
+void tree_append(tree_ptr f, tree_ptr p);
 void tree_set_fun(tree_ptr dst, tree_ptr src);
 void tree_eval_stmt(tree_ptr t);
 

@@ -45,6 +45,8 @@ define                  return DEFINE;
 \)                      return RPAR;
 \[                      return LSQU;
 \]                      return RSQU;
+\{                      return LBRACE;
+\}                      return RBRACE;
 \n                      if (option_easy) return TERMINATOR;
 =                       return option_easy ? ASSIGN : UNKNOWN;
 .                       return UNKNOWN;
