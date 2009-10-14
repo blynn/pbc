@@ -2,6 +2,14 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.5.5 and 0.5.4
+
+* Fixed bug reported by Zhang Ye: comparisons with the identity element in the
+  input groups was broken.
+* Fixed bug reported by Mario Di Raimondo: comparisons in G2 for some pairing
+  types were broken. (Different representatives of the same coset are now
+  considered equal.)
+
 Changes between PBC version 0.5.4 and 0.5.3
 
 * Accessors for coordinates of points and coefficients of polynomials.

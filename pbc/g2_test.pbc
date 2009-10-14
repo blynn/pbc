@@ -1,16 +1,19 @@
 # Exercises a bug found by Zhang Ye.
 
-define test_g2_0(initfn) {
+define test_cmp_0(initfn) {
   CHECK(random(G2) != G2(0));
   CHECK(G2(0) != random(G2));
   CHECK(G2(0) == G2(0));
+  CHECK(random(G1) != G1(0));
+  CHECK(G1(0) != random(G1));
+  CHECK(G1(0) == G1(0));
 }
 
-test_g2_0(init_pairing_a);
-test_g2_0(init_pairing_d);
-test_g2_0(init_pairing_e);
-test_g2_0(init_pairing_f);
-test_g2_0(init_pairing_g);
+test_cmp_0(init_pairing_a);
+test_cmp_0(init_pairing_d);
+test_cmp_0(init_pairing_e);
+test_cmp_0(init_pairing_f);
+test_cmp_0(init_pairing_g);
 
 # Exercises a bug found by Mario Di Raimondo.
 
