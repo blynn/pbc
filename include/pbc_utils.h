@@ -32,26 +32,32 @@ Macro: if elements `a`, `b` and `c` are from different fields then exit.
 // die, warn and info based on Git code.
 
 /*@manual log
-Print error message to standard error and exit with code 128.
+By default error messages are printed to standard error.
+Call `pbc_set_msg_to_stderr(0)` to suppress messages.
+*/
+int pbc_set_msg_to_stderr(int i);
+
+/*@manual log
+Reports error message and exits with code 128.
 */
 void pbc_die(const char *err, ...)
     __attribute__((__noreturn__))
     __attribute__((format (printf, 1, 2)));
 
 /*@manual log
-Print info message to standard error.
+Reports informational message.
 */
 void pbc_info(const char *err, ...)
     __attribute__((format (printf, 1, 2)));
 
 /*@manual log
-Print warning message to standard error.
+Reports warning message.
 */
 void pbc_warn(const char *err, ...)
     __attribute__((format (printf, 1, 2)));
 
 /*@manual log
-Print error message to standard error.
+Reports error message.
 */
 void pbc_error(const char *err, ...)
     __attribute__((format (printf, 1, 2)));
