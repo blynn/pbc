@@ -1,3 +1,9 @@
+libpbc (0.5.5-2) unstable; urgency=low
+
+    * Trying out the new bison/flex rules in configure.ac
+
+ -- Paul Miller <jettero@gmail.com>  Thu, 15 Aug 2009 09:41:00 -0400
+
 libpbc (0.5.5-1) unstable; urgency=low
 
     * Bugfixes, et al
