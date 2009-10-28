@@ -104,3 +104,6 @@ echo "CPPFLAGS:         $CPPFLAGS"
 echo "CFLAGS:           $CFLAGS"
 echo "-----------------------------------------"
 echo -ne "\n"
+
+syscmd(bison -d -b pbc/parser pbc/parser.y)
+syscmd(flex -o pbc/lex.yy.c --header-file=pbc/lex.yy.h pbc/parser.lex)
