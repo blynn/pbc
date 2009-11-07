@@ -1223,9 +1223,13 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
   }
 
   element_init(V, p->Eq);
+  element_init(V1, p->Eq);
   Vx = curve_x_coord(V);
   Vy = curve_y_coord(V);
-  element_init(V1, p->Eq);
+
+  V1x = curve_x_coord(V1);
+  V1y = curve_y_coord(V1);
+
   element_set(V, in1);
   element_init(f, p->Fq2);
   element_init(f0, p->Fq2);
@@ -1236,7 +1240,6 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
   element_init(c, p->Fq);
   element_init(e0, p->Fq);
   n = p->exp1;
-  element_t z; element_init(z, p->Fq);
   for (i=0; i<n; i++) {
     //f = f^2 g_V,V(Q)
     //where g_V,V = tangent at V
