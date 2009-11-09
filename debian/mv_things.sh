@@ -2,7 +2,7 @@
 
 # this is all from my ebuild (no doi)
 
-function die() { 
+function die() {
     echo mv_things.sh ERROR
     exit 1
 }
