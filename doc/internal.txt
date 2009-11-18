@@ -186,7 +186,7 @@ is given r and cannot choose it.
 +a1_param+ struct fields:
 
   p, n, l:
-    p * 1 = n * l
+    p + 1 = n * l
     p is prime, same as the q in a_param, n is the order of the group.
 
 === Type B internals ===
