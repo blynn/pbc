@@ -27,6 +27,8 @@ struct pairing_s {
   void (*phi)(element_ptr out, element_ptr in, struct pairing_s *pairing); //isomorphism G2 --> G1
   void (*map)(element_ptr out, element_ptr in1, element_ptr in2,
       struct pairing_s *p);
+  void (*prod_pairings)(element_ptr out, element_t in1[], element_t in2[], int n_prod,
+            struct pairing_s *p);  //calculate a product of pairings at one time.
   // is_almost coddh returns true given (g, g^x, h, h^x) or (g, g^x, h, h^-x)
   // order is important: a, b are from G1, c, d are from G2
   int (*is_almost_coddh)(element_ptr a, element_ptr b,
@@ -137,6 +139,26 @@ static inline void pairing_apply(element_t out, element_t in1, element_t in2,
   }
   // TODO: Needing to access out->data here is awful. Can I fix this?
   pairing->map((element_ptr) out->data, in1, in2, pairing);
+}
+
+static inline void pairings_apply(element_t out, element_t in1[], element_t in2[], int n_prod,
+    pairing_t pairing){
+        int i;
+
+        PBC_ASSERT(pairing->GT == out->field, "pairing output mismatch");
+        for(i=0; i<n_prod; i++){
+      PBC_ASSERT(pairing->G1 == in1[i]->field, "pairing 1st input mismatch");
+      PBC_ASSERT(pairing->G2 == in2[i]->field, "pairing 2nd input mismatch");
+      if (element_is0(in1[i])) {
+        element_set0(out);
+        return;
+      }
+      if (element_is0(in2[i])) {
+        element_set0(out);
+        return;
+          }
+        }
+        pairing->prod_pairings((element_ptr)out->data, in1, in2, n_prod, pairing);
 }
 
 // TODO: future versions will use API like this: rename following to

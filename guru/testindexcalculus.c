@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     int bits = 40;
 
     if (argc == 2) {
-	bits = atoi(argv[1]);
+        bits = atoi(argv[1]);
     }
     mpz_setbit(q, bits);
     pbc_mpz_random(q, q);

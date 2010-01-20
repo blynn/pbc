@@ -205,6 +205,165 @@ static void curve_mul(element_ptr c, element_ptr a, element_ptr b) {
   }
 }
 
+//compute c_i=a_i+a_i at one time.
+static void parallel_double(element_ptr c[], element_ptr a[], int n) {
+  int i;
+  element_t* table=malloc(sizeof(element_t)*n);  //a big problem?
+  element_t e0, e1, e2;
+  point_ptr q, r;
+  curve_data_ptr cdp = a[0]->field->data;
+
+  q=a[0]->data;
+  element_init(e0,q->y->field);
+  element_init(e1,q->y->field);
+  element_init(e2,q->y->field);
+
+  for(i=0; i<n; i++){
+    q=a[i]->data; r=c[i]->data;
+    element_init(table[i],q->y->field);
+
+    if (q->inf_flag) {
+      r->inf_flag = 1;
+      continue;
+    }
+    if (element_is0(q->y)) {
+      r->inf_flag = 1;
+      continue;
+    }
+  }
+  //to compute 1/2y parallel. see Cohen's GTM139 Algorithm 10.3.4
+  for(i=0; i<n; i++){
+    q=a[i]->data;
+    element_double(table[i],q->y);
+    if(i>0) element_mul(table[i],table[i],table[i-1]);
+  }
+  element_invert(e2,table[n-1]); //ONLY ONE inv is required now.
+  for(i=n-1; i>0; i--){
+    q=a[i]->data;
+    element_mul(table[i],table[i-1],e2);
+    element_mul(e2,e2,q->y);
+    element_double(e2,e2); //e2=e2*2y_j
+  }
+  element_set(table[0],e2); //e2 no longer used.
+
+  for(i=0; i<n; i++){
+    q=a[i]->data;
+    r=c[i]->data;
+    if(r->inf_flag) continue;
+
+    //e2=lambda = (3x^2 + a) / 2y
+    element_square(e2, q->x);
+    element_mul_si(e2, e2, 3);
+    element_add(e2, e2, cdp->a);
+
+    element_mul(e2, e2, table[i]); //Recall that table[i]=1/2y_i
+    //x1 = lambda^2 - 2x
+    element_double(e1, q->x);
+    element_square(e0, e2);
+    element_sub(e0, e0, e1);
+    //y1 = (x - x1)lambda - y
+    element_sub(e1, q->x, e0);
+    element_mul(e1, e1, e2);
+    element_sub(e1, e1, q->y);
+    element_set(r->x, e0);
+    element_set(r->y, e1);
+    r->inf_flag = 0;
+  }
+
+  element_clear(e0);
+  element_clear(e1);
+  element_clear(e2);
+  for(i=0; i<n; i++){
+    element_clear(table[i]);
+  }
+  free(table);
+}
+
+//compute c_i=a_i+b_i at one time.
+static void parallel_add(element_ptr c[], element_ptr a[], element_ptr b[], int n){
+  int i;
+  element_t* table=malloc(sizeof(element_t)*n);  //a big problem?
+  point_ptr p, q, r;
+  element_t e0, e1, e2;
+  curve_data_ptr cdp = a[0]->field->data;
+
+  p = a[0]->data;
+  q = b[0]->data;
+  element_init(e0, p->x->field);
+  element_init(e1, p->x->field);
+  element_init(e2, p->x->field);
+
+  element_init(table[0], p->x->field);
+  element_sub(table[0], q->x, p->x);
+  for(i=1; i<n; i++){
+    p = a[i]->data;
+    q = b[i]->data;
+    element_init(table[i], p->x->field);
+    element_sub(table[i], q->x, p->x);
+    element_mul(table[i], table[i], table[i-1]);
+  }
+  element_invert(e2, table[n-1]);
+  for(i=n-1; i>0; i--){
+    p = a[i]->data;
+    q = b[i]->data;
+    element_mul(table[i], table[i-1], e2);
+    element_sub(e1, q->x, p->x);
+    element_mul(e2,e2,e1); //e2=e2*(x2_j-x1_j)
+  }
+  element_set(table[0],e2); //e2 no longer used.
+
+  for(i=0; i<n; i++){
+    p = a[i]->data;
+    q = b[i]->data;
+    r = c[i]->data;
+    if (p->inf_flag) {
+      curve_set(c[i], b[i]);
+      continue;
+    }
+    if (q->inf_flag) {
+      curve_set(c[i], a[i]);
+      continue;
+    }
+    if (!element_cmp(p->x, q->x)) { //a[i]=b[i]
+      if (!element_cmp(p->y, q->y)) {
+        if (element_is0(p->y)) {
+          r->inf_flag = 1;
+          continue;
+        } else {
+          double_no_check(r, p, cdp->a);
+          continue;
+        }
+      }
+      //points are inverses of each other
+      r->inf_flag = 1;
+      continue;
+    } else {
+      //lambda = (y2-y1)/(x2-x1)
+      element_sub(e2, q->y, p->y);
+      element_mul(e2, e2, table[i]);
+      //x3 = lambda^2 - x1 - x2
+      element_square(e0, e2);
+      element_sub(e0, e0, p->x);
+      element_sub(e0, e0, q->x);
+      //y3 = (x1-x3)lambda - y1
+      element_sub(e1, p->x, e0);
+      element_mul(e1, e1, e2);
+      element_sub(e1, e1, p->y);
+      element_set(r->x, e0);
+      element_set(r->y, e1);
+      r->inf_flag = 0;
+    }
+  }
+  element_clear(e0);
+  element_clear(e1);
+  element_clear(e2);
+  for(i=0; i<n; i++){
+    element_clear(table[i]);
+  }
+  free(table);
+}
+
+
 static inline int point_cmp(point_ptr p, point_ptr q) {
   if (p->inf_flag || q->inf_flag) {
     return !(p->inf_flag && q->inf_flag);
@@ -546,7 +705,9 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
   f->clear = curve_clear;
   f->neg = f->invert = curve_invert;
   f->square = f->doub = curve_double;
+  f->parallel_doub = parallel_double;
   f->add = f->mul = curve_mul;
+  f->parallel_add = parallel_add;
   f->mul_mpz = element_pow_mpz;
   f->cmp = curve_cmp;
   f->set0 = f->set1 = curve_set1;

@@ -848,7 +848,7 @@ int main(int argc, char **argv) {
     switch (c) {
       case 'y':
         option_easy = 1;
-	option_prompt = "> ";
+        option_prompt = "> ";
         break;
       default:
         fprintf(stderr, "unrecognized option: %c\n", c);

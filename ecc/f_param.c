@@ -19,12 +19,12 @@ struct f_param_s {
     mpz_t r; // The order of the curve.
     mpz_t b; // E: y^2 = x^3 + b
     mpz_t beta; //beta is a quadratic nonresidue in Fq
-	//we use F_q^2 = F_q[sqrt(beta)]
+        //we use F_q^2 = F_q[sqrt(beta)]
     mpz_t alpha0, alpha1;
-	//the polynomial x^6 + alpha0 + alpha1 sqrt(beta)
-	//is irreducible over F_q^2[x], so
-	//we can extend F_q^2 to F_q^12 using the
-	//sixth root of -(alpha0 + alpha1 sqrt(beta))
+        //the polynomial x^6 + alpha0 + alpha1 sqrt(beta)
+        //is irreducible over F_q^2[x], so
+        //we can extend F_q^2 to F_q^12 using the
+        //sixth root of -(alpha0 + alpha1 sqrt(beta))
 };
 typedef struct f_param_s f_param_t[1];
 typedef struct f_param_s *f_param_ptr;

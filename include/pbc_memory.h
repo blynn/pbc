@@ -17,7 +17,7 @@ realloc should terminate the program on failure: they must not return in this
 case.
 */
 void pbc_set_memory_functions(void *(*malloc_fn)(size_t),
-	void *(*realloc_fn)(void *, size_t), void (*free_fn)(void *));
+        void *(*realloc_fn)(void *, size_t), void (*free_fn)(void *));
 
 char *pbc_strdup(const char *s);
 

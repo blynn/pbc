@@ -22,7 +22,7 @@ static int optimal_pow_window_size(mpz_ptr n) {
          exp_bits > 474 ? 5 :
          exp_bits > 157 ? 4 :
          exp_bits > 47 ? 3 :
-	 2;
+         2;
 }
 
 /* builds k-bit lookup window for base a */
@@ -775,7 +775,7 @@ int pbc_trial_divide(int (*fun)(mpz_t factor, unsigned int multiplicity),
         mul++;
       } while (mpz_divisible_p(m, p));
       if (fun(fac, mul)) {
-	mpz_clear(fac);
+        mpz_clear(fac);
         mpz_clear(m);
         mpz_clear(p);
         return 1;

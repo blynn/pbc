@@ -66,6 +66,8 @@ struct field_s {
   void (*mul_si)(element_ptr, element_ptr, signed long int);
   void (*div)(element_ptr, element_ptr, element_ptr);
   void (*doub)(element_ptr, element_ptr);  // Can't call it "double"!
+  void (*parallel_doub)(element_ptr*, element_ptr*, int n);
+  void (*parallel_add)(element_ptr*, element_ptr*, element_ptr*, int n);
   void (*halve)(element_ptr, element_ptr);
   void (*square)(element_ptr, element_ptr);
 
@@ -323,6 +325,46 @@ Set 'n' = 'a' + 'a'.
 static inline void element_double(element_t n, element_t a) {
   PBC_ASSERT_MATCH2(n, a);
   n->field->doub(n, a);
+}
+
+//Set n_i = a_i + a_i for all i at one time.
+//Currently, only for elliptic curve.
+static inline void element_parallel_double(element_t n [ ],element_t a [ ],int m){
+        element_ptr * temp1 = malloc(sizeof(element_ptr)*m);
+        element_ptr * temp2 = malloc(sizeof(element_ptr)*m);
+        int i;
+
+        for(i=0; i<m; i++){
+                PBC_ASSERT_MATCH2(n[i], a[i]);
+                temp1[i] = n[i];
+                temp2[i] = a[i];
+        }
+        n[0]->field->parallel_doub(temp1, temp2, m);
+        free(temp1);
+        free(temp2);
+}
+
+//Set n_i =a_i + b_i for all i at one time.
+//Currently, only for elliptic curve.
+static inline void element_parallel_add(element_t n [ ],element_t a [ ],element_t b [ ],int m){
+  size_t size = sizeof(element_ptr)*m;
+  element_ptr * temp1 = malloc(size);
+  element_ptr * temp2 = malloc(size);
+  element_ptr * temp3 = malloc(size);
+
+  int i;
+  for(i=0; i<m; i++){
+    PBC_ASSERT_MATCH3(n[i], a[i], b[i]);
+    temp1[i] = n[i];
+    temp2[i] = a[i];
+    temp3[i] = b[i];
+  }
+
+  n[0]->field->parallel_add(temp1, temp2, temp3, m);
+  free(temp1);
+  free(temp2);
+  free(temp3);
+
 }
 
 /*@manual earith

@@ -54,16 +54,16 @@ static const char *token_get(token_t tok, const char *input, const char *end) {
   for(;;) {
     do {
       if (get()) {
-	tok->type = token_eof;
-	return input;
+        tok->type = token_eof;
+        return input;
       }
     } while (strchr(" \t\r\n", c));
     if (c == '#') {
       do {
-	if (get()) {
-	  tok->type = token_eof;
-	  return input;
-	}
+        if (get()) {
+          tok->type = token_eof;
+          return input;
+        }
       } while (c != '\n');
     } else break;
   }
@@ -190,9 +190,9 @@ static int param_set_tab(pbc_param_t par, symtab_t tab) {
     unsigned int i;
     for(i = 0; i < sizeof(funtab)/sizeof(*funtab); i++) {
       if (!strcmp(s, funtab[i].s)) {
-	res = funtab[i].fun(par, lookup);
-	if (res) pbc_error("bad pairing parameters");
-	return res;
+        res = funtab[i].fun(par, lookup);
+        if (res) pbc_error("bad pairing parameters");
+        return res;
       }
     }
   }
