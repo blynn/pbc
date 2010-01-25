@@ -668,11 +668,11 @@ static void cc_millers_no_denom_affine(element_t res, mpz_t q, element_t P[],
     do_tangents();
 
     if (!m) break;
-    element_parallel_double(Z, Z, n_prod); //Z_i=Z_i+Z_i for all i.
+    element_multi_double(Z, Z, n_prod); //Z_i=Z_i+Z_i for all i.
 
     if (mpz_tstbit(q, m)) {
       do_lines();
-      element_parallel_add(Z, Z, P, n_prod); //Z_i=Z_i+P_i for all i.
+      element_multi_add(Z, Z, P, n_prod); //Z_i=Z_i+P_i for all i.
     }
     m--;
     element_square(v, v);

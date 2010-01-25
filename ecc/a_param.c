@@ -1341,7 +1341,7 @@ void a_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
     //where g_V,V = tangent at V
     element_square(f, f);
     do_tangents();
-    element_parallel_double(V, V, n_prod); //V_i = V_i + V_i for all i at one time.
+    element_multi_double(V, V, n_prod); //V_i = V_i + V_i for all i at one time.
   }
   if (p->sign1 < 0) {
           for(j=0; j<n_prod; j++){
@@ -1358,7 +1358,7 @@ void a_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
   for (; i<n; i++) {
     element_square(f, f);
     do_tangents();
-    element_parallel_double(V, V, n_prod);
+    element_multi_double(V, V, n_prod);
   }
 
   element_mul(f, f, f1);
@@ -2142,10 +2142,10 @@ void a1_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
   for(;;) {
     do_tangents();
     if (!m) break;
-    element_parallel_double(V, V, n_prod);
+    element_multi_double(V, V, n_prod);
     if (mpz_tstbit(pairing->r, m)) {
       do_lines();
-      element_parallel_add(V, V, in1, n_prod);
+      element_multi_add(V, V, in1, n_prod);
     }
 
     m--;

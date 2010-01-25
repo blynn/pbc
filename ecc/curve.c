@@ -206,7 +206,7 @@ static void curve_mul(element_ptr c, element_ptr a, element_ptr b) {
 }
 
 //compute c_i=a_i+a_i at one time.
-static void parallel_double(element_ptr c[], element_ptr a[], int n) {
+static void multi_double(element_ptr c[], element_ptr a[], int n) {
   int i;
   element_t* table=malloc(sizeof(element_t)*n);  //a big problem?
   element_t e0, e1, e2;
@@ -231,7 +231,7 @@ static void parallel_double(element_ptr c[], element_ptr a[], int n) {
       continue;
     }
   }
-  //to compute 1/2y parallel. see Cohen's GTM139 Algorithm 10.3.4
+  //to compute 1/2y multi. see Cohen's GTM139 Algorithm 10.3.4
   for(i=0; i<n; i++){
     q=a[i]->data;
     element_double(table[i],q->y);
@@ -280,7 +280,7 @@ static void parallel_double(element_ptr c[], element_ptr a[], int n) {
 }
 
 //compute c_i=a_i+b_i at one time.
-static void parallel_add(element_ptr c[], element_ptr a[], element_ptr b[], int n){
+static void multi_add(element_ptr c[], element_ptr a[], element_ptr b[], int n){
   int i;
   element_t* table=malloc(sizeof(element_t)*n);  //a big problem?
   point_ptr p, q, r;
@@ -705,9 +705,9 @@ void field_init_curve_ab(field_ptr f, element_ptr a, element_ptr b, mpz_t order,
   f->clear = curve_clear;
   f->neg = f->invert = curve_invert;
   f->square = f->doub = curve_double;
-  f->parallel_doub = parallel_double;
+  f->multi_doub = multi_double;
   f->add = f->mul = curve_mul;
-  f->parallel_add = parallel_add;
+  f->multi_add = multi_add;
   f->mul_mpz = element_pow_mpz;
   f->cmp = curve_cmp;
   f->set0 = f->set1 = curve_set1;

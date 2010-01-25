@@ -44,8 +44,6 @@ int main(int argc, char **argv) {
     t1 = pbc_get_time();
     ttotal += t1 - t0;
 
-    element_printf("x = %B\n", x);
-    element_printf("y = %B\n", y);
     element_printf("e(x,y) = %B\n", r);
     EXPECT(!element_cmp(r, r2));
   }

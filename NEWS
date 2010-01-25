@@ -2,6 +2,12 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.5.7 and 0.5.6
+
+* Faster multi-pairing (product of pairings) for A, A1, and D pairings.
+  Contributed by Zhang Ye.
+* New API functions element_pairing() and element_prod_pairing().
+
 Changes between PBC version 0.5.6 and 0.5.5
 
 * Projective coordinates for A1 pairings. Contributed by Zhang Ye.
