@@ -1379,7 +1379,6 @@ void a_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
   element_clear(b);
   element_clear(c);
   element_clear(e0);
-
 }
 
 static void a_pairing_clear(pairing_t pairing) {
@@ -2087,8 +2086,8 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 }
 
 //in1, in2 are from E(F_q), out from F_q^2
-void a1_pairings_affine(element_ptr out, element_t in1[], element_t in2[], int n_prod,
-    pairing_t pairing) {
+void a1_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
+    int n_prod, pairing_t pairing) {
   a1_pairing_data_ptr p = pairing->data;
   element_t* V = malloc(sizeof(element_t)*n_prod);
   element_t f, f0;

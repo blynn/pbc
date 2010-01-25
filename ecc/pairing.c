@@ -31,16 +31,17 @@ static int generic_is_almost_coddh(element_ptr a, element_ptr b,
   return res;
 }
 
-static void prod_pairings_warning(element_ptr out,element_t in1 [ ],element_t in2 [ ],int n_prod,pairing_t pairing){
-
-  UNUSED_VAR(out);
-  UNUSED_VAR(in1);
-  UNUSED_VAR(in2);
-  UNUSED_VAR(pairing);
-
-  printf("prod_pairings() not implemented for this pairing type yet!\n");
-  printf("Please let us know if you need this feature.\n");
-
+static void generic_prod_pairings(element_ptr out, element_t in1[],
+    element_t in2[], int n, pairing_t pairing) {
+  pairing->map(out, in1[0], in2[0], pairing);
+  element_t tmp;
+  element_init_same_as(tmp, out);
+  int i;
+  for(i = 1; i < n; i++) {
+    pairing->map(tmp, in1[i], in2[i], pairing);
+    element_mul(out, out, tmp);
+  }
+  element_clear(tmp);
 }
 
 static void phi_warning(element_ptr out, element_ptr in, pairing_ptr pairing) {
@@ -76,7 +77,7 @@ int pairing_init_set_buf(pairing_t pairing, const char *input, size_t len) {
   pairing->pp_apply = default_pp_apply;
   pairing->is_almost_coddh = generic_is_almost_coddh;
   pairing->phi = phi_warning;
-  pairing->prod_pairings = prod_pairings_warning;
+  pairing->prod_pairings = generic_prod_pairings;
 
   pbc_param_t par;
   int res = pbc_param_init_set_buf(par, input, len);

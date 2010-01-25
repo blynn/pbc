@@ -329,19 +329,20 @@ static inline void element_double(element_t n, element_t a) {
 
 //Set n_i = a_i + a_i for all i at one time.
 //Currently, only for elliptic curve.
-static inline void element_parallel_double(element_t n [ ],element_t a [ ],int m){
-        element_ptr * temp1 = malloc(sizeof(element_ptr)*m);
-        element_ptr * temp2 = malloc(sizeof(element_ptr)*m);
-        int i;
+static inline void element_parallel_double(element_t n[], element_t a[],
+    int m) {
+  element_ptr *temp1 = malloc(sizeof(element_ptr)*m);
+  element_ptr *temp2 = malloc(sizeof(element_ptr)*m);
+  int i;
 
-        for(i=0; i<m; i++){
-                PBC_ASSERT_MATCH2(n[i], a[i]);
-                temp1[i] = n[i];
-                temp2[i] = a[i];
-        }
-        n[0]->field->parallel_doub(temp1, temp2, m);
-        free(temp1);
-        free(temp2);
+  for(i=0; i<m; i++) {
+    PBC_ASSERT_MATCH2(n[i], a[i]);
+    temp1[i] = n[i];
+    temp2[i] = a[i];
+  }
+  n[0]->field->parallel_doub(temp1, temp2, m);
+  free(temp1);
+  free(temp2);
 }
 
 //Set n_i =a_i + b_i for all i at one time.
