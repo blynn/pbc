@@ -78,8 +78,8 @@ size_t mpc_out_str(FILE *stream, int base, size_t n_digits, mpc_t op)
     result = mpf_out_str(stream, base, n_digits, op->a);
     if (!result) return 0;
     if (mpf_sgn(op->b) >= 0) {
-	if (EOF == fputc('+', stream)) return 0;
-	result++;
+        if (EOF == fputc('+', stream)) return 0;
+        result++;
     }
     status = mpf_out_str(stream, base, n_digits, op->b);
     if (!status) return 0;
@@ -100,11 +100,11 @@ void mpc_pow_ui(mpc_t res, mpc_t z, unsigned int n)
     mpf_set_ui(z0->a, 1);
     mpf_set_ui(z0->b, 0);
     while (m) {
-	mpc_mul(z0, z0, z0);
-	if (m & n) {
-	    mpc_mul(z0, z0, z);
-	}
-	m >>= 1;
+        mpc_mul(z0, z0, z0);
+        if (m & n) {
+            mpc_mul(z0, z0, z);
+        }
+        m >>= 1;
     }
     mpc_set(res, z0);
     mpc_clear(z0);

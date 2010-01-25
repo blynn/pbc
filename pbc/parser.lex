@@ -13,6 +13,8 @@ extern int option_easy;
 
 %}
 
+%option nounput noinput
+
 %x COMMENT
 %%
 \/\*                    BEGIN(COMMENT);  // Open C-style comment.

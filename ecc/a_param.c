@@ -1223,9 +1223,13 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
   }
 
   element_init(V, p->Eq);
+  element_init(V1, p->Eq);
   Vx = curve_x_coord(V);
   Vy = curve_y_coord(V);
-  element_init(V1, p->Eq);
+
+  V1x = curve_x_coord(V1);
+  V1y = curve_y_coord(V1);
+
   element_set(V, in1);
   element_init(f, p->Fq2);
   element_init(f0, p->Fq2);
@@ -1236,7 +1240,6 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
   element_init(c, p->Fq);
   element_init(e0, p->Fq);
   n = p->exp1;
-  element_t z; element_init(z, p->Fq);
   for (i=0; i<n; i++) {
     //f = f^2 g_V,V(Q)
     //where g_V,V = tangent at V
@@ -1268,6 +1271,110 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
   element_clear(f1);
   element_clear(V);
   element_clear(V1);
+  element_clear(a);
+  element_clear(b);
+  element_clear(c);
+  element_clear(e0);
+}
+
+// On Computing Products of Pairing
+//in1, in2 are from E(F_q), out from F_q^2
+void a_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
+    int n_prod, pairing_t pairing) {
+  a_pairing_data_ptr p = pairing->data;
+  element_t* V=malloc(sizeof(element_t)*n_prod);
+  element_t* V1=malloc(sizeof(element_t)*n_prod);
+  element_t f, f0, f1;
+  element_t a, b, c;
+  element_t e0;
+  int i, j, n;
+  element_ptr Qx, Qy;
+  element_ptr Vx, Vy;
+  element_ptr V1x, V1y;
+
+  void do_tangents(void) {
+    for(j=0; j<n_prod; j++){
+      Vx = curve_x_coord(V[j]);
+      Vy = curve_y_coord(V[j]);
+      Qx = curve_x_coord(in2[j]);
+      Qy = curve_y_coord(in2[j]);
+
+      compute_abc_tangent(a, b, c, Vx, Vy, e0);
+      a_miller_evalfn(f0, a, b, c, Qx, Qy);
+      element_mul(f, f, f0);
+    }
+  }
+
+  void do_lines(void) {
+    for(j=0;j<n_prod;j++){
+      Vx = curve_x_coord(V[j]);
+      Vy = curve_y_coord(V[j]);
+      V1x = curve_x_coord(V1[j]);
+      V1y = curve_y_coord(V1[j]);
+      Qx = curve_x_coord(in2[j]);
+      Qy = curve_y_coord(in2[j]);
+
+      compute_abc_line(a, b, c, Vx, Vy, V1x, V1y, e0);
+      a_miller_evalfn(f0, a, b, c, Qx, Qy);
+      element_mul(f, f, f0);
+    }
+  }
+
+  for(i=0; i<n_prod; i++){
+    element_init(V[i],p->Eq);
+    element_init(V1[i],p->Eq);
+    element_set(V[i],in1[i]);
+  }
+
+
+  element_init(f, p->Fq2);
+  element_init(f0, p->Fq2);
+  element_init(f1, p->Fq2);
+  element_set1(f);
+  element_init(a, p->Fq);
+  element_init(b, p->Fq);
+  element_init(c, p->Fq);
+  element_init(e0, p->Fq);
+  n = p->exp1;
+  for (i=0; i<n; i++) {
+    //f = f^2 g_V,V(Q)
+    //where g_V,V = tangent at V
+    element_square(f, f);
+    do_tangents();
+    element_multi_double(V, V, n_prod); //V_i = V_i + V_i for all i at one time.
+  }
+  if (p->sign1 < 0) {
+          for(j=0; j<n_prod; j++){
+            element_neg(V1[j], V[j]);
+          }
+          element_invert(f1, f);
+  } else {
+          for(j=0; j<n_prod; j++){
+            element_set(V1[j], V[j]);
+          }
+          element_set(f1, f);
+  }
+  n = p->exp2;
+  for (; i<n; i++) {
+    element_square(f, f);
+    do_tangents();
+    element_multi_double(V, V, n_prod);
+  }
+
+  element_mul(f, f, f1);
+  do_lines();
+
+  a_tateexp(out, f, f0, pairing->phikonr);
+
+  element_clear(f);
+  element_clear(f0);
+  element_clear(f1);
+  for(j=0;j<n_prod;j++){
+    element_clear(V[j]);
+    element_clear(V1[j]);
+  }
+  free(V);
+  free(V1);
   element_clear(a);
   element_clear(b);
   element_clear(c);
@@ -1333,6 +1440,7 @@ static void a_init_pairing(pairing_ptr pairing, void *data) {
   mpz_set(pairing->r, param->r);
   field_init_fp(pairing->Zr, pairing->r);
   pairing->map = a_pairing_proj;
+  pairing->prod_pairings = a_pairings_affine;
 
   field_init_fp(p->Fq, param->q);
   element_init(a, p->Fq);
@@ -1704,6 +1812,199 @@ static void a1_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p
   element_clear(e0);
 }
 
+// e0 is a temp var.
+// Mixed coordinates.
+static void compute_abc_line_proj(element_ptr a, element_ptr b, element_ptr c,
+  element_ptr Vx, element_ptr Vy, element_ptr z, element_ptr z2,
+  element_ptr V1x, element_ptr V1y, element_ptr e0) {
+  //temporally used to store Z1^3
+  element_mul(c,z,z2);
+  //a = Y1-Y2*Z1^3
+  element_mul(e0,V1y,c);
+  element_sub(a,Vy,e0);
+  //b = -(X1*Z1-X2*Z1^3)
+  element_mul(b,c,V1x);
+  element_mul(e0,Vx,z);
+  element_sub(b,b,e0);
+  //c = -(Y2*b+X2*a)
+  element_mul(c,b,V1y);
+  element_mul(e0,a,V1x);
+  element_add(c,c,e0);
+  element_neg(c,c);
+}
+
+// in1, in2 are from E(F_q), out from F_q^2
+static void a1_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
+    pairing_t pairing) {
+  a1_pairing_data_ptr p = pairing->data;
+  element_t V;
+  element_t z, z2;
+  element_t f, f0;
+  element_t a, b, c;
+  element_t e0;
+  const element_ptr e1 = a, e2 = b, e3 = c;  // used in point_to_affine() etc.
+  int m;
+  element_ptr Px = curve_x_coord(in1);
+  element_ptr Py = curve_y_coord(in1);
+  element_ptr Qx = curve_x_coord(in2);
+  element_ptr Qy = curve_y_coord(in2);
+  element_ptr Vx;
+  element_ptr Vy;
+
+  void point_to_affine(void) {
+    element_invert(z, z);
+    element_square(e0, z);
+    element_mul(Vx, Vx, e0);
+    element_mul(e0, e0, z);
+    element_mul(Vy, Vy, e0);
+    element_set1(z);
+    element_set1(z2);
+  }
+
+  //TODO: do I need to check if V=-in1?
+  //Where V=(Vx,Vy,z) and in1=(Px,Py,1), a mixed coordinates.
+  void proj_add(void){
+    //H=X2*Z1^2-X1
+    element_mul(e0,Px,z2);
+    element_sub(e0,e0,Vx);
+    //H^2
+    element_square(e1,e0);
+    //r=Y2*Z1^3-Y1
+    element_mul(e2,z,z2);
+    element_mul(e2,e2,Py);
+    element_sub(e2,e2,Vy);
+
+    //X3=r^2-H^3-2X1*H^2
+    element_set(z2,Vx); //use z2 to store X1 and update Vx=X3
+    element_square(Vx,e2);
+    element_mul(e3,e0,e1); //e3=H^3
+    element_sub(Vx,Vx,e3);
+    element_double(e3,z2);
+    element_mul(e3,e3,e1); //2X1*H^2
+    element_sub(Vx,Vx,e3);
+    //Y3=r(X1*H^2-X3)-Y1*H^3
+    element_mul(e3,z2,e1);
+    element_sub(e3,e3,Vx);
+    element_mul(e3,e3,e2);
+    element_mul(e2,e0,e1); //e2 no longer used.
+    element_mul(e2,e2,Vy);
+    element_sub(Vy,e3,e2);
+    //Z3=Z1*H
+    element_mul(z,z,e0);
+    element_square(z2,z);
+  }
+
+  void proj_double(void) {
+    //e0 = 3x^2 + (cc->a) z^4
+    //for this case a = 1
+    element_square(e0, Vx);
+    ////element_mul_si(e0, e0, 3);
+    element_double(e1, e0);
+    element_add(e0, e1, e0);
+    element_square(e1, z2);
+    element_add(e0, e0, e1);
+
+    //z_out = 2 y z
+    element_mul(z, Vy, z);
+    ////element_mul_si(z, z, 2);
+    element_double(z, z);
+    element_square(z2, z);
+
+    //e1 = 4 x y^2
+    element_square(e2, Vy);
+    element_mul(e1, Vx, e2);
+    //element_mul_si(e1, e1, 4);
+    element_double(e1, e1);
+    element_double(e1, e1);
+
+    //x_out = e0^2 - 2 e1
+    element_double(e3, e1);
+    element_square(Vx, e0);
+    element_sub(Vx, Vx, e3);
+
+    //e2 = 8y^4
+    element_square(e2, e2);
+    //element_mul_si(e2, e2, 8);
+    element_double(e2, e2);
+    element_double(e2, e2);
+    element_double(e2, e2);
+
+    //y_out = e0(e1 - x_out) - e2
+    element_sub(e1, e1, Vx);
+    element_mul(e0, e0, e1);
+    element_sub(Vy, e0, e2);
+  }
+
+  void do_tangent(void) {
+    compute_abc_tangent_proj(a, b, c, Vx, Vy, z, z2, e0);
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);
+    element_mul(f, f, f0);
+  }
+
+  void do_line(void) {
+    compute_abc_line_proj(a, b, c, Vx, Vy, z, z2, Px, Py, e0);
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);
+    element_mul(f, f, f0);
+  }
+
+  element_init(V, p->Ep);
+  element_set(V, in1);
+  Vx = curve_x_coord(V);
+  Vy = curve_y_coord(V);
+
+  element_init(f, p->Fp2);
+  element_init(f0, p->Fp2);
+  element_set1(f);
+  element_init(a, p->Fp);
+  element_init(b, p->Fp);
+  element_init(c, p->Fp);
+  element_init(e0, p->Fp);
+  element_init(z, p->Fp);
+  element_init(z2, p->Fp);
+  element_set1(z);
+  element_set1(z2);
+
+  m = mpz_sizeinbase(pairing->r, 2) - 2;
+  //TODO: sliding NAF
+  for(;;) {
+    do_tangent();
+    if (!m) break;
+
+    proj_double(); //V=2V
+    if (mpz_tstbit(pairing->r, m)) {
+     // point_to_affine();
+      do_line();
+      proj_add(); //V=V+in1
+    }
+
+    m--;
+    element_square(f, f);
+  }
+
+  // Tate exponentiation.
+  // Simpler but slower:
+  //   element_pow_mpz(out, f, p->tateexp);
+  // Use this trick instead:
+  element_invert(f0, f);
+  element_neg(element_y(f), element_y(f));
+  element_mul(f, f, f0);
+  element_pow_mpz(out, f, pairing->phikonr);
+
+  /* We could use this instead but p->h is small so this does not help much
+  a_tateexp(out, f, f0, p->h);
+  */
+
+  element_clear(f);
+  element_clear(f0);
+  element_clear(z);
+  element_clear(z2);
+  element_clear(V);
+  element_clear(a);
+  element_clear(b);
+  element_clear(c);
+  element_clear(e0);
+}
+
 //in1, in2 are from E(F_q), out from F_q^2
 static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
     pairing_t pairing) {
@@ -1784,6 +2085,98 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
   element_clear(e0);
 }
 
+//in1, in2 are from E(F_q), out from F_q^2
+void a1_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
+    int n_prod, pairing_t pairing) {
+  a1_pairing_data_ptr p = pairing->data;
+  element_t* V = malloc(sizeof(element_t)*n_prod);
+  element_t f, f0;
+  element_t a, b, c;
+  element_t e0;
+  int m, i;
+  element_ptr Px, Py;
+  element_ptr Qx, Qy;
+  element_ptr Vx, Vy;
+
+  void do_tangents(void) {
+    for(i=0; i<n_prod; i++){
+      Vx = curve_x_coord(V[i]);
+      Vy = curve_y_coord(V[i]);
+      Qx = curve_x_coord(in2[i]);
+      Qy = curve_y_coord(in2[i]);
+      compute_abc_tangent(a, b, c, Vx, Vy, e0);
+      a_miller_evalfn(f0, a, b, c, Qx, Qy);
+      element_mul(f, f, f0);
+    }
+  }
+
+  void do_lines(void) {
+    for(i=0; i<n_prod; i++){
+      Vx = curve_x_coord(V[i]);
+      Vy = curve_y_coord(V[i]);
+      Px = curve_x_coord(in1[i]);
+      Py = curve_y_coord(in1[i]);
+      Qx = curve_x_coord(in2[i]);
+      Qy = curve_y_coord(in2[i]);
+      compute_abc_line(a, b, c, Vx, Vy, Px, Py, e0);
+      a_miller_evalfn(f0, a, b, c, Qx, Qy);
+      element_mul(f, f, f0);
+    }
+  }
+
+  for(i=0; i<n_prod; i++){
+    element_init(V[i], p->Ep);
+    element_set(V[i], in1[i]);
+  }
+  element_init(f, p->Fp2);
+  element_init(f0, p->Fp2);
+  element_set1(f);
+  element_init(a, p->Fp);
+  element_init(b, p->Fp);
+  element_init(c, p->Fp);
+  element_init(e0, p->Fp);
+
+  m = mpz_sizeinbase(pairing->r, 2) - 2;
+
+  //TODO: sliding NAF
+  for(;;) {
+    do_tangents();
+    if (!m) break;
+    element_multi_double(V, V, n_prod);
+    if (mpz_tstbit(pairing->r, m)) {
+      do_lines();
+      element_multi_add(V, V, in1, n_prod);
+    }
+
+    m--;
+    element_square(f, f);
+  }
+
+  // Tate exponentiation.
+  // Simpler but slower:
+  //   element_pow_mpz(out, f, p->tateexp);
+  // Use this trick instead:
+  element_invert(f0, f);
+  element_neg(element_y(f), element_y(f));
+  element_mul(f, f, f0);
+  element_pow_mpz(out, f, pairing->phikonr);
+
+  /* We could use this instead but p->h is small so this does not help much
+  a_tateexp(out, f, f0, p->h);
+  */
+
+  element_clear(f);
+  element_clear(f0);
+  for(i=0; i<n_prod; i++){
+    element_clear(V[i]);
+  }
+  free(V);
+  element_clear(a);
+  element_clear(b);
+  element_clear(c);
+  element_clear(e0);
+}
+
 static void a1_pairing_clear(pairing_t pairing) {
   field_clear(pairing->GT);
 
@@ -1800,7 +2193,12 @@ static void a1_pairing_clear(pairing_t pairing) {
 
 static void a1_pairing_option_set(pairing_t pairing, char *key, char *value) {
   if (!strcmp(key, "method")) {
-    if (!strcmp(value, "miller") || !strcmp(value, "miller-affine")) {
+    if (!strcmp(value, "miller")) {
+      pairing->map = a1_pairing_proj;
+      pairing->pp_init = a1_pairing_pp_init;
+      pairing->pp_clear = a1_pairing_pp_clear;
+      pairing->pp_apply = a1_pairing_pp_apply;
+    } else if (!strcmp(value, "miller-affine")){
       pairing->map = a1_pairing;
       pairing->pp_init = a1_pairing_pp_init;
       pairing->pp_clear = a1_pairing_pp_clear;
@@ -1848,8 +2246,9 @@ static void a1_init_pairing(pairing_t pairing, void *data) {
   pairing->G2 = pairing->G1 = p->Ep;
   pairing_GT_init(pairing, p->Fp2);
 
-  pairing->map = a1_pairing;
+  pairing->map = a1_pairing_proj; //default uses projective coordinates.
   pairing->phi = phi_identity;
+  pairing->prod_pairings = a1_pairings_affine;
 
   pairing->clear_func = a1_pairing_clear;
 

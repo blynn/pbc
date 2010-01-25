@@ -330,7 +330,6 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, element_t P,
     //a = -(3 Zx^2 + cc->a)
     //b = 2 * Zy
     //c = -(2 Zy^2 + a Zx);
-
     element_square(a, Zx);
     element_mul_si(a, a, 3);
     element_add(a, a, cca);
@@ -383,9 +382,7 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, element_t P,
 
   for(;;) {
     do_tangent();
-
     if (!m) break;
-
     element_double(Z, Z);
     if (mpz_tstbit(q, m)) {
       do_line();
@@ -631,8 +628,7 @@ static void g_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
   element_ptr Zx;
   element_ptr Zy;
 
-  void store_abc(void)
-  {
+  void store_abc(void) {
     element_init(pp->a, Fq);
     element_init(pp->b, Fq);
     element_init(pp->c, Fq);
@@ -642,8 +638,7 @@ static void g_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
     pp++;
   }
 
-  void do_tangent(void)
-  {
+  void do_tangent(void) {
     //a = -slope_tangent(Z.x, Z.y);
     //b = 1;
     //c = -(Z.y + a * Z.x);
@@ -671,8 +666,7 @@ static void g_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
     store_abc();
   }
 
-  void do_line(void)
-  {
+  void do_line(void) {
     //a = -(B.y - A.y) / (B.x - A.x);
     //b = 1;
     //c = -(A.y + a * A.x);
@@ -705,9 +699,7 @@ static void g_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
 
   for(;;) {
     do_tangent();
-
     if (!m) break;
-
     element_double(Z, Z);
     if (mpz_tstbit(q, m)) {
       do_line();

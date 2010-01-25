@@ -120,8 +120,8 @@ static size_t multiz_out_str(FILE *stream, int base, multiz ep) {
       int n = darray_count(ep->a);
       int i;
       for(i = 0; i < n; i++) {
-	if (i) res += 2, fputs(", ", stream);
-	res += multiz_out_str(stream, base, darray_at(ep->a, i));
+        if (i) res += 2, fputs(", ", stream);
+        res += multiz_out_str(stream, base, darray_at(ep->a, i));
       }
       fputc(']', stream);
       res++;
@@ -167,7 +167,7 @@ static multiz multiz_new_unary(const multiz y,
       x->type = T_ARR;
       darray_init(x->a);
       void add_to_x(void *data) {
-	darray_append(x->a, multiz_new_unary(data, fun));
+        darray_append(x->a, multiz_new_unary(data, fun));
       }
       darray_forall(y->a, add_to_x);
       break;
@@ -212,15 +212,15 @@ static multiz multiz_new_bin(const multiz a, const multiz b,
       multiz x = multiz_new_empty_list();
       int i;
       for(i = 0; i < min; i++) {
-	multiz z = multiz_new_bin(darray_at(a->a, i), darray_at(b->a, i), fun);
-	darray_append(x->a, z);
+        multiz z = multiz_new_bin(darray_at(a->a, i), darray_at(b->a, i), fun);
+        darray_append(x->a, z);
       }
       multiz zero = multiz_new();
       for(; i < max; i++) {
-	multiz z = multiz_new_bin(m > n ? darray_at(a->a, i) : zero,
-				  n > m ? darray_at(b->a, i) : zero,
-				  fun);
-	darray_append(x->a, z);
+        multiz z = multiz_new_bin(m > n ? darray_at(a->a, i) : zero,
+                                  n > m ? darray_at(b->a, i) : zero,
+                                  fun);
+        darray_append(x->a, z);
       }
       multiz_free(zero);
       return x;
@@ -266,17 +266,17 @@ static multiz multiz_new_mul(const multiz a, const multiz b) {
       int i;
       multiz zero = multiz_new();
       for(i = 0; i < max; i++) {
-	multiz z = multiz_new();
-	int j;
-	for (j = 0; j <= i; j++) {
-	  multiz y = multiz_new_mul(j < m ? darray_at(a->a, j) : zero,
-				    i - j < n ? darray_at(b->a, i - j) : zero);
-	  multiz t = multiz_new_add(z, y);
-	  multiz_free(y);
-	  multiz_free(z);
-	  z = t;
-	}
-	darray_append(x->a, z);
+        multiz z = multiz_new();
+        int j;
+        for (j = 0; j <= i; j++) {
+          multiz y = multiz_new_mul(j < m ? darray_at(a->a, j) : zero,
+                                    i - j < n ? darray_at(b->a, i - j) : zero);
+          multiz t = multiz_new_add(z, y);
+          multiz_free(y);
+          multiz_free(z);
+          z = t;
+        }
+        darray_append(x->a, z);
       }
       multiz_free(zero);
       return x;

@@ -46,13 +46,13 @@ int main(int argc, char **argv) {
   printf("C sends A and B: cP\n");
   element_printf("cP = %B\n", t3);
 
-  pairing_apply(t4, t2, t3, pairing);
+  element_pairing(t4, t2, t3);
   element_pow_zn(Ka, t4, a);
   element_printf("Ka = %B\n", Ka);
-  pairing_apply(t5, t1, t3, pairing);
+  element_pairing(t5, t1, t3);
   element_pow_zn(Kb, t5, b);
   element_printf("Kb = %B\n", Kb);
-  pairing_apply(t6, t1, t2, pairing);
+  element_pairing(t6, t1, t2);
   element_pow_zn(Kc, t6, c);
   element_printf("Kc = %B\n", Kc);
 

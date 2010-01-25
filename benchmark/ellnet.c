@@ -26,7 +26,7 @@ void time_pairing(pairing_ptr pairing) {
     pairing_pp_clear(pp);
 
     t0 = pbc_get_time();
-    pairing_apply(r2, x, y, pairing);
+    element_pairing(r2, x, y);
     t1 = pbc_get_time();
     ttotal += t1 - t0;
 

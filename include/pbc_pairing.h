@@ -27,6 +27,8 @@ struct pairing_s {
   void (*phi)(element_ptr out, element_ptr in, struct pairing_s *pairing); //isomorphism G2 --> G1
   void (*map)(element_ptr out, element_ptr in1, element_ptr in2,
       struct pairing_s *p);
+  void (*prod_pairings)(element_ptr out, element_t in1[], element_t in2[], int n_prod,
+            struct pairing_s *p);  //calculate a product of pairings at one time.
   // is_almost coddh returns true given (g, g^x, h, h^x) or (g, g^x, h, h^-x)
   // order is important: a, b are from G1, c, d are from G2
   int (*is_almost_coddh)(element_ptr a, element_ptr b,
@@ -44,6 +46,7 @@ struct pairing_s {
 typedef struct pairing_s pairing_t[1];
 typedef struct pairing_s *pairing_ptr;
 
+// TODO: The 'pairing' argument is redundant.
 /*@manual pairing_apply
 Get ready to perform a pairing whose first input is 'in1',
 and store the results of time-saving precomputation in 'p'.
@@ -115,15 +118,11 @@ structure.
 void pairing_clear(pairing_t pairing);
 
 /*@manual pairing_apply
-Apply the bilinear map described by 'pairing'. The element 'out'
-will be set to the map applied to 'in1' and 'in2', that is
-'out' = 'e'('in1', 'in2').
-'in1' must be in the group G1,
-'in2' must be in the group G2, and
-'out' must be in the group GT.
+Deprecated as the 'pairing' argument is redundant. Prefer 'element_pairing',
+which is equivalent.
 */
 static inline void pairing_apply(element_t out, element_t in1, element_t in2,
-  pairing_t pairing) {
+    pairing_t pairing) {
   PBC_ASSERT(pairing->GT == out->field, "pairing output mismatch");
   PBC_ASSERT(pairing->G1 == in1->field, "pairing 1st input mismatch");
   PBC_ASSERT(pairing->G2 == in2->field, "pairing 2nd input mismatch");
@@ -135,17 +134,46 @@ static inline void pairing_apply(element_t out, element_t in1, element_t in2,
     element_set0(out);
     return;
   }
-  // TODO: Needing to access out->data here is awful. Can I fix this?
+  // TODO: 'out' is an element of a multiplicative subgroup, but the
+  // pairing routine expects it to be an element of the full group, hence
+  // the 'out->data'. I should make this clearer.
   pairing->map((element_ptr) out->data, in1, in2, pairing);
 }
 
-// TODO: future versions will use API like this: rename following to
-// pairing_apply, remove original, also change pairing_pp_init
-// and update docs, bump minor version number
-static inline void bilinear_map(element_t out, element_t in1, element_t in2) {
+/*@manual pairing_apply
+Computes a pairing: 'out' = 'e'('in1', 'in2'),
+where 'in1', 'in2', 'out' must be in the groups G1, G2, GT.
+*/
+static inline void element_pairing(element_t out, element_t in1, element_t in2) {
   pairing_ptr pairing = out->field->pairing;
   PBC_ASSERT(pairing != NULL, "pairing output mismatch");
   pairing_apply(out, in1, in2, pairing);
+}
+
+/*@manual pairing_apply
+Computes the product of pairings, that is
+'out' = 'e'('in1'[0], 'in2'[0]) ... 'e'('in1'[n-1], 'in2'[n-1]).
+The arrays 'in1', 'in2' must have at least 'n' elements belonging to
+the groups G1, G2 respectively, and 'out' must belong to the group GT.
+*/
+static inline void element_prod_pairing(
+    element_t out, element_t in1[], element_t in2[], int n) {
+  pairing_ptr pairing = out->field->pairing;
+  int i;
+  PBC_ASSERT(pairing->GT == out->field, "pairing output mismatch");
+  for(i = 0; i < n; i++) {
+    PBC_ASSERT(pairing->G1 == in1[i]->field, "pairing 1st input mismatch");
+    PBC_ASSERT(pairing->G2 == in2[i]->field, "pairing 2nd input mismatch");
+    if (element_is0(in1[i])) {
+      element_set0(out);
+      return;
+    }
+    if (element_is0(in2[i])) {
+      element_set0(out);
+      return;
+    }
+  }
+  pairing->prod_pairings((element_ptr) out->data, in1, in2, n, pairing);
 }
 
 /*@manual pairing_op

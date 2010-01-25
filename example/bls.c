@@ -67,12 +67,12 @@ int main(int argc, char **argv) {
   }
 
   //verification part 1
-  pairing_apply(temp1, sig, g, pairing);
+  element_pairing(temp1, sig, g);
   element_printf("f(sig, g) = %B\n", temp1);
 
   //verification part 2
   //should match above
-  pairing_apply(temp2, h, public_key, pairing);
+  element_pairing(temp2, h, public_key);
   element_printf("f(message hash, public_key) = %B\n", temp2);
 
   if (!element_cmp(temp1, temp2)) {
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
     element_from_bytes_x_only(sig, data);
     element_printf("de-x-ed = %B\n", sig);
 
-    pairing_apply(temp1, sig, g, pairing);
+    element_pairing(temp1, sig, g);
     if (!element_cmp(temp1, temp2)) {
       printf("signature verifies on first guess\n");
     } else {
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
 
   //a random signature shouldn't verify
   element_random(sig);
-  pairing_apply(temp1, sig, g, pairing);
+  element_pairing(temp1, sig, g);
   if (element_cmp(temp1, temp2)) {
     printf("random signature doesn't verify\n");
   } else {

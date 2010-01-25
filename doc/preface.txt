@@ -1,4 +1,4 @@
-= PBC Library Manual 0.5.5 =
+= PBC Library Manual 0.5.7 =
 Ben Lynn
 2006
 

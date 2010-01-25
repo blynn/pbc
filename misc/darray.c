@@ -48,9 +48,9 @@ static void darray_realloc(darray_ptr a, int size)
 void darray_append(darray_ptr a, void *p)
 {
     if (a->count == a->max) {
-	if (!a->max) a->max = max_init;
-	else a->max *= 2;
-	a->item = pbc_realloc(a->item, sizeof(void *) * a->max);
+        if (!a->max) a->max = max_init;
+        else a->max *= 2;
+        a->item = pbc_realloc(a->item, sizeof(void *) * a->max);
     }
     a->item[a->count] = p;
     a->count++;
@@ -60,7 +60,7 @@ int darray_index_of(darray_ptr a, void *p)
 {
     int i;
     for (i=0; i<a->count; i++) {
-	if (a->item[i] == p) return i;
+        if (a->item[i] == p) return i;
     }
     return -1;
 }
@@ -88,11 +88,11 @@ void darray_remove(darray_ptr a, void *p)
 {
     int i;
     for (i=0; i<a->count; i++) {
-	if (a->item[i] == p) {
-	    a->count--;
-	    memmove(&a->item[i], &a->item[i+1], sizeof(void *) * (a->count - i));
-	    return;
-	}
+        if (a->item[i] == p) {
+            a->count--;
+            memmove(&a->item[i], &a->item[i+1], sizeof(void *) * (a->count - i));
+            return;
+        }
     }
     assert(0);
 }
@@ -101,12 +101,12 @@ void darray_remove_with_test(darray_ptr a, int (*test)(void *))
 {
     int i;
     for (i=0; i<a->count; i++) {
-	if (test(a->item[i])) {
-	    for (;i<a->count; i++) {
-		a->item[i] = a->item[i+1];
-	    }
-	    a->count--;
-	}
+        if (test(a->item[i])) {
+            for (;i<a->count; i++) {
+                a->item[i] = a->item[i+1];
+            }
+            a->count--;
+        }
     }
 }
 
@@ -121,7 +121,7 @@ void darray_forall(darray_t a, void (*func)(void *))
 {
     int i, n = a->count;
     for (i=0; i<n; i++) {
-	func(a->item[i]);
+        func(a->item[i]);
     }
 }
 
@@ -129,8 +129,8 @@ void *darray_at_test(darray_ptr a, int (*test)(void *))
 {
     int i;
     for (i = 0; i < a->count; i++) {
-	void *p = a->item[i];
-	if (test(p)) return p;
+        void *p = a->item[i];
+        if (test(p)) return p;
     }
     return NULL;
 }

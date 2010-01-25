@@ -53,7 +53,8 @@ bin_srcs := \
   $(addsuffix .c,$(addprefix gen/, \
     gena1param genaparam gendparam geneparam genfparam gengparam \
     hilbertpoly listmnt listfreeman)) \
-  benchmark/benchmark.c benchmark/timersa.c benchmark/ellnet.c
+  benchmark/benchmark.c benchmark/timersa.c benchmark/ellnet.c \
+  benchmark/multipairing.c
 
 define demo_tmpl
   examples += out/$(basename $(notdir $(1)))$(exe_suffix)

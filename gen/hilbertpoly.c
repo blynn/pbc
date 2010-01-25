@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     int i;
     for (i = n - 2; i >= 0; i--) {
       if (mpz_sgn(coefflist[i]) >= 0) {
-	printf("+");
+        printf("+");
       }
       mpz_out_str(stdout, 0, coefflist[i]);
       xpow(i);

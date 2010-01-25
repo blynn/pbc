@@ -47,9 +47,9 @@ int main(void) {
     for(;;) {
       a[d]++;
       if (a[d] >= p) {
-	a[d] = 0;
-	d++;
-	if (d > 2) goto break2;
+        a[d] = 0;
+        d++;
+        if (d > 2) goto break2;
       } else break;
     }
   }
@@ -107,9 +107,9 @@ break2: ;
     for(;;) {
       a[d]++;
       if (a[d] >= p) {
-	a[d] = 0;
-	d++;
-	if (d > 2) goto break3;
+        a[d] = 0;
+        d++;
+        if (d > 2) goto break3;
       } else break;
     }
   }

@@ -93,3 +93,4 @@ else
     zip -r $HERE/pbc-$VER-win32-bin.zip pbc-$VER
 fi
 rm -rf $TMPDIR
+echo 'Now run ./publish!'

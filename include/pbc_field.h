@@ -66,6 +66,8 @@ struct field_s {
   void (*mul_si)(element_ptr, element_ptr, signed long int);
   void (*div)(element_ptr, element_ptr, element_ptr);
   void (*doub)(element_ptr, element_ptr);  // Can't call it "double"!
+  void (*multi_doub)(element_ptr*, element_ptr*, int n);
+  void (*multi_add)(element_ptr*, element_ptr*, element_ptr*, int n);
   void (*halve)(element_ptr, element_ptr);
   void (*square)(element_ptr, element_ptr);
 
@@ -324,6 +326,14 @@ static inline void element_double(element_t n, element_t a) {
   PBC_ASSERT_MATCH2(n, a);
   n->field->doub(n, a);
 }
+
+// Set n_i = a_i + a_i for all i at one time.
+// Uses multi_doub(), which only elliptic curves have at the moment.
+void element_multi_double(element_t n[], element_t a[], int m);
+
+// Set n_i =a_i + b_i for all i at one time.
+// Uses multi_add(), which only elliptic curves have at the moment.
+void element_multi_add(element_t n[], element_t a[],element_t b[], int m);
 
 /*@manual earith
 Set 'n' = 'a/2'

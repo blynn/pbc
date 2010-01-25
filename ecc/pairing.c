@@ -18,8 +18,8 @@ static int generic_is_almost_coddh(element_ptr a, element_ptr b,
 
   element_init(t0, pairing->GT);
   element_init(t1, pairing->GT);
-  pairing_apply(t0, a, d, pairing);
-  pairing_apply(t1, b, c, pairing);
+  element_pairing(t0, a, d);
+  element_pairing(t1, b, c);
   if (!element_cmp(t0, t1)) {
     res = 1;
   } else {
@@ -29,6 +29,19 @@ static int generic_is_almost_coddh(element_ptr a, element_ptr b,
   element_clear(t0);
   element_clear(t1);
   return res;
+}
+
+static void generic_prod_pairings(element_ptr out, element_t in1[],
+    element_t in2[], int n, pairing_t pairing) {
+  pairing->map(out, in1[0], in2[0], pairing);
+  element_t tmp;
+  element_init_same_as(tmp, out);
+  int i;
+  for(i = 1; i < n; i++) {
+    pairing->map(tmp, in1[i], in2[i], pairing);
+    element_mul(out, out, tmp);
+  }
+  element_clear(tmp);
 }
 
 static void phi_warning(element_ptr out, element_ptr in, pairing_ptr pairing) {
@@ -64,6 +77,7 @@ int pairing_init_set_buf(pairing_t pairing, const char *input, size_t len) {
   pairing->pp_apply = default_pp_apply;
   pairing->is_almost_coddh = generic_is_almost_coddh;
   pairing->phi = phi_warning;
+  pairing->prod_pairings = generic_prod_pairings;
 
   pbc_param_t par;
   int res = pbc_param_init_set_buf(par, input, len);

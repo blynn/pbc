@@ -576,6 +576,153 @@ static void cc_pairing(element_ptr out, element_ptr in1, element_ptr in2,
   element_clear(Qy);
 }
 
+
+//do many millers at one time with affine coordinates.
+static void cc_millers_no_denom_affine(element_t res, mpz_t q, element_t P[],
+    element_t Qx[], element_t Qy[], int n_prod) {
+  int m, i;
+  element_t v;
+  element_t a, b, c;
+  element_t t0;
+  element_t e0;
+  const element_ptr cca = curve_a_coeff(P[0]);
+  element_ptr Px, Py;
+  element_t* Z=malloc(sizeof(element_t)*n_prod);
+  element_ptr Zx, Zy;
+
+  /* TODO: when exactly is this not needed?
+  void do_vertical() {
+    mapbase(e0, Z->x);
+    element_sub(e0, Qx, e0);
+    element_mul(v, v, e0);
+  }
+  */
+
+  void do_tangents(void) {
+    // a = -(3 Zx^2 + cc->a)
+    // b = 2 * Zy
+    // c = -(2 Zy^2 + a Zx);
+    for(i=0; i<n_prod; i++){
+      Px = curve_x_coord(P[i]);
+      Py = curve_y_coord(P[i]);
+      Zx = curve_x_coord(Z[i]);
+      Zy = curve_y_coord(Z[i]);
+
+      element_square(a, Zx);
+      element_mul_si(a, a, 3);
+      element_add(a, a, cca);
+      element_neg(a, a);
+
+      element_add(b, Zy, Zy);
+
+      element_mul(t0, b, Zy);
+      element_mul(c, a, Zx);
+      element_add(c, c, t0);
+      element_neg(c, c);
+
+      d_miller_evalfn(e0, a, b, c, Qx[i], Qy[i]);
+      element_mul(v, v, e0);
+    }
+  }
+
+  void do_lines(void) {
+    // a = -(B.y - A.y) / (B.x - A.x);
+    // b = 1;
+    // c = -(A.y + a * A.x);
+    // but we multiply by B.x - A.x to avoid division.
+    for(i=0; i<n_prod; i++){
+      Px = curve_x_coord(P[i]);
+      Py = curve_y_coord(P[i]);
+      Zx = curve_x_coord(Z[i]);
+      Zy = curve_y_coord(Z[i]);
+
+      element_sub(b, Px, Zx);
+      element_sub(a, Zy, Py);
+      element_mul(t0, b, Zy);
+      element_mul(c, a, Zx);
+      element_add(c, c, t0);
+      element_neg(c, c);
+
+      d_miller_evalfn(e0, a, b, c, Qx[i], Qy[i]);
+      element_mul(v, v, e0);
+    }
+  }
+
+  Px= curve_x_coord(P[0]); //temporally used to initial a,b, c and etc.
+  element_init(a, Px->field);
+  element_init(b, a->field);
+  element_init(c, a->field);
+  element_init(t0, a->field);
+  element_init(e0, res->field);
+
+  element_init(v, res->field);
+  for(i=0; i<n_prod; i++){
+    element_init(Z[i], P[i]->field);
+    element_set(Z[i], P[i]);
+  }
+
+  element_set1(v);
+  m = mpz_sizeinbase(q, 2) - 2;
+
+  for(;;) {
+    do_tangents();
+
+    if (!m) break;
+    element_multi_double(Z, Z, n_prod); //Z_i=Z_i+Z_i for all i.
+
+    if (mpz_tstbit(q, m)) {
+      do_lines();
+      element_multi_add(Z, Z, P, n_prod); //Z_i=Z_i+P_i for all i.
+    }
+    m--;
+    element_square(v, v);
+  }
+
+  element_set(res, v);
+
+  element_clear(v);
+  for(i=0; i<n_prod; i++){
+          element_clear(Z[i]);
+  }
+  free(Z);
+  element_clear(a);
+  element_clear(b);
+  element_clear(c);
+  element_clear(t0);
+  element_clear(e0);
+}
+
+
+void cc_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
+        int n_prod, pairing_t pairing) {
+  element_ptr Qbase;
+  element_t* Qx=malloc(sizeof(element_t)*n_prod);
+  element_t* Qy=malloc(sizeof(element_t)*n_prod);
+  pptr p = pairing->data;
+  int i;
+  for(i=0; i<n_prod; i++){
+          element_init(Qx[i], p->Fqd);
+          element_init(Qy[i], p->Fqd);
+        Qbase = in2[i];
+          // Twist: (x, y) --> (v^-1 x, v^-(3/2) y)
+          // where v is the quadratic nonresidue used to construct the twist.
+          element_mul(Qx[i], curve_x_coord(Qbase), p->nqrinv);
+          // v^-3/2 = v^-2 * v^1/2
+          element_mul(Qy[i], curve_y_coord(Qbase), p->nqrinv2);
+  }
+  cc_millers_no_denom_affine(out, pairing->r, in1, Qx, Qy, n_prod);
+  cc_tatepower(out, out, pairing);
+
+  for(i=0; i<n_prod; i++){
+          element_clear(Qx[i]);
+                element_clear(Qy[i]);
+  }
+  free(Qx);
+        free(Qy);
+
+}
+
+
 static int cc_is_almost_coddh(element_ptr a, element_ptr b,
     element_ptr c, element_ptr d,
     pairing_t pairing) {
@@ -838,6 +985,7 @@ static void d_init_pairing(pairing_ptr pairing, void *data) {
   mpz_set(pairing->r, param->r);
   field_init_fp(pairing->Zr, pairing->r);
   pairing->map = cc_pairing;
+  pairing->prod_pairings = cc_pairings_affine;
   pairing->is_almost_coddh = cc_is_almost_coddh;
 
   p = pairing->data = pbc_malloc(sizeof(*p));

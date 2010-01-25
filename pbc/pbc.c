@@ -630,7 +630,7 @@ static fun_t fun_type = {{ "type", run_type, 1, sig_any }};
 static val_ptr run_pairing(val_ptr v[]) {
   element_ptr x = v[0]->elem;
   element_ptr e = element_new(x->field->pairing->GT);
-  bilinear_map(e, x, v[1]->elem);
+  element_pairing(e, x, v[1]->elem);
   return val_new_element(e);
 }
 static fun_t fun_pairing = {{ "pairing", run_pairing, 2, sig_elem_elem }};
@@ -848,7 +848,7 @@ int main(int argc, char **argv) {
     switch (c) {
       case 'y':
         option_easy = 1;
-	option_prompt = "> ";
+        option_prompt = "> ";
         break;
       default:
         fprintf(stderr, "unrecognized option: %c\n", c);

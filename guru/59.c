@@ -183,22 +183,22 @@ void tate(element_t z, element_t P, element_t Q)
     element_pow_mpz(z, z, q1r);
     */
     {
-	element_t R, QR;
-	element_t z0;
+        element_t R, QR;
+        element_t z0;
 
-	element_init_same_as(R, P);
-	element_init_same_as(QR, P);
-	element_init_same_as(z0, z);
+        element_init_same_as(R, P);
+        element_init_same_as(QR, P);
+        element_init_same_as(z0, z);
 
-	element_random(R);
-	element_add(QR, Q, R);
+        element_random(R);
+        element_add(QR, Q, R);
 
-	millertate(z, P, QR);
-	millertate(z0, P, R);
-	element_div(z, z, z0);
-	element_pow_mpz(z, z, q1r);
-	element_clear(R);
-	element_clear(QR);
+        millertate(z, P, QR);
+        millertate(z0, P, R);
+        element_div(z, z, z0);
+        element_pow_mpz(z, z, q1r);
+        element_clear(R);
+        element_clear(QR);
     }
 
     mpz_clear(q1r);
@@ -343,7 +343,7 @@ void shipseystange(element_t z, element_t P, element_t Q)
 
     element_printf("VEC1: %B %B %B\n", v1m1, v10, v11);
     element_printf("VEC0: %B %B %B %B %B %B %B %B\n",
-	    v0m3, v0m2, v0m1, v00, v01, v02, v03, v04);
+            v0m3, v0m2, v0m1, v00, v01, v02, v03, v04);
 
     //Double
     element_square(sm2, v0m2);
@@ -414,7 +414,7 @@ void shipseystange(element_t z, element_t P, element_t Q)
 
     element_printf("VEC1: %B %B %B\n", v1m1, v10, v11);
     element_printf("VEC0: %B %B %B %B %B %B %B %B\n",
-	    v0m3, v0m2, v0m1, v00, v01, v02, v03, v04);
+            v0m3, v0m2, v0m1, v00, v01, v02, v03, v04);
 
     //DoubleAdd
     element_square(sm2, v0m2);
@@ -486,7 +486,7 @@ void shipseystange(element_t z, element_t P, element_t Q)
 
     element_printf("VEC1: %B %B %B\n", v1m1, v10, v11);
     element_printf("VEC0: %B %B %B %B %B %B %B %B\n",
-	    v0m3, v0m2, v0m1, v00, v01, v02, v03, v04);
+            v0m3, v0m2, v0m1, v00, v01, v02, v03, v04);
     element_div(z, v11, v01);
     element_printf("prepow: %B\n", z);
 
@@ -518,32 +518,32 @@ void miller(element_t z, element_t PR, element_t R, element_t P, element_t Q)
     element_set(z, x1);
 
     for (;;) {
-	printf("iteration %d: %d\n", m, mpz_tstbit(order,m));
-	element_square(z, z);
-	element_printf("squared: %B\n", z);
-	do_tangent(z1, Z, Q);
-	element_mul(z, z, z1);
+        printf("iteration %d: %d\n", m, mpz_tstbit(order,m));
+        element_square(z, z);
+        element_printf("squared: %B\n", z);
+        do_tangent(z1, Z, Q);
+        element_mul(z, z, z1);
 
-	element_double(Z, Z);
-	do_vert(z1, Z, Q);
-	element_div(z, z, z1);
-	element_printf("pre-if: %B\n", z);
+        element_double(Z, Z);
+        do_vert(z1, Z, Q);
+        element_div(z, z, z1);
+        element_printf("pre-if: %B\n", z);
 
-	if (mpz_tstbit(order, m)) {
-	    element_mul(z, z, x1);
-	    do_vert(z1, P, Q);
-	    element_mul(z, z, z1);
-	    element_printf("done %B\n", z);
-	    /*
-	    do_line(z1, Z, P, Q);
-	    element_mul(z, z, z1);
-	    element_add(Z, Z, P);
-	    do_vert(z1, Z, Q);
-	    element_div(z, z, z1);
-	    */
-	}
-	if (!m) break;
-	m--;
+        if (mpz_tstbit(order, m)) {
+            element_mul(z, z, x1);
+            do_vert(z1, P, Q);
+            element_mul(z, z, z1);
+            element_printf("done %B\n", z);
+            /*
+            do_line(z1, Z, P, Q);
+            element_mul(z, z, z1);
+            element_add(Z, Z, P);
+            do_vert(z1, Z, Q);
+            element_div(z, z, z1);
+            */
+        }
+        if (!m) break;
+        m--;
     }
 
     element_clear(x1);
@@ -730,13 +730,13 @@ int main(void)
 
     /*
     do {
-	element_random(g);
+        element_random(g);
     } while (element_is1(g));
     for (i=1; i<5; i++) {
-	element_mul(h, h, g);
-	element_printf("%d: %B\n", i, h);
-	element_printf("tangent = ");
-	do_tangent(h);
+        element_mul(h, h, g);
+        element_printf("%d: %B\n", i, h);
+        element_printf("tangent = ");
+        do_tangent(h);
     }
     */
     element_set_str(g, "[[25,0],[30,0]", 0);
@@ -746,8 +746,8 @@ int main(void)
 
     element_set1(w1);
     for (i=1; i<6; i++) {
-	element_mul(w1, w1, w0);
-	element_printf("%d: %B\n", i, w1);
+        element_mul(w1, w1, w0);
+        element_printf("%d: %B\n", i, w1);
     }
 
     fasterweil(w0, g, h);
@@ -755,8 +755,8 @@ int main(void)
 
     element_set1(w1);
     for (i=1; i<6; i++) {
-	element_mul(w1, w1, w0);
-	element_printf("%d: %B\n", i, w1);
+        element_mul(w1, w1, w0);
+        element_printf("%d: %B\n", i, w1);
     }
 
     fasterweil2(w0, g, h);
@@ -767,8 +767,8 @@ int main(void)
 
     element_set1(w1);
     for (i=1; i<6; i++) {
-	element_mul(w1, w1, w0);
-	element_printf("%d: %B\n", i, w1);
+        element_mul(w1, w1, w0);
+        element_printf("%d: %B\n", i, w1);
     }
 
     shipseystange(w0, g, h);
@@ -776,8 +776,8 @@ int main(void)
 
     element_set1(w1);
     for (i=1; i<6; i++) {
-	element_mul(w1, w1, w0);
-	element_printf("%d: %B\n", i, w1);
+        element_mul(w1, w1, w0);
+        element_printf("%d: %B\n", i, w1);
     }
     return 0;
 }

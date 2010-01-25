@@ -22,7 +22,7 @@ static int optimal_pow_window_size(mpz_ptr n) {
          exp_bits > 474 ? 5 :
          exp_bits > 157 ? 4 :
          exp_bits > 47 ? 3 :
-	 2;
+         2;
 }
 
 /* builds k-bit lookup window for base a */
@@ -775,7 +775,7 @@ int pbc_trial_divide(int (*fun)(mpz_t factor, unsigned int multiplicity),
         mul++;
       } while (mpz_divisible_p(m, p));
       if (fun(fac, mul)) {
-	mpz_clear(fac);
+        mpz_clear(fac);
         mpz_clear(m);
         mpz_clear(p);
         return 1;
@@ -829,6 +829,41 @@ clean:
   mpz_clear(z);
   mpz_clear(d);
   return res;
+}
+
+void element_multi_double(element_t n[], element_t a[], int m) {
+  element_ptr *temp1 = pbc_malloc(sizeof(*temp1)*m);
+  element_ptr *temp2 = pbc_malloc(sizeof(*temp2)*m);
+  int i;
+
+  for(i=0; i<m; i++) {
+    PBC_ASSERT_MATCH2(n[i], a[i]);
+    temp1[i] = n[i];
+    temp2[i] = a[i];
+  }
+  n[0]->field->multi_doub(temp1, temp2, m);
+  pbc_free(temp1);
+  pbc_free(temp2);
+}
+
+void element_multi_add(element_t n[], element_t a[],element_t b[], int m) {
+  size_t size = sizeof(element_ptr)*m;
+  element_ptr *temp1 = pbc_malloc(size);
+  element_ptr *temp2 = pbc_malloc(size);
+  element_ptr *temp3 = pbc_malloc(size);
+
+  int i;
+  for(i=0; i<m; i++){
+    PBC_ASSERT_MATCH3(n[i], a[i], b[i]);
+    temp1[i] = n[i];
+    temp2[i] = a[i];
+    temp3[i] = b[i];
+  }
+
+  n[0]->field->multi_add(temp1, temp2, temp3, m);
+  pbc_free(temp1);
+  pbc_free(temp2);
+  pbc_free(temp3);
 }
 
 element_ptr element_new(field_ptr f) {

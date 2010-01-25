@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   printf("SIGN\n");
   element_random(P1);
   element_random(k);
-  pairing_apply(t1, P1, P, pairing);
+  element_pairing(t1, P1, P);
   element_pow_zn(r, t1, k);
   element_to_mpz(t2, r);
 
@@ -68,9 +68,9 @@ int main(int argc, char **argv) {
   element_printf("v = %B\n", v);
 
   printf("VERIFY\n");
-  pairing_apply(t6, u, P, pairing);
+  element_pairing(t6, u, P);
   element_neg(Ppub, Ppub);
-  pairing_apply(t7, Qid, Ppub, pairing);
+  element_pairing(t7, Qid, Ppub);
   element_pow_zn(t7, t7, v);
   element_mul(r, t6, t7);
   element_to_mpz(t2, r);
