@@ -18,8 +18,8 @@ static int generic_is_almost_coddh(element_ptr a, element_ptr b,
 
   element_init(t0, pairing->GT);
   element_init(t1, pairing->GT);
-  pairing_apply(t0, a, d, pairing);
-  pairing_apply(t1, b, c, pairing);
+  element_pairing(t0, a, d);
+  element_pairing(t1, b, c);
   if (!element_cmp(t0, t1)) {
     res = 1;
   } else {

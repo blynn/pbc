@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
   element_add(t1, R, t1);
   element_mul_zn(t2, Qid, b);
   element_add(t2, t2, t1);
-  pairing_apply(t3, t2, Ppub, pairing);
+  element_pairing(t3, t2, Ppub);
   element_to_mpz(t4, t3);
   element_from_hash(t5, "Message", 7);
   element_mul_mpz(t6, t5, t4);
@@ -93,10 +93,10 @@ int main(int argc, char **argv) {
   element_printf("c1 = %B\n", c);
 
   printf("VERIFICATION\n");
-  pairing_apply(t10, Qid, Ppub, pairing);
+  element_pairing(t10, Qid, Ppub);
   element_neg(negc, c);
   element_pow_zn(t10, t10, negc);
-  pairing_apply(t11, S, P, pairing);
+  element_pairing(t11, S, P);
   element_mul(t12, t11, t10);
   element_to_mpz(t13, t12);
   element_from_hash(t5, "Message", 7);

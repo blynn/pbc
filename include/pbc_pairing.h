@@ -147,7 +147,7 @@ where 'in1', 'in2', 'out' must be in the groups G1, G2, GT.
 static inline void element_pairing(element_t out, element_t in1, element_t in2) {
   pairing_ptr pairing = out->field->pairing;
   PBC_ASSERT(pairing != NULL, "pairing output mismatch");
-  pairing_apply(out, in1, in2, pairing);
+  element_pairing(out, in1, in2);
 }
 
 /*@manual pairing_apply

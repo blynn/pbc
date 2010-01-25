@@ -72,15 +72,15 @@ int main(int argc, char **argv) {
   printf("VERIFY\n");
   element_from_hash(t1, "Message", 7);
   element_mul_zn(t7, P, t1);
-  pairing_apply(t6, P, t7, pairing);
-  pairing_apply(t8, Ppub, Qid, pairing);
+  element_pairing(t6, P, t7);
+  element_pairing(t8, Ppub, Qid);
   element_to_mpz(t3, R);
   element_pow_mpz(t9, t8, t3);
   element_printf("t8 = %B\n", t8);
   element_printf("t9 = %B\n", t9);
   element_mul(t10, t6, t9);
   element_printf("t10 = %B\n", t10);
-  pairing_apply(t11, R, S, pairing);
+  element_pairing(t11, R, S);
   element_printf("[e(P, P)^H2(M)][e(Ppub, Qid)^H3(R)] = %B\n", t10);
   element_printf("e(R, S) = %B\n", t11);
   if (!element_cmp(t10, t11)) {

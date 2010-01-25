@@ -36,10 +36,8 @@ int main(int argc, char **argv) {
     ttotalm += t1 - t0;
 
     t0 = pbc_get_time();
-    //pairing_apply(r2, x[0], y[0], pairing);
     element_pairing(r2, x[0], y[0]);
     for(j = 1; j < K; j++) {
-      //pairing_apply(tmp, x[j], y[j], pairing);
       element_pairing(tmp, x[j], y[j]);
       element_mul(r2, r2, tmp);
     }

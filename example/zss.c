@@ -47,8 +47,8 @@ int main(int argc, char **argv) {
   element_from_hash(H, "Message", 7);
   element_mul_zn(t2, P, H);
   element_add(t2, t2, Ppub);
-  pairing_apply(t3, t2, S, pairing);
-  pairing_apply(t4, P, P, pairing);
+  element_pairing(t3, t2, S);
+  element_pairing(t4, P, P);
   element_printf("e(H(m)P + Ppub, S) = %B\n", t3);
   element_printf("e(P, P) = %B\n", t4);
   if (!element_cmp(t3, t4)) printf("Signature is valid\n");
