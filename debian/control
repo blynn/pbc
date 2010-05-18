@@ -13,8 +13,8 @@ Description: Pairing-Based Cryptography Library
   Pairing-based cryptography is a relatively young area of cryptography that
   revolves around a certain function with special properties.
    The PBC (Pairing-Based Cryptography) library is a free C library (released
-  under the GNU Public License) built on the GMP library that performs the
-  mathematical operations underlying pairing-based cryptosystem.
+  under the Lesser GNU Public License) built on the GMP library that performs
+  the mathematical operations underlying pairing-based cryptosystem.
    The PBC library is designed to be the backbone of implementations of
   pairing-based cryptosystems, thus speed and portability are important goals.
   It provides routines such as elliptic curve generation, elliptic curve
@@ -37,8 +37,8 @@ Description: Pairing-Based Cryptography Library
   Pairing-based cryptography is a relatively young area of cryptography that
   revolves around a certain function with special properties.
    The PBC (Pairing-Based Cryptography) library is a free C library (released
-  under the GNU Public License) built on the GMP library that performs the
-  mathematical operations underlying pairing-based cryptosystem.
+  under the Lesser GNU Public License) built on the GMP library that performs
+  the mathematical operations underlying pairing-based cryptosystem.
    The PBC library is designed to be the backbone of implementations of
   pairing-based cryptosystems, thus speed and portability are important goals.
   It provides routines such as elliptic curve generation, elliptic curve

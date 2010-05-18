@@ -1,3 +1,14 @@
+libpbc (0.5.8) unstable; urgency=low
+
+  * GIT DIFF STAT (from 0.5.7-1):
+  *  COPYING         |  827 +++++++++++--------------------------------------------
+  *  NEWS            |    4 +
+  *  configure.ac    |    2 +-
+  *  doc/preface.txt |    2 +-
+  *  4 files changed, 165 insertions(+), 670 deletions(-)
+
+ -- Paul Miller <jettero@cpan.org>  Mon, 17 May 2010 20:21:34 -0400
+
 libpbc (0.5.7-1) unstable; urgency=low
 
     * Bugfixes and speadups

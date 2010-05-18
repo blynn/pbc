@@ -9,11 +9,11 @@ Upstream Author(s):
 
 Copyright: 
 
-    <Copyright (C) 2008 Ben Lynn of Stanford>
+    <Copyright (C) 2010 Ben Lynn of Stanford>
 
 License:
 
-    GPL
+    LGPL
 
-The Debian packaging is (C) 2008, Paul Miller <jettero@gmail.com> and
+The Debian packaging is (C) 2010, Paul Miller <jettero@gmail.com> and
 is licensed under the GPL, see `/usr/share/common-licenses/GPL'.
