@@ -288,18 +288,23 @@ static void *element_build_base_table(element_ptr a, int bits, int k) {
  * exponentiation using aggressive base lookup table
  * must have k >= 1.
  */
-static void element_pow_base_table(element_ptr x, mpz_ptr n,
+static void element_pow_base_table(element_ptr x, mpz_ptr power,
                                    struct element_base_table *base_table) {
   int word;                     /* the word to look up. 0<word<base */
   int row, s;                   /* row and col in base table */
   int num_lookups;
 
   element_t result;
+  mpz_t n;
+  mpz_init_set(n, power);
 
-  // early abort if raising to power 0
+  // Early abort if raising to power 0.
   if (!mpz_sgn(n)) {
     element_set1(x);
     return;
+  }
+  if (mpz_cmp(n, x->field->order) > 0) {
+    mpz_mod(n, n, x->field->order);
   }
 
   element_init(result, x->field);
@@ -319,6 +324,7 @@ static void element_pow_base_table(element_ptr x, mpz_ptr n,
 
   element_set(x, result);
   element_clear(result);
+  mpz_clear(n);
 }
 
 static void default_element_pp_init(element_pp_t p, element_t in) {
