@@ -229,11 +229,9 @@ static void mulg_pp_pow(element_t out, mpz_ptr power, element_pp_t p) {
 
 void pairing_GT_init(pairing_ptr pairing, field_t f) {
   field_ptr gt = pairing->GT;
-
   field_init(gt);
   gt->data = f;
-  f->pairing = pairing;
-
+  gt->pairing = pairing;
   mpz_set(gt->order, pairing->r);
   gt->field_clear = mulg_field_clear;
   gt->out_info = gt_out_info;
