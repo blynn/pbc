@@ -7,3 +7,4 @@ libpbc0.postinst.debhelper
 libpbc0.postrm.debhelper
 libpbc0.substvars
 libpbc-dev.substvars
+*.log

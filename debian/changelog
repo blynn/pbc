@@ -1,3 +1,22 @@
+libpbc (0.5.9) unstable; urgency=low
+
+  * GIT DIFF STAT (from 0.5.8 to 0.5.9):
+  *  NEWS                  |    5 +++++
+  *  arith/field.c         |   10 ++++++++--
+  *  configure.ac          |    2 +-
+  *  debian/.gitignore     |    1 +
+  *  debian/changelog      |   38 ++++++++++++++++++++++++++++++++++++++
+  *  debian/control        |    8 ++++----
+  *  debian/copyright      |    6 +++---
+  *  debian/mv_things.sh   |    8 ++++++--
+  *  doc/preface.txt       |    2 +-
+  *  ecc/pairing.c         |    4 +---
+  *  include/pbc_pairing.h |    4 ----
+  *  makedeb.sh            |    8 --------
+  *  12 files changed, 68 insertions(+), 28 deletions(-)
+
+ -- Paul Miller <jettero@cpan.org>  Fri, 22 Oct 2010 09:12:15 -0400
+
 libpbc (0.5.8) unstable; urgency=low
 
   * GIT DIFF STAT (from 0.5.7-1):
