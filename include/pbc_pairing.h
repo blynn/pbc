@@ -117,10 +117,6 @@ structure.
 */
 void pairing_clear(pairing_t pairing);
 
-/*@manual pairing_apply
-Deprecated as the 'pairing' argument is redundant. Prefer 'element_pairing',
-which is equivalent.
-*/
 static inline void pairing_apply(element_t out, element_t in1, element_t in2,
     pairing_t pairing) {
   PBC_ASSERT(pairing->GT == out->field, "pairing output mismatch");

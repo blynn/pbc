@@ -2,6 +2,11 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.5.9 and 0.5.8
+
+* Bugfix thanks to Michael Adjedj.
+* Reduce high exponents for exponentiations in finite groups.
+
 Changes between PBC version 0.5.8 and 0.5.7
 
 * Changed the license to LGPL.
