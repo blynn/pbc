@@ -104,9 +104,7 @@ int pairing_init_set_buf(pairing_t pairing, const char *s, size_t len);
 /*@manual pairing_init
 Initialize a pairing with pairing parameters 'p'.
 */
-static inline void pairing_init_pbc_param(struct pairing_s *pairing, pbc_param_ptr p) {
-  p->api->init_pairing(pairing, p->data);
-}
+void pairing_init_pbc_param(struct pairing_s *pairing, pbc_param_ptr p);
 
 /*@manual pairing_init
 Free the space occupied by 'pairing'. Call
