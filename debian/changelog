@@ -1,3 +1,25 @@
+libpbc (0.5.10) unstable; urgency=low
+
+  * GIT DIFF STAT (from 0.5.9 to 0.5.10):
+  *  NEWS                    |    4 +++
+  *  configure.ac            |    2 +-
+  *  debian/.gitignore       |    1 +
+  *  debian/changelog        |   57 +++++++++++++++++++++++++++++++++++++++++++++++
+  *  debian/control          |    8 +++---
+  *  debian/copyright        |    6 ++--
+  *  debian/mv_things.sh     |    8 +++++-
+  *  doc/Makefile            |    2 +-
+  *  doc/preface.txt         |    2 +-
+  *  ecc/pairing.c           |   14 ++++++-----
+  *  guru/prodpairing_test.c |   44 ++++++++++++++++++++++++++++++++++++
+  *  include/pbc_pairing.h   |    4 +--
+  *  makedeb.sh              |    8 ------
+  *  simple.make             |   19 ++++++++++++++-
+  *  test                    |   21 +++++++++++-----
+  *  15 files changed, 163 insertions(+), 37 deletions(-)
+
+ -- Paul Miller <jettero@cpan.org>  Sun, 24 Oct 2010 07:36:53 -0400
+
 libpbc (0.5.9) unstable; urgency=low
 
   * GIT DIFF STAT (from 0.5.8 to 0.5.9):
