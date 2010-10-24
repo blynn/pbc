@@ -46,4 +46,4 @@ clean:
 	-rm -rf manual.xml manual.html manual chunked index.html
 
 sync: $(TARGETS)
-	rsync -r manual manual.html manual.txt chunked manual.pdf blynn@tl1.stanford.edu:pbc/
+	rsync -r manual manual.html manual.txt chunked manual.pdf blynn@xenon.stanford.edu:pbc/

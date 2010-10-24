@@ -2,6 +2,10 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.5.10 and 0.5.9
+
+* pairing_init_pbc_param() fix thanks to Michael Adjedj.
+
 Changes between PBC version 0.5.9 and 0.5.8
 
 * Bugfix thanks to Michael Adjedj.

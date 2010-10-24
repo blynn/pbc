@@ -83,7 +83,7 @@ binaries : $(examples) $(pbc_bin)
 
 test_srcs := \
   $(addsuffix .c,$(addprefix guru/, \
-    fp_test quadratic_test poly_test exp_test))
+    fp_test quadratic_test poly_test exp_test prodpairing_test))
 
 tests := $(test_srcs:.c=)
 
@@ -92,6 +92,7 @@ fp_objs := $(addsuffix .o, \
   arith/field arith/fp arith/naivefp arith/fastfp arith/fasterfp arith/montfp arith/random arith/init_random misc/extend_printf misc/memory misc/utils \
   arith/multiz misc/darray )
 
+guru/prodpairing_test: guru/prodpairing_test.o libpbc.a
 guru/exp_test: guru/exp_test.o libpbc.a
 guru/fp_test: guru/fp_test.o $(fp_objs)
 guru/poly_test: guru/poly_test.o $(fp_objs) arith/poly.o misc/darray.o
@@ -332,6 +333,14 @@ benchmark/ellnet.o: include/pbc_d_param.h include/pbc_e_param.h
 benchmark/ellnet.o: include/pbc_f_param.h include/pbc_g_param.h
 benchmark/ellnet.o: include/pbc_random.h include/pbc_memory.h
 benchmark/ellnet.o: include/pbc_test.h
+benchmark/multipairing.o: include/pbc.h include/pbc_utils.h
+benchmark/multipairing.o: include/pbc_field.h include/pbc_param.h
+benchmark/multipairing.o: include/pbc_pairing.h include/pbc_curve.h
+benchmark/multipairing.o: include/pbc_mnt.h include/pbc_a1_param.h
+benchmark/multipairing.o: include/pbc_a_param.h include/pbc_d_param.h
+benchmark/multipairing.o: include/pbc_e_param.h include/pbc_f_param.h
+benchmark/multipairing.o: include/pbc_g_param.h include/pbc_random.h
+benchmark/multipairing.o: include/pbc_memory.h include/pbc_test.h
 guru/fp_test.o: include/pbc.h include/pbc_utils.h include/pbc_field.h
 guru/fp_test.o: include/pbc_param.h include/pbc_pairing.h include/pbc_curve.h
 guru/fp_test.o: include/pbc_mnt.h include/pbc_a1_param.h
@@ -363,3 +372,11 @@ guru/exp_test.o: include/pbc_a_param.h include/pbc_d_param.h
 guru/exp_test.o: include/pbc_e_param.h include/pbc_f_param.h
 guru/exp_test.o: include/pbc_g_param.h include/pbc_random.h
 guru/exp_test.o: include/pbc_memory.h include/pbc_test.h
+guru/prodpairing_test.o: include/pbc/pbc.h include/pbc_utils.h
+guru/prodpairing_test.o: include/pbc_field.h include/pbc_param.h
+guru/prodpairing_test.o: include/pbc_pairing.h include/pbc_curve.h
+guru/prodpairing_test.o: include/pbc_mnt.h include/pbc_a1_param.h
+guru/prodpairing_test.o: include/pbc_a_param.h include/pbc_d_param.h
+guru/prodpairing_test.o: include/pbc_e_param.h include/pbc_f_param.h
+guru/prodpairing_test.o: include/pbc_g_param.h include/pbc_random.h
+guru/prodpairing_test.o: include/pbc_memory.h include/pbc_test.h

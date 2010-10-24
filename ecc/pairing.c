@@ -70,7 +70,7 @@ static void default_pp_clear(pairing_pp_t p) {
   UNUSED_VAR(p);
 }
 
-int pairing_init_set_buf(pairing_t pairing, const char *input, size_t len) {
+void pairing_init_pbc_param(pairing_t pairing, pbc_param_ptr p) {
   pairing->option_set = default_option_set;
   pairing->pp_init = default_pp_init;
   pairing->pp_clear = default_pp_clear;
@@ -78,7 +78,13 @@ int pairing_init_set_buf(pairing_t pairing, const char *input, size_t len) {
   pairing->is_almost_coddh = generic_is_almost_coddh;
   pairing->phi = phi_warning;
   pairing->prod_pairings = generic_prod_pairings;
+  p->api->init_pairing(pairing, p->data);
+  pairing->G1->pairing = pairing;
+  pairing->G2->pairing = pairing;
+  pairing->GT->pairing = pairing;
+}
 
+int pairing_init_set_buf(pairing_t pairing, const char *input, size_t len) {
   pbc_param_t par;
   int res = pbc_param_init_set_buf(par, input, len);
   if (res) {
@@ -87,10 +93,6 @@ int pairing_init_set_buf(pairing_t pairing, const char *input, size_t len) {
   }
   pairing_init_pbc_param(pairing, par);
   pbc_param_clear(par);
-
-  pairing->G1->pairing = pairing;
-  pairing->G2->pairing = pairing;
-  pairing->GT->pairing = pairing;
   return 0;
 }
 
@@ -231,7 +233,7 @@ void pairing_GT_init(pairing_ptr pairing, field_t f) {
   field_ptr gt = pairing->GT;
   field_init(gt);
   gt->data = f;
-  gt->pairing = pairing;
+  f->pairing = pairing;
   mpz_set(gt->order, pairing->r);
   gt->field_clear = mulg_field_clear;
   gt->out_info = gt_out_info;

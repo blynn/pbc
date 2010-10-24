@@ -1,17 +1,24 @@
 #!/bin/bash
 
-#make test
-make out/pbc
-for t in pbc/pairing_test.pbc pbc/g2_test.pbc ; do
-  out/pbc < $t > /dev/null
-  retcode=$?
-
+function show_result() {
   red=$'\e'"[31m"
   green=$'\e'"[32;1m"
   normal=$'\e'"[0m"
-  if [[ $retcode != 0 ]]; then
+  if [[ $1 != 0 ]]; then
     echo $red"[FAILED]"$normal $t
   else
     echo $green"[PASSED]"$normal $t
   fi
+}
+
+make test
+make out/pbc
+for t in pbc/pairing_test.pbc pbc/g2_test.pbc ; do
+  out/pbc < $t > /dev/null
+  show_result $?
+done
+
+for t in guru/fp_test guru/quadratic_test guru/poly_test guru/prodpairing_test ; do
+  $t > /dev/null
+  show_result $?
 done
