@@ -1,7 +1,7 @@
 #-*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.5)
+AC_PREREQ(2.59)
 AC_INIT([pbc], [0.5.10], [blynn@cs.stanford.edu])
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
@@ -31,6 +31,46 @@ case $host_os in
 	      fi
 	      ;;
 esac
+
+############################
+# Configs for Windows DLLs.
+# Framework for the below was extracted and
+# modeled after the libgmp configure script.
+
+AC_LIBTOOL_WIN32_DLL
+AC_SUBST(LIBPBC_DLL,0)
+
+case $host in
+  *-*-cygwin* | *-*-mingw* | *-*-pw32* | *-*-os2*)
+    if test -z "$enable_shared"; then
+      enable_shared=no
+    fi
+    # Don't allow both static and DLL.
+    if test "$enable_shared" != no && test "$enable_static" != no; then
+      AC_MSG_ERROR([cannot build both static and DLL, since gmp.h is different for each.
+Use "--disable-static --enable-shared" to build just a DLL.])
+    fi
+
+    # "-no-undefined" is required when building a DLL, see documentation on
+    # AC_LIBTOOL_WIN32_DLL.  Also, -no-undefined needs a version number
+    # or it will complain about not having a nonnegative integer.
+    if test "$enable_shared" = yes; then
+      PBC_LDFLAGS="$PBC_LDFLAGS -no-undefined 0 -Wl,--export-all-symbols"
+      LIBPBC_LDFLAGS="$LIBPBC_LDFLAGS -Wl,--output-def,.libs/libpbc.dll.def"
+      LIBPBC_DLL=1
+    fi
+    ;;
+esac
+case $host in
+  *-*-mingw*)
+    gcc_cflags_optlist="$gcc_cflags_optlist nocygwin"
+    gcc_cflags_nocygwin="-mno-cygwin"
+    ;;
+esac
+
+AC_SUBST(PBC_LDFLAGS)
+AC_SUBST(LIBPBC_LDFLAGS)
+############################
 
 # Checks for programs.
 AC_PROG_CC

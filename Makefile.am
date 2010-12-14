@@ -52,7 +52,7 @@ libpbc_la_SOURCES = arith/field.c arith/z.c \
 	ecc/singular.c \
 	ecc/param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
 	ecc/f_param.c ecc/g_param.c
-libpbc_la_LDFLAGS =  -lgmp -lm -version-info $(SO_VERSION)
+libpbc_la_LDFLAGS = -lgmp -lm -version-info $(SO_VERSION) $(PBC_LDFLAGS) $(LIBPBC_LDFLAGS)
 
 noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa benchmark/ellnet
 pbc_pbc_CPPFLAGS = -I include

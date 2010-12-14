@@ -3,25 +3,31 @@
 The PBC library needs http://www.swox.com/gmp/[the GMP library].
 Multiple ways to install PBC are provided.
 
-GNU Build System (autotools)::
-  This build system has been tested and works on Linux and Mac OS X with a
-  fink installation.
-+
+=== GNU Build System (autotools) ===
+
+This build system has been tested and works on Linux and Mac OS X with a
+fink installation.
+
   $ ./configure
   $ make
   $ make install
-+
+
+On Windows, the configure command requires a couple of options:
+
+  $ ./configure -disable-static -enable-shared
+
 By default the library is installed in `/usr/local/lib`.  On some systems, this
 may not be in the library path. One way to fix this is to edit
 `/etc/ld.so.conf` and run `ldconfig`.
 
-Simple Makefile::
-  Due to its speed and simplicity, I use `simple.make` during development.
-  Naturally it is less portable.
-+
+=== Simple Makefile ===
+
+For speed and simplicity, I use `simple.make` during development.
+Naturally it is less portable.
+
   $ make -f simple.make
 
-PBC uses some GNU C extensions, notably nested functions.
+PBC uses some GNU C extensions such as nested functions.
 
 [[pbcintro]]
 === Quick start ===
