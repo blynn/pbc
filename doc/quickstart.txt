@@ -1,9 +1,6 @@
 == Installing PBC ==
 
 The PBC library needs http://www.swox.com/gmp/[the GMP library].
-Multiple ways to install PBC are provided.
-
-=== GNU Build System (autotools) ===
 
 This build system has been tested and works on Linux and Mac OS X with a
 fink installation.

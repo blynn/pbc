@@ -43,12 +43,11 @@ static const char *token_get(token_t tok, const char *input, const char *end) {
   int i;
   char c;
   int get(void) {
-    if (!end || input < end) {
+    if ((!end || input < end) && *input) {
       c = *input++;
-      return !c;
-    } else {
-      return 1;
+      return 0;
     }
+    return 1;
   }
   // Skip whitespace and comments.
   for(;;) {
@@ -97,21 +96,19 @@ static void token_clear(token_t tok) {
 
 static void read_symtab(symtab_t tab, const char *input, size_t limit) {
   token_t tok;
-  char *s, *s1;
   const char *inputend = limit ? input + limit : NULL;
   token_init(tok);
   for (;;) {
     input = token_get(tok, input, inputend);
     if (tok->type != token_word) break;
-    s = pbc_strdup(tok->s);
+    char *key = pbc_strdup(tok->s);
     input = token_get(tok, input, inputend);
     if (tok->type != token_word) {
-      pbc_free(s);
+      pbc_free(key);
       break;
     }
-    s1 = pbc_strdup(tok->s);
-    symtab_put(tab, s1, s);
-    pbc_free(s);
+    symtab_put(tab, pbc_strdup(tok->s), key);
+    pbc_free(key);
   }
   token_clear(tok);
 }
