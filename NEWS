@@ -2,6 +2,10 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.5.12 and 0.5.11
+
+* Fixed a parsing bug reported by Michael Adjedj.
+
 Changes between PBC version 0.5.11 and 0.5.10
 
 * Support native win32 compilation via autotools. Thanks to Michael Rushanan.
