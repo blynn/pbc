@@ -13,12 +13,15 @@
 
 // TODO: remove repeated code for error handling
 static int do_print(int (*strcb)(void *, char *s),
-    int (*fstrcb)(void *, char *s, va_list ap),
+    int (*fstrcb)(void *, char *s, void *),
     int (*elcb)(void *, element_ptr e),
     void *data,
     const char *format, va_list ap) {
+  // A primitive front-end for printf()-family functions. Only handles types
+  // in specifiers, and assumes they all take void * arguments.
+  // 
+  // I wish register_printf_specifier() were more widespread.
   int count = 0, status;
-  char ch;
   char *copy, *c, *start, *next;
   element_ptr e;
   int found;
@@ -30,7 +33,6 @@ static int do_print(int (*strcb)(void *, char *s),
     for(;;) {
       c = strchr(next, '%');
       if (!c) {
-        //status = fprintf(stream, start);
         status = strcb(data, start);
         if (status < 0) {
           count = -1;
@@ -38,11 +40,10 @@ static int do_print(int (*strcb)(void *, char *s),
         goto done;
       }
       if (!*(c + 1)) goto done;
-      if (!*(c + 1) != '%') break;
+      if (*(c + 1) != '%') break;
       next = c + 2;
     }
     *c = 0;
-    //status = fprintf(stream, start);
     status = strcb(data, start);
     if (status < 0) {
       count = -1;
@@ -58,7 +59,6 @@ static int do_print(int (*strcb)(void *, char *s),
           goto done;
         case 'B':
           e = va_arg(ap, element_ptr);
-          //status = element_out_str(stream, 0, e);
           status = elcb(data, e);
           if (status < 0) {
             count = -1;
@@ -67,12 +67,11 @@ static int do_print(int (*strcb)(void *, char *s),
           found = 1;
           break;
         default:
-          if (strchr("diouxXeEfFgGaAcspnm", *c)) {
-            void *ptr = va_arg(ap, void *);
-            ch = *(c+1);
+          if (strchr("diouxXeEfFgGaAcspnmZ", *c)) {
+            if (*c == 'Z') c++;
+            char ch = *(c+1);
             *(c+1) = '\0';
-            //status = gmp_fprintf(stream, start, ptr);
-            status = fstrcb(data, start, ptr);
+            status = fstrcb(data, start, va_arg(ap, void *));
             if (status < 0) {
               count = -1;
               goto done;
@@ -98,7 +97,7 @@ int element_vfprintf(FILE *stream, const char *format, va_list ap) {
     return strlen(s);
   }
 
-  int format_cb(void *data, char *fstring, va_list ptr) {
+  int format_cb(void *data, char *fstring, void *ptr) {
     return gmp_fprintf(data, fstring, ptr);
   }
 
@@ -150,7 +149,7 @@ int element_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
     return status;
   }
 
-  int format_cb(void *data, char *fstring, va_list ptr) {
+  int format_cb(void *data, char *fstring, void *ptr) {
     struct sninfo_s *p = data;
     int status = gmp_snprintf(p->s + p->result, p->left, fstring, ptr);
     if (status < 0) return status;
