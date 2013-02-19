@@ -115,145 +115,141 @@ static void cc_miller_no_denom_proj(element_t res, mpz_t q, element_t P,
   const element_ptr Px = curve_x_coord(P);
   const element_ptr Py = curve_y_coord(P);
 
-  void proj_double(void)
-  {
-    //t0 = 3x^2 + (curve_a) z^4
-    element_square(t0, Zx);
-    //element_mul_si(t0, t0, 3);
-    element_double(t1, t0);
-    element_add(t0, t0, t1);
-    element_square(t1, z2);
-    element_mul(t1, t1, curve_a);
-    element_add(t0, t0, t1);
-
-    //z_out = 2 y z
-    element_mul(z, Zy, z);
-    //element_mul_si(z, z, 2);
-    element_double(z, z);
-    element_square(z2, z);
-
-    //t1 = 4 x y^2
-    element_square(t2, Zy);
-    element_mul(t1, Zx, t2);
-    //element_mul_si(t1, t1, 4);
-    element_double(t1, t1);
-    element_double(t1, t1);
-
-    //x_out = t0^2 - 2 t1
-    //element_mul_si(t3, t1, 2);
-    element_double(t3, t1);
-    element_square(Zx, t0);
-    element_sub(Zx, Zx, t3);
-
-    //t2 = 8y^4
-    element_square(t2, t2);
-    //element_mul_si(t2, t2, 8);
-    element_double(t2, t2);
-    element_double(t2, t2);
-    element_double(t2, t2);
-
-    //y_out = t0(t1 - x_out) - t2
-    element_sub(t1, t1, Zx);
-    element_mul(t0, t0, t1);
-    element_sub(Zy, t0, t2);
+  #define proj_double() {             \
+    /* t0 = 3x^2 + (curve_a) z^4 */   \
+    element_square(t0, Zx);           \
+    /* element_mul_si(t0, t0, 3); */  \
+    element_double(t1, t0);           \
+    element_add(t0, t0, t1);          \
+    element_square(t1, z2);           \
+    element_mul(t1, t1, curve_a);     \
+    element_add(t0, t0, t1);          \
+                                      \
+    /* z_out = 2 y z */               \
+    element_mul(z, Zy, z);            \
+    /* element_mul_si(z, z, 2); */    \
+    element_double(z, z);             \
+    element_square(z2, z);            \
+                                      \
+    /* t1 = 4 x y^2 */                \
+    element_square(t2, Zy);           \
+    element_mul(t1, Zx, t2);          \
+    /* element_mul_si(t1, t1, 4); */  \
+    element_double(t1, t1);           \
+    element_double(t1, t1);           \
+                                      \
+    /* x_out = t0^2 - 2 t1 */         \
+    /* element_mul_si(t3, t1, 2); */  \
+    element_double(t3, t1);           \
+    element_square(Zx, t0);           \
+    element_sub(Zx, Zx, t3);          \
+                                      \
+    /* t2 = 8y^4 */                   \
+    element_square(t2, t2);           \
+    /* element_mul_si(t2, t2, 8); */  \
+    element_double(t2, t2);           \
+    element_double(t2, t2);           \
+    element_double(t2, t2);           \
+                                      \
+    /* y_out = t0(t1 - x_out) - t2 */ \
+    element_sub(t1, t1, Zx);          \
+    element_mul(t0, t0, t1);          \
+    element_sub(Zy, t0, t2);          \
   }
 
-  void proj_mixin(void)
-  {
-    //t2 = Px z^2
-    element_mul(t2, z2, Px);
-
-    //t3 = Zx - t2
-    element_sub(t3, Zx, t2);
-
-    //t0 = Py z^3
-    element_mul(t0, z2, Py);
-    element_mul(t0, t0, z);
-
-    //t1 = Zy - t0
-    element_sub(t1, Zy, t0);
-
-    //e7 = Zx + t2, use t2 to double for e7
-    element_add(t2, Zx, t2);
-
-    //e8 = Zy + t0, use t0 to double for e8
-    element_add(t0, Zy, t0);
-
-    //z = z t3
-    element_mul(z, z, t3);
-    element_square(z2, z);
-
-    //Zx = t1^2 - e7 t3^2
-    //t3 now holds t3^3,
-    //t4 holds e7 t3^2
-    element_square(t4, t3);
-    element_mul(t3, t4, t3);
-    element_square(Zx, t1);
-    element_mul(t4, t2, t4);
-    element_sub(Zx, Zx, t4);
-
-    //t4 = e7 t3^2 - 2 Zx
-    element_sub(t4, t4, Zx);
-    element_sub(t4, t4, Zx);
-
-    //Zy = (t4 t1 - e8 t3^3)/2
-    element_mul(t4, t4, t1);
-    element_mul(t0, t0, t3);
-    element_sub(t4, t4, t0);
-    element_halve(Zy, t4);
+  #define proj_mixin() {                        \
+    /* t2 = Px z^2 */                           \
+    element_mul(t2, z2, Px);                    \
+                                                \
+    /* t3 = Zx - t2 */                          \
+    element_sub(t3, Zx, t2);                    \
+                                                \
+    /* t0 = Py z^3 */                           \
+    element_mul(t0, z2, Py);                    \
+    element_mul(t0, t0, z);                     \
+                                                \
+    /* t1 = Zy - t0 */                          \
+    element_sub(t1, Zy, t0);                    \
+                                                \
+    /* e7 = Zx + t2, use t2 to double for e7 */ \
+    element_add(t2, Zx, t2);                    \
+                                                \
+    /* e8 = Zy + t0, use t0 to double for e8 */ \
+    element_add(t0, Zy, t0);                    \
+                                                \
+    /* z = z t3 */                              \
+    element_mul(z, z, t3);                      \
+    element_square(z2, z);                      \
+                                                \
+    /* Zx = t1^2 - e7 t3^2 */                   \
+    /* t3 now holds t3^3, */                    \
+    /* t4 holds e7 t3^2 */                      \
+    element_square(t4, t3);                     \
+    element_mul(t3, t4, t3);                    \
+    element_square(Zx, t1);                     \
+    element_mul(t4, t2, t4);                    \
+    element_sub(Zx, Zx, t4);                    \
+                                                \
+    /* t4 = e7 t3^2 - 2 Zx */                   \
+    element_sub(t4, t4, Zx);                    \
+    element_sub(t4, t4, Zx);                    \
+                                                \
+    /* Zy = (t4 t1 - e8 t3^3)/2 */              \
+    element_mul(t4, t4, t1);                    \
+    element_mul(t0, t0, t3);                    \
+    element_sub(t4, t4, t0);                    \
+    element_halve(Zy, t4);                      \
   }
 
-  void do_tangent(void)
-  {
-    //a = -(3x^2 + cca z^4)
-    //b = 2 y z^3
-    //c = -(2 y^2 + x a)
-    //a = z^2 a
-    element_square(a, z2);
-    element_mul(a, a, curve_a);
-    element_square(b, Zx);
-    //element_mul_si(b, b, 3);
-    element_double(t0, b);
-    element_add(b, b, t0);
-    element_add(a, a, b);
-    element_neg(a, a);
-
-    element_mul(b, z, z2);
-    element_mul(b, b, Zy);
-    element_mul_si(b, b, 2);
-
-    element_mul(c, Zx, a);
-    element_mul(a, a, z2);
-    element_square(t0, Zy);
-    element_mul_si(t0, t0, 2);
-    element_add(c, c, t0);
-    element_neg(c, c);
-
-    d_miller_evalfn(e0, a, b, c, Qx, Qy);
-    element_mul(v, v, e0);
+  #define do_tangent() {                  \
+    /* a = -(3x^2 + cca z^4) */           \
+    /* b = 2 y z^3 */                     \
+    /* c = -(2 y^2 + x a) */              \
+    /* a = z^2 a */                       \
+    element_square(a, z2);                \
+    element_mul(a, a, curve_a);           \
+    element_square(b, Zx);                \
+    /* element_mul_si(b, b, 3); */        \
+    element_double(t0, b);                \
+    element_add(b, b, t0);                \
+    element_add(a, a, b);                 \
+    element_neg(a, a);                    \
+                                          \
+    element_mul(b, z, z2);                \
+    element_mul(b, b, Zy);                \
+    element_mul_si(b, b, 2);              \
+                                          \
+    element_mul(c, Zx, a);                \
+    element_mul(a, a, z2);                \
+    element_square(t0, Zy);               \
+    element_mul_si(t0, t0, 2);            \
+    element_add(c, c, t0);                \
+    element_neg(c, c);                    \
+                                          \
+    d_miller_evalfn(e0, a, b, c, Qx, Qy); \
+    element_mul(v, v, e0);                \
   }
 
-  void do_line(void)
-  {
-    //a = -(Py z^3 - Zy)
-    //b = Px z^3 - Zx z
-    //c = Zx z Py - Zy Px;
-
-    element_mul(t0, Zx, z);
-    element_mul(t1, z2, z);
-
-    element_mul(a, Py, t1);
-    element_sub(a, Zy, a);
-
-    element_mul(b, Px, t1);
-    element_sub(b, b, t0);
-
-    element_mul(t0, t0, Py);
-    element_mul(c, Zy, Px);
-    element_sub(c, t0, c);
-
-    d_miller_evalfn(e0, a, b, c, Qx, Qy);
-    element_mul(v, v, e0);
+  #define do_line() {                     \
+    /* a = -(Py z^3 - Zy) */              \
+    /* b = Px z^3 - Zx z */               \
+    /* c = Zx z Py - Zy Px; */            \
+                                          \
+    element_mul(t0, Zx, z);               \
+    element_mul(t1, z2, z);               \
+                                          \
+    element_mul(a, Py, t1);               \
+    element_sub(a, Zy, a);                \
+                                          \
+    element_mul(b, Px, t1);               \
+    element_sub(b, b, t0);                \
+                                          \
+    element_mul(t0, t0, Py);              \
+    element_mul(c, Zy, Px);               \
+    element_sub(c, t0, c);                \
+                                          \
+    d_miller_evalfn(e0, a, b, c, Qx, Qy); \
+    element_mul(v, v, e0);                \
   }
 
   element_init(a, Px->field);
@@ -301,6 +297,10 @@ static void cc_miller_no_denom_proj(element_t res, mpz_t q, element_t P,
   element_clear(e0);
   element_clear(z);
   element_clear(z2);
+  #undef proj_double
+  #undef proj_mixin
+  #undef do_tangent
+  #undef do_line
 }
 
 static void cc_miller_no_denom_affine(element_t res, mpz_t q, element_t P,
@@ -325,43 +325,42 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, element_t P,
   }
   */
 
-  void do_tangent(void)
-  {
-    //a = -(3 Zx^2 + cc->a)
-    //b = 2 * Zy
-    //c = -(2 Zy^2 + a Zx);
-    element_square(a, Zx);
-    element_mul_si(a, a, 3);
-    element_add(a, a, cca);
-    element_neg(a, a);
-
-    element_add(b, Zy, Zy);
-
-    element_mul(t0, b, Zy);
-    element_mul(c, a, Zx);
-    element_add(c, c, t0);
-    element_neg(c, c);
-
-    d_miller_evalfn(e0, a, b, c, Qx, Qy);
-    element_mul(v, v, e0);
+  #define do_tangent() {                  \
+    /* a = -(3 Zx^2 + cc->a) */           \
+    /* b = 2 * Zy */                      \
+    /* c = -(2 Zy^2 + a Zx); */           \
+    element_square(a, Zx);                \
+    element_mul_si(a, a, 3);              \
+    element_add(a, a, cca);               \
+    element_neg(a, a);                    \
+                                          \
+    element_add(b, Zy, Zy);               \
+                                          \
+    element_mul(t0, b, Zy);               \
+    element_mul(c, a, Zx);                \
+    element_add(c, c, t0);                \
+    element_neg(c, c);                    \
+                                          \
+    d_miller_evalfn(e0, a, b, c, Qx, Qy); \
+    element_mul(v, v, e0);                \
   }
 
-  void do_line(void)
-  {
-    //a = -(B.y - A.y) / (B.x - A.x);
-    //b = 1;
-    //c = -(A.y + a * A.x);
-    //but we'll multiply by B.x - A.x to avoid division
-
-    element_sub(b, Px, Zx);
-    element_sub(a, Zy, Py);
-    element_mul(t0, b, Zy);
-    element_mul(c, a, Zx);
-    element_add(c, c, t0);
-    element_neg(c, c);
-
-    d_miller_evalfn(e0, a, b, c, Qx, Qy);
-    element_mul(v, v, e0);
+  #define do_line() {                     \
+    /* a = -(B.y - A.y) / (B.x - A.x); */ \
+    /* b = 1; */                          \
+    /* c = -(A.y + a * A.x); */           \
+    /* but we'll multiply by B.x - A.x */ \
+    /* to avoid division */               \
+                                          \
+    element_sub(b, Px, Zx);               \
+    element_sub(a, Zy, Py);               \
+    element_mul(t0, b, Zy);               \
+    element_mul(c, a, Zx);                \
+    element_add(c, c, t0);                \
+    element_neg(c, c);                    \
+                                          \
+    d_miller_evalfn(e0, a, b, c, Qx, Qy); \
+    element_mul(v, v, e0);                \
   }
 
   element_init(a, Px->field);
@@ -401,6 +400,8 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, element_t P,
   element_clear(c);
   element_clear(t0);
   element_clear(e0);
+  #undef do_tangent
+  #undef do_line
 }
 
 // Requires cofactor is even.
@@ -478,38 +479,38 @@ static void tatepower10(element_ptr out, element_ptr in, pairing_t pairing) {
   element_t *inre = element_x(in)->data;
   element_t *inim = element_y(in)->data;
   //see thesis
-  void qpower(int sign) {
-    polymod_const_mul(e2, inre[1], p->xpowq);
-    element_set(e0re, e2);
-    polymod_const_mul(e2, inre[2], p->xpowq2);
-    element_add(e0re, e0re, e2);
-    polymod_const_mul(e2, inre[3], p->xpowq3);
-    element_add(e0re, e0re, e2);
-    polymod_const_mul(e2, inre[4], p->xpowq4);
-    element_add(e0re, e0re, e2);
-    element_add(e0re0, e0re0, inre[0]);
-
-    if (sign > 0) {
-      polymod_const_mul(e2, inim[1], p->xpowq);
-      element_set(e0im, e2);
-      polymod_const_mul(e2, inim[2], p->xpowq2);
-      element_add(e0im, e0im, e2);
-      polymod_const_mul(e2, inim[3], p->xpowq3);
-      element_add(e0im, e0im, e2);
-      polymod_const_mul(e2, inim[4], p->xpowq4);
-      element_add(e0im, e0im, e2);
-      element_add(e0im0, e0im0, inim[0]);
-    } else {
-      polymod_const_mul(e2, inim[1], p->xpowq);
-      element_neg(e0im, e2);
-      polymod_const_mul(e2, inim[2], p->xpowq2);
-      element_sub(e0im, e0im, e2);
-      polymod_const_mul(e2, inim[3], p->xpowq3);
-      element_sub(e0im, e0im, e2);
-      polymod_const_mul(e2, inim[4], p->xpowq4);
-      element_sub(e0im, e0im, e2);
-      element_sub(e0im0, e0im0, inim[0]);
-    }
+  #define qpower(sign) {                         \
+    polymod_const_mul(e2, inre[1], p->xpowq);    \
+    element_set(e0re, e2);                       \
+    polymod_const_mul(e2, inre[2], p->xpowq2);   \
+    element_add(e0re, e0re, e2);                 \
+    polymod_const_mul(e2, inre[3], p->xpowq3);   \
+    element_add(e0re, e0re, e2);                 \
+    polymod_const_mul(e2, inre[4], p->xpowq4);   \
+    element_add(e0re, e0re, e2);                 \
+    element_add(e0re0, e0re0, inre[0]);          \
+                                                 \
+    if (sign > 0) {                              \
+      polymod_const_mul(e2, inim[1], p->xpowq);  \
+      element_set(e0im, e2);                     \
+      polymod_const_mul(e2, inim[2], p->xpowq2); \
+      element_add(e0im, e0im, e2);               \
+      polymod_const_mul(e2, inim[3], p->xpowq3); \
+      element_add(e0im, e0im, e2);               \
+      polymod_const_mul(e2, inim[4], p->xpowq4); \
+      element_add(e0im, e0im, e2);               \
+      element_add(e0im0, e0im0, inim[0]);        \
+    } else {                                     \
+      polymod_const_mul(e2, inim[1], p->xpowq);  \
+      element_neg(e0im, e2);                     \
+      polymod_const_mul(e2, inim[2], p->xpowq2); \
+      element_sub(e0im, e0im, e2);               \
+      polymod_const_mul(e2, inim[3], p->xpowq3); \
+      element_sub(e0im, e0im, e2);               \
+      polymod_const_mul(e2, inim[4], p->xpowq4); \
+      element_sub(e0im, e0im, e2);               \
+      element_sub(e0im0, e0im0, inim[0]);        \
+    }                                            \
   }
   qpower(1);
   element_set(e3, e0);
@@ -528,6 +529,7 @@ static void tatepower10(element_ptr out, element_ptr in, pairing_t pairing) {
   element_clear(e1);
   element_clear(e2);
   element_clear(e3);
+  #undef qpower
 }
 
 static void (*cc_miller_no_denom_fn)(element_t res, mpz_t q, element_t P,
@@ -628,58 +630,55 @@ static void g_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
   element_ptr Zx;
   element_ptr Zy;
 
-  void store_abc(void) {
-    element_init(pp->a, Fq);
-    element_init(pp->b, Fq);
-    element_init(pp->c, Fq);
-    element_set(pp->a, a);
-    element_set(pp->b, b);
-    element_set(pp->c, c);
-    pp++;
+  #define store_abc() {      \
+    element_init(pp->a, Fq); \
+    element_init(pp->b, Fq); \
+    element_init(pp->c, Fq); \
+    element_set(pp->a, a);   \
+    element_set(pp->b, b);   \
+    element_set(pp->c, c);   \
+    pp++;                    \
   }
 
-  void do_tangent(void) {
-    //a = -slope_tangent(Z.x, Z.y);
-    //b = 1;
-    //c = -(Z.y + a * Z.x);
-    //but we multiply by 2*Z.y to avoid division
+  //a = -slope_tangent(Z.x, Z.y);
+  //b = 1;
+  //c = -(Z.y + a * Z.x);
+  //but we multiply by 2*Z.y to avoid division
 
-    //a = -Zx * (3 Zx + twicea_2) - a_4;
-    //Common curves: a2 = 0 (and cc->a is a_4), so
-    //a = -(3 Zx^2 + cc->a)
-    //b = 2 * Zy
-    //c = -(2 Zy^2 + a Zx);
-
-    element_square(a, Zx);
-    element_double(t0, a);
-    element_add(a, a, t0);
-    element_add(a, a, cca);
-    element_neg(a, a);
-
-    element_add(b, Zy, Zy);
-
-    element_mul(t0, b, Zy);
-    element_mul(c, a, Zx);
-    element_add(c, c, t0);
-    element_neg(c, c);
-
-    store_abc();
+  //a = -Zx * (3 Zx + twicea_2) - a_4;
+  //Common curves: a2 = 0 (and cc->a is a_4), so
+  //a = -(3 Zx^2 + cc->a)
+  //b = 2 * Zy
+  //c = -(2 Zy^2 + a Zx);
+  #define do_tangent() {    \
+    element_square(a, Zx);  \
+    element_double(t0, a);  \
+    element_add(a, a, t0);  \
+    element_add(a, a, cca); \
+    element_neg(a, a);      \
+                            \
+    element_add(b, Zy, Zy); \
+                            \
+    element_mul(t0, b, Zy); \
+    element_mul(c, a, Zx);  \
+    element_add(c, c, t0);  \
+    element_neg(c, c);      \
+                            \
+    store_abc();            \
   }
 
-  void do_line(void) {
-    //a = -(B.y - A.y) / (B.x - A.x);
-    //b = 1;
-    //c = -(A.y + a * A.x);
-    //but we'll multiply by B.x - A.x to avoid division
-
-    element_sub(b, Px, Zx);
-    element_sub(a, Zy, Py);
-    element_mul(t0, b, Zy);
-    element_mul(c, a, Zx);
-    element_add(c, c, t0);
-    element_neg(c, c);
-
-    store_abc();
+  //a = -(B.y - A.y) / (B.x - A.x);
+  //b = 1;
+  //c = -(A.y + a * A.x);
+  //but we'll multiply by B.x - A.x to avoid division
+  #define do_line() {       \
+    element_sub(b, Px, Zx); \
+    element_sub(a, Zy, Py); \
+    element_mul(t0, b, Zy); \
+    element_mul(c, a, Zx);  \
+    element_add(c, c, t0);  \
+    element_neg(c, c);      \
+    store_abc();            \
   }
 
   element_init(Z, P->field);
@@ -713,6 +712,9 @@ static void g_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
   element_clear(b);
   element_clear(c);
   element_clear(Z);
+  #undef store_abc
+  #undef do_tangent
+  #undef do_line
 }
 
 static void g_pairing_pp_clear(pairing_pp_t p) {
@@ -1366,7 +1368,7 @@ static void g_init(pbc_param_ptr p) {
 
 // Public interface:
 
-int pbc_param_init_g(pbc_param_ptr par, const char *(*tab)(const char *)) {
+int pbc_param_init_g(pbc_param_ptr par, struct symtab_s *tab) {
   g_init(par);
   g_param_ptr p = par->data;
   char s[80];

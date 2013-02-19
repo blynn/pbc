@@ -156,15 +156,13 @@ static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
   element_ptr Vx, Vy;
   element_ptr V1x, V1y;
 
-  void do_tangent(void) {
-    compute_abc_tangent(a, b, c, Vx, Vy, e0);
+  #define do_tangent()                        \
+    compute_abc_tangent(a, b, c, Vx, Vy, e0); \
     pp_coeff_set(coeff[i], a, b, c);
-  }
 
-  void do_line(void) {
-    compute_abc_line(a, b, c, Vx, Vy, V1x, V1y, e0);
+  #define do_line()                                  \
+    compute_abc_line(a, b, c, Vx, Vy, V1x, V1y, e0); \
     pp_coeff_set(coeff[i], a, b, c);
-  }
 
   element_init(V, ainfo->Eq);
   element_init(V1, ainfo->Eq);
@@ -203,6 +201,8 @@ static void a_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
   element_clear(c);
   element_clear(V);
   element_clear(V1);
+  #undef do_tangent
+  #undef do_line
 }
 
 static void a_pairing_pp_clear(pairing_pp_t p) {
@@ -1068,70 +1068,65 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
   //convert V from weighted projective (Jacobian) to affine
   //i.e. (X, Y, Z) --> (X/Z^2, Y/Z^3)
   //also sets z to 1
-  void point_to_affine(void)
-  {
-    element_invert(z, z);
-    element_square(e0, z);
-    element_mul(Vx, Vx, e0);
-    element_mul(e0, e0, z);
-    element_mul(Vy, Vy, e0);
-    element_set1(z);
+  #define point_to_affine()  \
+    element_invert(z, z);    \
+    element_square(e0, z);   \
+    element_mul(Vx, Vx, e0); \
+    element_mul(e0, e0, z);  \
+    element_mul(Vy, Vy, e0); \
+    element_set1(z);         \
     element_set1(z2);
+
+  #define proj_double()      {     \
+    /* e0 = 3x^2 + (cc->a) z^4 */  \
+    /* for this case a = 1     */  \
+    element_square(e0, Vx);        \
+    /*element_mul_si(e0, e0, 3);*/ \
+    element_double(e1, e0);        \
+    element_add(e0, e1, e0);       \
+    element_square(e1, z2);        \
+    element_add(e0, e0, e1);       \
+                                   \
+    /* z_out = 2 y z */            \
+    element_mul(z, Vy, z);         \
+    /*element_mul_si(z, z, 2);*/   \
+    element_double(z, z);          \
+    element_square(z2, z);         \
+                                   \
+    /* e1 = 4 x y^2 */             \
+    element_square(e2, Vy);        \
+    element_mul(e1, Vx, e2);       \
+    /*element_mul_si(e1, e1, 4);*/ \
+    element_double(e1, e1);        \
+    element_double(e1, e1);        \
+                                   \
+    /* x_out = e0^2 - 2 e1 */      \
+    element_double(e3, e1);        \
+    element_square(Vx, e0);        \
+    element_sub(Vx, Vx, e3);       \
+                                   \
+    /* e2 = 8y^4 */                \
+    element_square(e2, e2);        \
+    /*element_mul_si(e2, e2, 8);*/ \
+    element_double(e2, e2);        \
+    element_double(e2, e2);        \
+    element_double(e2, e2);        \
+                                   \
+    /*y_out = e0(e1 - x_out) - e2*/\
+    element_sub(e1, e1, Vx);       \
+    element_mul(e0, e0, e1);       \
+    element_sub(Vy, e0, e2);       \
   }
 
-  void proj_double(void)
-  {
-    //e0 = 3x^2 + (cc->a) z^4
-    //for this case a = 1
-    element_square(e0, Vx);
-    ////element_mul_si(e0, e0, 3);
-    element_double(e1, e0);
-    element_add(e0, e1, e0);
-    element_square(e1, z2);
-    element_add(e0, e0, e1);
-
-    //z_out = 2 y z
-    element_mul(z, Vy, z);
-    ////element_mul_si(z, z, 2);
-    element_double(z, z);
-    element_square(z2, z);
-
-    //e1 = 4 x y^2
-    element_square(e2, Vy);
-    element_mul(e1, Vx, e2);
-    //element_mul_si(e1, e1, 4);
-    element_double(e1, e1);
-    element_double(e1, e1);
-
-    //x_out = e0^2 - 2 e1
-    element_double(e3, e1);
-    element_square(Vx, e0);
-    element_sub(Vx, Vx, e3);
-
-    //e2 = 8y^4
-    element_square(e2, e2);
-    //element_mul_si(e2, e2, 8);
-    element_double(e2, e2);
-    element_double(e2, e2);
-    element_double(e2, e2);
-
-    //y_out = e0(e1 - x_out) - e2
-    element_sub(e1, e1, Vx);
-    element_mul(e0, e0, e1);
-    element_sub(Vy, e0, e2);
-  }
-
-  void do_tangent(void) {
-    compute_abc_tangent_proj(a, b, c, Vx, Vy, z, z2, e0);
-    a_miller_evalfn(f0, a, b, c, Qx, Qy);
+  #define do_tangent()                                    \
+    compute_abc_tangent_proj(a, b, c, Vx, Vy, z, z2, e0); \
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);                 \
     element_mul(f, f, f0);
-  }
 
-  void do_line(void) {
-    compute_abc_line(a, b, c, Vx, Vy, V1x, V1y, e0);
-    a_miller_evalfn(f0, a, b, c, Qx, Qy);
+  #define do_line()                                  \
+    compute_abc_line(a, b, c, Vx, Vy, V1x, V1y, e0); \
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);            \
     element_mul(f, f, f0);
-  }
 
   element_init(V, p->Eq);
   element_init(V1, p->Eq);
@@ -1194,6 +1189,10 @@ static void a_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
   element_clear(b);
   element_clear(c);
   element_clear(e0);
+  #undef point_to_affine
+  #undef proj_double
+  #undef do_tangent
+  #undef do_line
 }
 
 //in1, in2 are from E(F_q), out from F_q^2
@@ -1210,17 +1209,15 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
   element_ptr Vx, Vy;
   element_ptr V1x, V1y;
 
-  void do_tangent(void) {
-    compute_abc_tangent(a, b, c, Vx, Vy, e0);
-    a_miller_evalfn(f0, a, b, c, Qx, Qy);
+  #define do_tangent()                        \
+    compute_abc_tangent(a, b, c, Vx, Vy, e0); \
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);     \
     element_mul(f, f, f0);
-  }
 
-  void do_line(void) {
-    compute_abc_line(a, b, c, Vx, Vy, V1x, V1y, e0);
-    a_miller_evalfn(f0, a, b, c, Qx, Qy);
+  #define do_line()                                  \
+    compute_abc_line(a, b, c, Vx, Vy, V1x, V1y, e0); \
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);            \
     element_mul(f, f, f0);
-  }
 
   element_init(V, p->Eq);
   element_init(V1, p->Eq);
@@ -1275,6 +1272,8 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
   element_clear(b);
   element_clear(c);
   element_clear(e0);
+  #undef do_tangent
+  #undef do_line
 }
 
 // On Computing Products of Pairing
@@ -1292,33 +1291,31 @@ void a_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
   element_ptr Vx, Vy;
   element_ptr V1x, V1y;
 
-  void do_tangents(void) {
-    for(j=0; j<n_prod; j++){
-      Vx = curve_x_coord(V[j]);
-      Vy = curve_y_coord(V[j]);
-      Qx = curve_x_coord(in2[j]);
-      Qy = curve_y_coord(in2[j]);
-
-      compute_abc_tangent(a, b, c, Vx, Vy, e0);
-      a_miller_evalfn(f0, a, b, c, Qx, Qy);
-      element_mul(f, f, f0);
+  #define do_tangents()                         \
+    for(j=0; j<n_prod; j++){                    \
+      Vx = curve_x_coord(V[j]);                 \
+      Vy = curve_y_coord(V[j]);                 \
+      Qx = curve_x_coord(in2[j]);               \
+      Qy = curve_y_coord(in2[j]);               \
+                                                \
+      compute_abc_tangent(a, b, c, Vx, Vy, e0); \
+      a_miller_evalfn(f0, a, b, c, Qx, Qy);     \
+      element_mul(f, f, f0);                    \
     }
-  }
 
-  void do_lines(void) {
-    for(j=0;j<n_prod;j++){
-      Vx = curve_x_coord(V[j]);
-      Vy = curve_y_coord(V[j]);
-      V1x = curve_x_coord(V1[j]);
-      V1y = curve_y_coord(V1[j]);
-      Qx = curve_x_coord(in2[j]);
-      Qy = curve_y_coord(in2[j]);
-
-      compute_abc_line(a, b, c, Vx, Vy, V1x, V1y, e0);
-      a_miller_evalfn(f0, a, b, c, Qx, Qy);
-      element_mul(f, f, f0);
+  #define do_lines()                                   \
+    for(j=0;j<n_prod;j++){                             \
+      Vx = curve_x_coord(V[j]);                        \
+      Vy = curve_y_coord(V[j]);                        \
+      V1x = curve_x_coord(V1[j]);                      \
+      V1y = curve_y_coord(V1[j]);                      \
+      Qx = curve_x_coord(in2[j]);                      \
+      Qy = curve_y_coord(in2[j]);                      \
+                                                       \
+      compute_abc_line(a, b, c, Vx, Vy, V1x, V1y, e0); \
+      a_miller_evalfn(f0, a, b, c, Qx, Qy);            \
+      element_mul(f, f, f0);                           \
     }
-  }
 
   for(i=0; i<n_prod; i++){
     element_init(V[i],p->Eq);
@@ -1344,15 +1341,15 @@ void a_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
     element_multi_double(V, V, n_prod); //V_i = V_i + V_i for all i at one time.
   }
   if (p->sign1 < 0) {
-          for(j=0; j<n_prod; j++){
-            element_neg(V1[j], V[j]);
-          }
-          element_invert(f1, f);
+    for(j=0; j<n_prod; j++){
+      element_neg(V1[j], V[j]);
+    }
+    element_invert(f1, f);
   } else {
-          for(j=0; j<n_prod; j++){
-            element_set(V1[j], V[j]);
-          }
-          element_set(f1, f);
+    for(j=0; j<n_prod; j++){
+      element_set(V1[j], V[j]);
+    }
+    element_set(f1, f);
   }
   n = p->exp2;
   for (; i<n; i++) {
@@ -1379,6 +1376,8 @@ void a_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
   element_clear(b);
   element_clear(c);
   element_clear(e0);
+  #undef do_tangents
+  #undef do_lines
 }
 
 static void a_pairing_clear(pairing_t pairing) {
@@ -1485,7 +1484,7 @@ static void a_param_init(pbc_param_ptr par) {
 
 // Public interface for type A pairings:
 
-int pbc_param_init_a(pbc_param_ptr par, const char *(*tab)(const char *)) {
+int pbc_param_init_a(pbc_param_ptr par, struct symtab_s *tab) {
   a_param_init(par);
   a_param_ptr p = par->data;
 
@@ -1641,13 +1640,9 @@ static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairin
   element_t e0, e1, e2;
   element_ptr Vx, Vy;
 
-  void do_tangent(void) {
-    compute_abc_tangent(a, b, c, Vx, Vy, e0);
-  }
+  #define do_tangent() compute_abc_tangent(a, b, c, Vx, Vy, e0);
 
-  void do_line(void) {
-    compute_abc_line(a2, b2, c2, Vx, Vy, Px, Py, e0);
-  }
+  #define do_line()    compute_abc_line(a2, b2, c2, Vx, Vy, Px, Py, e0);
 
   element_init(V, a1info->Ep);
   element_set(V, in1);
@@ -1723,6 +1718,8 @@ static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairin
   element_clear(b);
   element_clear(c);
   element_clear(V);
+  #undef do_tangent
+  #undef do_line
 }
 
 static void a1_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p) {
@@ -1735,30 +1732,30 @@ static void a1_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p
   element_ptr Qy = curve_y_coord(in2);
   element_t Qx2, Qy2, Qxy;
 
-  void do_tangent(void) {
-    pp_coeff_ptr ppp = *pp;
+  #define do_tangent()                                   \
+    pp_coeff_ptr ppp = *pp;                              \
     a_miller_evalfn(f0, ppp->a, ppp->b, ppp->c, Qx, Qy);
+
+  #define do_line() {                                \
+    pp2_coeff_ptr ppp = *pp;                         \
+    /*we'll map Q via (x,y) --> (-x, iy) */          \
+    /*hence  Qx^2 = x^2, Qy^2 = -y^2, Qx Qy = -ixy */\
+    /*where x = Q'x, y = Q'y */                      \
+                                                     \
+    /* Re = cx2 x^2 - cy2 y^2 - cx x + c */          \
+    /* Im = -cxy xy + cy y */                        \
+    element_mul(e0, ppp->cx2, Qx2);                  \
+    element_mul(e1, ppp->cy2, Qy2);                  \
+    element_sub(e0, e0, e1);                         \
+    element_mul(e1, ppp->cx, Qx);                    \
+    element_sub(e0, e0, e1);                         \
+    element_add(element_x(f0), e0, ppp->c);          \
+                                                     \
+    element_mul(e0, ppp->cy, Qy);                    \
+    element_mul(e1, ppp->cxy, Qxy);                  \
+    element_sub(element_y(f0), e0, e1);              \
   }
 
-  void do_line(void) {
-    pp2_coeff_ptr ppp = *pp;
-    //we'll map Q via (x,y) --> (-x, iy)
-    //hence  Qx^2 = x^2, Qy^2 = -y^2, Qx Qy = -ixy
-    //where x = Q'x, y = Q'y
-
-    // Re = cx2 x^2 - cy2 y^2 - cx x + c
-    // Im = -cxy xy + cy y
-    element_mul(e0, ppp->cx2, Qx2);
-    element_mul(e1, ppp->cy2, Qy2);
-    element_sub(e0, e0, e1);
-    element_mul(e1, ppp->cx, Qx);
-    element_sub(e0, e0, e1);
-    element_add(element_x(f0), e0, ppp->c);
-
-    element_mul(e0, ppp->cy, Qy);
-    element_mul(e1, ppp->cxy, Qxy);
-    element_sub(element_y(f0), e0, e1);
-  }
   element_init(f, out->field);
   element_init(f0, out->field);
 
@@ -1810,6 +1807,8 @@ static void a1_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p
   element_clear(f0);
   element_clear(e1);
   element_clear(e0);
+  #undef do_tangent
+  #undef do_line
 }
 
 // e0 is a temp var.
@@ -1851,100 +1850,99 @@ static void a1_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
   element_ptr Vx;
   element_ptr Vy;
 
-  void point_to_affine(void) {
-    element_invert(z, z);
-    element_square(e0, z);
-    element_mul(Vx, Vx, e0);
-    element_mul(e0, e0, z);
-    element_mul(Vy, Vy, e0);
-    element_set1(z);
+  #define point_to_affine()  \
+    element_invert(z, z);    \
+    element_square(e0, z);   \
+    element_mul(Vx, Vx, e0); \
+    element_mul(e0, e0, z);  \
+    element_mul(Vy, Vy, e0); \
+    element_set1(z);         \
     element_set1(z2);
-  }
 
   //TODO: do I need to check if V=-in1?
   //Where V=(Vx,Vy,z) and in1=(Px,Py,1), a mixed coordinates.
-  void proj_add(void){
-    //H=X2*Z1^2-X1
-    element_mul(e0,Px,z2);
-    element_sub(e0,e0,Vx);
-    //H^2
-    element_square(e1,e0);
-    //r=Y2*Z1^3-Y1
-    element_mul(e2,z,z2);
-    element_mul(e2,e2,Py);
-    element_sub(e2,e2,Vy);
-
-    //X3=r^2-H^3-2X1*H^2
-    element_set(z2,Vx); //use z2 to store X1 and update Vx=X3
-    element_square(Vx,e2);
-    element_mul(e3,e0,e1); //e3=H^3
-    element_sub(Vx,Vx,e3);
-    element_double(e3,z2);
-    element_mul(e3,e3,e1); //2X1*H^2
-    element_sub(Vx,Vx,e3);
-    //Y3=r(X1*H^2-X3)-Y1*H^3
-    element_mul(e3,z2,e1);
-    element_sub(e3,e3,Vx);
-    element_mul(e3,e3,e2);
-    element_mul(e2,e0,e1); //e2 no longer used.
-    element_mul(e2,e2,Vy);
-    element_sub(Vy,e3,e2);
-    //Z3=Z1*H
-    element_mul(z,z,e0);
-    element_square(z2,z);
+  #define proj_add() {                                            \
+    /* H=X2*Z1^2-X1 */                                            \
+    element_mul(e0,Px,z2);                                        \
+    element_sub(e0,e0,Vx);                                        \
+    /* H^2 */                                                     \
+    element_square(e1,e0);                                        \
+    /* r=Y2*Z1^3-Y1 */                                            \
+    element_mul(e2,z,z2);                                         \
+    element_mul(e2,e2,Py);                                        \
+    element_sub(e2,e2,Vy);                                        \
+                                                                  \
+    /* X3=r^2-H^3-2X1*H^2 */                                      \
+    element_set(z2,Vx); /* use z2 to store X1 and update Vx=X3 */ \
+    element_square(Vx,e2);                                        \
+    element_mul(e3,e0,e1); /* e3=H^3 */                           \
+    element_sub(Vx,Vx,e3);                                        \
+    element_double(e3,z2);                                        \
+    element_mul(e3,e3,e1); /* 2X1*H^2 */                          \
+    element_sub(Vx,Vx,e3);                                        \
+    /* Y3=r(X1*H^2-X3)-Y1*H^3 */                                  \
+    element_mul(e3,z2,e1);                                        \
+    element_sub(e3,e3,Vx);                                        \
+    element_mul(e3,e3,e2);                                        \
+    element_mul(e2,e0,e1); /* e2 no longer used. */               \
+    element_mul(e2,e2,Vy);                                        \
+    element_sub(Vy,e3,e2);                                        \
+    /* Z3=Z1*H */                                                 \
+    element_mul(z,z,e0);                                          \
+    element_square(z2,z);                                         \
   }
 
-  void proj_double(void) {
-    //e0 = 3x^2 + (cc->a) z^4
-    //for this case a = 1
-    element_square(e0, Vx);
-    ////element_mul_si(e0, e0, 3);
-    element_double(e1, e0);
-    element_add(e0, e1, e0);
-    element_square(e1, z2);
-    element_add(e0, e0, e1);
-
-    //z_out = 2 y z
-    element_mul(z, Vy, z);
-    ////element_mul_si(z, z, 2);
-    element_double(z, z);
-    element_square(z2, z);
-
-    //e1 = 4 x y^2
-    element_square(e2, Vy);
-    element_mul(e1, Vx, e2);
-    //element_mul_si(e1, e1, 4);
-    element_double(e1, e1);
-    element_double(e1, e1);
-
-    //x_out = e0^2 - 2 e1
-    element_double(e3, e1);
-    element_square(Vx, e0);
-    element_sub(Vx, Vx, e3);
-
-    //e2 = 8y^4
-    element_square(e2, e2);
-    //element_mul_si(e2, e2, 8);
-    element_double(e2, e2);
-    element_double(e2, e2);
-    element_double(e2, e2);
-
-    //y_out = e0(e1 - x_out) - e2
-    element_sub(e1, e1, Vx);
-    element_mul(e0, e0, e1);
-    element_sub(Vy, e0, e2);
+  #define proj_double() {             \
+    /* e0 = 3x^2 + (cc->a) z^4 */     \
+    /* for this case a = 1 */         \
+    element_square(e0, Vx);           \
+    /* element_mul_si(e0, e0, 3); */  \
+    element_double(e1, e0);           \
+    element_add(e0, e1, e0);          \
+    element_square(e1, z2);           \
+    element_add(e0, e0, e1);          \
+                                      \
+    /* z_out = 2 y z */               \
+    element_mul(z, Vy, z);            \
+    /* element_mul_si(z, z, 2); */    \
+    element_double(z, z);             \
+    element_square(z2, z);            \
+                                      \
+    /* e1 = 4 x y^2 */                \
+    element_square(e2, Vy);           \
+    element_mul(e1, Vx, e2);          \
+    /* element_mul_si(e1, e1, 4); */  \
+    element_double(e1, e1);           \
+    element_double(e1, e1);           \
+                                      \
+    /* x_out = e0^2 - 2 e1 */         \
+    element_double(e3, e1);           \
+    element_square(Vx, e0);           \
+    element_sub(Vx, Vx, e3);          \
+                                      \
+    /* e2 = 8y^4 */                   \
+    element_square(e2, e2);           \
+    /* element_mul_si(e2, e2, 8); */  \
+    element_double(e2, e2);           \
+    element_double(e2, e2);           \
+    element_double(e2, e2);           \
+                                      \
+    /* y_out = e0(e1 - x_out) - e2 */ \
+    element_sub(e1, e1, Vx);          \
+    element_mul(e0, e0, e1);          \
+    element_sub(Vy, e0, e2);          \
   }
 
-  void do_tangent(void) {
-    compute_abc_tangent_proj(a, b, c, Vx, Vy, z, z2, e0);
-    a_miller_evalfn(f0, a, b, c, Qx, Qy);
-    element_mul(f, f, f0);
+  #define do_tangent() {                                  \
+    compute_abc_tangent_proj(a, b, c, Vx, Vy, z, z2, e0); \
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);                 \
+    element_mul(f, f, f0);                                \
   }
 
-  void do_line(void) {
-    compute_abc_line_proj(a, b, c, Vx, Vy, z, z2, Px, Py, e0);
-    a_miller_evalfn(f0, a, b, c, Qx, Qy);
-    element_mul(f, f, f0);
+  #define do_line() {                                          \
+    compute_abc_line_proj(a, b, c, Vx, Vy, z, z2, Px, Py, e0); \
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);                      \
+    element_mul(f, f, f0);                                     \
   }
 
   element_init(V, p->Ep);
@@ -2003,6 +2001,11 @@ static void a1_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
   element_clear(b);
   element_clear(c);
   element_clear(e0);
+  #undef point_to_affine
+  #undef proj_add
+  #undef proj_double
+  #undef do_tangent
+  #undef do_line
 }
 
 //in1, in2 are from E(F_q), out from F_q^2
@@ -2021,16 +2024,16 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
   element_ptr Vx;
   element_ptr Vy;
 
-  void do_tangent(void) {
-    compute_abc_tangent(a, b, c, Vx, Vy, e0);
-    a_miller_evalfn(f0, a, b, c, Qx, Qy);
-    element_mul(f, f, f0);
+  #define do_tangent() {                      \
+    compute_abc_tangent(a, b, c, Vx, Vy, e0); \
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);     \
+    element_mul(f, f, f0);                    \
   }
 
-  void do_line(void) {
-    compute_abc_line(a, b, c, Vx, Vy, Px, Py, e0);
-    a_miller_evalfn(f0, a, b, c, Qx, Qy);
-    element_mul(f, f, f0);
+  #define do_line() {                              \
+    compute_abc_line(a, b, c, Vx, Vy, Px, Py, e0); \
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);          \
+    element_mul(f, f, f0);                         \
   }
 
   element_init(V, p->Ep);
@@ -2083,6 +2086,8 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
   element_clear(b);
   element_clear(c);
   element_clear(e0);
+  #undef do_tangent
+  #undef do_line
 }
 
 //in1, in2 are from E(F_q), out from F_q^2
@@ -2098,30 +2103,30 @@ void a1_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
   element_ptr Qx, Qy;
   element_ptr Vx, Vy;
 
-  void do_tangents(void) {
-    for(i=0; i<n_prod; i++){
-      Vx = curve_x_coord(V[i]);
-      Vy = curve_y_coord(V[i]);
-      Qx = curve_x_coord(in2[i]);
-      Qy = curve_y_coord(in2[i]);
-      compute_abc_tangent(a, b, c, Vx, Vy, e0);
-      a_miller_evalfn(f0, a, b, c, Qx, Qy);
-      element_mul(f, f, f0);
-    }
+  #define do_tangents() {                     \
+    for(i=0; i<n_prod; i++){                  \
+    Vx = curve_x_coord(V[i]);                 \
+    Vy = curve_y_coord(V[i]);                 \
+    Qx = curve_x_coord(in2[i]);               \
+    Qy = curve_y_coord(in2[i]);               \
+    compute_abc_tangent(a, b, c, Vx, Vy, e0); \
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);     \
+    element_mul(f, f, f0);                    \
+    }                                         \
   }
 
-  void do_lines(void) {
-    for(i=0; i<n_prod; i++){
-      Vx = curve_x_coord(V[i]);
-      Vy = curve_y_coord(V[i]);
-      Px = curve_x_coord(in1[i]);
-      Py = curve_y_coord(in1[i]);
-      Qx = curve_x_coord(in2[i]);
-      Qy = curve_y_coord(in2[i]);
-      compute_abc_line(a, b, c, Vx, Vy, Px, Py, e0);
-      a_miller_evalfn(f0, a, b, c, Qx, Qy);
-      element_mul(f, f, f0);
-    }
+  #define do_lines() {                             \
+    for(i=0; i<n_prod; i++){                       \
+    Vx = curve_x_coord(V[i]);                      \
+    Vy = curve_y_coord(V[i]);                      \
+    Px = curve_x_coord(in1[i]);                    \
+    Py = curve_y_coord(in1[i]);                    \
+    Qx = curve_x_coord(in2[i]);                    \
+    Qy = curve_y_coord(in2[i]);                    \
+    compute_abc_line(a, b, c, Vx, Vy, Px, Py, e0); \
+    a_miller_evalfn(f0, a, b, c, Qx, Qy);          \
+    element_mul(f, f, f0);                         \
+    }                                              \
   }
 
   for(i=0; i<n_prod; i++){
@@ -2175,6 +2180,8 @@ void a1_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
   element_clear(b);
   element_clear(c);
   element_clear(e0);
+  #undef do_tangents
+  #undef do_lines
 }
 
 static void a1_pairing_clear(pairing_t pairing) {
@@ -2272,7 +2279,7 @@ static void a1_init(pbc_param_t p) {
 
 // Public interface:
 
-int pbc_param_init_a1(pbc_param_ptr par, const char *(*tab)(const char *)) {
+int pbc_param_init_a1(pbc_param_ptr par, struct symtab_s *tab) {
   a1_init(par);
   a1_param_ptr p = par->data;
 

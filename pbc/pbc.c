@@ -145,6 +145,10 @@ static val_ptr v_builtin(val_ptr v, tree_ptr t) {
   return fun->run(arg);
 }
 
+static void eval_stmt(void *ptr) {
+  tree_eval(ptr);
+}
+
 static val_ptr v_def_call(val_ptr v, tree_ptr t) {
   int i;
   const char* name = ((tree_ptr) darray_at(v->def->child, 0))->id;
@@ -161,9 +165,6 @@ static val_ptr v_def_call(val_ptr v, tree_ptr t) {
   }
   // Evaluate function body.
   darray_ptr a = ((tree_ptr) darray_at(v->def->child, 2))->child;
-  void eval_stmt(void *ptr) {
-    tree_eval(ptr);
-  }
   darray_forall(a, eval_stmt);
   return NULL;
 }
@@ -287,28 +288,49 @@ static val_ptr fun_cmp(val_ptr v[], int (*fun)(int)) {
   return v[0];
 }
 
+static int is0(int i) {
+  return i == 0;
+}
+
+static int isnot0(int i) {
+  return i != 0;
+}
+
+static int isle(int i) {
+  return i <= 0;
+}
+
+static int isge(int i) {
+  return i >= 0;
+}
+
+static int islt(int i) {
+  return i < 0;
+}
+
+static int isgt(int i) {
+  return i > 0;
+}
+
 static val_ptr run_eq(val_ptr v[]) {
-  int is0(int i) { return i == 0; }
   return fun_cmp(v, is0);
 }
+
 static val_ptr run_ne(val_ptr v[]) {
-  int isnot0(int i) { return i != 0; }
   return fun_cmp(v, isnot0);
 }
+
 static val_ptr run_le(val_ptr v[]) {
-  int isle(int i) { return i <= 0; }
   return fun_cmp(v, isle);
 }
+
 static val_ptr run_ge(val_ptr v[]) {
-  int isge(int i) { return i >= 0; }
   return fun_cmp(v, isge);
 }
 static val_ptr run_lt(val_ptr v[]) {
-  int islt(int i) { return i < 0; }
   return fun_cmp(v, islt);
 }
 static val_ptr run_gt(val_ptr v[]) {
-  int isgt(int i) { return i > 0; }
   return fun_cmp(v, isgt);
 }
 

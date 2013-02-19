@@ -8,6 +8,26 @@
 #include "pbc_memory.h"
 #include "misc/darray.h"
 
+struct snapshot_s {
+  element_t a;
+  element_t b;
+  element_t snark;
+};
+typedef struct snapshot_s *snapshot_ptr;
+
+static void record(element_t asum, element_t bsum, element_t snark,
+                   darray_t hole, mpz_t counter) {
+  snapshot_ptr ss = pbc_malloc(sizeof(struct snapshot_s));
+  element_init_same_as(ss->a, asum);
+  element_init_same_as(ss->b, bsum);
+  element_init_same_as(ss->snark, snark);
+  element_set(ss->a, asum);
+  element_set(ss->b, bsum);
+  element_set(ss->snark, snark);
+  darray_append(hole, ss);
+  element_printf("snark %Zd: %B\n", counter, snark);
+}
+
 // g, h in some group of order r
 // finds x such that g^x = h
 // will hang if no such x exists
@@ -49,25 +69,6 @@ void element_dlog_pollard_rho(element_t x, element_t g, element_t h) {
   mpz_t counter;
   int found = 0;
 
-  struct snapshot_s {
-    element_t a;
-    element_t b;
-    element_t snark;
-  };
-  typedef struct snapshot_s *snapshot_ptr;
-
-  void record(void) {
-    snapshot_ptr ss = pbc_malloc(sizeof(struct snapshot_s));
-    element_init_same_as(ss->a, asum);
-    element_init_same_as(ss->b, bsum);
-    element_init_same_as(ss->snark, snark);
-    element_set(ss->a, asum);
-    element_set(ss->b, bsum);
-    element_set(ss->snark, snark);
-    darray_append(hole, ss);
-    element_printf("snark %Zd: %B\n", counter, snark);
-  }
-
   mpz_init(counter);
   element_init(g0, G);
   element_init(snark, G);
@@ -92,7 +93,7 @@ void element_dlog_pollard_rho(element_t x, element_t g, element_t h) {
   element_pow_zn(snark, h, bsum);
   element_mul(snark, snark, g0);
 
-  record();
+  record(asum, bsum, snark, hole, counter);
   for (;;) {
     int len = element_length_in_bytes(snark);
     unsigned char *buf = pbc_malloc(len);
@@ -159,7 +160,7 @@ void element_dlog_pollard_rho(element_t x, element_t g, element_t h) {
 
     mpz_add_ui(counter, counter, 1);
     if (mpz_tstbit(counter, interval)) {
-      record();
+      record(asum, bsum, snark, hole, counter);
       interval++;
     }
   }

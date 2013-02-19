@@ -6,7 +6,8 @@
 #ifndef __PBC_G_PARAM_H__
 #define __PBC_G_PARAM_H__
 
-int pbc_param_init_g(pbc_param_ptr par, const char *(*tab)(const char *));
+struct symtab_s;
+int pbc_param_init_g(pbc_param_ptr par, struct symtab_s *tab);
 
 /*@manual gparam
 Type G curves are generated using the complex multiplication (CM) method.  This

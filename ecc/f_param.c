@@ -105,50 +105,48 @@ static void cc_miller_no_denom(element_t res, mpz_t q, element_t P,
   const element_ptr Px = curve_x_coord(P);
   const element_ptr Py = curve_y_coord(P);
 
-  void f_miller_evalfn(void)
-  {
-    // a, b, c lie in Fq
-    // Qx, Qy lie in Fq^2
-    // Qx is coefficient of x^4
-    // Qy is coefficient of x^3
-    //
-    // computes v *= (a Qx x^4 + b Qy x^3 + c)
-    //
-    // recall x^6 = -alpha thus
-    // x^4 (u0 + u1 x^1 + ... + u5 x^5) =
-    // u0 x^4 + u1 x^5
-    // - alpha u2 - alpha u3 x - alpha u4 x^2 - alpha u5 x^3
-    // and
-    // x^4 (u0 + u1 x^1 + ... + u5 x^5) =
-    // u0 x^3 + u1 x^4 + u2 x^5
-    // - alpha u3 - alpha u4 x - alpha u5 x^2
-    element_ptr e2;
-    inline void do_term(int i, int j, int k, int flag)
-    {
-      e2 = element_item(e0, i);
-      element_mul(e1, element_item(v, j), Qx);
-      if (flag == 1) element_mul(e1, e1, negalpha);
-      element_mul(element_x(e1), element_x(e1), a);
-      element_mul(element_y(e1), element_y(e1), a);
-      element_mul(e2, element_item(v, k), Qy);
-      element_mul(element_x(e2), element_x(e2), b);
-      element_mul(element_y(e2), element_y(e2), b);
-      element_add(e2, e2, e1);
-      if (flag == 2) element_mul(e2, e2, negalpha);
-      element_mul(element_x(e1), element_x(element_item(v, i)), c);
-      element_mul(element_y(e1), element_y(element_item(v, i)), c);
-      element_add(e2, e2, e1);
-    }
-    do_term(0, 2, 3, 2);
-    do_term(1, 3, 4, 2);
-    do_term(2, 4, 5, 2);
-    do_term(3, 5, 0, 1);
-    do_term(4, 0, 1, 0);
-    do_term(5, 1, 2, 0);
+  #define do_term(i, j, k, flag) {                                \
+    element_ptr e2;                                               \
+    e2 = element_item(e0, i);                                     \
+    element_mul(e1, element_item(v, j), Qx);                      \
+    if (flag == 1) element_mul(e1, e1, negalpha);                 \
+    element_mul(element_x(e1), element_x(e1), a);                 \
+    element_mul(element_y(e1), element_y(e1), a);                 \
+    element_mul(e2, element_item(v, k), Qy);                      \
+    element_mul(element_x(e2), element_x(e2), b);                 \
+    element_mul(element_y(e2), element_y(e2), b);                 \
+    element_add(e2, e2, e1);                                      \
+    if (flag == 2) element_mul(e2, e2, negalpha);                 \
+    element_mul(element_x(e1), element_x(element_item(v, i)), c); \
+    element_mul(element_y(e1), element_y(element_item(v, i)), c); \
+    element_add(e2, e2, e1);                                      \
+  }
 
-    element_set(v, e0);
-
-    /*
+  // a, b, c lie in Fq
+  // Qx, Qy lie in Fq^2
+  // Qx is coefficient of x^4
+  // Qy is coefficient of x^3
+  //
+  // computes v *= (a Qx x^4 + b Qy x^3 + c)
+  //
+  // recall x^6 = -alpha thus
+  // x^4 (u0 + u1 x^1 + ... + u5 x^5) =
+  // u0 x^4 + u1 x^5
+  // - alpha u2 - alpha u3 x - alpha u4 x^2 - alpha u5 x^3
+  // and
+  // x^4 (u0 + u1 x^1 + ... + u5 x^5) =
+  // u0 x^3 + u1 x^4 + u2 x^5
+  // - alpha u3 - alpha u4 x - alpha u5 x^2
+  #define f_miller_evalfn() { \
+    do_term(0, 2, 3, 2);      \
+    do_term(1, 3, 4, 2);      \
+    do_term(2, 4, 5, 2);      \
+    do_term(3, 5, 0, 1);      \
+    do_term(4, 0, 1, 0);      \
+    do_term(5, 1, 2, 0);      \
+    element_set(v, e0);       \
+  }
+  /*
     element_ptr e1;
 
     e1 = element_item(e0, 4);
@@ -164,43 +162,39 @@ static void cc_miller_no_denom(element_t res, mpz_t q, element_t P,
     element_set(element_x(element_item(e0, 0)), c);
 
     element_mul(v, v, e0);
-    */
+   */
+
+  //a = -3 Zx^2 since cc->a is 0 for D = 3
+  //b = 2 * Zy
+  //c = -(2 Zy^2 + a Zx);
+  #define do_tangent() {     \
+    element_square(a, Zx);   \
+    element_mul_si(a, a, 3); \
+    element_neg(a, a);       \
+                             \
+    element_add(b, Zy, Zy);  \
+                             \
+    element_mul(t0, b, Zy);  \
+    element_mul(c, a, Zx);   \
+    element_add(c, c, t0);   \
+    element_neg(c, c);       \
+                             \
+    f_miller_evalfn();       \
   }
 
-  void do_tangent(void)
-  {
-    //a = -3 Zx^2 since cc->a is 0 for D = 3
-    //b = 2 * Zy
-    //c = -(2 Zy^2 + a Zx);
-    element_square(a, Zx);
-    element_mul_si(a, a, 3);
-    element_neg(a, a);
-
-    element_add(b, Zy, Zy);
-
-    element_mul(t0, b, Zy);
-    element_mul(c, a, Zx);
-    element_add(c, c, t0);
-    element_neg(c, c);
-
-    f_miller_evalfn();
-  }
-
-  void do_line(void)
-  {
-    //a = -(B.y - A.y) / (B.x - A.x);
-    //b = 1;
-    //c = -(A.y + a * A.x);
-    //but we'll multiply by B.x - A.x to avoid division
-
-    element_sub(b, Px, Zx);
-    element_sub(a, Zy, Py);
-    element_mul(t0, b, Zy);
-    element_mul(c, a, Zx);
-    element_add(c, c, t0);
-    element_neg(c, c);
-
-    f_miller_evalfn();
+  //a = -(B.y - A.y) / (B.x - A.x);
+  //b = 1;
+  //c = -(A.y + a * A.x);
+  //but we'll multiply by B.x - A.x to avoid division
+  #define do_line() {       \
+    element_sub(b, Px, Zx); \
+    element_sub(a, Zy, Py); \
+    element_mul(t0, b, Zy); \
+    element_mul(c, a, Zx);  \
+    element_add(c, c, t0);  \
+    element_neg(c, c);      \
+                            \
+    f_miller_evalfn();      \
   }
 
   element_init(a, Px->field);
@@ -245,6 +239,10 @@ static void cc_miller_no_denom(element_t res, mpz_t q, element_t P,
   element_clear(t0);
   element_clear(e0);
   element_clear(e1);
+  #undef do_term
+  #undef f_miller_evalfn
+  #undef do_tangent
+  #undef do_line
 }
 
 static void f_tateexp(element_t out) {
@@ -253,17 +251,18 @@ static void f_tateexp(element_t out) {
   element_init(x, p->Fq12);
   element_init(y, p->Fq12);
   element_init(epow, p->Fq2);
-  void qpower(element_ptr e1, element_ptr e) {
-    element_set(element_item(e1, 0), element_item(out, 0));
-    element_mul(element_item(e1, 1), element_item(out, 1), e);
-    element_square(epow, e);
-    element_mul(element_item(e1, 2), element_item(out, 2), epow);
-    element_mul(epow, epow, e);
-    element_mul(element_item(e1, 3), element_item(out, 3), epow);
-    element_mul(epow, epow, e);
-    element_mul(element_item(e1, 4), element_item(out, 4), epow);
-    element_mul(epow, epow, e);
-    element_mul(element_item(e1, 5), element_item(out, 5), epow);
+
+  #define qpower(e1, e) {                                         \
+    element_set(element_item(e1, 0), element_item(out, 0));       \
+    element_mul(element_item(e1, 1), element_item(out, 1), e);    \
+    element_square(epow, e);                                      \
+    element_mul(element_item(e1, 2), element_item(out, 2), epow); \
+    element_mul(epow, epow, e);                                   \
+    element_mul(element_item(e1, 3), element_item(out, 3), epow); \
+    element_mul(epow, epow, e);                                   \
+    element_mul(element_item(e1, 4), element_item(out, 4), epow); \
+    element_mul(epow, epow, e);                                   \
+    element_mul(element_item(e1, 5), element_item(out, 5), epow); \
   }
 
   qpower(y, p->xpowq8);
@@ -278,6 +277,7 @@ static void f_tateexp(element_t out) {
   element_clear(x);
   element_clear(y);
   element_pow_mpz(out, out, p->tateexp);
+  #undef qpower
 }
 
 static void f_finalpow(element_t out) {
@@ -462,7 +462,7 @@ static void f_init(pbc_param_ptr p) {
 
 // Public interface:
 
-int pbc_param_init_f(pbc_param_ptr par, const char *(*tab)(const char *)) {
+int pbc_param_init_f(pbc_param_ptr par, struct symtab_s *tab) {
   f_init(par);
   f_param_ptr p = par->data;
 

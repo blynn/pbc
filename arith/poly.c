@@ -377,9 +377,9 @@ static int poly_snprint(char *s, size_t size, element_ptr e) {
   size_t result = 0, left;
   int status;
 
-  void clip_sub(void) {
-    result += status;
-    left = result >= size ? 0 : size - result;
+  #define clip_sub() {                         \
+    result += status;                          \
+    left = result >= size ? 0 : size - result; \
   }
 
   status = snprintf(s, size, "[");
@@ -399,6 +399,7 @@ static int poly_snprint(char *s, size_t size, element_ptr e) {
   status = snprintf(s + result, left, "]");
   if (status < 0) return status;
   return result + status;
+  #undef clip_sub
 }
 
 static void poly_div(element_ptr quot, element_ptr rem,
@@ -1223,9 +1224,9 @@ static int polymod_snprint(char *s, size_t size, element_ptr e) {
   size_t result = 0, left;
   int status;
 
-  void clip_sub(void) {
-    result += status;
-    left = result >= size ? 0 : size - result;
+  #define clip_sub(void) {                     \
+    result += status;                          \
+    left = result >= size ? 0 : size - result; \
   }
 
   status = snprintf(s, size, "[");
@@ -1245,6 +1246,7 @@ static int polymod_snprint(char *s, size_t size, element_ptr e) {
   status = snprintf(s + result, left, "]");
   if (status < 0) return status;
   return result + status;
+  #undef clip_sub
 }
 
 static void polymod_set_multiz(element_ptr e, multiz m) {
@@ -1554,6 +1556,25 @@ void polymod_const_mul(element_ptr res, element_ptr a, element_ptr e) {
   }
 }
 
+struct checkgcd_scope_var {
+  mpz_ptr     z, deg;
+  field_ptr   basef;
+  element_ptr xpow, x, f, g;
+};
+
+// Returns 0 if gcd(x^q^{n/d} - x, f) = 1, 1 otherwise.
+static int checkgcd(mpz_ptr fac, unsigned int mul, struct checkgcd_scope_var *v) {
+  UNUSED_VAR(mul);
+  mpz_divexact(v->z, v->deg, fac);
+  mpz_pow_ui(v->z, v->basef->order, mpz_get_ui(v->z));
+  element_pow_mpz(v->xpow, v->x, v->z);
+  element_sub(v->xpow, v->xpow, v->x);
+  if (element_is0(v->xpow)) return 1;
+  polymod_to_poly(v->g, v->xpow);
+  poly_gcd(v->g, v->f, v->g);
+  return poly_degree(v->g) != 0;
+}
+
 // Returns 1 if polynomial is irreducible, 0 otherwise.
 // A polynomial f(x) is irreducible in F_q[x] if and only if:
 //  (1) f(x) | x^{q^n} - x, and
@@ -1584,20 +1605,9 @@ int poly_is_irred(element_ptr f) {
   mpz_init(z);
   mpz_set_ui(deg, poly_degree(f));
 
-  // Returns 0 if gcd(x^q^{n/d} - x, f) = 1, 1 otherwise.
-  int checkgcd(mpz_ptr fac, unsigned int mul) {
-    UNUSED_VAR(mul);
-    mpz_divexact(z, deg, fac);
-    mpz_pow_ui(z, basef->order, mpz_get_ui(z));
-    element_pow_mpz(xpow, x, z);
-    element_sub(xpow, xpow, x);
-    if (element_is0(xpow)) return 1;
-    polymod_to_poly(g, xpow);
-    poly_gcd(g, f, g);
-    return poly_degree(g) != 0;
-  }
-
-  if (!pbc_trial_divide(checkgcd, deg, NULL)) {
+  struct checkgcd_scope_var v = {.z = z, .deg = deg, .basef = basef,
+                                 .xpow = xpow, .x = x, .f = f, .g = g};
+  if (!pbc_trial_divide((int(*)(mpz_t,unsigned,void*))checkgcd, &v, deg, NULL)) {
     // By now condition (2) has been satisfied. Check (1).
     mpz_pow_ui(z, basef->order, poly_degree(f));
     element_pow_mpz(xpow, x, z);

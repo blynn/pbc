@@ -502,9 +502,9 @@ static int curve_snprint(char *s, size_t n, element_ptr a) {
   size_t result = 0, left;
   int status;
 
-  void clip_sub(void) {
-    result += status;
-    left = result >= n ? 0 : n - result;
+  #define clip_sub() {                   \
+    result += status;                    \
+    left = result >= n ? 0 : n - result; \
   }
 
   if (p->inf_flag) {
@@ -528,6 +528,7 @@ static int curve_snprint(char *s, size_t n, element_ptr a) {
   status = snprintf(s + result, left, "]");
   if (status < 0) return status;
   return result + status;
+  #undef clip_sub
 }
 
 static void curve_set_multiz(element_ptr a, multiz m) {

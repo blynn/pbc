@@ -84,136 +84,131 @@ static void e_miller_proj(element_t res, element_t P,
   //convert Z from weighted projective (Jacobian) to affine
   //i.e. (X, Y, Z) --> (X/Z^2, Y/Z^3)
   //also sets z to 1
-  void to_affine(void)
-  {
-    element_invert(z, z);
-    element_square(e0, z);
-    element_mul(Zx, Zx, e0);
-    element_mul(e0, e0, z);
-    element_mul(Zy, Zy, e0);
-    element_set1(z);
-    element_set1(z2);
+  #define to_affine() {      \
+    element_invert(z, z);    \
+    element_square(e0, z);   \
+    element_mul(Zx, Zx, e0); \
+    element_mul(e0, e0, z);  \
+    element_mul(Zy, Zy, e0); \
+    element_set1(z);         \
+    element_set1(z2);        \
   }
 
-  void proj_double(void)
-  {
-    const element_ptr x = Zx;
-    const element_ptr y = Zy;
-    //e0 = 3x^2 + (cc->a) z^4
-    element_square(e0, x);
-    //element_mul_si(e0, e0, 3);
-    element_double(e1, e0);
-    element_add(e0, e0, e1);
-    element_square(e1, z2);
-    element_mul(e1, e1, cca);
-    element_add(e0, e0, e1);
-
-    //z_out = 2 y z
-    element_mul(z, y, z);
-    //element_mul_si(z, z, 2);
-    element_double(z, z);
-    element_square(z2, z);
-
-    //e1 = 4 x y^2
-    element_square(e2, y);
-    element_mul(e1, x, e2);
-    //element_mul_si(e1, e1, 4);
-    element_double(e1, e1);
-    element_double(e1, e1);
-
-    //x_out = e0^2 - 2 e1
-    //element_mul_si(e3, e1, 2);
-    element_double(e3, e1);
-    element_square(x, e0);
-    element_sub(x, x, e3);
-
-    //e2 = 8y^4
-    element_square(e2, e2);
-    //element_mul_si(e2, e2, 8);
-    element_double(e2, e2);
-    element_double(e2, e2);
-    element_double(e2, e2);
-
-    //y_out = e0(e1 - x_out) - e2
-    element_sub(e1, e1, x);
-    element_mul(e0, e0, e1);
-    element_sub(y, e0, e2);
+  #define proj_double() {             \
+    const element_ptr x = Zx;         \
+    const element_ptr y = Zy;         \
+    /* e0 = 3x^2 + (cc->a) z^4 */     \
+    element_square(e0, x);            \
+    /* element_mul_si(e0, e0, 3); */  \
+    element_double(e1, e0);           \
+    element_add(e0, e0, e1);          \
+    element_square(e1, z2);           \
+    element_mul(e1, e1, cca);         \
+    element_add(e0, e0, e1);          \
+                                      \
+    /* z_out = 2 y z */               \
+    element_mul(z, y, z);             \
+    /* element_mul_si(z, z, 2); */    \
+    element_double(z, z);             \
+    element_square(z2, z);            \
+                                      \
+    /* e1 = 4 x y^2 */                \
+    element_square(e2, y);            \
+    element_mul(e1, x, e2);           \
+    /* element_mul_si(e1, e1, 4); */  \
+    element_double(e1, e1);           \
+    element_double(e1, e1);           \
+                                      \
+    /* x_out = e0^2 - 2 e1 */         \
+    /* element_mul_si(e3, e1, 2); */  \
+    element_double(e3, e1);           \
+    element_square(x, e0);            \
+    element_sub(x, x, e3);            \
+                                      \
+    /* e2 = 8y^4 */                   \
+    element_square(e2, e2);           \
+    /* element_mul_si(e2, e2, 8); */  \
+    element_double(e2, e2);           \
+    element_double(e2, e2);           \
+    element_double(e2, e2);           \
+                                      \
+    /* y_out = e0(e1 - x_out) - e2 */ \
+    element_sub(e1, e1, x);           \
+    element_mul(e0, e0, e1);          \
+    element_sub(y, e0, e2);           \
   }
 
-  void do_tangent(element_t e, element_t edenom)
-  {
-    //a = -(3x^2 + cca z^4)
-    //b = 2 y z^3
-    //c = -(2 y^2 + x a)
-    //a = z^2 a
-    element_square(a, z2);
-    element_mul(a, a, cca);
-    element_square(b, Zx);
-    //element_mul_si(b, b, 3);
-    element_double(e0, b);
-    element_add(b, b, e0);
-    element_add(a, a, b);
-    element_neg(a, a);
-
-    //element_mul_si(e0, Zy, 2);
-    element_double(e0, Zy);
-    element_mul(b, e0, z2);
-    element_mul(b, b, z);
-
-    element_mul(c, Zx, a);
-    element_mul(a, a, z2);
-    element_mul(e0, e0, Zy);
-    element_add(c, c, e0);
-    element_neg(c, c);
-
-    element_mul(e0, a, numx);
-    element_mul(e1, b, numy);
-    element_add(e0, e0, e1);
-    element_add(e0, e0, c);
-    element_mul(e, e, e0);
-
-    element_mul(e0, a, denomx);
-    element_mul(e1, b, denomy);
-    element_add(e0, e0, e1);
-    element_add(e0, e0, c);
-    element_mul(edenom, edenom, e0);
+  #define do_tangent(e, edenom) {    \
+    /* a = -(3x^2 + cca z^4) */      \
+    /* b = 2 y z^3 */                \
+    /* c = -(2 y^2 + x a) */         \
+    /* a = z^2 a */                  \
+    element_square(a, z2);           \
+    element_mul(a, a, cca);          \
+    element_square(b, Zx);           \
+    /* element_mul_si(b, b, 3); */   \
+    element_double(e0, b);           \
+    element_add(b, b, e0);           \
+    element_add(a, a, b);            \
+    element_neg(a, a);               \
+                                     \
+    /* element_mul_si(e0, Zy, 2); */ \
+    element_double(e0, Zy);          \
+    element_mul(b, e0, z2);          \
+    element_mul(b, b, z);            \
+                                     \
+    element_mul(c, Zx, a);           \
+    element_mul(a, a, z2);           \
+    element_mul(e0, e0, Zy);         \
+    element_add(c, c, e0);           \
+    element_neg(c, c);               \
+                                     \
+    element_mul(e0, a, numx);        \
+    element_mul(e1, b, numy);        \
+    element_add(e0, e0, e1);         \
+    element_add(e0, e0, c);          \
+    element_mul(e, e, e0);           \
+                                     \
+    element_mul(e0, a, denomx);      \
+    element_mul(e1, b, denomy);      \
+    element_add(e0, e0, e1);         \
+    element_add(e0, e0, c);          \
+    element_mul(edenom, edenom, e0); \
   }
 
-  void do_vertical(element_t e, element_t edenom, element_ptr Ax)
-  {
-    element_mul(e0, numx, z2);
-    element_sub(e0, e0, Ax);
-    element_mul(e, e, e0);
-
-    element_mul(e0, denomx, z2);
-    element_sub(e0, e0, Ax);
-    element_mul(edenom, edenom, e0);
+  #define do_vertical(e, edenom, Ax) { \
+    element_mul(e0, numx, z2);         \
+    element_sub(e0, e0, Ax);           \
+    element_mul(e, e, e0);             \
+                                       \
+    element_mul(e0, denomx, z2);       \
+    element_sub(e0, e0, Ax);           \
+    element_mul(edenom, edenom, e0);   \
   }
 
-  void do_line(element_ptr e, element_ptr edenom, element_ptr A, element_ptr B)
-  {
-    element_ptr Ax = curve_x_coord(A);
-    element_ptr Ay = curve_y_coord(A);
-    element_ptr Bx = curve_x_coord(B);
-    element_ptr By = curve_y_coord(B);
-
-    element_sub(b, Bx, Ax);
-    element_sub(a, Ay, By);
-    element_mul(c, Ax, By);
-    element_mul(e0, Ay, Bx);
-    element_sub(c, c, e0);
-
-    element_mul(e0, a, numx);
-    element_mul(e1, b, numy);
-    element_add(e0, e0, e1);
-    element_add(e0, e0, c);
-    element_mul(e, e, e0);
-
-    element_mul(e0, a, denomx);
-    element_mul(e1, b, denomy);
-    element_add(e0, e0, e1);
-    element_add(e0, e0, c);
-    element_mul(edenom, edenom, e0);
+  #define do_line(e, edenom, A, B) {   \
+    element_ptr Ax = curve_x_coord(A); \
+    element_ptr Ay = curve_y_coord(A); \
+    element_ptr Bx = curve_x_coord(B); \
+    element_ptr By = curve_y_coord(B); \
+                                       \
+    element_sub(b, Bx, Ax);            \
+    element_sub(a, Ay, By);            \
+    element_mul(c, Ax, By);            \
+    element_mul(e0, Ay, Bx);           \
+    element_sub(c, c, e0);             \
+                                       \
+    element_mul(e0, a, numx);          \
+    element_mul(e1, b, numy);          \
+    element_add(e0, e0, e1);           \
+    element_add(e0, e0, c);            \
+    element_mul(e, e, e0);             \
+                                       \
+    element_mul(e0, a, denomx);        \
+    element_mul(e1, b, denomy);        \
+    element_add(e0, e0, e1);           \
+    element_add(e0, e0, c);            \
+    element_mul(edenom, edenom, e0);   \
   }
 
   element_init(a, res->field);
@@ -296,6 +291,11 @@ static void e_miller_proj(element_t res, element_t P,
   element_clear(c);
   element_clear(e0);
   element_clear(e1);
+  #undef to_affine
+  #undef proj_double
+  #undef do_tangent
+  #undef do_vertical
+  #undef do_line
 }
 
 static void e_miller_affine(element_t res, element_t P,
@@ -317,77 +317,74 @@ static void e_miller_affine(element_t res, element_t P,
   const element_ptr denomx = curve_x_coord(R);
   const element_ptr denomy = curve_y_coord(R);
 
-  void do_vertical(element_t e, element_t edenom, element_ptr Ax)
-  {
-    element_sub(e0, numx, Ax);
-    element_mul(e, e, e0);
-
-    element_sub(e0, denomx, Ax);
-    element_mul(edenom, edenom, e0);
+  #define do_vertical(e, edenom, Ax) { \
+    element_sub(e0, numx, Ax);         \
+    element_mul(e, e, e0);             \
+                                       \
+    element_sub(e0, denomx, Ax);       \
+    element_mul(edenom, edenom, e0);   \
   }
 
-  void do_tangent(element_t e, element_t edenom)
-  {
-    //a = -slope_tangent(A.x, A.y);
-    //b = 1;
-    //c = -(A.y + a * A.x);
-    //but we multiply by 2*A.y to avoid division
-
-    //a = -Ax * (Ax + Ax + Ax + twicea_2) - a_4;
-    //Common curves: a2 = 0 (and cc->a is a_4), so
-    //a = -(3 Ax^2 + cc->a)
-    //b = 2 * Ay
-    //c = -(2 Ay^2 + a Ax);
-
-    element_square(a, Zx);
-    element_mul_si(a, a, 3);
-    element_add(a, a, cca);
-    element_neg(a, a);
-
-    element_add(b, Zy, Zy);
-
-    element_mul(e0, b, Zy);
-    element_mul(c, a, Zx);
-    element_add(c, c, e0);
-    element_neg(c, c);
-
-    element_mul(e0, a, numx);
-    element_mul(e1, b, numy);
-    element_add(e0, e0, e1);
-    element_add(e0, e0, c);
-    element_mul(e, e, e0);
-
-    element_mul(e0, a, denomx);
-    element_mul(e1, b, denomy);
-    element_add(e0, e0, e1);
-    element_add(e0, e0, c);
-    element_mul(edenom, edenom, e0);
+  #define do_tangent(e, edenom) {                      \
+    /* a = -slope_tangent(A.x, A.y); */                \
+    /* b = 1; */                                       \
+    /* c = -(A.y + a * A.x); */                        \
+    /* but we multiply by 2*A.y to avoid division */   \
+                                                       \
+    /* a = -Ax * (Ax + Ax + Ax + twicea_2) - a_4; */   \
+    /* Common curves: a2 = 0 (and cc->a is a_4), so */ \
+    /* a = -(3 Ax^2 + cc->a) */                        \
+    /* b = 2 * Ay */                                   \
+    /* c = -(2 Ay^2 + a Ax); */                        \
+                                                       \
+    element_square(a, Zx);                             \
+    element_mul_si(a, a, 3);                           \
+    element_add(a, a, cca);                            \
+    element_neg(a, a);                                 \
+                                                       \
+    element_add(b, Zy, Zy);                            \
+                                                       \
+    element_mul(e0, b, Zy);                            \
+    element_mul(c, a, Zx);                             \
+    element_add(c, c, e0);                             \
+    element_neg(c, c);                                 \
+                                                       \
+    element_mul(e0, a, numx);                          \
+    element_mul(e1, b, numy);                          \
+    element_add(e0, e0, e1);                           \
+    element_add(e0, e0, c);                            \
+    element_mul(e, e, e0);                             \
+                                                       \
+    element_mul(e0, a, denomx);                        \
+    element_mul(e1, b, denomy);                        \
+    element_add(e0, e0, e1);                           \
+    element_add(e0, e0, c);                            \
+    element_mul(edenom, edenom, e0);                   \
   }
 
-  void do_line(element_ptr e, element_ptr edenom, element_ptr A, element_ptr B)
-  {
-    element_ptr Ax = curve_x_coord(A);
-    element_ptr Ay = curve_y_coord(A);
-    element_ptr Bx = curve_x_coord(B);
-    element_ptr By = curve_y_coord(B);
-
-    element_sub(b, Bx, Ax);
-    element_sub(a, Ay, By);
-    element_mul(c, Ax, By);
-    element_mul(e0, Ay, Bx);
-    element_sub(c, c, e0);
-
-    element_mul(e0, a, numx);
-    element_mul(e1, b, numy);
-    element_add(e0, e0, e1);
-    element_add(e0, e0, c);
-    element_mul(e, e, e0);
-
-    element_mul(e0, a, denomx);
-    element_mul(e1, b, denomy);
-    element_add(e0, e0, e1);
-    element_add(e0, e0, c);
-    element_mul(edenom, edenom, e0);
+  #define do_line(e, edenom, A, B) {   \
+    element_ptr Ax = curve_x_coord(A); \
+    element_ptr Ay = curve_y_coord(A); \
+    element_ptr Bx = curve_x_coord(B); \
+    element_ptr By = curve_y_coord(B); \
+                                       \
+    element_sub(b, Bx, Ax);            \
+    element_sub(a, Ay, By);            \
+    element_mul(c, Ax, By);            \
+    element_mul(e0, Ay, Bx);           \
+    element_sub(c, c, e0);             \
+                                       \
+    element_mul(e0, a, numx);          \
+    element_mul(e1, b, numy);          \
+    element_add(e0, e0, e1);           \
+    element_add(e0, e0, c);            \
+    element_mul(e, e, e0);             \
+                                       \
+    element_mul(e0, a, denomx);        \
+    element_mul(e1, b, denomy);        \
+    element_add(e0, e0, e1);           \
+    element_add(e0, e0, c);            \
+    element_mul(edenom, edenom, e0);   \
   }
 
   element_init(a, res->field);
@@ -462,6 +459,9 @@ static void e_miller_affine(element_t res, element_t P,
   element_clear(c);
   element_clear(e0);
   element_clear(e1);
+  #undef do_vertical
+  #undef do_tangent
+  #undef do_line
 }
 
 static void (*e_miller_fn)(element_t res, element_t P,
@@ -886,7 +886,7 @@ static void e_init(pbc_param_ptr p) {
 
 // Public interface:
 
-int pbc_param_init_e(pbc_param_ptr par, const char *(*tab)(const char *)) {
+int pbc_param_init_e(pbc_param_ptr par, struct symtab_s *tab) {
   e_init(par);
   e_param_ptr p = par->data;
 

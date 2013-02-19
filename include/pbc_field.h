@@ -677,8 +677,11 @@ void element_dlog_pollard_rho(element_t x, element_t g, element_t h);
 // Trial division up to a given limit. If limit == NULL, then there is no limit.
 // Call the callback for each factor found, abort and return 1 if the callback
 // returns nonzero, otherwise return 0.
-int pbc_trial_divide(int (*fun)(mpz_t factor, unsigned int multiplicity),
-    mpz_t n, mpz_ptr limit);
-
+int pbc_trial_divide(int (*fun)(mpz_t factor,
+                                unsigned int multiplicity,
+                                void *scope_ptr),
+                     void *scope_ptr,
+                     mpz_t n,
+                     mpz_ptr limit);
 
 #endif  // __PBC_FIELD_H__

@@ -6,6 +6,29 @@
 #include "pbc.h"
 #include "pbc_utils.h"
 
+struct cell_s {
+  int ind;
+  mpz_t data;
+};
+typedef struct cell_s *cell_ptr;
+
+static cell_ptr newcell(void)
+{
+  cell_ptr res;
+  res = pbc_malloc(sizeof(struct cell_s));
+  //res->data = pbc_malloc(sizeof(mpz_t));
+  //mpz_init(res->data);
+  mpz_init(res->data);
+  return res;
+}
+
+static void delcell(void *p)
+{
+  cell_ptr cp = p;
+  mpz_clear(cp->data);
+  pbc_free(p);
+}
+
 static int is_gen(mpz_t x, mpz_t q, darray_ptr fac, darray_ptr mul) {
   int result = 1;
   mpz_t z;
@@ -80,28 +103,6 @@ void index_calculus_step1(mpz_t *ind, int r, mpz_t g, mpz_t q,
   mpz_t *bundle = pbc_malloc(sizeof(mpz_t) * bundlecount);
   int faci;
   mpz_t k, km;
-
-  struct cell_s {
-    int ind;
-    mpz_t data;
-  };
-  typedef struct cell_s *cell_ptr;
-
-  cell_ptr newcell(void)
-  {
-    cell_ptr res;
-    res = pbc_malloc(sizeof(struct cell_s));
-    //res->data = pbc_malloc(sizeof(mpz_t));
-    //mpz_init(res->data);
-    mpz_init(res->data);
-    return res;
-  }
-  void delcell(void *p)
-  {
-    cell_ptr cp = p;
-    mpz_clear(cp->data);
-    pbc_free(p);
-  }
 
   cell_ptr *rel = pbc_malloc(sizeof(cell_ptr) * r);
   cell_ptr *relm = pbc_malloc(sizeof(cell_ptr) * r);
@@ -759,15 +760,24 @@ static void index_calculus_step2(mpz_t x, mpz_t *ind, int r,
   }
 }
 
+static void mpzclear(void *p) {
+  mpz_clear(p);
+  pbc_free(p);
+}
+
+struct addfm_scope_var {
+  darray_ptr fac, mul;
+};
+
+static int addfm(mpz_t f, unsigned int m, struct addfm_scope_var *v) {
+  darray_append(v->fac, f);
+  darray_append(v->mul, int_to_voidp(m));
+  return 0;
+}
+
 void pbc_mpz_index_calculus(mpz_t x, mpz_t g, mpz_t h, mpz_t q) {
   int i, r;
   mpz_t q1, z0;
-
-  void mpzclear(void *p)
-  {
-    mpz_clear(p);
-    pbc_free(p);
-  }
 
   mpz_init(q1);
   mpz_init(z0);
@@ -778,12 +788,8 @@ void pbc_mpz_index_calculus(mpz_t x, mpz_t g, mpz_t h, mpz_t q) {
   darray_t fac, mul;
   darray_init(fac);
   darray_init(mul);
-  int addfm(mpz_t f, unsigned int m) {
-    darray_append(fac, f);
-    darray_append(mul, int_to_voidp(m));
-    return 0;
-  }
-  pbc_trial_divide(addfm, q1, z0);
+  struct addfm_scope_var v = {.fac = fac, .mul = mul};
+  pbc_trial_divide((int(*)(mpz_t,unsigned,void*))addfm, &v, q1, z0);
 
   for (i=0; i<mul->count; i++) {
     unsigned int m = (unsigned int) mul->item[i];

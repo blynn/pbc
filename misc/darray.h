@@ -52,8 +52,25 @@ void darray_remove_index(darray_ptr a, int n);
 void darray_copy(darray_ptr dst, darray_ptr src);
 void darray_remove_all(darray_ptr d);
 void darray_forall(darray_t a, void (*func)(void *));
+void darray_forall2(darray_t a,
+                    void (*func)(void *darray_item, void *scope_ptr),
+                    void *scope_ptr);
+void darray_forall3(darray_t a,
+                    void (*func)(void *darray_item,
+                                 void *scope_ptr1,
+                                 void *scope_ptr2),
+                    void *scope_ptr1,
+                    void *scope_ptr2);
+void darray_forall4(darray_t a,
+                    void (*func)(void *darray_item,
+                                 void *scope_ptr1,
+                                 void *scope_ptr2,
+                                 void *scope_ptr3),
+                    void *scope_ptr1,
+                    void *scope_ptr2,
+                    void *scope_ptr3);
 
-void *darray_at_test(darray_ptr a, int (*test)(void *));
+void *darray_at_test(darray_ptr a, int (*test)(void *,void *), void *scope_ptr);
 
 /*@manual darray
 Returns the number of pointers held in 'a'.

@@ -15,15 +15,15 @@
 #include "pbc_utils.h"
 #include "pbc_hilbert.h"
 
-int main(int argc, char **argv) {
-  void xpow(int degree) {
-    if (degree == 1) {
-      printf("X");
-    } else if (degree) {
-      printf("X^%d", degree);
-    }
+static void xpow(int degree) {
+  if (degree == 1) {
+    printf("X");
+  } else if (degree) {
+    printf("X^%d", degree);
   }
+}
 
+int main(int argc, char **argv) {
   int D      = argc > 1 ? atoi(argv[1]) : 3;
   if (D <= 0) pbc_die("D must be positive.");
 

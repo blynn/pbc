@@ -125,12 +125,52 @@ void darray_forall(darray_t a, void (*func)(void *))
     }
 }
 
-void *darray_at_test(darray_ptr a, int (*test)(void *))
+void darray_forall2(darray_t a,
+                    void (*func)(void *darray_item, void *scope_ptr),
+                    void *scope_ptr)
+{
+    int i, n = a->count;
+    for (i=0; i<n; i++) {
+        func(a->item[i], scope_ptr);
+    }
+}
+
+void darray_forall3(darray_t a,
+                    void (*func)(void *darray_item,
+                                 void *scope_ptr1,
+                                 void *scope_ptr2),
+                    void *scope_ptr1,
+                    void *scope_ptr2)
+{
+    int i, n = a->count;
+    for (i=0; i<n; i++) {
+        func(a->item[i], scope_ptr1, scope_ptr2);
+    }
+}
+
+void darray_forall4(darray_t a,
+                    void (*func)(void *darray_item,
+                                 void *scope_ptr1,
+                                 void *scope_ptr2,
+                                 void *scope_ptr3),
+                    void *scope_ptr1,
+                    void *scope_ptr2,
+                    void *scope_ptr3)
+{
+    int i, n = a->count;
+    for (i=0; i<n; i++) {
+        func(a->item[i], scope_ptr1, scope_ptr2, scope_ptr3);
+    }
+}
+
+void *darray_at_test(darray_ptr a,
+                     int (*test)(void *data, void *scope_ptr),
+                     void *scope_ptr)
 {
     int i;
     for (i = 0; i < a->count; i++) {
         void *p = a->item[i];
-        if (test(p)) return p;
+        if (test(p, scope_ptr)) return p;
     }
     return NULL;
 }

@@ -42,13 +42,7 @@ static const char *token_get(token_t tok, const char *input, const char *end) {
   int n = 32;
   int i;
   char c;
-  int get(void) {
-    if ((!end || input < end) && *input) {
-      c = *input++;
-      return 0;
-    }
-    return 1;
-  }
+  #define get() (((!end || input < end) && *input) ? (c = *input++, 0) : 1)
   // Skip whitespace and comments.
   for(;;) {
     do {
@@ -83,6 +77,7 @@ static const char *token_get(token_t tok, const char *input, const char *end) {
   buf[i] = 0;
   tok->s = buf;
   return input;
+  #undef get
 }
 
 static void token_init(token_t tok) {
@@ -134,8 +129,16 @@ void param_out_int(FILE *stream, char *s, int i) {
   mpz_clear(z);
 }
 
-int lookup_mpz(mpz_t z, const char *(*tab)(const char *), const char *key) {
-  const char *data = tab(key);
+static const char *lookup(symtab_t tab, const char *key) {
+  if (!symtab_has(tab, key)) {
+    pbc_error("missing param: `%s'", key);
+    return NULL;
+  }
+  return symtab_at(tab, key);
+}
+
+int lookup_mpz(mpz_t z, symtab_t tab, const char *key) {
+  const char *data = lookup(tab, key);
   if (!data) {
     pbc_error("missing param: `%s'", key);
     return 1;
@@ -144,9 +147,9 @@ int lookup_mpz(mpz_t z, const char *(*tab)(const char *), const char *key) {
   return 0;
 }
 
-int lookup_int(int *n, const char *(*tab)(const char *), const char *key) {
+int lookup_int(int *n, symtab_t tab, const char *key) {
   mpz_t z;
-  const char *data = tab(key);
+  const char *data = lookup(tab, key);
   if (!data) {
     pbc_error("missing param: `%s'", key);
     return 1;
@@ -161,18 +164,11 @@ int lookup_int(int *n, const char *(*tab)(const char *), const char *key) {
 }
 
 static int param_set_tab(pbc_param_t par, symtab_t tab) {
-  const char *lookup(const char *key) {
-    if (!symtab_has(tab, key)) {
-      pbc_error("missing param: `%s'", key);
-      return NULL;
-    }
-    return symtab_at(tab, key);
-  }
-  const char *s = lookup("type");
+  const char *s = lookup(tab, "type");
 
   static struct {
     char *s;
-    int (*fun)(pbc_param_ptr, const char *(*)(const char *));
+    int (*fun)(pbc_param_ptr, symtab_t tab);
   } funtab[] = {
       { "a", pbc_param_init_a },
       { "d", pbc_param_init_d },
@@ -187,7 +183,7 @@ static int param_set_tab(pbc_param_t par, symtab_t tab) {
     unsigned int i;
     for(i = 0; i < sizeof(funtab)/sizeof(*funtab); i++) {
       if (!strcmp(s, funtab[i].s)) {
-        res = funtab[i].fun(par, lookup);
+        res = funtab[i].fun(par, tab);
         if (res) pbc_error("bad pairing parameters");
         return res;
       }

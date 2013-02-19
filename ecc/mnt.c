@@ -20,6 +20,11 @@ struct pell_solution_s {
 typedef struct pell_solution_s pell_solution_t[1];
 typedef struct pell_solution_s *pell_solution_ptr;
 
+static void freempz(void *data) {
+  mpz_clear(data);
+  free(data);
+}
+
 // Solves x^2 - Dy^2 = N where D not a square.
 // For square D, we have (x+Dy)(x-Dy) = N so we look at the factors of N.
 static void general_pell(pell_solution_t ps, mpz_t D, int N) {
@@ -157,10 +162,6 @@ static void general_pell(pell_solution_t ps, mpz_t D, int N) {
   mpz_clear(p0); mpz_clear(p1); mpz_clear(pnext);
   mpz_clear(q0); mpz_clear(q1); mpz_clear(qnext);
 
-  void freempz(void *data) {
-    mpz_clear(data);
-    free(data);
-  }
   darray_forall(listp, freempz);
   darray_forall(listq, freempz);
   darray_clear(listp);

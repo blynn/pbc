@@ -754,8 +754,12 @@ int pbc_mpz_set_str(mpz_t z, const char *s, int base) {
 // Divides `n` with primes up to `limit`. For each factor found,
 // call `fun`. If the callback returns nonzero, then aborts and returns 1.
 // Otherwise returns 0.
-int pbc_trial_divide(int (*fun)(mpz_t factor, unsigned int multiplicity),
-    mpz_t n, mpz_ptr limit) {
+int pbc_trial_divide(int (*fun)(mpz_t factor,
+                                unsigned int multiplicity,
+                                void *scope_ptr),
+                     void *scope_ptr,
+                     mpz_t n,
+                     mpz_ptr limit) {
   mpz_t p, m;
   mpz_t fac;
   unsigned int mul;
@@ -780,7 +784,7 @@ int pbc_trial_divide(int (*fun)(mpz_t factor, unsigned int multiplicity),
         mpz_divexact(m, m, p);
         mul++;
       } while (mpz_divisible_p(m, p));
-      if (fun(fac, mul)) {
+      if (fun(fac, mul, scope_ptr)) {
         mpz_clear(fac);
         mpz_clear(m);
         mpz_clear(p);

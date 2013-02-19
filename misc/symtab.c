@@ -15,14 +15,13 @@ void symtab_init(symtab_t t) {
   darray_init(t->list);
 }
 
-void symtab_clear(symtab_t t) {
-  void clear(void *data)
-  {
-    entry_ptr e = data;
-    pbc_free(e->key);
-    pbc_free(e);
-  }
+static void clear(void *data) {
+  entry_ptr e = data;
+  pbc_free(e->key);
+  pbc_free(e);
+}
 
+void symtab_clear(symtab_t t) {
   darray_forall(t->list, clear);
   darray_clear(t->list);
 }

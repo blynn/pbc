@@ -93,8 +93,11 @@ tree_ptr tree_new(int type, void *data) {
   return res;
 }
 
+static void delete_child(void *p) {
+  tree_delete(p);
+}
+
 void tree_delete(tree_ptr t) {
-  void delete_child(void *p) { tree_delete(p); }
   darray_forall(t->child, delete_child);
   darray_clear(t->child);
   switch(t->type) {

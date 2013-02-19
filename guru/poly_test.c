@@ -5,6 +5,32 @@
 #include "pbc_test.h"
 #include "misc/darray.h"
 
+static void elfree(void *data) {
+  element_clear(data);
+  free(data);
+}
+
+static void inner(void *data2, element_ptr f, field_t fx, darray_t prodlist) {
+  element_ptr g = data2;
+  if (!poly_degree(f) || !poly_degree(g)) return;
+  if (poly_degree(f) + poly_degree(g) > 3) return;
+  element_ptr h = pbc_malloc(sizeof(*h));
+  element_init(h, fx);
+  element_mul(h, f, g);
+  darray_append(prodlist, h);
+  EXPECT(!poly_is_irred(h));
+}
+
+static void outer(void *data, darray_t list, field_t fx, darray_t prodlist) {
+  element_ptr f = data;
+  darray_forall4(list, (void(*)(void*,void*,void*,void*))inner, f, fx, prodlist);
+}
+
+int isf(void *data, element_ptr f) {
+  element_ptr f1 = data;
+  return !element_cmp(f, f1);
+}
+
 int main(void) {
   field_t fp, fx;
   mpz_t prime;
@@ -32,7 +58,7 @@ int main(void) {
     }
 
     // Test poly_degree().
-    for(j = 2; !a[j] && j >= 0; j--);
+    for(j = 2; j >= 0 && !a[j]; j--);
     EXPECT(poly_degree(f) == j);
 
     // Add monic polynomials to the list.
@@ -59,21 +85,7 @@ break2: ;
   darray_t prodlist;
   darray_init(prodlist);
 
-  void outer(void *data) {
-    element_ptr f = data;
-    void inner(void *data2) {
-      element_ptr g = data2;
-      if (!poly_degree(f) || !poly_degree(g)) return;
-      if (poly_degree(f) + poly_degree(g) > 3) return;
-      element_ptr h = pbc_malloc(sizeof(*h));
-      element_init(h, fx);
-      element_mul(h, f, g);
-      darray_append(prodlist, h);
-      EXPECT(!poly_is_irred(h));
-    }
-    darray_forall(list, inner);
-  }
-  darray_forall(list, outer);
+  darray_forall4(list, (void(*)(void*,void*,void*,void*))outer, list, fx, prodlist);
 
   // Enumerate all monic polynomials in F_p[x] up to degree 3.
   a[0] = a[1] = a[2] = 0;
@@ -85,20 +97,16 @@ break2: ;
       element_set_si(e, a[j]);
       poly_set_coeff(f, e, j);
     }
-    for(j = 2; !a[j] && j >= 0; j--);
+    for(j = 2; j >= 0 && !a[j]; j--);
     element_set1(e);
     poly_set_coeff(f, e, j + 1);
 
-    int isf(void *data) {
-      element_ptr f1 = data;
-      return !element_cmp(f, f1);
-    }
     // Check f is a unit or appears on the list of composites if and only if
     // poly_is_irred() returns 0.
     if (poly_is_irred(f)) {
-      EXPECT(!darray_at_test(prodlist, isf));
+      EXPECT(!darray_at_test(prodlist, (int(*)(void*,void*))isf, f));
     } else if (poly_degree(f)) {
-      EXPECT(darray_at_test(prodlist, isf));
+      EXPECT(darray_at_test(prodlist, (int(*)(void*,void*))isf, f));
     }
     element_clear(f);
 
@@ -115,10 +123,6 @@ break2: ;
   }
 break3: ;
 
-  void elfree(void *data) {
-    element_clear(data);
-    free(data);
-  }
   darray_forall(list, elfree);
   darray_forall(prodlist, elfree);
   darray_clear(prodlist);

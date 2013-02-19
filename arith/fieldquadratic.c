@@ -106,10 +106,9 @@ static int fq_snprint(char *s, size_t n, element_ptr e) {
   size_t result = 0, left;
   int status;
 
-  void clip_sub(void)
-  {
-    result += status;
-    left = result >= n ? 0 : n - result;
+  #define clip_sub() {                   \
+    result += status;                    \
+    left = result >= n ? 0 : n - result; \
   }
 
   status = snprintf(s, n, "[");
@@ -127,6 +126,7 @@ static int fq_snprint(char *s, size_t n, element_ptr e) {
   status = snprintf(s + result, left, "]");
   if (status < 0) return status;
   return result + status;
+  #undef clip_sub
 }
 
 static void fq_set_multiz(element_ptr e, multiz m) {

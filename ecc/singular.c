@@ -304,65 +304,51 @@ static void sn_miller(element_t res, mpz_t q, element_t P,
   const element_ptr Px = curve_x_coord(P);
   const element_ptr Py = curve_y_coord(P);
 
-  void do_vertical(element_t e)
-  {
-    element_sub(e0, Qx, Zx);
+  #define do_vertical(e)     \
+    element_sub(e0, Qx, Zx); \
     element_mul(e, e, e0);
-  }
 
-  void do_tangent(element_t e)
-  {
-    //a = -slope_tangent(Z.x, Z.y);
-    //b = 1;
-    //c = -(Z.y + a * Z.x);
-    //but we multiply by 2*Z.y to avoid division
-
-    //a = -Zx * (Zx + Zx + Zx + 2)
-    //b = 2 * Zy
-    //c = -(2 Zy^2 + a Zx);
-
-    //element_mul_si(a, Zx, 3);
-    element_double(e0, Zx);
-    element_add(a, Zx, e0);
-    element_set_si(e0, 2);
-    element_add(a, a, e0);
-    element_mul(a, a, Zx);
-    element_neg(a, a);
-
-    element_add(b, Zy, Zy);
-
-    element_mul(e0, b, Zy);
-    element_mul(c, a, Zx);
-    element_add(c, c, e0);
-    element_neg(c, c);
-
-    element_mul(e0, a, Qx);
-    element_mul(e1, b, Qy);
-    element_add(e0, e0, e1);
-    element_add(e0, e0, c);
+  //a = -slope_tangent(Z.x, Z.y);
+  //b = 1;
+  //c = -(Z.y + a * Z.x);
+  //but we multiply by 2*Z.y to avoid division
+  //a = -Zx * (Zx + Zx + Zx + 2)
+  //b = 2 * Zy
+  //c = -(2 Zy^2 + a Zx);
+  #define do_tangent(e)      \
+    element_double(e0, Zx);  \
+    element_add(a, Zx, e0);  \
+    element_set_si(e0, 2);   \
+    element_add(a, a, e0);   \
+    element_mul(a, a, Zx);   \
+    element_neg(a, a);       \
+    element_add(b, Zy, Zy);  \
+    element_mul(e0, b, Zy);  \
+    element_mul(c, a, Zx);   \
+    element_add(c, c, e0);   \
+    element_neg(c, c);       \
+    element_mul(e0, a, Qx);  \
+    element_mul(e1, b, Qy);  \
+    element_add(e0, e0, e1); \
+    element_add(e0, e0, c);  \
     element_mul(e, e, e0);
-  }
 
-  void do_line(element_ptr e)
-  {
-    //a = -(B.y - A.y) / (B.x - A.x);
-    //b = 1;
-    //c = -(A.y + a * A.x);
-    //but we'll multiply by B.x - A.x to avoid division
-
-    element_sub(b, Px, Zx);
-    element_sub(a, Zy, Py);
-    element_mul(e0, b, Zy);
-    element_mul(c, a, Zx);
-    element_add(c, c, e0);
-    element_neg(c, c);
-
-    element_mul(e0, a, Qx);
-    element_mul(e1, b, Qy);
-    element_add(e0, e0, e1);
-    element_add(e0, e0, c);
+  //a = -(B.y - A.y) / (B.x - A.x);
+  //b = 1;
+  //c = -(A.y + a * A.x);
+  //but we'll multiply by B.x - A.x to avoid division
+  #define do_line(e)         \
+    element_sub(b, Px, Zx);  \
+    element_sub(a, Zy, Py);  \
+    element_mul(e0, b, Zy);  \
+    element_mul(c, a, Zx);   \
+    element_add(c, c, e0);   \
+    element_neg(c, c);       \
+    element_mul(e0, a, Qx);  \
+    element_mul(e1, b, Qy);  \
+    element_add(e0, e0, e1); \
+    element_add(e0, e0, c);  \
     element_mul(e, e, e0);
-  }
 
   element_init(a, Px->field);
   element_init(b, Px->field);
@@ -395,6 +381,9 @@ static void sn_miller(element_t res, mpz_t q, element_t P,
     }
     m--;
   }
+  #undef do_tangent
+  #undef do_vertical
+  #undef do_line
 
   element_invert(vd, vd);
   element_mul(res, v, vd);

@@ -5,7 +5,8 @@
 #ifndef __PBC_A_PARAM_H__
 #define __PBC_A_PARAM_H__
 
-int pbc_param_init_a(pbc_param_ptr par, const char *(*tab)(const char *));
+struct symtab_s;
+int pbc_param_init_a(pbc_param_ptr par, struct symtab_s *tab);
 
 /*@manual aparam
 Generate type A pairing parameters and store them in 'p',
