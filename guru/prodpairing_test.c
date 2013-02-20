@@ -2,7 +2,7 @@
 // pairing_init_pbc_param().
 //
 // By Michael Adjedj, Ben Lynn.
-#include "pbc/pbc.h"
+#include "pbc.h"
 #include "pbc_test.h"
 
 int main(void) {

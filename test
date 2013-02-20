@@ -12,9 +12,9 @@ function show_result() {
 }
 
 make test
-make out/pbc
+make pbc/pbc
 for t in pbc/pairing_test.pbc pbc/g2_test.pbc ; do
-  out/pbc < $t > /dev/null
+  pbc/pbc < $t > /dev/null
   show_result $?
 done
 
