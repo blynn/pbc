@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([pbc], [0.5.12], [blynn@cs.stanford.edu])
+AC_INIT([pbc], [0.5.13], [blynn@cs.stanford.edu])
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_SRCDIR([./])

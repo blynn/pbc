@@ -2,6 +2,12 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.5.13 and 0.5.12
+
+* Many thanks to Homer Hsing for volunteering to maintain this library.
+* Flattened nested functions.
+* Bugfix for test script.
+
 Changes between PBC version 0.5.12 and 0.5.11
 
 * Fixed a parsing bug reported by Michael Adjedj.

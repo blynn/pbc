@@ -81,7 +81,7 @@ expr
 // Not quite atoms.
 molecule
   : molecule LPAR exprlist RPAR  { $$ = $3; tree_set_fun($$, $1); }
-  | LPAR expr RPAR               { $$ = $2 }
+  | LPAR expr RPAR               { $$ = $2; }
   | ID
   ;
 
