@@ -4,9 +4,10 @@
 AC_PREREQ(2.59)
 AC_INIT([pbc], [0.5.13], [blynn@cs.stanford.edu])
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([./])
-AC_PROG_LIBTOOL
+LT_INIT
 #AC_CANONICAL_HOST
 
 CFLAGS=
@@ -74,10 +75,27 @@ AC_SUBST(LIBPBC_LDFLAGS)
 
 # Checks for programs.
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
+
+AC_PROG_LEX
+if test "x$LEX" != xflex; then
+  echo "************************"
+  echo "flex not found"
+  echo "************************"
+  exit -1
+fi
+
+AC_PROG_YACC
+if test "x$YACC" != "xbison -y"; then
+  echo "************************"
+  echo "bison not found"
+  echo "************************"
+  exit -1
+fi
 
 # Checks for libraries.
 lib_err_msg="add its path to LDFLAGS\nsee ./configure --help"
@@ -112,10 +130,10 @@ AC_HEADER_TIME
 dnl setup CFLAGS
 with_enable_optimized="no"
 AC_ARG_ENABLE( optimized, 
-	       [AC_HELP_STRING([--enable-optimized],
-			[Enable optimized build])],
-         [with_enable_optimized="$withval"],
-	 [with_enable_optimized="no"])
+              [AS_HELP_STRING([--enable-optimized],
+                              [Enable optimized build])],
+              [with_enable_optimized="$withval"],
+              [with_enable_optimized="no"])
 
 CFLAGS="$CFLAGS -Wall -W -Wfloat-equal -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wredundant-decls \
 -Wendif-labels -Wshadow -pipe -ffast-math -U__STRICT_ANSI__ -std=gnu99"

@@ -7,7 +7,7 @@
 
 #include "pbc_tree.h"
 #define YYSTYPE tree_ptr
-void yyerror(char *s);
+void yyerror(const char *s);
 int yylex(void);
 
 #define YY_NO_INPUT

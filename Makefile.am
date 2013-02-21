@@ -5,6 +5,7 @@ SO_VERSION = 1:0:0
 ChangeLog :
 	git log > ChangeLog
 
+ACLOCAL_AMFLAGS = -I m4
 CLEANFILES = *~
 maintainer-clean-local:
 	-rm -rf Makefile.in depcomp ltmain.sh config.h.in configure compile config.guess config.sub \

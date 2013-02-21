@@ -4,7 +4,7 @@
 #include "pbc.h"
 
 int consider(pbc_cm_t cm, void *data) {
-  unsigned int D = (unsigned int) data;
+  unsigned int D = * (unsigned *) data;
   int qbits, rbits;
   qbits = mpz_sizeinbase(cm->q, 2);
   rbits = mpz_sizeinbase(cm->r, 2);
@@ -14,7 +14,7 @@ int consider(pbc_cm_t cm, void *data) {
 }
 
 void try(unsigned int D) {
-  pbc_cm_search_d(consider, (void *) D, D, 500);
+  pbc_cm_search_d(consider, &D, D, 500);
 }
 
 int main(int argc, char **argv)
