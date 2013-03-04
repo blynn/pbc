@@ -14,10 +14,6 @@ CFLAGS=
 default_fink_path=/sw
 case $host_os in
      darwin*) 
-     	      dnl nested function support
-     	      AC_MSG_NOTICE([Adding -fnested-functions to CFLAGS])
-	      CFLAGS="-fnested-functions"
-
 	      dnl fink installation
      	      AC_MSG_CHECKING([for a fink installation at $default_fink_path])
      	      if test -d $default_fink_path; then 
