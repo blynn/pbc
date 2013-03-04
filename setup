@@ -1,6 +1,13 @@
 #!/bin/bash -ex
 
-libtoolize --force --copy
+if [ `which libtoolize` != '' ]; then
+    LT=libtoolize
+elif [ `which glibtoolize` != '' ]; then
+    LT=glibtoolize
+else
+    exit 1
+fi
+$LT --force --copy
 aclocal
 autoheader
 automake --add-missing --copy --gnu
