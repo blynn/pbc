@@ -3,7 +3,7 @@ maintainer-clean-local:
 	-rm -rf Makefile.in
 
 AM_CPPFLAGS = -I../include
-LDADD = ../libpbc.la
+LDADD = ../libpbc.la -lgmp
 
 noinst_PROGRAMS = bls hess joux paterson yuanli zhangkim zss
 

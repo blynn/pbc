@@ -55,29 +55,24 @@ libpbc_la_SOURCES = arith/field.c arith/z.c \
 	ecc/f_param.c ecc/g_param.c
 libpbc_la_LDFLAGS = -lgmp -lm -version-info $(SO_VERSION) $(PBC_LDFLAGS) $(LIBPBC_LDFLAGS)
 
+# LDADD is fallback of program_LDADD
+# explicit "-lgmp" fixes error of "undefined reference to GMP symbol"
+LDADD = libpbc.la -lgmp
 noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa benchmark/ellnet
 noinst_PROGRAMS += guru/fp_test guru/quadratic_test guru/poly_test guru/prodpairing_test
 pbc_pbc_CPPFLAGS = -I include
-pbc_pbc_LDADD = libpbc.la
 pbc_pbc_SOURCES = pbc/parser.tab.c pbc/lex.yy.c pbc/pbc.c pbc/pbc_getline.c misc/darray.c misc/symtab.c
 benchmark_benchmark_CPPFLAGS = -I include
-benchmark_benchmark_LDADD = libpbc.la
 benchmark_benchmark_SOURCES = benchmark/benchmark.c
 benchmark_timersa_CPPFLAGS = -I include
-benchmark_timersa_LDADD = libpbc.la
 benchmark_timersa_SOURCES = benchmark/timersa.c
 benchmark_ellnet_CPPFLAGS = -I include
-benchmark_ellnet_LDADD = libpbc.la
 benchmark_ellnet_SOURCES = benchmark/ellnet.c
 guru_fp_test_CPPFLAGS = -I include
-guru_fp_test_LDADD = libpbc.la
 guru_fp_test_SOURCES = guru/fp_test.c
 guru_quadratic_test_CPPFLAGS = -I include
-guru_quadratic_test_LDADD = libpbc.la
 guru_quadratic_test_SOURCES = guru/quadratic_test.c
 guru_poly_test_CPPFLAGS = -I include
-guru_poly_test_LDFLAGS = -lgmp -lm
 guru_poly_test_SOURCES = $(libpbc_la_SOURCES) guru/poly_test.c
 guru_prodpairing_test_CPPFLAGS = -I include
-guru_prodpairing_test_LDADD = libpbc.la
 guru_prodpairing_test_SOURCES = guru/prodpairing_test.c
