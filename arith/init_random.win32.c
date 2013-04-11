@@ -1,5 +1,6 @@
 // Win32 Compatibility Code added by Yulian Kalev and Stefan Georg Weber.
 #include <stdio.h>
+#include <stdint.h> // for intptr_t
 #include <stdlib.h>
 #include <windows.h>
 #include <wincrypt.h>

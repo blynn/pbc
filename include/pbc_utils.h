@@ -77,10 +77,10 @@ void pbc_error(const char *err, ...)
 #endif
 
 // For storing small integers in void *
-// see http://www.gelato.unsw.edu.au/archives/linux-ia64/0008/0344.html
-static inline void *int_to_voidp(int i) {
-  // TODO: This won't work on some platforms.
-  return (void *) (long) i;
+// C99 standard introduced the intptr_t and uintptr_t types,
+// guaranteed to be able to hold pointers
+static inline void *int_to_voidp(intptr_t i) {
+  return (void *) i;
 }
 
 #endif //__PBC_UTILS_H__

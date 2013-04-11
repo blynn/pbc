@@ -1,6 +1,7 @@
 %{
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdint.h> // for intptr_t
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"

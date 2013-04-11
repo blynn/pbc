@@ -1,4 +1,5 @@
-#include <pbc.h>
+#include <stdint.h> // for intptr_t
+#include "pbc.h"
 #include "pbc_test.h"
 
 /* I've heard that sometimes automatic garbage collection can outperform

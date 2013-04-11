@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <stdarg.h>
+#include <stdint.h> // for intptr_t
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> // for memcmp()

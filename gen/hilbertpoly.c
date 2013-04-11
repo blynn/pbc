@@ -10,6 +10,7 @@
 // e.g. $ hilbertpoly 3 1000000
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdint.h> // for intptr_t
 #include <stdlib.h> //for atoi, exit
 #include <gmp.h>
 #include "pbc_utils.h"

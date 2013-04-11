@@ -1,5 +1,6 @@
 // Generate MNT curve(s) for a given D.
 
+#include <stdint.h> // for intptr_t
 #include "pbc.h"
 #include "pbc_utils.h"  // for UNUSED_VAR
 

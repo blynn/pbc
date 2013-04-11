@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdint.h> // for intptr_t
 #include <stdio.h>
 #include <string.h>
 #include "pbc_utils.h"

@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h> // for intptr_t
 #include <gmp.h>
 #include "pbc_mnt.h"
 #include "pbc_memory.h"
@@ -29,7 +30,8 @@ static void freempz(void *data) {
 // For square D, we have (x+Dy)(x-Dy) = N so we look at the factors of N.
 static void general_pell(pell_solution_t ps, mpz_t D, int N) {
   // TODO: Use brute force for small D.
-  int i, f, n, sgnN = N > 0 ? 1 : -1;
+  int i, sgnN = N > 0 ? 1 : -1;
+  intptr_t f, n;
 
   // Find square factors of N.
   darray_t listf;
@@ -94,7 +96,7 @@ static void general_pell(pell_solution_t ps, mpz_t D, int N) {
   for(;;) {
     if (d == sgnN) {
       for (i=0; i<listf->count; i++) {
-        f = (int) listf->item[i];
+        f = (intptr_t) listf->item[i];
         if (!mpz_cmp_ui(Q1, abs(N) / (f * f))) {
 //element_printf("found %Zd, %Zd, %d\n", p0, q0, f);
           zptr = (mpz_ptr) pbc_malloc(sizeof(mpz_t));

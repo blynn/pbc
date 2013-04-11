@@ -1,3 +1,4 @@
+#include <stdint.h> // for intptr_t
 #include <sys/time.h>
 #include "pbc_utils.h"
 

@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdint.h> // for intptr_t
 #include <stdlib.h> //for rand, pbc_malloc, pbc_free
 #include <string.h> //for strcmp
 #include <gmp.h>
