@@ -13,7 +13,7 @@ function show_result() {
 
 make test
 make pbc/pbc
-for t in pbc/pairing_test.pbc pbc/g2_test.pbc ; do
+for t in pbc/pairing_test.pbc pbc/g2_test.pbc pbc/bilinear.test ; do
   pbc/pbc < $t > /dev/null
   show_result $?
 done
