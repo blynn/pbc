@@ -1,8 +1,8 @@
 #!/bin/bash -ex
 
-if [ `which libtoolize` != '' ]; then
+if [ x`which libtoolize` != x ]; then
     LT=libtoolize
-elif [ `which glibtoolize` != '' ]; then
+elif [ x`which glibtoolize` != x ]; then
     LT=glibtoolize
 else
     exit 1
