@@ -619,7 +619,8 @@ static val_ptr run_order(val_ptr v[]) {
   element_set_mpz(e, f->order);
   return val_new_element(e);
 }
-static fun_t fun_order = {{ "ord", run_order, 1, sig_field }};
+static fun_t fun_ord = {{ "ord", run_order, 1, sig_field }};
+static fun_t fun_order = {{ "order", run_order, 1, sig_field }};
 
 static val_ptr run_random(val_ptr v[]) {
   element_ptr e = pbc_malloc(sizeof(*e));
@@ -627,7 +628,8 @@ static val_ptr run_random(val_ptr v[]) {
   element_random(e);
   return val_new_element(e);
 }
-static fun_t fun_random = {{ "rnd", run_random, 1, sig_field }};
+static fun_t fun_rnd = {{ "rnd", run_random, 1, sig_field }};
+static fun_t fun_random = {{ "random", run_random, 1, sig_field }};
 
 static val_ptr run_sqrt(val_ptr v[]) {
   // TODO: Check v[0] is square.
@@ -831,8 +833,8 @@ static fun_t fun_init_pairing_g = {{
     "init_pairing_g", run_init_pairing_g, 0, NULL
     }};
 
-static void builtin(fun_ptr fun, const char *s) {
-  symtab_put(reserved, val_new_fun(fun), s);
+static void builtin(fun_ptr fun) {
+  symtab_put(reserved, val_new_fun(fun), fun->name);
 }
 
 int end_of_input;
@@ -882,26 +884,26 @@ int main(int argc, char **argv) {
   field_init_multiz(M);
   symtab_init(tab);
 
-  builtin(fun_random, "rnd");
-  builtin(fun_random, "random");
-  builtin(fun_order, "ord");
-  builtin(fun_order, "order");
-  builtin(fun_nextprime, "nextprime");
-  builtin(fun_sqrt, "sqrt");
-  builtin(fun_inv, "inv");
-  builtin(fun_type, "type");
-  builtin(fun_pairing, "pairing");
-  builtin(fun_zmod, "zmod");
-  builtin(fun_poly, "poly");
-  builtin(fun_polymod, "polymod");
-  builtin(fun_extend, "extend");
-  builtin(fun_exit, "exit");
-  builtin(fun_CHECK, "CHECK");
-  builtin(fun_init_pairing_a, "init_pairing_a");
-  builtin(fun_init_pairing_d, "init_pairing_d");
-  builtin(fun_init_pairing_e, "init_pairing_e");
-  builtin(fun_init_pairing_f, "init_pairing_f");
-  builtin(fun_init_pairing_g, "init_pairing_g");
+  builtin(fun_rnd);
+  builtin(fun_random);
+  builtin(fun_ord);
+  builtin(fun_order);
+  builtin(fun_nextprime);
+  builtin(fun_sqrt);
+  builtin(fun_inv);
+  builtin(fun_type);
+  builtin(fun_pairing);
+  builtin(fun_zmod);
+  builtin(fun_poly);
+  builtin(fun_polymod);
+  builtin(fun_extend);
+  builtin(fun_exit);
+  builtin(fun_CHECK);
+  builtin(fun_init_pairing_a);
+  builtin(fun_init_pairing_d);
+  builtin(fun_init_pairing_e);
+  builtin(fun_init_pairing_f);
+  builtin(fun_init_pairing_g);
   run_init_pairing_a(NULL);
   symtab_put(reserved, val_new_field(M), "M");
   symtab_put(reserved, val_new_field(Z), "Z");
