@@ -1,6 +1,7 @@
 # Exercises a bug found by Zhang Ye.
 
 define test_cmp_0(initfn) {
+  initfn();
   CHECK(random(G2) != G2(0));
   CHECK(G2(0) != random(G2));
   CHECK(G2(0) == G2(0));
