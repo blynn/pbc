@@ -7,7 +7,7 @@
 
 static void elfree(void *data) {
   element_clear(data);
-  free(data);
+  pbc_free(data);
 }
 
 static void inner(void *data2, element_ptr f, field_t fx, darray_t prodlist) {
@@ -65,7 +65,7 @@ int main(void) {
     if (j >= 0 && a[j] == 1) darray_append(list, f);
     else {
       element_clear(f);
-      free(f);
+      pbc_free(f);
     }
 
     // Next!
