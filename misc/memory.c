@@ -35,22 +35,62 @@ __attribute__((constructor)) void init(void) {
   gmp_guarantee_zero_memory();
 }
 
+/* pbc_mem is a continuous memory keeping track of its size */
+static inline size_t pbc_mem_get_size(size_t *p) {
+  return *p;
+}
+
+static inline void pbc_mem_set_size(size_t *p, size_t size) {
+  *p = size;
+}
+
+static inline void *pbc_mem_to_ptr(size_t *p) {
+  return p + 1;
+}
+
+static inline void *pbc_ptr_to_mem(size_t *p) {
+  return p - 1;
+}
+
+static void *pbc_mem_malloc(size_t size) {
+  void *ptr = malloc(size + sizeof(size_t));
+  if(ptr)
+    pbc_mem_set_size(ptr, size);
+  return ptr;
+}
+
+static void pbc_mem_free(void *ptr) {
+  memset(ptr, 0, pbc_mem_get_size(ptr) + sizeof(size_t));
+  free(ptr);
+}
+
 static void *default_pbc_malloc(size_t size) {
-  void *res = malloc(size);
-  if (!res) pbc_die("malloc() error");
-  return res;
+  void *ptr = pbc_mem_malloc(size);
+  if(!ptr) pbc_die("malloc() error");
+  return pbc_mem_to_ptr(ptr);
 }
 
-static void *default_pbc_realloc(void *ptr, size_t size) {
-  void *res = realloc(ptr, size);
-  if (!res) pbc_die("realloc() error");
-  return res;
+static void *default_pbc_realloc(void *old, size_t new_size) {
+  void *new = pbc_mem_malloc(new_size);
+  if(!new) pbc_die("realloc() error");
+  if(old) {
+    old = pbc_ptr_to_mem(old);
+    memcpy(pbc_mem_to_ptr(new), pbc_mem_to_ptr(old), pbc_mem_get_size(old));
+    pbc_mem_free(old);
+  }
+  return pbc_mem_to_ptr(new);
 }
 
-static void default_pbc_free(void *ptr) { free(ptr); }
+static void default_pbc_free(void *ptr) {
+  if(ptr)
+    pbc_mem_free(pbc_ptr_to_mem(ptr));
+}
 
+/* release memory got from pbc_malloc only by pbc_free(), do not use free() */
 void *(*pbc_malloc)(size_t) = default_pbc_malloc;
+/* pbc_realloc guarantees zeroing out the memory before moving old memory */
 void *(*pbc_realloc)(void *, size_t) = default_pbc_realloc;
+/* pbc_free guarantees zeroing out the memory */
 void (*pbc_free)(void *) = default_pbc_free;
 
 void pbc_set_memory_functions(void *(*malloc_fn)(size_t),
