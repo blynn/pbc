@@ -8,5 +8,10 @@ char *pbc_getline(const char *prompt) {
   if (prompt) fputs(prompt, stdout);
   if (!fgets(s, 1024, stdin)) return NULL;
   if (feof(stdin)) return NULL;
-  return pbc_strdup(s);
+  /* use strdup rather than pbc_strdup. because
+   * 1. readline version of this function uses malloc.
+   * 2. pbc_malloc called by pbc_strdup may differ from malloc.
+   * here we keep consistency.
+   */
+  return strdup(s);
 }
