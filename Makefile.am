@@ -57,7 +57,8 @@ libpbc_la_LDFLAGS = -lgmp -lm -version-info $(SO_VERSION) $(PBC_LDFLAGS) $(LIBPB
 
 # LDADD is fallback of program_LDADD
 # explicit "-lgmp" fixes error of "undefined reference to GMP symbol"
-LDADD = libpbc.la -lgmp
+# explicit "-lm" fixes error of "undefined reference to libm symbol"
+LDADD = libpbc.la -lgmp -lm
 noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa benchmark/ellnet
 noinst_PROGRAMS += guru/fp_test guru/quadratic_test guru/poly_test guru/prodpairing_test
 pbc_pbc_CPPFLAGS = -I include
