@@ -7,7 +7,8 @@
 
 /* guarantee zeroing the memory */
 static void gmp_free(void *ptr, size_t size) {
-  memset(ptr, 0, size);
+  if(ptr)
+    memset(ptr, 0, size);
   free(ptr);
 }
 
@@ -20,7 +21,8 @@ static void* gmp_malloc(size_t size) {
  * because memory contents are not zeroed out. */
 static void* gmp_realloc(void *old_ptr, size_t old_size, size_t new_size) {
   void *new_ptr = malloc(new_size);
-  memcpy(new_ptr, old_ptr, old_size);
+  if(new_ptr && old_ptr)
+    memcpy(new_ptr, old_ptr, old_size);
   gmp_free(old_ptr, old_size);
   return new_ptr;
 }
