@@ -23,7 +23,7 @@ typedef struct pell_solution_s *pell_solution_ptr;
 
 static void freempz(void *data) {
   mpz_clear(data);
-  free(data);
+  pbc_free(data);
 }
 
 // Solves x^2 - Dy^2 = N where D not a square.

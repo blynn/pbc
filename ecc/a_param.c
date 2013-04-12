@@ -1282,8 +1282,8 @@ static void a_pairing_affine(element_ptr out, element_ptr in1, element_ptr in2,
 void a_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
     int n_prod, pairing_t pairing) {
   a_pairing_data_ptr p = pairing->data;
-  element_t* V=malloc(sizeof(element_t)*n_prod);
-  element_t* V1=malloc(sizeof(element_t)*n_prod);
+  element_t* V = pbc_malloc(sizeof(element_t)*n_prod);
+  element_t* V1 = pbc_malloc(sizeof(element_t)*n_prod);
   element_t f, f0, f1;
   element_t a, b, c;
   element_t e0;
@@ -1371,8 +1371,8 @@ void a_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
     element_clear(V[j]);
     element_clear(V1[j]);
   }
-  free(V);
-  free(V1);
+  pbc_free(V);
+  pbc_free(V1);
   element_clear(a);
   element_clear(b);
   element_clear(c);
@@ -2095,7 +2095,7 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 void a1_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
     int n_prod, pairing_t pairing) {
   a1_pairing_data_ptr p = pairing->data;
-  element_t* V = malloc(sizeof(element_t)*n_prod);
+  element_t* V = pbc_malloc(sizeof(element_t)*n_prod);
   element_t f, f0;
   element_t a, b, c;
   element_t e0;
@@ -2176,7 +2176,7 @@ void a1_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
   for(i=0; i<n_prod; i++){
     element_clear(V[i]);
   }
-  free(V);
+  pbc_free(V);
   element_clear(a);
   element_clear(b);
   element_clear(c);

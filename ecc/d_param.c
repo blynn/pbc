@@ -595,7 +595,7 @@ static void cc_millers_no_denom_affine(element_t res, mpz_t q, element_t P[],
   element_t e0;
   const element_ptr cca = curve_a_coeff(P[0]);
   element_ptr Px, Py;
-  element_t* Z=malloc(sizeof(element_t)*n_prod);
+  element_t* Z = pbc_malloc(sizeof(element_t)*n_prod);
   element_ptr Zx, Zy;
 
   /* TODO: when exactly is this not needed?
@@ -692,7 +692,7 @@ static void cc_millers_no_denom_affine(element_t res, mpz_t q, element_t P[],
   for(i=0; i<n_prod; i++){
     element_clear(Z[i]);
   }
-  free(Z);
+  pbc_free(Z);
   element_clear(a);
   element_clear(b);
   element_clear(c);
@@ -706,8 +706,8 @@ static void cc_millers_no_denom_affine(element_t res, mpz_t q, element_t P[],
 void cc_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
         int n_prod, pairing_t pairing) {
   element_ptr Qbase;
-  element_t* Qx=malloc(sizeof(element_t)*n_prod);
-  element_t* Qy=malloc(sizeof(element_t)*n_prod);
+  element_t* Qx = pbc_malloc(sizeof(element_t)*n_prod);
+  element_t* Qy = pbc_malloc(sizeof(element_t)*n_prod);
   pptr p = pairing->data;
   int i;
   for(i=0; i<n_prod; i++){
@@ -727,9 +727,8 @@ void cc_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
           element_clear(Qx[i]);
                 element_clear(Qy[i]);
   }
-  free(Qx);
-        free(Qy);
-
+  pbc_free(Qx);
+  pbc_free(Qy);
 }
 
 

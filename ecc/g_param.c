@@ -60,7 +60,7 @@ static void g_clear(void *data) {
     mpz_clear(param->coeff[i]);
   }
   pbc_free(param->coeff);
-  free(data);
+  pbc_free(data);
 }
 
 static void g_out_str(FILE *stream, void *data) {

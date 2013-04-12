@@ -209,7 +209,7 @@ static void curve_mul(element_ptr c, element_ptr a, element_ptr b) {
 //compute c_i=a_i+a_i at one time.
 static void multi_double(element_ptr c[], element_ptr a[], int n) {
   int i;
-  element_t* table=malloc(sizeof(element_t)*n);  //a big problem?
+  element_t* table = pbc_malloc(sizeof(element_t)*n);  //a big problem?
   element_t e0, e1, e2;
   point_ptr q, r;
   curve_data_ptr cdp = a[0]->field->data;
@@ -277,13 +277,13 @@ static void multi_double(element_ptr c[], element_ptr a[], int n) {
   for(i=0; i<n; i++){
     element_clear(table[i]);
   }
-  free(table);
+  pbc_free(table);
 }
 
 //compute c_i=a_i+b_i at one time.
 static void multi_add(element_ptr c[], element_ptr a[], element_ptr b[], int n){
   int i;
-  element_t* table=malloc(sizeof(element_t)*n);  //a big problem?
+  element_t* table = pbc_malloc(sizeof(element_t)*n);  //a big problem?
   point_ptr p, q, r;
   element_t e0, e1, e2;
   curve_data_ptr cdp = a[0]->field->data;
@@ -361,7 +361,7 @@ static void multi_add(element_ptr c[], element_ptr a[], element_ptr b[], int n){
   for(i=0; i<n; i++){
     element_clear(table[i]);
   }
-  free(table);
+  pbc_free(table);
 }
 
 
