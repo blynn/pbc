@@ -5,6 +5,7 @@
 #include "pbc_utils.h"
 #include "pbc_memory.h"
 
+#ifdef SAFE_CLEAN
 /* guarantee zeroing the memory */
 static void gmp_free(void *ptr, size_t size) {
   if(ptr)
@@ -85,6 +86,21 @@ static void default_pbc_free(void *ptr) {
   if(ptr)
     pbc_mem_free(pbc_ptr_to_mem(ptr));
 }
+#else
+static void *default_pbc_malloc(size_t size) {
+  void *res = malloc(size);
+  if (!res) pbc_die("malloc() error");
+  return res;
+}
+
+static void *default_pbc_realloc(void *ptr, size_t size) {
+  void *res = realloc(ptr, size);
+  if (!res) pbc_die("realloc() error");
+  return res;
+}
+
+static void default_pbc_free(void *ptr) { free(ptr); }
+#endif
 
 /* release memory got from pbc_malloc only by pbc_free(), do not use free() */
 void *(*pbc_malloc)(size_t) = default_pbc_malloc;

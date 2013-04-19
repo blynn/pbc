@@ -131,12 +131,24 @@ AC_ARG_ENABLE( optimized,
               [with_enable_optimized="$withval"],
               [with_enable_optimized="no"])
 
+
+with_safe_clean=n
+AC_ARG_ENABLE( safe-clean,
+              [AS_HELP_STRING([--enable-safe-clean],
+                              [When free any PBC element or GMP mpz_t, fill internal memory inside the element by zero])],
+              [with_safe_clean=y],
+              [with_safe_clean=n])
+
 CFLAGS="$CFLAGS -Wall -W -Wfloat-equal -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wredundant-decls \
 -Wendif-labels -Wshadow -pipe -ffast-math -U__STRICT_ANSI__ -std=gnu99"
 if test "x$with_enable_optimized" != "no"; then
    	CFLAGS="$CFLAGS -g -O2"
 else
 	CFLAGS="$CFLAGS -fomit-frame-pointer -O3"
+fi
+
+if test "$with_safe_clean" != "n"; then
+  CFLAGS="$CFLAGS -DSAFE_CLEAN"
 fi
 
 # Checks for library functions.
