@@ -165,6 +165,7 @@ echo "-----------------------------------------"
 echo `date`
 echo "host info:        $host"
 echo "optimized build:  $with_enable_optimized"
+echo "compiler (CC):    $CC"
 echo "LDFLAGS:          $LDFLAGS"
 echo "CPPFLAGS:         $CPPFLAGS"
 echo "CFLAGS:           $CFLAGS"
