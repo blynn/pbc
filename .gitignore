@@ -6,7 +6,7 @@ Makefile
 Makefile.in
 aclocal.m4
 autom4te.cache/
-benchmark/.dirstamp
+.dirstamp
 benchmark/benchmark
 benchmark/ellnet
 benchmark/timersa
@@ -39,12 +39,12 @@ gen/hilbertpoly
 gen/listfreeman
 gen/listmnt
 git_config_back
+guru/*_test
 install-sh
 libpbc.la
 libtool
 ltmain.sh
 missing
-pbc/.dirstamp
 pbc/lex.yy.c
 pbc/lex.yy.h
 pbc/parser.tab.c
@@ -52,3 +52,7 @@ pbc/parser.tab.h
 pbc/pbc
 stamp-h1
 tags
+compile
+m4/
+*.exe
+*.exe.stackdump
