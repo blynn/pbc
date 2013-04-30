@@ -139,9 +139,18 @@ AC_ARG_ENABLE( safe-clean,
               [with_safe_clean=y],
               [with_safe_clean=n])
 
+with_debug=n
+AC_ARG_ENABLE( debug,
+              [AS_HELP_STRING([--enable-debug],
+                              [Add extra debugging information. Forbid compiling optimization.])],
+                              [with_debug=y],
+                              [with_debug=n])
+
 CFLAGS="$CFLAGS -Wall -W -Wfloat-equal -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wredundant-decls \
 -Wendif-labels -Wshadow -pipe -ffast-math -U__STRICT_ANSI__ -std=gnu99"
-if test "x$with_enable_optimized" != "no"; then
+if test "$with_debug" == "y"; then
+    CFLAGS="$CFLAGS -g3 -O0"
+elif test "$with_enable_optimized" != "no"; then
    	CFLAGS="$CFLAGS -g -O2"
 else
 	CFLAGS="$CFLAGS -fomit-frame-pointer -O3"
