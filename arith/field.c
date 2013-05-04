@@ -500,7 +500,7 @@ static int generic_is0(element_ptr a) {
   int result;
   element_t b;
   element_init(b, a->field);
-  result = element_cmp(a, b);
+  result = !element_cmp(a, b); // element_cmp returns 0 if 'a' and 'b' are the same, nonzero otherwise. generic_is0 returns true if 'a' is 0.
   element_clear(b);
   return result;
 }
@@ -510,7 +510,7 @@ static int generic_is1(element_ptr a) {
   element_t b;
   element_init(b, a->field);
   element_set1(b);
-  result = element_cmp(a, b);
+  result = !element_cmp(a, b); // element_cmp returns 0 if 'a' and 'b' are the same, nonzero otherwise. generic_is1 returns true if 'a' is 1.
   element_clear(b);
   return result;
 }
