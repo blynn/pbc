@@ -18,7 +18,7 @@ for t in pbc/pairing_test.pbc pbc/g2_test.pbc pbc/bilinear.test ; do
   show_result $?
 done
 
-for t in guru/fp_test guru/quadratic_test guru/poly_test guru/prodpairing_test ; do
+for t in guru/fp_test guru/quadratic_test guru/poly_test guru/prodpairing_test guru/ternary_extension_field_test guru/eta_T_3_test ; do
   $t > /dev/null
   show_result $?
 done
