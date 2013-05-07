@@ -26,7 +26,9 @@ include/pbc_z.h \
 include/pbc_fieldquadratic.h \
 include/pbc_f_param.h \
 include/pbc_g_param.h \
+include/pbc_i_param.h \
 include/pbc_fp.h \
+include/pbc_ternary_extension_field.h \
 include/pbc.h \
 include/pbc_hilbert.h \
 include/pbc_memory.h \
@@ -43,6 +45,7 @@ libpbc_la_CPPFLAGS = -Iinclude
 libpbc_la_SOURCES = arith/field.c arith/z.c \
 	arith/naivefp.c arith/fastfp.c \
 	arith/fp.c arith/fasterfp.c arith/montfp.c \
+	arith/ternary_extension_field.c \
 	arith/multiz.c \
 	arith/dlog.c \
 	arith/fieldquadratic.c arith/poly.c \
@@ -51,6 +54,7 @@ libpbc_la_SOURCES = arith/field.c arith/z.c \
 	misc/utils.c misc/memory.c misc/extend_printf.c \
 	ecc/mpc.c ecc/mnt.c ecc/hilbert.c ecc/curve.c ecc/pairing.c \
 	ecc/singular.c \
+	ecc/eta_T_3.c \
 	ecc/param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
 	ecc/f_param.c ecc/g_param.c
 libpbc_la_LDFLAGS = -lgmp -lm -version-info $(SO_VERSION) $(PBC_LDFLAGS) $(LIBPBC_LDFLAGS)
@@ -61,6 +65,7 @@ libpbc_la_LDFLAGS = -lgmp -lm -version-info $(SO_VERSION) $(PBC_LDFLAGS) $(LIBPB
 LDADD = libpbc.la -lgmp -lm
 noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa benchmark/ellnet
 noinst_PROGRAMS += guru/fp_test guru/quadratic_test guru/poly_test guru/prodpairing_test
+noinst_PROGRAMS += guru/ternary_extension_field_test guru/eta_T_3_test
 pbc_pbc_CPPFLAGS = -I include
 pbc_pbc_SOURCES = pbc/parser.tab.c pbc/lex.yy.c pbc/pbc.c pbc/pbc_getline.c misc/darray.c misc/symtab.c
 benchmark_benchmark_CPPFLAGS = -I include
@@ -77,3 +82,7 @@ guru_poly_test_CPPFLAGS = -I include
 guru_poly_test_SOURCES = $(libpbc_la_SOURCES) guru/poly_test.c
 guru_prodpairing_test_CPPFLAGS = -I include
 guru_prodpairing_test_SOURCES = guru/prodpairing_test.c
+guru_ternary_extension_field_test_CPPFLAGS = -I include
+guru_ternary_extension_field_test_SOURCES = guru/ternary_extension_field_test.c
+guru_eta_T_3_test_CPPFLAGS = -I include
+guru_eta_T_3_test_SOURCES = guru/eta_T_3_test.c
