@@ -176,7 +176,12 @@ static val_ptr v_field_cast(val_ptr v, tree_ptr t) {
   if (e->field == M) {
     if (v->field == M) return x;
     element_ptr e2 = element_new(v->field);
-    element_set_multiz(e2, e->data);
+    if (element_is0(e)) // if 'set0' is not 'set1' in base field of GT, but we hope 'GT(0)' calls 'set1', we may directly call 'element_set0' here
+      element_set0(e2);
+    else if (element_is1(e)) // reason is same as above
+      element_set1(e2);
+    else
+      element_set_multiz(e2, e->data);
     x->elem = e2;
     return x;
   }
@@ -788,6 +793,13 @@ static char *gparam =
 "coeff4 405367866213598664862417230702935310328613596\n"
 "nqr 22204504160560785687198080413579021865783099\n";
 
+static char *iparam =
+"type i\n"
+"m 97\n"
+"t 12\n"
+"n 2726865189058261010774960798134976187171462721\n"
+"n2 7\n";
+
 static val_ptr run_init_pairing_a(val_ptr v[]) {
   UNUSED_VAR(v);
   init_pairing(aparam);
@@ -831,6 +843,15 @@ static val_ptr run_init_pairing_g(val_ptr v[]) {
 }
 static fun_t fun_init_pairing_g = {{
     "init_pairing_g", run_init_pairing_g, 0, NULL
+    }};
+
+static val_ptr run_init_pairing_i(val_ptr v[]) {
+  UNUSED_VAR(v);
+  init_pairing(iparam);
+  return NULL;
+}
+static fun_t fun_init_pairing_i = {{
+    "init_pairing_i", run_init_pairing_i, 0, NULL
     }};
 
 static void builtin(fun_ptr fun) {
@@ -904,6 +925,7 @@ int main(int argc, char **argv) {
   builtin(fun_init_pairing_e);
   builtin(fun_init_pairing_f);
   builtin(fun_init_pairing_g);
+  builtin(fun_init_pairing_i);
   run_init_pairing_a(NULL);
   symtab_put(reserved, val_new_field(M), "M");
   symtab_put(reserved, val_new_field(Z), "Z");
