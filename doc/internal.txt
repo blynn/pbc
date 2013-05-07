@@ -321,6 +321,23 @@ Another construction based on the CM method.
 
 Discovered by Freeman, "Constructing pairing-friendly elliptic curves with embedding degree 10."
 
+=== Type I Internals ===
+
+Type I pairings is symmetric, constructed on a supersingular curve
+y^2^ = x^3^ - x + 1 over a ternary extension field F_{3^m^}.
+The embedding degree k is 6.
+Both G1 and G2 are the group of points E(F_{3^m^}).
+GT is a subgroup of F_{3^6*m^}. The group order is a prime number.
+
+parameters:
+
+  m, t:
+    The ternary extension field is F(3)[x]/(x^m^ + x^t^ + 2).
+  n:
+    the order of G1
+  n2:
+    n * n2 = number of points in E(F_{3^m^})
+
 === Testing functions ===
 
 For testing, debugging, demonstrations and benchmarks.
