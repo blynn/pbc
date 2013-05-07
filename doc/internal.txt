@@ -338,6 +338,10 @@ parameters:
   n2:
     n * n2 = number of points in E(F_{3^m^})
 
+Introduced by Barreto et al, "Efficient Pairing Computation on Supersingular
+Abelian Varieties", Designs, Codes and Cryptography, vol. 42, no. 3, pp. 239-271,
+Mar. 2007.
+
 === Testing functions ===
 
 For testing, debugging, demonstrations and benchmarks.
