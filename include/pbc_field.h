@@ -71,6 +71,7 @@ struct field_s {
   void (*halve)(element_ptr, element_ptr);
   void (*square)(element_ptr, element_ptr);
 
+  void (*cubic) (element_ptr, element_ptr);
   void (*pow_mpz)(element_ptr, element_ptr, mpz_ptr);
   void (*invert)(element_ptr, element_ptr);
   void (*neg)(element_ptr, element_ptr);
@@ -96,6 +97,7 @@ struct field_s {
   mpz_t order;                // 0 for infinite order
   element_ptr nqr;            // nonquadratic residue
 
+  char *name;
   void *data;
 };
 typedef struct field_s *field_ptr;
@@ -278,6 +280,11 @@ Set 'n' = 'a' 'b'.
 static inline void element_mul(element_t n, element_t a, element_t b) {
   PBC_ASSERT_MATCH3(n, a, b);
   n->field->mul(n, a, b);
+}
+
+static inline void element_cubic(element_t n, element_t a) {
+  PBC_ASSERT_MATCH2(n, a);
+  n->field->cubic(n, a);
 }
 
 /*@manual earith
