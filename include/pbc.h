@@ -23,6 +23,7 @@ extern "C" {
 #include "pbc_e_param.h"
 #include "pbc_f_param.h"
 #include "pbc_g_param.h"
+#include "pbc_i_param.h"
 #include "pbc_random.h"
 #include "pbc_memory.h"
 

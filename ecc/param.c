@@ -13,6 +13,7 @@
 #include "pbc_f_param.h"
 #include "pbc_a1_param.h"
 #include "pbc_g_param.h"
+#include "pbc_i_param.h"
 
 #include "misc/symtab.h"
 #include "ecc/param.h"
@@ -177,6 +178,7 @@ static int param_set_tab(pbc_param_t par, symtab_t tab) {
       { "f", pbc_param_init_f },
       { "g", pbc_param_init_g },
       { "a1", pbc_param_init_a1 },
+      { "i", pbc_param_init_i },
   };
 
   int res = 1;
