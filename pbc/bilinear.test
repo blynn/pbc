@@ -8,9 +8,14 @@ define test_element_order(group) {
 define test_group_order() {
   CHECK(order(G1) == order(G2));
   CHECK(order(G2) == order(GT));
+  a := pairing(random(G1), random(G2));
+  o := order(GT);
+  b := a^o;
+  CHECK(b == GT(0));
 }
 
 define test_pairing_with_zero() {
+  CHECK(GT(0) == GT(1));
   CHECK(pairing(G1(0), random(G2)) == GT(0));
   CHECK(pairing(random(G1), G2(0)) == GT(0));
   CHECK(pairing(G1(0), G2(0)) == GT(0));
@@ -42,3 +47,4 @@ test(init_pairing_d);
 test(init_pairing_e);
 test(init_pairing_f);
 test(init_pairing_g);
+test(init_pairing_i);

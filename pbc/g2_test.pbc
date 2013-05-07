@@ -15,6 +15,7 @@ test_cmp_0(init_pairing_d);
 test_cmp_0(init_pairing_e);
 test_cmp_0(init_pairing_f);
 test_cmp_0(init_pairing_g);
+test_cmp_0(init_pairing_i);
 
 # Exercises a bug found by Mario Di Raimondo.
 
@@ -33,3 +34,4 @@ test_g2_cmp(init_pairing_d);
 test_g2_cmp(init_pairing_e);
 test_g2_cmp(init_pairing_f);
 test_g2_cmp(init_pairing_g);
+test_g2_cmp(init_pairing_i);
