@@ -2,6 +2,10 @@ The PBC pairing-based cryptography library. See COPYING for license.
 
 Ben Lynn
 
+Changes between PBC version 0.5.14 and 0.5.13
+
+* Eta pairing (type I), by Homer Hsing
+
 Changes between PBC version 0.5.13 and 0.5.12
 
 * Many thanks to Homer Hsing for volunteering to maintain this library.
