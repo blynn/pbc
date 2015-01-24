@@ -1,11 +1,15 @@
 #include <stdint.h> // for intptr_t
-#include <sys/time.h>
 #include "pbc_utils.h"
 
 typedef struct _FILETIME {
   unsigned long dwLowDateTime;
   unsigned long dwHighDateTime;
 } FILETIME;
+
+typedef struct timeval {
+    long tv_sec;
+    long tv_usec;
+} timeval;
 
 void __stdcall GetSystemTimeAsFileTime(FILETIME*);
 

@@ -1,0 +1,478 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug DLL|Win32">
+      <Configuration>Debug DLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug DLL|x64">
+      <Configuration>Debug DLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release DLL|Win32">
+      <Configuration>Release DLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release DLL|x64">
+      <Configuration>Release DLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\arith\dlog.c" />
+    <ClCompile Include="..\..\arith\fasterfp.c" />
+    <ClCompile Include="..\..\arith\fastfp.c" />
+    <ClCompile Include="..\..\arith\field.c" />
+    <ClCompile Include="..\..\arith\fieldquadratic.c" />
+    <ClCompile Include="..\..\arith\fp.c" />
+    <ClCompile Include="..\..\arith\init_random.win32.c" />
+    <ClCompile Include="..\..\arith\montfp.c" />
+    <ClCompile Include="..\..\arith\multiz.c" />
+    <ClCompile Include="..\..\arith\naivefp.c" />
+    <ClCompile Include="..\..\arith\poly.c" />
+    <ClCompile Include="..\..\arith\random.c" />
+    <ClCompile Include="..\..\arith\ternary_extension_field.c" />
+    <ClCompile Include="..\..\arith\tinyfp.c" />
+    <ClCompile Include="..\..\arith\z.c" />
+    <ClCompile Include="..\..\ecc\a_param.c" />
+    <ClCompile Include="..\..\ecc\curve.c" />
+    <ClCompile Include="..\..\ecc\d_param.c" />
+    <ClCompile Include="..\..\ecc\eta_T_3.c" />
+    <ClCompile Include="..\..\ecc\e_param.c" />
+    <ClCompile Include="..\..\ecc\f_param.c" />
+    <ClCompile Include="..\..\ecc\g_param.c" />
+    <ClCompile Include="..\..\ecc\hilbert.c" />
+    <ClCompile Include="..\..\ecc\mnt.c" />
+    <ClCompile Include="..\..\ecc\mpc.c" />
+    <ClCompile Include="..\..\ecc\pairing.c" />
+    <ClCompile Include="..\..\ecc\param.c" />
+    <ClCompile Include="..\..\ecc\singular.c" />
+    <ClCompile Include="..\..\misc\darray.c" />
+    <ClCompile Include="..\..\misc\extend_printf.c" />
+    <ClCompile Include="..\..\misc\get_time.win32.c" />
+    <ClCompile Include="..\..\misc\memory.c" />
+    <ClCompile Include="..\..\misc\symtab.c" />
+    <ClCompile Include="..\..\misc\utils.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\ecc\mpc.h" />
+    <ClInclude Include="..\..\ecc\param.h" />
+    <ClInclude Include="..\..\include\pbc.h" />
+    <ClInclude Include="..\..\include\pbc_a1_param.h" />
+    <ClInclude Include="..\..\include\pbc_a_param.h" />
+    <ClInclude Include="..\..\include\pbc_curve.h" />
+    <ClInclude Include="..\..\include\pbc_d_param.h" />
+    <ClInclude Include="..\..\include\pbc_e_param.h" />
+    <ClInclude Include="..\..\include\pbc_field.h" />
+    <ClInclude Include="..\..\include\pbc_fieldquadratic.h" />
+    <ClInclude Include="..\..\include\pbc_fp.h" />
+    <ClInclude Include="..\..\include\pbc_f_param.h" />
+    <ClInclude Include="..\..\include\pbc_g_param.h" />
+    <ClInclude Include="..\..\include\pbc_hilbert.h" />
+    <ClInclude Include="..\..\include\pbc_i_param.h" />
+    <ClInclude Include="..\..\include\pbc_memory.h" />
+    <ClInclude Include="..\..\include\pbc_mnt.h" />
+    <ClInclude Include="..\..\include\pbc_multiz.h" />
+    <ClInclude Include="..\..\include\pbc_pairing.h" />
+    <ClInclude Include="..\..\include\pbc_param.h" />
+    <ClInclude Include="..\..\include\pbc_poly.h" />
+    <ClInclude Include="..\..\include\pbc_random.h" />
+    <ClInclude Include="..\..\include\pbc_singular.h" />
+    <ClInclude Include="..\..\include\pbc_ternary_extension_field.h" />
+    <ClInclude Include="..\..\include\pbc_test.h" />
+    <ClInclude Include="..\..\include\pbc_utils.h" />
+    <ClInclude Include="..\..\include\pbc_vc_compat.win32.h" />
+    <ClInclude Include="..\..\include\pbc_z.h" />
+    <ClInclude Include="..\..\misc\darray.h" />
+    <ClInclude Include="..\..\misc\symtab.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FB108CA8-CBA9-4CC3-8FC5-CB2BB5C224B3}</ProjectGuid>
+    <RootNamespace>pbcwin</RootNamespace>
+    <ProjectName>pbclib</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\lib\$(Platform)\Debug;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\mpir\lib\$(Platform)\Debug;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)lib\Debug\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\lib\$(Platform)\Debug;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\mpir\lib\$(Platform)\Debug;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+    <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\dll\$(Platform)\Debug;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\mpir\dll\$(Platform)\Debug;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)dll\Debug\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+    <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\dll\$(Platform)\Debug;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\mpir\dll\$(Platform)\Debug;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\lib\$(Platform)\Release;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\mpir\lib\x64\Release;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)lib\Release\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\lib\x64\Release;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\mpir\lib\x64\Release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+    <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\dll\$(Platform)\Release;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\mpir\dll\$(Platform)\Release;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)dll\Release\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+    <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\dll\$(Platform)\Release;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\mpir\dll\$(Platform)\Release;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ForcedIncludeFiles>pbc_vc_compat.win32.h</ForcedIncludeFiles>
+      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>mpir.lib</AdditionalDependencies>
+    </Lib>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)..\..\mpir" GOTO skip
+
+echo *******************************************************************************
+echo *                                   WARNING                                   *
+echo *    You appear to be missing one or more prerequisites for building PBC.     *
+echo *             If you experience build errors, consult README.txt              *
+echo *******************************************************************************
+
+:skip</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ForcedIncludeFiles>pbc_vc_compat.win32.h</ForcedIncludeFiles>
+      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>mpir.lib</AdditionalDependencies>
+    </Lib>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)..\..\mpir" GOTO skip
+
+echo *******************************************************************************
+echo *                                   WARNING                                   *
+echo *    You appear to be missing one or more prerequisites for building PBC.     *
+echo *             If you experience build errors, consult README.txt              *
+echo *******************************************************************************
+
+:skip</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ForcedIncludeFiles>pbc_vc_compat.win32.h</ForcedIncludeFiles>
+      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)..\..\mpir" GOTO skip
+
+echo *******************************************************************************
+echo *                                   WARNING                                   *
+echo *    You appear to be missing one or more prerequisites for building PBC.     *
+echo *             If you experience build errors, consult README.txt              *
+echo *******************************************************************************
+
+:skip</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ForcedIncludeFiles>pbc_vc_compat.win32.h</ForcedIncludeFiles>
+      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)..\..\mpir" GOTO skip
+
+echo *******************************************************************************
+echo *                                   WARNING                                   *
+echo *    You appear to be missing one or more prerequisites for building PBC.     *
+echo *             If you experience build errors, consult README.txt              *
+echo *******************************************************************************
+
+:skip</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ForcedIncludeFiles>pbc_vc_compat.win32.h</ForcedIncludeFiles>
+      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>mpir.lib</AdditionalDependencies>
+    </Lib>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)..\..\mpir" GOTO skip
+
+echo *******************************************************************************
+echo *                                   WARNING                                   *
+echo *    You appear to be missing one or more prerequisites for building PBC.     *
+echo *             If you experience build errors, consult README.txt              *
+echo *******************************************************************************
+
+:skip</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ForcedIncludeFiles>pbc_vc_compat.win32.h</ForcedIncludeFiles>
+      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>mpir.lib</AdditionalDependencies>
+    </Lib>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)..\..\mpir" GOTO skip
+
+echo *******************************************************************************
+echo *                                   WARNING                                   *
+echo *    You appear to be missing one or more prerequisites for building PBC.     *
+echo *             If you experience build errors, consult README.txt              *
+echo *******************************************************************************
+
+:skip</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ForcedIncludeFiles>pbc_vc_compat.win32.h</ForcedIncludeFiles>
+      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)..\..\mpir" GOTO skip
+
+echo *******************************************************************************
+echo *                                   WARNING                                   *
+echo *    You appear to be missing one or more prerequisites for building PBC.     *
+echo *             If you experience build errors, consult README.txt              *
+echo *******************************************************************************
+
+:skip</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <CompileAs>Default</CompileAs>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ForcedIncludeFiles>pbc_vc_compat.win32.h</ForcedIncludeFiles>
+      <DisableSpecificWarnings>4068</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>mpir.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PreBuildEvent>
+      <Command>IF EXIST "$(SolutionDir)..\..\mpir" GOTO skip
+
+echo *******************************************************************************
+echo *                                   WARNING                                   *
+echo *    You appear to be missing one or more prerequisites for building PBC.     *
+echo *             If you experience build errors, consult README.txt              *
+echo *******************************************************************************
+
+:skip</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

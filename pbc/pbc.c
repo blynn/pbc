@@ -3,7 +3,7 @@
 // TODO: Garbage collection.
 // TODO: Recursion (stack frames), anonymous functions.
 
-#include <unistd.h>  // For getopt.
+#include <string.h>
 
 #include "pbc.h"
 #include "pbc_fp.h"
@@ -134,7 +134,7 @@ static val_ptr v_builtin(val_ptr v, tree_ptr t) {
   if (1 + n != darray_count(t->child)) {
     return val_new_error("%s: wrong number of arguments", fun->name);
   }
-  val_ptr arg[n];
+  val_ptr* arg = pbc_malloc(n * sizeof(val_ptr));
   int i;
   for(i = 0; i < n; i++) {
     arg[i] = tree_eval(darray_at(t->child, i));
@@ -142,7 +142,9 @@ static val_ptr v_builtin(val_ptr v, tree_ptr t) {
       return val_new_error("%s: argument %d type mismatch", fun->name, i + 1);
     }
   }
-  return fun->run(arg);
+  val_ptr out = fun->run(arg);
+  pbc_free(arg);
+  return out;
 }
 
 static void eval_stmt(void *ptr) {
@@ -443,6 +445,7 @@ tree_ptr tree_new_z(const char* s) {
 static val_ptr eval_err(tree_ptr t) {
   UNUSED_VAR(t);
   pbc_die("BUG: shouldn't reach here!");
+  return NULL;
 }
 
 tree_ptr tree_new_empty_stmt_list() {

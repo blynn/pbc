@@ -15,6 +15,7 @@
 #include <stdint.h> // for intptr_t
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"
@@ -126,12 +127,13 @@ static void fp_to_mpz(mpz_ptr z, element_ptr e) {
     // x is stored as xR.
     // We must divide out R to convert to standard representation.
     fptr p = e->field->data;
-    mp_limb_t tmp[2 * p->limbs];
+    mp_limb_t* tmp = pbc_malloc(2 * p->limbs * sizeof(mp_limb_t));
 
     memcpy(tmp, ep->d, p->limbs * sizeof(mp_limb_t));
     memset(&tmp[p->limbs], 0, p->limbs * sizeof(mp_limb_t));
     _mpz_realloc(z, p->limbs);
     mont_reduce(z->_mp_d, tmp, p);
+    pbc_free(tmp);
     // Remove leading zero limbs.
     for (z->_mp_size = p->limbs; !z->_mp_d[z->_mp_size - 1]; z->_mp_size--);
   }
@@ -335,7 +337,7 @@ static inline void mont_mul(mp_limb_t *c, mp_limb_t *a, mp_limb_t *b,
   // Instead of right shifting every iteration
   // I allocate more room for the z array.
   size_t i, t = p->limbs;
-  mp_limb_t z[2 * t + 1];
+  mp_limb_t* z = pbc_malloc((2 * t + 1) * sizeof(mp_limb_t));
   mp_limb_t u = (a[0] * b[0]) * p->negpinv;
   mp_limb_t v = z[t] = mpn_mul_1(z, b, t, a[0]);
   z[t] += mpn_addmul_1(z, p->primelimbs, t, u);
@@ -359,6 +361,7 @@ static inline void mont_mul(mp_limb_t *c, mp_limb_t *a, mp_limb_t *b,
        mpz_set(z1, z2);
      */
   }
+  pbc_free(z);
 }
 
 static void fp_mul(element_ptr c, element_ptr a, element_ptr b) {
@@ -400,7 +403,7 @@ static void fp_invert(element_ptr c, element_ptr a) {
   eptr ad = a->data;
   eptr cd = c->data;
   fptr p = a->field->data;
-  mp_limb_t tmp[p->limbs];
+  mp_limb_t* tmp = pbc_malloc(p->limbs * sizeof(mp_limb_t));
   mpz_t z;
 
   mpz_init(z);
@@ -415,6 +418,8 @@ static void fp_invert(element_ptr c, element_ptr a) {
   mont_mul(cd->d, tmp, p->R3, p);
   cd->flag = 2;
   mpz_clear(z);
+
+  pbc_free(tmp);
 }
 
 static void fp_random(element_ptr a) {
@@ -591,6 +596,6 @@ void field_init_mont_fp(field_ptr f, mpz_t prime) {
   // since we're only doing it once.
   mpz_setbit(z, p->bytes * 8);
   mpz_invert(z, prime, z);
-  p->negpinv = -mpz_get_ui(z);
+  p->negpinv = ULONG_MAX - (mpz_get_ui(z) - 1);
   mpz_clear(z);
 }

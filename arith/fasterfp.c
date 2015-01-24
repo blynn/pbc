@@ -290,8 +290,9 @@ static void fp_mul(element_ptr c, element_ptr a, element_ptr b) {
     size_t t = p->limbs;
     //mp_limb_t tmp[3 * t + 1];
     //mp_limb_t *qp = &tmp[2 * t];
-    mp_limb_t tmp[2 * t];
-    mp_limb_t qp[t + 1];
+    mp_limb_t* buf = pbc_malloc(((2 * t) + (t + 1)) * sizeof(mp_limb_t));
+    mp_limb_t* tmp = buf;
+    mp_limb_t* qp = &buf[2 * t];
     //static mp_limb_t tmp[2 * 100];
     //static mp_limb_t qp[100 + 1];
 
@@ -299,6 +300,8 @@ static void fp_mul(element_ptr c, element_ptr a, element_ptr b) {
 
     mpn_tdiv_qr(qp, cd->d, 0, tmp, 2 * t, p->primelimbs, t);
     cd->flag = 2;
+
+    pbc_free(buf);
   }
 }
 
@@ -351,11 +354,12 @@ static void fp_mul_si(element_ptr c, element_ptr a, signed long int op) {
     cd->flag = 2;
     fp_field_data_ptr p = a->field->data;
     size_t t = p->limbs;
-    mp_limb_t tmp[t + 1];
+    mp_limb_t* tmp = pbc_malloc((t + 1) * sizeof(mp_limb_t));
     mp_limb_t qp[2];
 
     tmp[t] = mpn_mul_1(tmp, ad->d, t, labs(op));
     mpn_tdiv_qr(qp, cd->d, 0, tmp, t + 1, p->primelimbs, t);
+    pbc_free(tmp);
     if (op < 0) {               //TODO: don't need to check c != 0 this time
       fp_neg(c, c);
     }
@@ -433,11 +437,14 @@ static int fp_sgn_even(element_ptr a) {
   fp_field_data_ptr p = a->field->data;
   dataptr ad = a->data;
   if (!ad->flag) return 0;
-  mp_limb_t sum[p->limbs];
+  mp_limb_t* sum = pbc_malloc(p->limbs * sizeof(mp_limb_t));
 
   int carry = mpn_add_n(sum, ad->d, ad->d, p->limbs);
-  if (carry) return 1;
-  return mpn_cmp(sum, p->primelimbs, p->limbs);
+  int result;
+  if (carry) result = 1;
+  else result = mpn_cmp(sum, p->primelimbs, p->limbs);
+  pbc_free(sum);
+  return result;
 }
 
 

@@ -61,9 +61,9 @@ void element_dlog_pollard_rho(element_t x, element_t g, element_t h) {
   field_ptr Zr = x->field, G = g->field;
   element_t asum;
   element_t bsum;
-  element_t a[s];
-  element_t b[s];
-  element_t m[s];
+  element_t a[20];
+  element_t b[20];
+  element_t m[20];
   element_t g0, snark;
   darray_t hole;
   int interval = 5;

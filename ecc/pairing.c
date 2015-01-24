@@ -157,7 +157,7 @@ static size_t mulg_out_str(FILE *stream, int base, element_ptr e) {
 }
 
 static void mulg_set_multiz(element_ptr e, multiz m) {
-  return element_set_multiz(e->data, m);
+  element_set_multiz(e->data, m);
 }
 
 static int mulg_set_str(element_ptr e, const char *s, int base) {

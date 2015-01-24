@@ -1,0 +1,8 @@
+bin
+dll
+lib
+obj
+*.user
+*.sdf
+*.opensdf
+*.suo

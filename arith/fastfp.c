@@ -172,14 +172,17 @@ static void fp_mul(element_ptr c, element_ptr a, element_ptr b) {
   size_t t = p->limbs;
   //mp_limb_t tmp[3 * t + 1];
   //mp_limb_t *qp = &tmp[2 * t];
-  mp_limb_t tmp[2 * t];
-  mp_limb_t qp[t + 1];
+  mp_limb_t* buf = pbc_malloc(((2 * t) + (t + 1)) * sizeof(mp_limb_t));
+  mp_limb_t* tmp = buf;
+  mp_limb_t* qp = &buf[2 * t];
   //static mp_limb_t tmp[2 * 100];
   //static mp_limb_t qp[100 + 1];
 
   mpn_mul_n(tmp, a->data, b->data, t);
 
   mpn_tdiv_qr(qp, c->data, 0, tmp, 2 * t, p->primelimbs, t);
+
+  pbc_free(buf);
 }
 
 static void fp_square(element_ptr c, element_ptr a) {
@@ -226,11 +229,12 @@ static void fp_neg(element_ptr n, element_ptr a) {
 static void fp_mul_si(element_ptr e, element_ptr a, signed long int op) {
   fp_field_data_ptr p = e->field->data;
   size_t t = p->limbs;
-  mp_limb_t tmp[t + 1];
+  mp_limb_t* tmp = pbc_malloc((t + 1) * sizeof(mp_limb_t));
   mp_limb_t qp[2];
 
   tmp[t] = mpn_mul_1(tmp, a->data, t, labs(op));
   mpn_tdiv_qr(qp, e->data, 0, tmp, t + 1, p->primelimbs, t);
+  pbc_free(tmp);
   if (op < 0) {
     fp_neg(e, e);
   }
@@ -286,11 +290,14 @@ static int fp_sgn_odd(element_ptr a) {
 static int fp_sgn_even(element_ptr a) {
   fp_field_data_ptr p = a->field->data;
   if (fp_is0(a)) return 0;
-  mp_limb_t sum[p->limbs];
+  mp_limb_t* sum = pbc_malloc(p->limbs * sizeof(mp_limb_t));
 
   int carry = mpn_add_n(sum, a->data, a->data, p->limbs);
-  if (carry) return 1;
-  return mpn_cmp(sum, p->primelimbs, p->limbs);
+  int result;
+  if (carry) result = 1;
+  else result = mpn_cmp(sum, p->primelimbs, p->limbs);
+  pbc_free(sum);
+  return result;
 }
 
 static int fp_is_sqr(element_ptr a) {
