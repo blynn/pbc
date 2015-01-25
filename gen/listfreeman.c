@@ -5,10 +5,10 @@
 
 int show(pbc_cm_t cm, void *data) {
   unsigned int D = * (unsigned *) data;
-  int qbits, rbits;
-  qbits = mpz_sizeinbase(cm->q, 2);
-  rbits = mpz_sizeinbase(cm->r, 2);
-  printf("%d, %d, %d\n", D, qbits, rbits);
+  unsigned int qbits, rbits;
+  qbits = (unsigned int)mpz_sizeinbase(cm->q, 2);
+  rbits = (unsigned int)mpz_sizeinbase(cm->r, 2);
+  printf("%u, %u, %u\n", D, qbits, rbits);
   fflush(stdout);
   return 0;
 }

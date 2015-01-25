@@ -96,7 +96,7 @@ static void tryplusx(mpz_ptr q, mpz_ptr x) {
 
 static void cc_miller_no_denom(element_t res, mpz_t q, element_t P,
     element_ptr Qx, element_ptr Qy, element_t negalpha) {
-  int m;
+  mp_bitcnt_t m;
   element_t v;
   element_t Z;
   element_t a, b, c;
@@ -213,7 +213,8 @@ static void cc_miller_no_denom(element_t res, mpz_t q, element_t P,
   Zy = curve_y_coord(Z);
 
   element_set1(v);
-  m = mpz_sizeinbase(q, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(q, 2);
+  m = (m > 2 ? m - 2 : 0);
 
   //TODO: sliding NAF
   for(;;) {

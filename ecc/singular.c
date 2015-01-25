@@ -295,7 +295,7 @@ void field_init_curve_singular_with_node(field_t c, field_t field) {
 static void sn_miller(element_t res, mpz_t q, element_t P,
     element_ptr Qx, element_ptr Qy) {
   //collate divisions
-  int m;
+  mp_bitcnt_t m;
   element_t v, vd;
   element_t Z;
   element_t a, b, c;
@@ -367,7 +367,8 @@ static void sn_miller(element_t res, mpz_t q, element_t P,
 
   element_set1(v);
   element_set1(vd);
-  m = mpz_sizeinbase(q, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(q, 2);
+  m = (m > 2 ? m - 2 : 0);
 
   while(m >= 0) {
     element_mul(v, v, v);

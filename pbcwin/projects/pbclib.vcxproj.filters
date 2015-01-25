@@ -62,9 +62,6 @@
     <ClCompile Include="..\..\arith\poly.c">
       <Filter>Source Files\arith</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\arith\random.c">
-      <Filter>Source Files\arith</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\arith\ternary_extension_field.c">
       <Filter>Source Files\arith</Filter>
     </ClCompile>
@@ -130,6 +127,9 @@
     </ClCompile>
     <ClCompile Include="..\..\misc\utils.c">
       <Filter>Source Files\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\arith\random.c">
+      <Filter>Source Files\arith</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

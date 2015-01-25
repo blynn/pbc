@@ -575,7 +575,7 @@ static val_ptr run_item(val_ptr v[]) {
   mpz_t z;
   mpz_init(z);
   element_to_mpz(z, v[1]->elem);
-  int i = mpz_get_si(z);
+  int i = (int)mpz_get_si(z);
   mpz_clear(z);
   element_ptr a = element_item(v[0]->elem, i);
   element_ptr e = pbc_malloc(sizeof(*e));
@@ -719,7 +719,7 @@ static val_ptr run_exit(val_ptr v[]) {
   mpz_t z;
   mpz_init(z);
   element_to_mpz(z, v[0]->elem);
-  exit(mpz_get_si(z));
+  exit((int)mpz_get_si(z));
 }
 static fun_t fun_exit = {{ "exit", run_exit, 1, sig_elem }};
 
@@ -875,7 +875,7 @@ int yywrap_readline(void) {
     end_of_input = 1;
     return 1;
   }
-  int n = strlen(currentline);
+  size_t n = strlen(currentline);
   currentline = realloc(currentline, n + 2);
   currentline[n] = '\n';
   currentline[n + 1] = '\0';

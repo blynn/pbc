@@ -266,5 +266,5 @@ void field_init_naive_fp(field_ptr f, mpz_t prime) {
 
   mpz_set(f->order, prime);
   f->data = NULL;
-  f->fixed_length_in_bytes = (mpz_sizeinbase(prime, 2) + 7) / 8;
+  f->fixed_length_in_bytes = (int)((mpz_sizeinbase(prime, 2) + 7) / 8);
 }

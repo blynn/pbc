@@ -230,7 +230,7 @@ static void lucas_odd(element_ptr out, element_ptr in, element_ptr temp, mpz_t c
   element_ptr v1 = element_y(out);
   element_ptr t0 = element_x(temp);
   element_ptr t1 = element_y(temp);
-  int j;
+  size_t j;
 
   element_set_si(t0, 2);
   element_double(t1, in0);
@@ -486,7 +486,8 @@ static void a_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
   element_init_same_as(u, d0);
   element_init_same_as(v, d0);
 
-  int m = mpz_sizeinbase(pairing->r, 2) - 2;
+  mp_bitcnt_t m = (mp_bitcnt_t)mpz_sizeinbase(pairing->r, 2);
+  m = (m > 2 ? m - 2 : 0);
   for (;;) {
     element_square(sm2, cm2);
     element_square(sm1, cm1);
@@ -686,7 +687,7 @@ typedef struct ellnet_pp_s *ellnet_pp_ptr;
 static void a_pairing_ellnet_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing) {
   element_ptr x = curve_x_coord(in1);
   element_ptr y = curve_y_coord(in1);
-  int i, rbits = mpz_sizeinbase(pairing->r, 2);
+  mp_bitcnt_t i, rbits = (mp_bitcnt_t)mpz_sizeinbase(pairing->r, 2);
   ellnet_pp_ptr pp = p->data = pbc_malloc(sizeof(ellnet_pp_t));
   pp->seq = pbc_malloc(sizeof(ellnet_pp_st_t) * rbits);
   element_init_same_as(pp->x, x);
@@ -780,7 +781,7 @@ static void a_pairing_ellnet_pp_init(pairing_pp_t p, element_ptr in1, pairing_t 
   element_init_same_as(e0, x);
   element_init_same_as(e1, x);
 
-  int m = rbits - 2;
+  mp_bitcnt_t m = (rbits > 2 ? rbits - 2 : 0);
   for (;;) {
     ellnet_pp_st_ptr seq = pp->seq[k];
     sm1 = seq->sm1;
@@ -910,7 +911,7 @@ static void a_pairing_ellnet_pp_init(pairing_pp_t p, element_ptr in1, pairing_t 
 
 static void a_pairing_ellnet_pp_clear(pairing_pp_t p) {
   ellnet_pp_ptr pp = p->data;
-  int i, rbits = mpz_sizeinbase(p->pairing->r, 2);
+  mp_bitcnt_t i, rbits = (mp_bitcnt_t)mpz_sizeinbase(p->pairing->r, 2);
   for (i=0; i<rbits; i++) {
     ellnet_pp_st_ptr seq = pp->seq[i];
     element_clear(seq->sm1);
@@ -932,9 +933,9 @@ static void a_pairing_ellnet_pp_apply(element_ptr out, element_ptr in2, pairing_
   element_ptr x2 = curve_x_coord(in2);
   element_ptr y2 = curve_y_coord(in2);
   ellnet_pp_ptr pp = p->data;
-  int rbits = mpz_sizeinbase(p->pairing->r, 2);
+  mp_bitcnt_t rbits = (mp_bitcnt_t)mpz_sizeinbase(p->pairing->r, 2);
   int k = 0;
-  int m = rbits - 2;
+  mp_bitcnt_t m = (rbits > 2 ? rbits - 2 : 0);
   element_t A, B;
   element_t e0, e1;
   element_t dm1, d0, d1;
@@ -1629,7 +1630,7 @@ static void a1_pairing_pp_clear(pairing_pp_t p) {
 }
 
 static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing) {
-  int m;
+  mp_bitcnt_t m;
   element_ptr Px = curve_x_coord(in1);
   element_ptr Py = curve_y_coord(in1);
   a1_pairing_data_ptr a1info = pairing->data;
@@ -1660,7 +1661,8 @@ static void a1_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairin
   element_init(b2, a1info->Fp);
   element_init(c2, a1info->Fp);
 
-  m = mpz_sizeinbase(pairing->r, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(pairing->r, 2);
+  m = (m > 2 ? m - 2 : 0);
 
   for(;;) {
     do_tangent();
@@ -1728,7 +1730,7 @@ static void a1_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p
   a1_pairing_data_ptr a1info = p->pairing->data;
   element_t f, f0;
   element_t e0, e1;
-  int m;
+  mp_bitcnt_t m;
   element_ptr Qx = curve_x_coord(in2);
   element_ptr Qy = curve_y_coord(in2);
   element_t Qx2, Qy2, Qxy;
@@ -1772,7 +1774,8 @@ static void a1_pairing_pp_apply(element_ptr out, element_ptr in2, pairing_pp_t p
   element_square(Qy2, Qy);
   element_mul(Qxy, Qx, Qy);
 
-  m = mpz_sizeinbase(p->pairing->r, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(p->pairing->r, 2);
+  m = (m > 2 ? m - 2 : 0);
 
   while (m > 0) {
     if (mpz_tstbit(p->pairing->r, m)) {
@@ -1843,7 +1846,7 @@ static void a1_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
   element_t a, b, c;
   element_t e0;
   const element_ptr e1 = a, e2 = b, e3 = c;  // used in point_to_affine() etc.
-  int m;
+  mp_bitcnt_t m;
   element_ptr Px = curve_x_coord(in1);
   element_ptr Py = curve_y_coord(in1);
   element_ptr Qx = curve_x_coord(in2);
@@ -1963,7 +1966,8 @@ static void a1_pairing_proj(element_ptr out, element_ptr in1, element_ptr in2,
   element_set1(z);
   element_set1(z2);
 
-  m = mpz_sizeinbase(pairing->r, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(pairing->r, 2);
+  m = (m > 2 ? m - 2 : 0);
   //TODO: sliding NAF
   for(;;) {
     do_tangent();
@@ -2017,7 +2021,7 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
   element_t f, f0;
   element_t a, b, c;
   element_t e0;
-  int m;
+  mp_bitcnt_t m;
   element_ptr Px = curve_x_coord(in1);
   element_ptr Py = curve_y_coord(in1);
   element_ptr Qx = curve_x_coord(in2);
@@ -2050,7 +2054,8 @@ static void a1_pairing(element_ptr out, element_ptr in1, element_ptr in2,
   element_init(c, p->Fp);
   element_init(e0, p->Fp);
 
-  m = mpz_sizeinbase(pairing->r, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(pairing->r, 2);
+  m = (m > 2 ? m - 2 : 0);
 
   //TODO: sliding NAF
   for(;;) {
@@ -2099,7 +2104,8 @@ void a1_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
   element_t f, f0;
   element_t a, b, c;
   element_t e0;
-  int m, i;
+  mp_bitcnt_t m;
+  int i;
   element_ptr Px, Py;
   element_ptr Qx, Qy;
   element_ptr Vx, Vy;
@@ -2142,7 +2148,8 @@ void a1_pairings_affine(element_ptr out, element_t in1[], element_t in2[],
   element_init(c, p->Fp);
   element_init(e0, p->Fp);
 
-  m = mpz_sizeinbase(pairing->r, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(pairing->r, 2);
+  m = (m > 2 ? m - 2 : 0);
 
   //TODO: sliding NAF
   for(;;) {

@@ -143,12 +143,12 @@ static void general_pell(pell_solution_t ps, mpz_t D, int N) {
   mpz_init(ps->miny);
   mpz_set(ps->minx, p0);
   mpz_set(ps->miny, q0);
-  n = listp->count;
-  ps->count = n;
-  if (n) {
-    ps->x = (mpz_t *) pbc_malloc(sizeof(mpz_t) * n);
-    ps->y = (mpz_t *) pbc_malloc(sizeof(mpz_t) * n);
-    for (i = 0; i < n; i++) {
+  int c = listp->count;
+  ps->count = c;
+  if (c) {
+    ps->x = (mpz_t *) pbc_malloc(sizeof(mpz_t) * c);
+    ps->y = (mpz_t *) pbc_malloc(sizeof(mpz_t) * c);
+    for (i = 0; i < c; i++) {
       mpz_init(ps->x[i]);
       mpz_init(ps->y[i]);
       mpz_set(ps->x[i], (mpz_ptr) listp->item[i]);

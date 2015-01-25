@@ -25,16 +25,18 @@ static void win32_mpz_random(mpz_t r, mpz_t limit, void *data) {
       return;
     }
   }
-  int n, bytecount, leftover;
+  mp_bitcnt_t n;
+  size_t bytecount, leftover;
   unsigned char *bytes;
   mpz_t z;
   mpz_init(z);
-  n = mpz_sizeinbase(limit, 2);
-  bytecount = (n + 7) / 8;
-  leftover = n % 8;
+  n = (mp_bitcnt_t)mpz_sizeinbase(limit, 2);
+  bytecount = (size_t)((n + 7) / 8);
+  leftover = (size_t)(n % 8);
   bytes = (unsigned char *) pbc_malloc(bytecount);
   for (;;) {
-    CryptGenRandom(phProv,bytecount,(byte *)bytes);
+    PBC_ASSERT(bytecount <= MAXDWORD, "Unreasonable amount of random data requested");
+    CryptGenRandom(phProv,(DWORD)bytecount,(byte *)bytes);
     if (leftover) {
       *bytes = *bytes % (1 << leftover);
     }

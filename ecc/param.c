@@ -159,7 +159,7 @@ int lookup_int(int *n, symtab_t tab, const char *key) {
   mpz_init(z);
 
   mpz_set_str(z, data, 0);
-  *n = mpz_get_si(z);
+  *n = (int)mpz_get_si(z);
   mpz_clear(z);
 
   return 0;

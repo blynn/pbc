@@ -625,7 +625,8 @@ static void e_pairing_ellnet(element_ptr out, element_ptr in1, element_ptr in2,
   element_init_same_as(u, d0);
   element_init_same_as(v, d0);
 
-  int m = mpz_sizeinbase(pairing->r, 2) - 2;
+  mp_bitcnt_t m = (mp_bitcnt_t)mpz_sizeinbase(pairing->r, 2);
+  m = (m > 2 ? m - 2 : 0);
   for (;;) {
     element_square(sm2, cm2);
     element_square(sm1, cm1);

@@ -20,15 +20,16 @@ struct sninfo_s {
 };
 
 // TODO: remove repeated code for error handling
-static int do_print(int (*strcb)(void *, char *s),
+static int do_print(int(*strcb)(void *, char *s),
     int (*fstrcb)(void *, char *s, void *),
-    int (*elcb)(void *, element_ptr e),
+    int(*elcb)(void *, element_ptr e),
     void *data,
     const char *format, va_list ap) {
   // A primitive front-end for printf()-family functions. Only handles types
   // in specifiers, and assumes they all take void * arguments.
   // 
   // I wish register_printf_specifier() were more widespread.
+
   int count = 0, status;
   char *copy, *c, *start, *next;
   element_ptr e;
@@ -101,7 +102,7 @@ done:
 
 static int string_cb(void *file, char *s) {
   if (fputs(s, file) == EOF) return -1;
-  return strlen(s);
+  return (int)strlen(s);
 }
 
 static int format_cb(void *file, char *fstring, void *ptr) {
@@ -109,7 +110,7 @@ static int format_cb(void *file, char *fstring, void *ptr) {
 }
 
 static int element_cb(void *file, element_ptr e) {
-  return element_out_str(file, 0, e);
+  return (int)element_out_str(file, 0, e);
 }
 
 int element_vfprintf(FILE *stream, const char *format, va_list ap) {
@@ -174,7 +175,7 @@ int element_vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
 
   do_print(string_cbv, format_cbv, element_cbv, &info, fmt, ap);
 
-  return info.result;
+  return (int)info.result;
 }
 
 int element_snprintf(char *buf, size_t size, const char *fmt, ...) {

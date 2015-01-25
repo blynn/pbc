@@ -97,7 +97,7 @@ static void compute_q(mpc_t q, mpc_t tau) {
   mpc_t z0;
   mpf_t f0, f1;
   mpf_ptr fp0;
-  unsigned long pwr;
+  gmp_ui pwr;
 
   mpc_init(z0);
   mpf_init(f0);
@@ -333,7 +333,7 @@ static void precision_clear(void) {
 size_t pbc_hilbert(mpz_t **arr, int D) {
   int a, b;
   int t;
-  int B = floor(sqrt((double) D / 3.0));
+  int B = (int)floor(sqrt((double) D / 3.0));
   mpc_t alpha;
   mpc_t j;
   mpf_t sqrtD;
@@ -376,7 +376,7 @@ step535_4:
 
   //printf("modulus: %f\n", exp(3.14159265358979 * sqrt(D)) * d * 0.5);
   d *= sqrt(D) * 3.14159265358979 / log(2);
-  precision_init(d + 34);
+  precision_init((int)(d + 34));
   pbc_info("class number %d, %d bit precision", h, (int) d + 34);
 
   darray_init(Pz);

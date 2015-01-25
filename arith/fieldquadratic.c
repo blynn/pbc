@@ -126,7 +126,7 @@ static int fq_snprint(char *s, size_t n, element_ptr e) {
   clip_sub();
   status = snprintf(s + result, left, "]");
   if (status < 0) return status;
-  return result + status;
+  return (int)(result + status);
   #undef clip_sub
 }
 
@@ -153,7 +153,7 @@ static int fq_set_str(element_ptr e, const char *s, int base) {
   if (*cp++ != ',') return 0;
   cp += element_set_str(p->y, cp, base);
   if (*cp++ != ']') return 0;
-  return cp - s;
+  return (int)(cp - s);
 }
 
 static int fq_sign(element_ptr n) {

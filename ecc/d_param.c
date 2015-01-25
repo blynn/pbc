@@ -115,7 +115,7 @@ static inline void d_miller_evalfn(element_t e0,
 // This version uses projective coordinates, which don't seem much faster.
 static void cc_miller_no_denom_proj(element_t res, mpz_t q, element_t P,
     element_ptr Qx, element_ptr Qy) {
-  int m;
+  mp_bitcnt_t m;
   element_t v;
   element_t Z;
   element_t a, b, c;
@@ -284,7 +284,8 @@ static void cc_miller_no_denom_proj(element_t res, mpz_t q, element_t P,
   Zy = curve_x_coord(Z);
 
   element_set1(v);
-  m = mpz_sizeinbase(q, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(q, 2);
+  m = (m > 2 ? m - 2 : 0);
 
   for(;;) {
     do_tangent();
@@ -319,7 +320,7 @@ static void cc_miller_no_denom_proj(element_t res, mpz_t q, element_t P,
 // Same as above, but with affine coordinates.
 static void cc_miller_no_denom_affine(element_t res, mpz_t q, element_t P,
     element_ptr Qx, element_ptr Qy) {
-  int m;
+  mp_bitcnt_t m;
   element_t v;
   element_t Z;
   element_t a, b, c;
@@ -390,7 +391,8 @@ static void cc_miller_no_denom_affine(element_t res, mpz_t q, element_t P,
   Zy = curve_y_coord(Z);
 
   element_set1(v);
-  m = mpz_sizeinbase(q, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(q, 2);
+  m = (m > 2 ? m - 2 : 0);
 
   for(;;) {
     do_tangent();
@@ -449,7 +451,7 @@ static void lucas_even(element_ptr out, element_ptr in, mpz_t cofactor) {
   element_ptr v1 = element_y(out);
   element_ptr t0 = element_x(temp);
   element_ptr t1 = element_y(temp);
-  int j;
+  size_t j;
 
   element_set_si(t0, 2);
   element_double(t1, in0);
@@ -588,7 +590,8 @@ static void cc_pairing(element_ptr out, element_ptr in1, element_ptr in2,
 //do many millers at one time with affine coordinates.
 static void cc_millers_no_denom_affine(element_t res, mpz_t q, element_t P[],
     element_t Qx[], element_t Qy[], int n_prod) {
-  int m, i;
+  mp_bitcnt_t m;
+  int i;
   element_t v;
   element_t a, b, c;
   element_t t0;
@@ -670,7 +673,8 @@ static void cc_millers_no_denom_affine(element_t res, mpz_t q, element_t P[],
   }
 
   element_set1(v);
-  m = mpz_sizeinbase(q, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(q, 2);
+  m = (m > 2 ? m - 2 : 0);
 
   for(;;) {
     do_tangents();
@@ -792,7 +796,7 @@ static void d_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
   const element_ptr Px = curve_x_coord(P);
   const element_ptr Py = curve_y_coord(P);
   element_t Z;
-  int m;
+  mp_bitcnt_t m;
   pptr info = pairing->data;
   element_t t0;
   element_t a, b, c;
@@ -868,7 +872,8 @@ static void d_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
   element_init(b, Fq);
   element_init(c, Fq);
 
-  m = mpz_sizeinbase(q, 2) - 2;
+  m = (mp_bitcnt_t)mpz_sizeinbase(q, 2);
+  m = (m > 2 ? m - 2 : 0);
   p->data = pbc_malloc(sizeof(pp_coeff_t) * 2 * m);
   coeff = (pp_coeff_t *) p->data;
   pp = coeff[0];
@@ -899,8 +904,9 @@ static void d_pairing_pp_init(pairing_pp_t p, element_ptr in1, pairing_t pairing
 static void d_pairing_pp_clear(pairing_pp_t p) {
   // TODO: Better to store a sentinel value in p->data?
   mpz_ptr q = p->pairing->r;
-  int m = mpz_sizeinbase(q, 2) + mpz_popcount(q) - 3;
-  int i;
+  mp_bitcnt_t m = (mp_bitcnt_t)mpz_sizeinbase(q, 2) + mpz_popcount(q);
+  m = (m > 3 ? m - 3 : 0);
+  mp_bitcnt_t i;
   pp_coeff_t *coeff = (pp_coeff_t *) p->data;
   pp_coeff_ptr pp;
   for (i=0; i<m; i++) {
@@ -916,7 +922,8 @@ static void d_pairing_pp_apply(element_ptr out, element_ptr in2,
     pairing_pp_t p) {
   mpz_ptr q = p->pairing->r;
   pptr info = p->pairing->data;
-  int m = mpz_sizeinbase(q, 2) - 2;
+  mp_bitcnt_t m = (mp_bitcnt_t)mpz_sizeinbase(q, 2);
+  m = (m > 2 ? m - 2 : 0);
   pp_coeff_t *coeff = (pp_coeff_t *) p->data;
   pp_coeff_ptr pp = coeff[0];
   element_ptr Qbase = in2;
@@ -1100,7 +1107,7 @@ static void compute_cm_curve(d_param_ptr param, pbc_cm_ptr cm) {
   element_init(hp, fpx);
 
   mpz_t *coefflist;
-  int n = pbc_hilbert(&coefflist, cm->D);
+  int n = (int)pbc_hilbert(&coefflist, cm->D);
 
   // Temporarily set the coefficient of x^{n-1} to 1 so hp has degree n - 1,
   // allowing us to use poly_coeff().

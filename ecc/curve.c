@@ -528,7 +528,7 @@ static int curve_snprint(char *s, size_t n, element_ptr a) {
   clip_sub();
   status = snprintf(s + result, left, "]");
   if (status < 0) return status;
-  return result + status;
+  return (int)(result + status);
   #undef clip_sub
 }
 
@@ -558,7 +558,7 @@ static int curve_set_str(element_ptr e, const char *s, int base) {
   element_set0(e);
   while (*cp && isspace(*cp)) cp++;
   if (*cp == 'O') {
-    return cp - s + 1;
+    return (int)(cp - s + 1);
   }
   p->inf_flag = 0;
   if (*cp != '[') return 0;
@@ -574,7 +574,7 @@ static int curve_set_str(element_ptr e, const char *s, int base) {
     element_set0(e);
     return 0;
   }
-  return cp - s + 1;
+  return (int)(cp - s + 1);
 }
 
 static void field_clear_curve(field_t f) {

@@ -12,7 +12,7 @@
 
 // returns recommended window size.  n is exponent.
 static int optimal_pow_window_size(mpz_ptr n) {
-  int exp_bits;
+  size_t exp_bits;
 
   exp_bits = mpz_sizeinbase(n, 2);
 
@@ -84,7 +84,7 @@ static void element_pow_wind(element_ptr x, mpz_ptr n,
   element_init(result, x->field);
   element_set1(result);
 
-  for (inword = 0, s = mpz_sizeinbase(n, 2) - 1; s >= 0; s--) {
+  for (inword = 0, s = (int)mpz_sizeinbase(n, 2) - 1; s >= 0; s--) {
     element_square(result, result);
     bit = mpz_tstbit(n, s);
 
@@ -168,8 +168,8 @@ void element_pow2_mpz(element_ptr x, element_ptr a1, mpz_ptr n1,
   element_init(a1a2, x->field);
   element_mul(a1a2, a1, a2);
 
-  s1 = mpz_sizeinbase(n1, 2) - 1;
-  s2 = mpz_sizeinbase(n2, 2) - 1;
+  s1 = (int)mpz_sizeinbase(n1, 2) - 1;
+  s2 = (int)mpz_sizeinbase(n2, 2) - 1;
   for (s = (s1 > s2) ? s1 : s2; s >= 0; s--) {
     element_mul(result, result, result);
     b1 = mpz_tstbit(n1, s);
@@ -220,9 +220,9 @@ void element_pow3_mpz(element_ptr x, element_ptr a1, mpz_ptr n1,
   element_mul(lookup[7], lookup[6], a1);
 
   // calculate largest exponent bitsize
-  s1 = mpz_sizeinbase(n1, 2) - 1;
-  s2 = mpz_sizeinbase(n2, 2) - 1;
-  s3 = mpz_sizeinbase(n3, 2) - 1;
+  s1 = (int)mpz_sizeinbase(n1, 2) - 1;
+  s2 = (int)mpz_sizeinbase(n2, 2) - 1;
+  s3 = (int)mpz_sizeinbase(n3, 2) - 1;
   s = (s1 > s2) ? ((s1 > s3) ? s1 : s3)
       : ((s2 > s3) ? s2 : s3);
 
@@ -291,9 +291,10 @@ static void *element_build_base_table(element_ptr a, int bits, int k) {
  */
 static void element_pow_base_table(element_ptr x, mpz_ptr power,
                                    struct element_base_table *base_table) {
-  int word;                     /* the word to look up. 0<word<base */
-  int row, s;                   /* row and col in base table */
-  int num_lookups;
+  size_t word;                  /* the word to look up. 0<word<base */
+  size_t row;                   /* row in base table */
+  int s;                        /* col in base table */
+  size_t num_lookups;
 
   element_t result;
   mpz_t n;
@@ -330,7 +331,7 @@ static void element_pow_base_table(element_ptr x, mpz_ptr power,
 
 static void default_element_pp_init(element_pp_t p, element_t in) {
   p->data =
-      element_build_base_table(in, mpz_sizeinbase(in->field->order, 2), 5);
+      element_build_base_table(in, (int)mpz_sizeinbase(in->field->order, 2), 5);
 }
 
 static void default_element_pp_pow(element_t out, mpz_ptr power, element_pp_t p) {
@@ -668,8 +669,7 @@ void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
 // Square root algorithm for Fp.
 // TODO: What happens if this is run on other kinds of fields?
 void element_tonelli(element_ptr x, element_ptr a) {
-  int s;
-  int i;
+  mp_bitcnt_t s, i;
   mpz_t e;
   mpz_t t, t0;
   element_t ginv, e0;
@@ -817,15 +817,15 @@ int pbc_mpz_trickle(int (*fun)(char), int base, mpz_t n) {
   mpz_init(q);
   mpz_set(z, n);
   int res;
-  int len;
-  mpz_ui_pow_ui(d, base, len = mpz_sizeinbase(z, base));
+  long len;
+  mpz_ui_pow_ui(d, base, len = (long)mpz_sizeinbase(z, base));
   if (mpz_cmp(d, z) > 0) {
     len--;
     mpz_divexact_ui(d, d, base);
   }
   while (mpz_cmp_ui(z, base) >= 0) {
     mpz_fdiv_qr(q, z, z, d);
-    res = fun('0' + mpz_get_ui(q));
+    res = fun('0' + (char)mpz_get_ui(q));
     if (res) goto clean;
     mpz_divexact_ui(d, d, base);
     len--;
@@ -835,7 +835,7 @@ int pbc_mpz_trickle(int (*fun)(char), int base, mpz_t n) {
     if (res) goto clean;
     len--;
   }
-  res = fun('0' + mpz_get_ui(z));
+  res = fun('0' + (char)mpz_get_ui(z));
 clean:
   mpz_clear(q);
   mpz_clear(z);

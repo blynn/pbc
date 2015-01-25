@@ -4,11 +4,10 @@ THE PBC LIBRARY - VISUAL C++ EDITION
         attempting to build the solution.
 
 This is the Visual C++ version of the PBC library. It is capable of compiling
-the core library in shared or dynamic versions. Only 32-bit builds are
-supported due to limitations in PBC itself. The Visual C++ solution is also
-able to compile the various binaries included with PBC, but only shared
-library configurations are provided for these binaries. These projects were
-created using Visual C++ 2013.
+the core library in shared or dynamic, and 32- or 64-bit versions. The Visual
+C++ solution is also able to compile the various binaries included with PBC,
+but only shared library configurations are provided for these binaries. These
+projects were created using Visual C++ 2013.
 
 
 DIRECTORIES
@@ -56,18 +55,24 @@ to modify the VC++ include directories in each project file manually.
 Once you have extracted MPIR, you must compile it. If you are using Visual
 C++ 2013, open "mpir\build.vc12\mpir.sln". The MPIR solution contains many
 projects for different processor architectures (the code is highly optimized).
-The PBC library will use the appropriate MPIR projects (DLL vs lib) and
-configurations (Debug vs Release) based on your settings in the IDE. It is
-recommended that you compile all four possibilities for your specific
-processor architecture.
+The PBC library will use the appropriate MPIR projects (DLL vs lib),
+configurations (Debug vs Release), and platform (Win32 vs x64) based on your
+settings in the IDE. It is recommended that you compile all eight versions for
+your specific processor architecture.
 
 For example, if you are using an Intel CPU with the Sandy Bridge architecture,
 you would perform the following steps:
 
    1) Compile "dll_mpir_sandybridge" in 32-bit debug mode
    2) Compile "lib_mpir_sandybridge" in 32-bit debug mode
-   1) Compile "dll_mpir_sandybridge" in 32-bit release mode
-   2) Compile "lib_mpir_sandybridge" in 32-bit release mode
+   3) Compile "dll_mpir_sandybridge" in 32-bit release mode
+   4) Compile "lib_mpir_sandybridge" in 32-bit release mode
+   5) Compile "dll_mpir_sandybridge" in 64-bit debug mode
+   6) Compile "lib_mpir_sandybridge" in 64-bit debug mode
+   7) Compile "dll_mpir_sandybridge" in 64-bit release mode
+   8) Compile "lib_mpir_sandybridge" in 64-bit release mode
+
+Note that the MPIR solution only supports building one project at a time.
    
 If you are using a different processor architecture, compile the appropriate
 projects. If your processor has no optimized builds available, you can instead
@@ -110,8 +115,8 @@ USING PBC
 ------------------------------------------------------------------------------
 To use the PBC library in your own applications, you must link to it in the
 standard manner. Include files are located in the "include" directory, and
-libraries are found in "pbcwin\lib\$(Configuration)". DLLs are placed in
-"pbcwin\dll\$(Configuration)".
+libraries are found in "pbcwin\lib\$(Platform)\$(Configuration)". DLLs are
+placed in "pbcwin\dll\$(Platform)\$(Configuration)".
 
 For convenience, we reiterate the process for Visual C++ 2013 applications
 wishing to statically link against PBC:
@@ -141,11 +146,11 @@ the dropdown menu in the field to add individuals paths using a GUI, if you
 would prefer to do so)
 
 Likewise, you need to add the library path to the "Library Directories" field.
-For example, if your library path was "$(VC_LibraryPath_x86)", set it to:
+For example, if your library path was "$(VC_LibraryPath_x64)", set it to:
 
-   C:\Users\Username\Documents\pbc\lib\$(Configuration);
+   C:\Users\Username\Documents\pbc\lib\$(Platform)\$(Configuration);
    C:\Users\Username\Documents\mpir\lib\$(Platform)\$(Configuration);
-   $(VC_LibraryPath_x86)
+   $(VC_LibraryPath_x64)
 
 Note that this will only work if you maintain the default "Debug" and
 "Release" configurations for your project. If you change them, manually set

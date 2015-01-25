@@ -15,7 +15,6 @@
 #include <stdint.h> // for intptr_t
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 #include <gmp.h>
 #include "pbc_utils.h"
 #include "pbc_field.h"
@@ -135,7 +134,7 @@ static void fp_to_mpz(mpz_ptr z, element_ptr e) {
     mont_reduce(z->_mp_d, tmp, p);
     pbc_free(tmp);
     // Remove leading zero limbs.
-    for (z->_mp_size = p->limbs; !z->_mp_d[z->_mp_size - 1]; z->_mp_size--);
+    for (z->_mp_size = (int)p->limbs; !z->_mp_d[z->_mp_size - 1]; z->_mp_size--);
   }
 }
 
@@ -211,7 +210,7 @@ static void fp_set(element_ptr c, element_ptr a) {
     mpz_t z1, z2;
     z1->_mp_d = cd->d;
     z2->_mp_d = ad->d;
-    z1->_mp_size = z1->_mp_alloc = z2->_mp_size = z2->_mp_alloc = p->limbs;
+    z1->_mp_size = z1->_mp_alloc = z2->_mp_size = z2->_mp_alloc = (int)p->limbs;
     mpz_set(z1, z2);
 
     cd->flag = 2;
@@ -283,7 +282,7 @@ static void fp_halve(element_ptr c, element_ptr a) {
   } else {
     fptr p = c->field->data;
     const size_t t = p->limbs;
-    int carry = 0;
+    mp_limb_t carry = 0;
     mp_limb_t *alimb = ad->d;
     mp_limb_t *climb = cd->d;
     if (alimb[0] & 1) {
@@ -575,7 +574,7 @@ void field_init_mont_fp(field_ptr f, mpz_t prime) {
   mpz_export(p->primelimbs, &p->limbs, -1, sizeof(mp_limb_t), 0, 0, prime);
 
   mpz_set(f->order, prime);
-  f->fixed_length_in_bytes = (mpz_sizeinbase(prime, 2) + 7) / 8;
+  f->fixed_length_in_bytes = (int)((mpz_sizeinbase(prime, 2) + 7) / 8);
 
   // Compute R, R3 and negpinv.
   mpz_t z;
@@ -596,6 +595,6 @@ void field_init_mont_fp(field_ptr f, mpz_t prime) {
   // since we're only doing it once.
   mpz_setbit(z, p->bytes * 8);
   mpz_invert(z, prime, z);
-  p->negpinv = ULONG_MAX - (mpz_get_ui(z) - 1);
+  p->negpinv = ~((gmp_ui)0) - (mpz_get_ui(z) - 1);
   mpz_clear(z);
 }

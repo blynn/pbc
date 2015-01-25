@@ -27,15 +27,16 @@ static void deterministic_mpz_random(mpz_t z, mpz_t limit, void *data) {
 static void file_mpz_random(mpz_t r, mpz_t limit, void *data) {
   char *filename = (char *) data;
   FILE *fp;
-  int n, bytecount, leftover;
+  mp_bitcnt_t n;
+  size_t bytecount, leftover;
   unsigned char *bytes;
   mpz_t z;
   mpz_init(z);
   fp = fopen(filename, "rb");
   if (!fp) return;
-  n = mpz_sizeinbase(limit, 2);
-  bytecount = (n + 7) / 8;
-  leftover = n % 8;
+  n = (mp_bitcnt_t)mpz_sizeinbase(limit, 2);
+  bytecount = (size_t)((n + 7) / 8);
+  leftover = (size_t)(n % 8);
   bytes = (unsigned char *) pbc_malloc(bytecount);
   for (;;) {
     if (!fread(bytes, 1, bytecount, fp)) {

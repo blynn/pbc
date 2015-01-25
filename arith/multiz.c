@@ -470,11 +470,11 @@ static int z_to_bytes(unsigned char *data, element_t e) {
   }
   n += (msb + 7) / 8 - 4;
   for (i=0; i<4; i++) {
-    data[i] = (n >> 8 * (3 - i));
+    data[i] = (unsigned char)(n >> 8 * (3 - i));
   }
   n += 4;
 
-  return n;
+  return (int)n;
 }
 
 static int z_from_bytes(element_t e, unsigned char *data) {
@@ -505,11 +505,11 @@ static int z_from_bytes(element_t e, unsigned char *data) {
   }
   mpz_clear(z1);
   if (neg) mpz_neg(z, z);
-  return n;
+  return (int)n;
 }
 
 static int z_length_in_bytes(element_ptr a) {
-  return (mpz_sizeinbase(a->data, 2) + 7) / 8 + 4;
+  return (int)((mpz_sizeinbase(a->data, 2) + 7) / 8 + 4);
 }
 
 static void f_out_info(FILE *out, field_ptr f) {

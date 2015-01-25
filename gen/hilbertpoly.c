@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     if (m == 1 || m == 2) continue;
     printf("D = %d\n", D);
 
-    int n = pbc_hilbert(&coefflist, D);
+    int n = (int)pbc_hilbert(&coefflist, D);
 
     printf(" ");
     xpow(n - 1);

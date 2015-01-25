@@ -399,7 +399,7 @@ static int poly_snprint(char *s, size_t size, element_ptr e) {
   }
   status = snprintf(s + result, left, "]");
   if (status < 0) return status;
-  return result + status;
+  return (int)(result + status);
   #undef clip_sub
 }
 
@@ -671,7 +671,7 @@ static void polymod_sqrt(element_ptr res, element_ptr a) {
     element_set1(s);
     //TODO: this can be optimized greatly
     //since we know r has the form ax + b
-    for (i = mpz_sizeinbase(z, 2) - 1; i >=0; i--) {
+    for (i = (int)mpz_sizeinbase(z, 2) - 1; i >=0; i--) {
       element_mul(s, s, s);
       if (poly_degree(s) == 2) {
         e1 = poly_coeff(s, 0);
@@ -1225,7 +1225,7 @@ static int polymod_snprint(char *s, size_t size, element_ptr e) {
   size_t result = 0, left;
   int status;
 
-  #define clip_sub(void) {                     \
+  #define clip_sub() {                         \
     result += status;                          \
     left = result >= size ? 0 : size - result; \
   }
@@ -1246,7 +1246,7 @@ static int polymod_snprint(char *s, size_t size, element_ptr e) {
   }
   status = snprintf(s + result, left, "]");
   if (status < 0) return status;
-  return result + status;
+  return (int)(result + status);
   #undef clip_sub
 }
 
@@ -1280,7 +1280,7 @@ static int polymod_set_str(element_ptr e, const char *s, int base) {
     if (i<n-1 && *cp++ != ',') return 0;
   }
   if (*cp++ != ']') return 0;
-  return cp - s;
+  return (int)(cp - s);
 }
 
 static int polymod_coeff_count(element_ptr e) {

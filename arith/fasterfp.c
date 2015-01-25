@@ -160,7 +160,7 @@ static void fp_set(element_ptr c, element_ptr a) {
     mpz_t z1, z2;
     z1->_mp_d = cd->d;
     z2->_mp_d = ad->d;
-    z1->_mp_size = z1->_mp_alloc = z2->_mp_size = z2->_mp_alloc = p->limbs;
+    z1->_mp_size = z1->_mp_alloc = z2->_mp_size = z2->_mp_alloc = (int)p->limbs;
     mpz_set(z1, z2);
 
     cd->flag = 2;
@@ -232,7 +232,7 @@ static void fp_halve(element_ptr c, element_ptr a) {
   } else {
     fp_field_data_ptr p = c->field->data;
     const size_t t = p->limbs;
-    int carry = 0;
+    mp_limb_t carry = 0;
     mp_limb_t *alimb = ad->d;
     mp_limb_t *climb = cd->d;
     if (alimb[0] & 1) {
@@ -317,12 +317,12 @@ static void fp_square(element_ptr c, element_ptr a) {
   } else {
     cd->flag = 2;
     z1->_mp_d = cd->d;
-    z1->_mp_size = z1->_mp_alloc = p->limbs;
+    z1->_mp_size = z1->_mp_alloc = (int)p->limbs;
     if (c == a) {
       mpz_powm_ui(z1, z1, 2, c->field->order);
     } else {
       z2->_mp_d = ad->d;
-      z2->_mp_size = z2->_mp_alloc = p->limbs;
+      z2->_mp_size = z2->_mp_alloc = (int)p->limbs;
       mpz_powm_ui(z1, z2, 2, c->field->order);
     }
 
@@ -439,7 +439,7 @@ static int fp_sgn_even(element_ptr a) {
   if (!ad->flag) return 0;
   mp_limb_t* sum = pbc_malloc(p->limbs * sizeof(mp_limb_t));
 
-  int carry = mpn_add_n(sum, ad->d, ad->d, p->limbs);
+  mp_limb_t carry = mpn_add_n(sum, ad->d, ad->d, p->limbs);
   int result;
   if (carry) result = 1;
   else result = mpn_cmp(sum, p->primelimbs, p->limbs);
@@ -549,5 +549,5 @@ void field_init_faster_fp(field_ptr f, mpz_t prime) {
   mpz_export(p->primelimbs, &p->limbs, -1, sizeof(mp_limb_t), 0, 0, prime);
 
   mpz_set(f->order, prime);
-  f->fixed_length_in_bytes = (mpz_sizeinbase(prime, 2) + 7) / 8;
+  f->fixed_length_in_bytes = (int)((mpz_sizeinbase(prime, 2) + 7) / 8);
 }

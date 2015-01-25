@@ -191,42 +191,50 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\lib\$(Platform)\Debug;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\mpir\lib\$(Platform)\Debug;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)lib\Debug\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)lib\$(Platform)\Debug\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\lib\$(Platform)\Debug;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\mpir\lib\$(Platform)\Debug;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)lib\$(Platform)\Debug\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|Win32'">
     <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\dll\$(Platform)\Debug;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\mpir\dll\$(Platform)\Debug;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)dll\Debug\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)dll\$(Platform)\Debug\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DLL|x64'">
     <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\dll\$(Platform)\Debug;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\mpir\dll\$(Platform)\Debug;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)dll\$(Platform)\Debug\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\lib\$(Platform)\Release;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\mpir\lib\x64\Release;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)lib\Release\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)lib\$(Platform)\Release\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\lib\x64\Release;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\mpir\lib\x64\Release;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)lib\$(Platform)\Release\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|Win32'">
     <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\dll\$(Platform)\Release;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\mpir\dll\$(Platform)\Release;$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)dll\Release\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)dll\$(Platform)\Release\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DLL|x64'">
     <IncludePath>$(SolutionDir)..\include;$(SolutionDir)..;$(SolutionDir)..\..\mpir\dll\$(Platform)\Release;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\mpir\dll\$(Platform)\Release;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)dll\$(Platform)\Release\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
