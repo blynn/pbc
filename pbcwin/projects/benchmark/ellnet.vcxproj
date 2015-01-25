@@ -69,28 +69,28 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IntDir>$(SolutionDir)obj\benchmark\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)bin\$(Configuration)\benchmark\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\benchmark\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\benchmark\</OutDir>
     <IncludePath>$(SolutionDir)..;$(SolutionDir)..\include;$(SolutionDir)..\..\mpir\lib\$(Platform)\$(Configuration);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\$(Platform)\$(Configuration);$(SolutionDir)..\..\mpir\lib\$(Platform)\$(Configuration);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)..;$(SolutionDir)..\include;$(SolutionDir)..\..\mpir\lib\$(Platform)\$(Configuration);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\$(Platform)\$(Configuration);$(SolutionDir)..\..\mpir\lib\$(Platform)\$(Configuration);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
-    <IntDir>$(SolutionDir)obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)bin\$(Configuration)\benchmark\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\benchmark\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\benchmark\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IntDir>$(SolutionDir)obj\benchmark\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)bin\$(Configuration)\benchmark\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\benchmark\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\benchmark\</OutDir>
     <IncludePath>$(SolutionDir)..;$(SolutionDir)..\include;$(SolutionDir)..\..\mpir\lib\$(Platform)\$(Configuration);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\$(Platform)\$(Configuration);$(SolutionDir)..\..\mpir\lib\$(Platform)\$(Configuration);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)..;$(SolutionDir)..\include;$(SolutionDir)..\..\mpir\lib\$(Platform)\$(Configuration);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\$(Platform)\$(Configuration);$(SolutionDir)..\..\mpir\lib\$(Platform)\$(Configuration);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
-    <IntDir>$(SolutionDir)obj\$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)bin\$(Configuration)\benchmark\</OutDir>
+    <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\benchmark\$(ProjectName)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\benchmark\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

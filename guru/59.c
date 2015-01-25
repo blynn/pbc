@@ -497,7 +497,8 @@ void shipseystange(element_t z, element_t P, element_t Q)
 
 void miller(element_t z, element_t PR, element_t R, element_t P, element_t Q)
 {
-    int m = mpz_sizeinbase(order, 2) - 2;
+    mp_bitcnt_t m = (mp_bitcnt_t)mpz_sizeinbase(order, 2);
+    m = (m > 2 ? m - 2 : 0);
 
     element_t Z;
     element_t z1;

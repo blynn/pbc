@@ -4,6 +4,7 @@
 #include "pbc.h"
 #include "pbc_fp.h"
 #include "pbc_fieldquadratic.h"
+#include "pbc_poly.h"
 
 static mpz_t prime;
 
@@ -21,12 +22,11 @@ static void check_p(int value, char *s) {
 }
 
 static void check_match_int(int i1, int i2, char *s) {
-  void bug(void)
-  {
-    printf("BUG: %s mismatch\n", s);
-    element_printf("i1: %d\n", i1);
-    element_printf("i2: %d\n", i2);
-    exit(1);
+  #define bug() {                    \
+    printf("BUG: %s mismatch\n", s); \
+    element_printf("i1: %d\n", i1);  \
+    element_printf("i2: %d\n", i2);  \
+    exit(1);                         \
   }
 
   if (VERBOSE) {
@@ -36,17 +36,17 @@ static void check_match_int(int i1, int i2, char *s) {
   }
 
   if (i1 != i2) bug();
+  #undef bug
 }
 
 static void check_match(element_t e1, element_t e2, char *s) {
   unsigned char *buf1, *buf2;
   int len;
-  void bug(void)
-  {
-    printf("BUG: %s mismatch\n", s);
-    element_printf("e1: %B\n", e1);
-    element_printf("e2: %B\n", e2);
-    exit(1);
+  #define bug() {                    \
+    printf("BUG: %s mismatch\n", s); \
+    element_printf("e1: %B\n", e1);  \
+    element_printf("e2: %B\n", e2);  \
+    exit(1);                         \
   }
 
   if (VERBOSE) {
@@ -70,6 +70,7 @@ static void check_match(element_t e1, element_t e2, char *s) {
 
   pbc_free(buf1);
   pbc_free(buf2);
+  #undef bug
 }
 
 static void run_check(field_ptr f1, field_ptr f2) {
@@ -78,79 +79,72 @@ static void run_check(field_ptr f1, field_ptr f2) {
   element_t x2, y2, z2;
   char s2[80];
 
-  void convertset(element_t out, element_t in)
-  {
-    unsigned char *buf;
-    int len;
-
-    len = element_length_in_bytes(in);
-    buf = pbc_malloc(len);
-    element_to_bytes(buf, in);
-    element_from_bytes(out, buf);
-    pbc_free(buf);
-    check_match(in, out, "conversion");
+  #define convertset(out, in) {             \
+    unsigned char *buf;                     \
+    int len;                                \
+    len = element_length_in_bytes(in);      \
+    buf = pbc_malloc(len);                  \
+    element_to_bytes(buf, (in));            \
+    element_from_bytes((out), buf);         \
+    pbc_free(buf);                          \
+    check_match((in), (out), "conversion"); \
   }
 
-  void randxy(void)
-  {
-
-    element_random(x1);
-    element_random(y1);
-    convertset(x2, x1);
-    convertset(y2, y1);
+  #define randxy() {    \
+    element_random(x1); \
+    element_random(y1); \
+    convertset(x2, x1); \
+    convertset(y2, y1); \
   }
 
-  void check_onearg(void (*fn)(element_ptr), char *s)
-  {
-    fn(x1);
-    fn(x2);
-    check_match(x1, x2, s);
+  #define check_onearg(fn, s) {   \
+    fn(x1);                       \
+    fn(x2);                       \
+    check_match(x1, x2, (s));     \
   }
 
-  void check_twoarg(void (*fn)(element_ptr, element_ptr), char *s)
-  {
-    randxy();
-    fn(z1, x1);
-    fn(z2, x2);
-    check_match(z1, z2, s);
-
-    strncpy(s2, s, 32);
-    strcat(s2, " (in place)");
-    fn(y1, y1);
-    fn(y2, y2);
-    check_match(y1, y2, s2);
+  #define check_twoarg(fn, s) { \
+    randxy();                   \
+    fn(z1, x1);                 \
+    fn(z2, x2);                 \
+    check_match(z1, z2, (s));   \
+                                \
+    strncpy(s2, (s), 32);       \
+    strcat(s2, " (in place)");  \
+    fn(y1, y1);                 \
+    fn(y2, y2);                 \
+    check_match(y1, y2, s2);    \
   }
 
-  void check_threearg(void (*fn)(element_ptr, element_ptr, element_ptr), char *s)
-  {
-    randxy();
-    fn(z1, x1, y1);
-    fn(z2, x2, y2);
-    check_match(z1, z2, s);
-
-    strncpy(s2, s, 32);
-    strcat(s2, " (first arg in place)");
-    element_set(z1, x1);
-    element_set(z2, x2);
-    fn(z1, z1, y1);
-    fn(z2, z2, y2);
-    check_match(z1, z2, s2);
-
-    strncpy(s2, s, 32);
-    strcat(s2, " (second arg in place)");
-    element_set(z1, y1);
-    element_set(z2, y2);
-    fn(z1, x1, z1);
-    fn(z2, x2, z2);
-    check_match(z1, z2, s2);
-
-    strncpy(s2, s, 32);
-    strcat(s2, " (both args in place)");
-    element_set(z1, y1);
-    element_set(z2, y2);
-    fn(x1, x1, x1);
-    fn(x2, x2, x2);
-    check_match(x1, x2, s2);
+  #define check_threearg(fn, s) {         \
+    randxy();                             \
+    fn(z1, x1, y1);                       \
+    fn(z2, x2, y2);                       \
+    check_match(z1, z2, (s));             \
+                                          \
+    strncpy(s2, (s), 32);                 \
+    strcat(s2, " (first arg in place)");  \
+    element_set(z1, x1);                  \
+    element_set(z2, x2);                  \
+    fn(z1, z1, y1);                       \
+    fn(z2, z2, y2);                       \
+    check_match(z1, z2, s2);              \
+                                          \
+    strncpy(s2, (s), 32);                 \
+    strcat(s2, " (second arg in place)"); \
+    element_set(z1, y1);                  \
+    element_set(z2, y2);                  \
+    fn(z1, x1, z1);                       \
+    fn(z2, x2, z2);                       \
+    check_match(z1, z2, s2);              \
+                                          \
+    strncpy(s2, (s), 32);                 \
+    strcat(s2, " (both args in place)");  \
+    element_set(z1, y1);                  \
+    element_set(z2, y2);                  \
+    fn(x1, x1, x1);                       \
+    fn(x2, x2, x2);                       \
+    check_match(x1, x2, s2);              \
   }
 
   mpz_init(t1);
@@ -238,11 +232,11 @@ static void run_check(field_ptr f1, field_ptr f2) {
   element_pow_mpz(z1, x1, t1);
   element_pow_mpz(z2, x2, t2);
   check_match(z1, z2, "pow_mpz");
-  element_mul_si(z1, x1, mpz_get_ui(t1));
-  element_mul_si(z2, x2, mpz_get_ui(t2));
+  element_mul_si(z1, x1, (long)mpz_get_si(t1));
+  element_mul_si(z2, x2, (long)mpz_get_si(t2));
   check_match(z1, z2, "mul_si");
-  element_set_si(z1, mpz_get_ui(t1));
-  element_set_si(z2, mpz_get_ui(t2));
+  element_set_si(z1, (long)mpz_get_si(t1));
+  element_set_si(z2, (long)mpz_get_si(t2));
   check_match(z1, z2, "set_si");
 
   element_clear(x1);
@@ -254,6 +248,11 @@ static void run_check(field_ptr f1, field_ptr f2) {
 
   mpz_clear(t1);
   mpz_clear(t2);
+  #undef convertset
+  #undef randxy
+  #undef check_onearg
+  #undef check_twoarg
+  #undef check_threearg
 }
 
 int main(void) {

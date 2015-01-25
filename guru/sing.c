@@ -13,7 +13,7 @@
 static void miller(element_t res, element_t P, element_t Q, element_t R, int n)
 {
     //collate divisions
-    int m;
+    mp_bitcnt_t m;
     element_t v, vd;
     element_t Z;
     element_t a, b, c;
@@ -27,86 +27,82 @@ static void miller(element_t res, element_t P, element_t Q, element_t R, int n)
     const element_ptr denomx = curve_x_coord(R);
     const element_ptr denomy = curve_y_coord(R);
 
-    void do_vertical(element_t e, element_t edenom)
-    {
-        element_sub(e0, numx, Zx);
-        element_mul(e, e, e0);
-
-        element_sub(e0, denomx, Zx);
-        element_mul(edenom, edenom, e0);
+    #define do_vertical(e, edenom) {         \
+        element_sub(e0, numx, Zx);           \
+        element_mul((e), (e), e0);           \
+                                             \
+        element_sub(e0, denomx, Zx);         \
+        element_mul((edenom), (edenom), e0); \
     }
 
-    void do_tangent(element_t e, element_t edenom)
-    {
-        //a = -slope_tangent(A.x, A.y);
-        //b = 1;
-        //c = -(A.y + a * A.x);
-        //but we multiply by 2*A.y to avoid division
-
-        //a = -Ax * (Ax + Ax + Ax + twicea_2) - a_4;
-        //This curve is special:
-        //a = -(3 Ax^2 + 2Ax)
-        //b = 2 * Ay
-        //c = -(2 Ay^2 + a Ax);
-
-        if (element_is0(Zy)) {
-            do_vertical(e, edenom);
-            return;
-        }
-        element_square(a, Zx);
-        element_mul_si(a, a, 3);
-        element_add(a, a, Zx);
-        element_add(a, a, Zx);
-        element_neg(a, a);
-
-        element_add(b, Zy, Zy);
-
-        element_mul(e0, b, Zy);
-        element_mul(c, a, Zx);
-        element_add(c, c, e0);
-        element_neg(c, c);
-
-        element_mul(e0, a, numx);
-        element_mul(e1, b, numy);
-        element_add(e0, e0, e1);
-        element_add(e0, e0, c);
-        element_mul(e, e, e0);
-
-        element_mul(e0, a, denomx);
-        element_mul(e1, b, denomy);
-        element_add(e0, e0, e1);
-        element_add(e0, e0, c);
-        element_mul(edenom, edenom, e0);
+    #define do_tangent(e, edenom) {                  \
+        /*a = -slope_tangent(A.x, A.y);              \
+          b = 1;                                     \
+          c = -(A.y + a * A.x);                      \
+          but we multiply by 2*A.y to avoid division \
+                                                     \
+          a = -Ax * (Ax + Ax + Ax + twicea_2) - a_4; \
+          This curve is special:                     \
+          a = -(3 Ax^2 + 2Ax)                        \
+          b = 2 * Ay                                 \
+          c = -(2 Ay^2 + a Ax);                   */ \
+                                                     \
+        if (element_is0(Zy)) {                       \
+            do_vertical((e), (edenom));              \
+        } else {                                     \
+          element_square(a, Zx);                     \
+          element_mul_si(a, a, 3);                   \
+          element_add(a, a, Zx);                     \
+          element_add(a, a, Zx);                     \
+          element_neg(a, a);                         \
+                                                     \
+          element_add(b, Zy, Zy);                    \
+                                                     \
+          element_mul(e0, b, Zy);                    \
+          element_mul(c, a, Zx);                     \
+          element_add(c, c, e0);                     \
+          element_neg(c, c);                         \
+                                                     \
+          element_mul(e0, a, numx);                  \
+          element_mul(e1, b, numy);                  \
+          element_add(e0, e0, e1);                   \
+          element_add(e0, e0, c);                    \
+          element_mul((e), (e), e0);                 \
+                                                     \
+          element_mul(e0, a, denomx);                \
+          element_mul(e1, b, denomy);                \
+          element_add(e0, e0, e1);                   \
+          element_add(e0, e0, c);                    \
+          element_mul((edenom), (edenom), e0);       \
+        }                                            \
     }
 
-    void do_line(element_ptr e, element_ptr edenom)
-    {
-        if (!element_cmp(Zx, Px)) {
-            if (!element_cmp(Zy, Py)) {
-                do_tangent(e, edenom);
-            } else {
-                do_vertical(e, edenom);
-            }
-            return;
-        }
-
-        element_sub(b, Px, Zx);
-        element_sub(a, Zy, Py);
-        element_mul(c, Zx, Py);
-        element_mul(e0, Zy, Px);
-        element_sub(c, c, e0);
-
-        element_mul(e0, a, numx);
-        element_mul(e1, b, numy);
-        element_add(e0, e0, e1);
-        element_add(e0, e0, c);
-        element_mul(e, e, e0);
-
-        element_mul(e0, a, denomx);
-        element_mul(e1, b, denomy);
-        element_add(e0, e0, e1);
-        element_add(e0, e0, c);
-        element_mul(edenom, edenom, e0);
+    #define do_line(e, edenom) {               \
+        if (!element_cmp(Zx, Px)) {            \
+            if (!element_cmp(Zy, Py)) {        \
+                do_tangent((e), (edenom));     \
+            } else {                           \
+                do_vertical((e), (edenom));    \
+            }                                  \
+        } else {                               \
+          element_sub(b, Px, Zx);              \
+          element_sub(a, Zy, Py);              \
+          element_mul(c, Zx, Py);              \
+          element_mul(e0, Zy, Px);             \
+          element_sub(c, c, e0);               \
+                                               \
+          element_mul(e0, a, numx);            \
+          element_mul(e1, b, numy);            \
+          element_add(e0, e0, e1);             \
+          element_add(e0, e0, c);              \
+          element_mul((e), (e), e0);           \
+                                               \
+          element_mul(e0, a, denomx);          \
+          element_mul(e1, b, denomy);          \
+          element_add(e0, e0, e1);             \
+          element_add(e0, e0, c);              \
+          element_mul((edenom), (edenom), e0); \
+       }                                       \
     }
 
     element_init(a, res->field);
@@ -128,9 +124,10 @@ static void miller(element_t res, element_t P, element_t Q, element_t R, int n)
 
     mpz_init(q);
     mpz_set_ui(q, n);
-    m = mpz_sizeinbase(q, 2) - 2;
+    m = (mp_bitcnt_t)mpz_sizeinbase(q, 2);
+    m = (m > 2 ? m - 2 : 0);
 
-    while(m >= 0) {
+    for (;;) {
         element_square(v, v);
         element_square(vd, vd);
         do_tangent(v, vd);
@@ -144,6 +141,7 @@ static void miller(element_t res, element_t P, element_t Q, element_t R, int n)
                 do_vertical(vd, v);
             }
         }
+        if (!m) break;
         m--;
     }
 

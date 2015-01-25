@@ -271,8 +271,15 @@ static size_t sn_out_str(FILE *stream, int base, element_ptr a) {
   return result + status + 1;
 }
 
-void naive_generic_pow_mpz(element_ptr x, element_ptr a, mpz_ptr n);
+static void field_clear_nothing(field_ptr f) {
+  UNUSED_VAR(f);
+}
+
 void field_init_curve_singular_with_node(field_t c, field_t field) {
+  field_t defaultField;
+  field_init(defaultField);
+
+  mpz_init(c->order);
   mpz_set(c->order, field->order);
   c->data = (void *) field;
   c->init = sn_init;
@@ -286,9 +293,12 @@ void field_init_curve_singular_with_node(field_t c, field_t field) {
   c->mul = c->add = sn_add;
   c->set1 = c->set0 = sn_set0;
   c->is1 = c->is0 = sn_is0;
-  c->mul_mpz = element_pow_mpz;
+  c->mul_mpz = defaultField->pow_mpz;
   c->out_str = sn_out_str;
   c->field_clear = sn_field_clear;
+
+  defaultField->field_clear = field_clear_nothing;
+  field_clear(defaultField);
 }
 
 //TODO: the following code is useless as the Tate pairing is degenerate on singular curves
