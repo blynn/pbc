@@ -97,7 +97,7 @@ static void compute_q(mpc_t q, mpc_t tau) {
   mpc_t z0;
   mpf_t f0, f1;
   mpf_ptr fp0;
-  gmp_ui pwr;
+  pbc_mpui pwr;
 
   mpc_init(z0);
   mpf_init(f0);

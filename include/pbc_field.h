@@ -241,11 +241,11 @@ static inline void element_to_mpz(mpz_t z, element_t e) {
   e->field->to_mpz(z, e);
 }
 
-static inline gmp_si element_to_si(element_t e) {
+static inline pbc_mpsi element_to_si(element_t e) {
   mpz_t z;
   mpz_init(z);
   e->field->to_mpz(z, e);
-  gmp_si res = mpz_get_si(z);
+  pbc_mpsi res = mpz_get_si(z);
   mpz_clear(z);
   return res;
 }

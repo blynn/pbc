@@ -85,11 +85,11 @@ static inline void *int_to_voidp(intptr_t i) {
 
 // Compatibility with x64 MPIR in MSVC
 #if defined(_MSC_VER) && defined(_WIN64)
-typedef unsigned long long int gmp_ui;
-typedef signed long long int   gmp_si;
+typedef unsigned long long int pbc_mpui;
+typedef signed long long int   pbc_mpsi;
 #else
-typedef unsigned long int      gmp_ui;
-typedef signed long int        gmp_si;
+typedef unsigned long int      pbc_mpui;
+typedef signed long int        pbc_mpsi;
 #endif
 
 #endif //__PBC_UTILS_H__

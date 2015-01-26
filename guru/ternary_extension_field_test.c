@@ -97,9 +97,9 @@ static void test_gf3m_cubic(void) {
 }
 
 static void test_gf3m_cubic2(void) {
-    if (sizeof(gmp_ui) < 8) return; // 64-bit test only
-    gmp_ui x[] = { (gmp_ui)1153286547535200267ul, (gmp_ui)6715371622ul, (gmp_ui)4990694927524257316ul, (gmp_ui)210763913ul };
-    gmp_ui y[] = { (gmp_ui)8145587063258678275ul, (gmp_ui)6451025920ul, (gmp_ui)9976895054123379152ul, (gmp_ui)1275593166ul };
+    if (sizeof(pbc_mpui) < 8) return; // 64-bit test only
+    pbc_mpui x[] = { (pbc_mpui)1153286547535200267ul, (pbc_mpui)6715371622ul, (pbc_mpui)4990694927524257316ul, (pbc_mpui)210763913ul };
+    pbc_mpui y[] = { (pbc_mpui)8145587063258678275ul, (pbc_mpui)6451025920ul, (pbc_mpui)9976895054123379152ul, (pbc_mpui)1275593166ul };
     memcpy(a->data, x, sizeof(x));
     memcpy(b->data, y, sizeof(y));
     element_cubic(a, a);

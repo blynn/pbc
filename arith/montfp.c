@@ -595,6 +595,6 @@ void field_init_mont_fp(field_ptr f, mpz_t prime) {
   // since we're only doing it once.
   mpz_setbit(z, p->bytes * 8);
   mpz_invert(z, prime, z);
-  p->negpinv = ~((gmp_ui)0) - (mpz_get_ui(z) - 1);
+  p->negpinv = ~((pbc_mpui)0) - (mpz_get_ui(z) - 1);
   mpz_clear(z);
 }
