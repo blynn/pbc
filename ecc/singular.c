@@ -380,7 +380,7 @@ static void sn_miller(element_t res, mpz_t q, element_t P,
   m = (mp_bitcnt_t)mpz_sizeinbase(q, 2);
   m = (m > 2 ? m - 2 : 0);
 
-  while(m >= 0) {
+  for (;;) {
     element_mul(v, v, v);
     element_mul(vd, vd, vd);
     do_tangent(v);
@@ -391,6 +391,7 @@ static void sn_miller(element_t res, mpz_t q, element_t P,
       element_add(Z, Z, P);
       do_vertical(vd);
     }
+    if (!m) break;
     m--;
   }
   #undef do_tangent
