@@ -2257,8 +2257,7 @@ static void a1_init_pairing(pairing_t pairing, void *data) {
   field_init_fi(p->Fp2, p->Fp);
 
   pairing->finalpow = a_finalpow;
-  pairing->G1 = pbc_malloc(sizeof(field_t));
-  pairing->G2 = pairing->G1 = p->Ep;
+  pairing->G1 = pairing->G2 = p->Ep;
   pairing_GT_init(pairing, p->Fp2);
 
   pairing->map = a1_pairing_proj; //default uses projective coordinates.
