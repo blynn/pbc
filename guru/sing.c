@@ -158,6 +158,9 @@ static void miller(element_t res, element_t P, element_t Q, element_t R, int n)
     element_clear(c);
     element_clear(e0);
     element_clear(e1);
+    #undef do_vertical
+    #undef do_tangent
+    #undef do_line
 }
 
 static void tate_3(element_ptr out, element_ptr P, element_ptr Q, element_ptr R)
