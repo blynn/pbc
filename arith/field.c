@@ -739,9 +739,9 @@ int pbc_mpz_set_str(mpz_t z, const char *s, int base) {
     if (isdigit(c)) {
       j = c - '0';
     } else if (c >= 'A' && c <= 'Z') {
-      j = c - 'A';
+      j = (c - 'A') + 10;
     } else if (c >= 'a' && c <= 'z') {
-      j = c - 'a';
+      j = (c - 'a') + 10;
     } else break;
 
     if (j >= b) break;
