@@ -56,3 +56,4 @@ compile
 m4/
 *.exe
 *.exe.stackdump
+build-stamp

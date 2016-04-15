@@ -9,7 +9,8 @@ ACLOCAL_AMFLAGS = -I m4
 CLEANFILES = *~
 maintainer-clean-local:
 	-rm -rf Makefile.in depcomp ltmain.sh config.h.in configure compile config.guess config.sub \
-	missing install-sh autom4te.cache aclocal.m4 tmp
+	missing install-sh autom4te.cache aclocal.m4 tmp *.o *.lo \
+	debian/libpbc0 debian/libpbc-dev/ debian/*debhelper.log debian/*debhelper debian/*substvars
 
 lib_LTLIBRARIES = libpbc.la 
 

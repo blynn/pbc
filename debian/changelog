@@ -1,3 +1,9 @@
+libpbc (0.5.14) unstable; urgency=low
+
+  * Update version number
+
+ -- Jeroen Massar <massar@fsi.io>  Mon, 21 Jul 2014 11:55:42 +0200
+  
 libpbc (0.5.10) unstable; urgency=low
 
   * GIT DIFF STAT (from 0.5.9 to 0.5.10):
