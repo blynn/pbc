@@ -13,6 +13,6 @@ The PBC library is built on top of the GMP library, and the PBC API is strongly
 influenced by the GMP API. Accordingly, this manual tries to imitate the look
 and feel of the GMP manual.
 
-The PBC library homepage: http://crypto.stanford.edu/pbc/[http://crypto.stanford.edu/pbc/]
+The PBC library homepage: https://crypto.stanford.edu/pbc/[https://crypto.stanford.edu/pbc/]
 
-The GMP library homepage: http://www.swox.com/gmp/[http://www.swox.com/gmp/]
+The GMP library homepage: https://gmplib.org/[https://gmplib.org/]

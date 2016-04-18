@@ -1,9 +1,13 @@
 INSTALLING THE PBC LIBRARY
 ==========================
 
-The PBC library needs the GMP library, which can be found at
+The PBC library needs the GMP library, which can be found at:
 
-    http://www.swox.com/gmp/
+  https://gmplib.org/
+
+On Debian-based systems, simply run:
+
+  $ sudo apt-get install libgmp3-dev
 
 This build system has been tested and works on Linux and Mac OS X with a
 fink installation.  You may need to specify paths via LDFLAGS and
