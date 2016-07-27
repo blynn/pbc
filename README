@@ -13,8 +13,9 @@ in a bilinear pairing.
 See the online manual for more information. The DocBook source files that
 are used to create the manual are in the doc/ subdirectory.
 
-The PBC library is released under the GNU General Public License. See the
-file COPYING for details.
+The PBC library is released under the GNU General Public License and
+the Apache License version 2.0. See the files COPYING and LICENSE-2.0.txt
+for details.
 
 ------------------------------------------------------------------------------
 Ben Lynn <blynn@cs.stanford.edu>
