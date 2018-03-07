@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 # pbc lexer and parser appears before configure script 
 [ x`which flex` == x ] && echo 'need flex' && exit 1
