@@ -25,7 +25,6 @@ const char *option_prompt;
 char *pbc_getline(const char *prompt);
 
 void yyerror(char *s) { fprintf(stderr, "%s\n", s); }
-int yyparse(void);
 
 // Symbol table holding built-in functions and variables.
 static symtab_t reserved;
