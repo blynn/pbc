@@ -302,6 +302,7 @@ static void element_pow_base_table(element_ptr x, mpz_ptr power,
 
   // Early abort if raising to power 0.
   if (!mpz_sgn(n)) {
+    mpz_clear(n);
     element_set1(x);
     return;
   }
