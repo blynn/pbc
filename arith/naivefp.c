@@ -175,7 +175,7 @@ static void zp_random(element_ptr n) {
   pbc_mpz_random(n->data, n->field->order);
 }
 
-static void zp_from_hash(element_ptr n, void *data, int len) {
+static void zp_from_hash(element_ptr n, const void *data, int len) {
   pbc_mpz_from_hash(n->data, n->field->order, data, len);
 }
 
@@ -210,7 +210,7 @@ static int zp_to_bytes(unsigned char *data, element_t e) {
   return n;
 }
 
-static int zp_from_bytes(element_t e, unsigned char *data) {
+static int zp_from_bytes(element_t e, const unsigned char *data) {
   mpz_ptr z = e->data;
   int n;
   n = e->field->fixed_length_in_bytes;

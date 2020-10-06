@@ -363,7 +363,7 @@ static void f_random(element_ptr n) {
   multiz_free(delme);
 }
 
-static void f_from_hash(element_ptr n, void *data, int len) {
+static void f_from_hash(element_ptr n, const void *data, int len) {
   mpz_t z;
   mpz_init(z);
   mpz_import(z, len, -1, 1, -1, 0, data);

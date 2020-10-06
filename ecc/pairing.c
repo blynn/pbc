@@ -115,7 +115,7 @@ static void gt_out_info(FILE *out, field_ptr f) {
   field_out_info(out, f->data);
 }
 
-static void gt_from_hash(element_ptr e, void *data, int len) {
+static void gt_from_hash(element_ptr e, const void *data, int len) {
   pairing_ptr pairing = e->field->pairing;
   element_from_hash(e->data, data, len);
   pairing->finalpow(e);
@@ -176,7 +176,7 @@ static int mulg_to_bytes(unsigned char *data, element_ptr e) {
   return element_to_bytes(data, e->data);
 }
 
-static int mulg_from_bytes(element_ptr e, unsigned char *data) {
+static int mulg_from_bytes(element_ptr e, const unsigned char *data) {
   return element_from_bytes(e->data, data);
 }
 

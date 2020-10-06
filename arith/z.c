@@ -107,7 +107,7 @@ static void z_random(element_ptr n) {
   mpz_set_ui(n->data, 0);
 }
 
-static void z_from_hash(element_ptr n, void *data, int len) {
+static void z_from_hash(element_ptr n, const void *data, int len) {
   mpz_import(n->data, len, -1, 1, -1, 0, data);
 }
 

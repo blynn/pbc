@@ -640,7 +640,7 @@ void pbc_mpz_out_raw_n(unsigned char *data, int n, mpz_t z) {
 //  buf = H || 0 || H || 1 || H || ...
 //before calling mpz_import
 void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
-                       unsigned char *data, unsigned int len) {
+                       const unsigned char *data, unsigned int len) {
   size_t i = 0, n, count = (mpz_sizeinbase(limit, 2) + 7) / 8;
   unsigned char* buf = pbc_malloc(count * sizeof(unsigned char));
   unsigned char counter = 0;
