@@ -30,7 +30,7 @@ the number of bits in the prime q, and the number of bits in the prime r. The
 
 Among the bundled type D curve parameters are the curves 9563-201-181,
 62003-159-158 and 496659-224-224 which have shortened names `param/d201.param`,
-`param/d159.param` and `param/d225.param` respectively.
+`param/d159.param` and `param/d224.param` respectively.
 
 See `gen/listmnt.c` and `gen/gendparam.c` for how to generate type D pairing
 parameters.
