@@ -1,6 +1,8 @@
 #ifndef __PBC_UTILS_H__
 #define __PBC_UTILS_H__
 
+#include <stdint.h> // for intptr_t
+
 #ifdef PBC_DEBUG
 
 /*@manual debug
