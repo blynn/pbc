@@ -34,7 +34,7 @@ install -o 0 -g 0 -m 755 -d ${D}/usr/bin/ || die
 
 echo "building a real pbc"
 (cd pbc; gcc -c pbc_getline.readline.c)
-gcc -o realpbc -I. -Iinclude pbc/pbc.c -L .libs -lpbc -lgmp pbc/pbc_getline.readline.o  -lreadline  pbc_pbc-symtab.o pbc_pbc-parser.tab.o pbc_pbc-darray.o pbc_pbc-lex.yy.o
+gcc -o realpbc -I. -Iinclude pbc/pbc.c -L .libs -lpbc -lgmp pbc/pbc_getline.readline.o  -lreadline  misc/pbc_pbc-symtab.o pbc/pbc_pbc-parser.tab.o misc/pbc_pbc-darray.o pbc/pbc_pbc-lex.yy.o
 
 echo "installing the pbc binary"
 install -o 0 -g 0 -m 755 realpbc ${D}/usr/bin/pbc || die
