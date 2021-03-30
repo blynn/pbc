@@ -266,7 +266,7 @@ static void fp_random(element_ptr a) {
   mpz_clear(z);
 }
 
-static void fp_from_hash(element_ptr a, void *data, int len) {
+static void fp_from_hash(element_ptr a, const void *data, int len) {
   mpz_t z;
 
   mpz_init(z);
@@ -324,7 +324,7 @@ static int fp_to_bytes(unsigned char *data, element_t e) {
   return n;
 }
 
-static int fp_from_bytes(element_t e, unsigned char *data) {
+static int fp_from_bytes(element_t e, const unsigned char *data) {
   int n;
   mpz_t z;
 

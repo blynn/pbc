@@ -76,13 +76,13 @@ struct field_s {
   void (*invert)(element_ptr, element_ptr);
   void (*neg)(element_ptr, element_ptr);
   void (*random)(element_ptr);
-  void (*from_hash)(element_ptr, void *data, int len);
+  void (*from_hash)(element_ptr, const void *data, int len);
   int (*is1)(element_ptr);
   int (*is0)(element_ptr);
   int (*sign)(element_ptr);  // satisfies sign(x) = -sign(-x)
   int (*cmp)(element_ptr, element_ptr);
   int (*to_bytes)(unsigned char *data, element_ptr);
-  int (*from_bytes)(element_ptr, unsigned char *data);
+  int (*from_bytes)(element_ptr, const unsigned char *data);
   int (*length_in_bytes)(element_ptr);
   int fixed_length_in_bytes;  // length of an element in bytes; -1 for variable
   int (*snprint)(char *s, size_t n, element_ptr e);
@@ -254,7 +254,7 @@ static inline pbc_mpsi element_to_si(element_t e) {
 Generate an element 'e' deterministically from
 the 'len' bytes stored in the buffer 'data'.
 */
-static inline void element_from_hash(element_t e, void *data, int len) {
+static inline void element_from_hash(element_t e, const void *data, int len) {
   e->field->from_hash(e, data, len);
 }
 
@@ -479,7 +479,7 @@ static inline int element_to_bytes(unsigned char *data, element_t e) {
 /*@manual etrade
 Reads 'e' from the buffer 'data', and returns the number of bytes read.
 */
-static inline int element_from_bytes(element_t e, unsigned char *data) {
+static inline int element_from_bytes(element_t e, const unsigned char *data) {
   return e->field->from_bytes(e, data);
 }
 
@@ -557,7 +557,7 @@ x-coordinate represented by the buffer 'data'. This is not unique.
 For each 'x'-coordinate, there exist two different points, at least
 for the elliptic curves in PBC. (They are inverses of each other.)
 */
-int element_from_bytes_x_only(element_t e, unsigned char *data);
+int element_from_bytes_x_only(element_t e, const unsigned char *data);
 /*@manual etrade
 Assumes 'e' is a point on an elliptic curve.
 Returns the length in bytes needed to hold the x-coordinate of 'e'.
@@ -576,7 +576,7 @@ Sets element 'e' to the element in compressed form in the buffer of bytes
 'data'.
 Currently only implemented for points on an elliptic curve.
 */
-int element_from_bytes_compressed(element_t e, unsigned char *data);
+int element_from_bytes_compressed(element_t e, const unsigned char *data);
 
 /*@manual etrade
 Returns the number of bytes needed to hold 'e' in compressed form.
@@ -624,7 +624,7 @@ static inline void element_pp_pow_zn(element_t out, element_t power,
 
 void pbc_mpz_out_raw_n(unsigned char *data, int n, mpz_t z);
 void pbc_mpz_from_hash(mpz_t z, mpz_t limit,
-                       unsigned char *data, unsigned int len);
+                       const unsigned char *data, unsigned int len);
 
 /*@manual etrade
 For points, returns the number of coordinates.

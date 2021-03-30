@@ -338,7 +338,7 @@ static void polymod_random(element_ptr e) {
   }
 }
 
-static void polymod_from_hash(element_ptr e, void *data, int len) {
+static void polymod_from_hash(element_ptr e, const void *data, int len) {
   // TODO: Improve this.
   element_t *coeff = e->data;
   int i, n = polymod_field_degree(e->field);
@@ -575,7 +575,7 @@ static int poly_to_bytes(unsigned char *buf, element_t p) {
   return result;
 }
 
-static int poly_from_bytes(element_t p, unsigned char *buf) {
+static int poly_from_bytes(element_t p, const unsigned char *buf) {
   int result = 2;
   int count = buf[0] + buf[1] * 256;
   int i;
@@ -739,7 +739,7 @@ static int polymod_length_in_bytes(element_t f) {
   return res;
 }
 
-static int polymod_from_bytes(element_t f, unsigned char *data) {
+static int polymod_from_bytes(element_t f, const unsigned char *data) {
   mfptr p = f->field->data;
   element_t *coeff = f->data;
   int i, n = p->n;

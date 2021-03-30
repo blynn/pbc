@@ -308,7 +308,7 @@ static void fq_invert(element_ptr n, element_ptr a) {
   element_clear(e1);
 }
 
-static void fq_from_hash(element_ptr n, void *data, int len) {
+static void fq_from_hash(element_ptr n, const void *data, int len) {
   eptr r = n->data;
   int k = len / 2;
   element_from_hash(r->x, data, k);
@@ -328,7 +328,7 @@ static int fq_to_bytes(unsigned char *data, element_t e) {
   return len;
 }
 
-static int fq_from_bytes(element_t e, unsigned char *data) {
+static int fq_from_bytes(element_t e, const unsigned char *data) {
   eptr p = e->data;
   int len;
   len = element_from_bytes(p->x, data);

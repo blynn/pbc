@@ -448,7 +448,7 @@ int gf3m_to_bytes(unsigned char *d, element_ptr e) {
     return SIZE(e);
 }
 
-int gf3m_from_bytes(element_ptr e, unsigned char *d) {
+int gf3m_from_bytes(element_ptr e, const unsigned char *d) {
     unsigned long *a = DATA1(e), *b = DATA2(e);
     unsigned i;
     int j;

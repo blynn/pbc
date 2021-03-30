@@ -452,7 +452,7 @@ static int curve_sign(element_ptr e) {
   return element_sign(p->y);
 }
 
-static void curve_from_hash(element_t a, void *data, int len) {
+static void curve_from_hash(element_t a, const void *data, int len) {
   element_t t, t1;
   point_ptr p = a->data;
   curve_data_ptr cdp = a->field->data;
@@ -608,7 +608,7 @@ static int curve_to_bytes(unsigned char *data, element_t e) {
   return len;
 }
 
-static int curve_from_bytes(element_t e, unsigned char *data) {
+static int curve_from_bytes(element_t e, const unsigned char *data) {
   point_ptr P = e->data;
   int len;
 
@@ -796,7 +796,7 @@ void curve_from_x(element_ptr e, element_t x) {
 }
 
 // Requires e to be a point on an elliptic curve.
-int element_from_bytes_compressed(element_ptr e, unsigned char *data) {
+int element_from_bytes_compressed(element_ptr e, const unsigned char *data) {
   curve_data_ptr cdp = e->field->data;
   point_ptr P = e->data;
   int len;
@@ -826,7 +826,7 @@ int element_to_bytes_x_only(unsigned char *data, element_ptr e) {
 }
 
 // Requires e to be a point on an elliptic curve.
-int element_from_bytes_x_only(element_ptr e, unsigned char *data) {
+int element_from_bytes_x_only(element_ptr e, const unsigned char *data) {
   curve_data_ptr cdp = e->field->data;
   point_ptr P = e->data;
   int len;
