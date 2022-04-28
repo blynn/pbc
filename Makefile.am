@@ -14,9 +14,6 @@ maintainer-clean-local:
 	debian/libpbc0 debian/libpbc-dev/ debian/*debhelper.log debian/*debhelper debian/*substvars
 
 lib_LTLIBRARIES = libpbc.la 
-if ENABLE_CXX
-lib_LTLIBRARIES += libpbcxx.la
-endif
 
 # this should really be a versioned dir, i.e., $(includedir)/pbc-0.5.0
 library_includedir = $(includedir)/pbc
@@ -65,16 +62,6 @@ libpbc_la_SOURCES = arith/field.c arith/z.c \
 	ecc/f_param.c ecc/g_param.c
 libpbc_la_LDFLAGS = -lgmp -lm -version-info $(SO_VERSION) $(PBC_LDFLAGS) $(LIBPBC_LDFLAGS)
 
-if ENABLE_CXX
-PBCXX_LTLIBRARIES_OPTION = libpbcxx.la
-endif
-libpbcxx_la_CPPFLAGS = -Iinclude
-libpbcxx_la_SOURCES = cxx/pbcxx.cc
-libpbcxx_la_DEPENDENCIES = libpbc.la
-libpbcxx_la_LIBADD = $(libpbcxx_la_DEPENDENCIES)
-libpbcxx_la_LDFLAGS = $(PBC_LDFLAGS) $(LIBPBCXX_LDFLAGS) \
-  -version-info $(SO_VERSION)
-
 # LDADD is fallback of program_LDADD
 # explicit "-lgmp" fixes error of "undefined reference to GMP symbol"
 # explicit "-lm" fixes error of "undefined reference to libm symbol"
@@ -82,6 +69,11 @@ LDADD = libpbc.la -lgmp -lm
 noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa benchmark/ellnet
 noinst_PROGRAMS += guru/fp_test guru/quadratic_test guru/poly_test guru/prodpairing_test
 noinst_PROGRAMS += guru/ternary_extension_field_test guru/eta_T_3_test
+if ENABLE_CXX
+noinst_PROGRAMS += benchmark/benchmark_cxx
+benchmark_benchmark_cxx_CPPFLAGS = -I include
+benchmark_benchmark_cxx_SOURCES = benchmark/benchmark_cxx.cc
+endif
 pbc_pbc_CPPFLAGS = -I include
 pbc_pbc_SOURCES = pbc/parser.tab.c pbc/lex.yy.c pbc/pbc.c pbc/pbc_getline.c misc/darray.c misc/symtab.c
 benchmark_benchmark_CPPFLAGS = -I include
