@@ -19,6 +19,9 @@
 #include "lex.yy.h"
 #include "parser.tab.h"
 
+// forward declaration to avoid C99 warnings
+int yyparse(void);
+
 int option_easy = 0;
 const char *option_prompt;
 

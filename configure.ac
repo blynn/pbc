@@ -1,14 +1,13 @@
 #-*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.59)
-AC_INIT([pbc], [0.5.14], [blynn@cs.stanford.edu])
+AC_PREREQ([2.71])
+AC_INIT([pbc],[0.5.14],[blynn@cs.stanford.edu])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([./])
-LT_INIT
-#AC_CANONICAL_HOST
+LT_INIT(win32-dll)
 
 CFLAGS=
 default_fink_path=/sw
@@ -34,7 +33,6 @@ esac
 # Framework for the below was extracted and
 # modeled after the libgmp configure script.
 
-AC_LIBTOOL_WIN32_DLL
 AC_SUBST(LIBPBC_DLL,0)
 
 case $host in
@@ -77,7 +75,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
-AC_PROG_LEX
+AC_PROG_LEX(yywrap)
 if test "x$LEX" != xflex; then
   echo "************************"
   echo "flex not found"
@@ -114,14 +112,14 @@ LIBS=
 
 # Checks for header files.
 AC_FUNC_ALLOCA
-AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h sys/time.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
-AC_HEADER_TIME
+AC_CHECK_HEADERS_ONCE([sys/time.h])
+
 
 dnl setup CFLAGS
 with_enable_optimized="no"
