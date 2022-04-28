@@ -69,6 +69,7 @@ AC_SUBST(LIBPBC_LDFLAGS)
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CXX
 AM_PROG_CC_C_O
 AC_PROG_CPP
 AC_PROG_INSTALL
@@ -173,8 +174,6 @@ AC_CHECK_FUNCS([floor gettimeofday memmove memset pow sqrt strchr strdup])
 
 # The C++ compiler, if desired.
 if test $enable_cxx != no; then
-  AC_PROG_CXX
-  AC_PROG_CXXCPP
   m4_ifndef([AX_CXX_COMPILE_STDCXX_11], [m4_fatal([Missing AX_CXX_COMPILE_STDCXX_11, install autoconf-archive])])
   AX_CXX_COMPILE_STDCXX_11
 
