@@ -10,7 +10,6 @@
 // TODO: find a way to make sure elements are destroyed before pairings.
 
 namespace pbc {
-namespace internal {
 
 using std::string;
 
@@ -50,7 +49,7 @@ class ElementWrapper {
   friend class GElementBase;
 
   // Allow Pairing to access elements for computing pairings.
-  friend class ::pbc::internal::Pairing;
+  friend class ::pbc::Pairing;
 
   // Shortcut for the type of the current template instatiation.
   typedef ElementWrapper<init, Derived> MyType;
@@ -458,7 +457,6 @@ ElementWrapper<init, Derived>::ElementWrapper(const Pairing& pairing) {
   (*init)(v_, pairing.pairing_);
 }
 
-} // namespace internal
 } // namespace pbc
 
 #endif  // PBC_PBCXX_H
