@@ -144,6 +144,14 @@ AC_ARG_ENABLE( debug,
                               [with_debug=y],
                               [with_debug=n])
 
+AC_ARG_ENABLE(cxx,
+AS_HELP_STRING([--enable-cxx],[enable C++ support [default=no]]),
+[case $enableval in
+yes|no|detect) ;;
+*) AC_MSG_ERROR([bad value $enableval for --enable-cxx, need yes/no/detect]) ;;
+esac],
+[enable_cxx=no])
+
 CFLAGS="$CFLAGS -Wall -W -Wfloat-equal -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wredundant-decls \
 -Wendif-labels -Wshadow -pipe -ffast-math -U__STRICT_ANSI__ -std=gnu99"
 if test "$with_debug" == "y"; then
@@ -162,6 +170,17 @@ fi
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([floor gettimeofday memmove memset pow sqrt strchr strdup])
+
+# The C++ compiler, if desired.
+if test $enable_cxx != no; then
+  AC_PROG_CXX
+  AC_PROG_CXXCPP
+  m4_ifndef([AX_CXX_COMPILE_STDCXX_11], [m4_fatal([Missing AX_CXX_COMPILE_STDCXX_11, install autoconf-archive])])
+  AX_CXX_COMPILE_STDCXX_11
+
+fi
+
+AM_CONDITIONAL(ENABLE_CXX, test $enable_cxx = yes)
 
 AC_CONFIG_FILES([Makefile example/Makefile gen/Makefile])
 AC_OUTPUT
@@ -182,6 +201,10 @@ echo "LFLAGS:           $LFLAGS"
 echo "YACC:             $YACC"
 echo "AM_YFLAGS:        $AM_YFLAGS"
 echo "YFLAGS:           $YFLAGS"
+if test $enable_cxx = yes; then
+  echo "      CXX=\"$CXX\""
+  echo "      CXXFLAGS=\"$CXXFLAGS\""
+fi
 echo "-----------------------------------------"
 echo -ne "\n"
 

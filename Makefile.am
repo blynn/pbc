@@ -14,6 +14,9 @@ maintainer-clean-local:
 	debian/libpbc0 debian/libpbc-dev/ debian/*debhelper.log debian/*debhelper debian/*substvars
 
 lib_LTLIBRARIES = libpbc.la 
+if ENABLE_CXX
+lib_LTLIBRARIES += libpbcxx.la
+endif
 
 # this should really be a versioned dir, i.e., $(includedir)/pbc-0.5.0
 library_includedir = $(includedir)/pbc
@@ -32,6 +35,7 @@ include/pbc_i_param.h \
 include/pbc_fp.h \
 include/pbc_ternary_extension_field.h \
 include/pbc.h \
+include/pbcxx.h \
 include/pbc_hilbert.h \
 include/pbc_memory.h \
 include/pbc_mnt.h \
@@ -60,6 +64,16 @@ libpbc_la_SOURCES = arith/field.c arith/z.c \
 	ecc/param.c ecc/a_param.c ecc/d_param.c ecc/e_param.c \
 	ecc/f_param.c ecc/g_param.c
 libpbc_la_LDFLAGS = -lgmp -lm -version-info $(SO_VERSION) $(PBC_LDFLAGS) $(LIBPBC_LDFLAGS)
+
+if ENABLE_CXX
+PBCXX_LTLIBRARIES_OPTION = libpbcxx.la
+endif
+libpbcxx_la_CPPFLAGS = -Iinclude
+libpbcxx_la_SOURCES = cxx/pbcxx.cc
+libpbcxx_la_DEPENDENCIES = libpbc.la
+libpbcxx_la_LIBADD = $(libpbcxx_la_DEPENDENCIES)
+libpbcxx_la_LDFLAGS = $(PBC_LDFLAGS) $(LIBPBCXX_LDFLAGS) \
+  -version-info $(SO_VERSION)
 
 # LDADD is fallback of program_LDADD
 # explicit "-lgmp" fixes error of "undefined reference to GMP symbol"
