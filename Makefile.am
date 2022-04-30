@@ -32,6 +32,7 @@ include/pbc_i_param.h \
 include/pbc_fp.h \
 include/pbc_ternary_extension_field.h \
 include/pbc.h \
+include/pbcxx.h \
 include/pbc_hilbert.h \
 include/pbc_memory.h \
 include/pbc_mnt.h \
@@ -68,6 +69,11 @@ LDADD = libpbc.la -lgmp -lm
 noinst_PROGRAMS = pbc/pbc benchmark/benchmark benchmark/timersa benchmark/ellnet
 noinst_PROGRAMS += guru/fp_test guru/quadratic_test guru/poly_test guru/prodpairing_test
 noinst_PROGRAMS += guru/ternary_extension_field_test guru/eta_T_3_test
+if ENABLE_CXX
+noinst_PROGRAMS += benchmark/benchmark_cxx
+benchmark_benchmark_cxx_CPPFLAGS = -I include
+benchmark_benchmark_cxx_SOURCES = benchmark/benchmark_cxx.cc
+endif
 pbc_pbc_CPPFLAGS = -I include
 pbc_pbc_SOURCES = pbc/parser.tab.c pbc/lex.yy.c pbc/pbc.c pbc/pbc_getline.c misc/darray.c misc/symtab.c
 benchmark_benchmark_CPPFLAGS = -I include

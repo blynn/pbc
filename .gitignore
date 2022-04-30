@@ -8,6 +8,7 @@ aclocal.m4
 autom4te.cache/
 .dirstamp
 benchmark/benchmark
+benchmark/benchmark_cxx
 benchmark/ellnet
 benchmark/timersa
 config.guess
