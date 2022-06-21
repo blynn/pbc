@@ -99,11 +99,16 @@ check_LTLIBRARIES = libgtest.la
 libgtest_la_SOURCES = googletest/googletest/src/gtest-all.cc
 libgtest_la_CPPFLAGS = -Igoogletest/googletest/include -Igoogletest/googletest -pthread
 
-check_PROGRAMS = gtest
+check_PROGRAMS = gtest pbc_test
 
 gtest_SOURCES = unittests/gtest.cpp
 gtest_LDADD = libgtest.la
 gtest_LDFLAGS = -pthread
 gtest_CPPFLAGS = -Igoogletest/googletest/include -Igoogletest/googletest -pthread
 
-TESTS = gtest
+pbc_test_SOURCES = unittests/pbc_test.cpp
+pbc_test_LDADD = libgtest.la libpbc.la -lgmp -lm
+pbc_test_LDFLAGS = -pthread
+pbc_test_CPPFLAGS = -Igoogletest/googletest/include -Igoogletest/googletest -I include -pthread
+
+TESTS = gtest pbc_test

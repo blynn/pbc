@@ -174,8 +174,8 @@ AC_CHECK_FUNCS([floor gettimeofday memmove memset pow sqrt strchr strdup])
 
 # The C++ compiler, if desired.
 if test $enable_cxx != no; then
-  m4_ifndef([AX_CXX_COMPILE_STDCXX_11], [m4_fatal([Missing AX_CXX_COMPILE_STDCXX_11, install autoconf-archive])])
-  AX_CXX_COMPILE_STDCXX_11
+  m4_ifndef([AX_CXX_COMPILE_STDCXX_14], [m4_fatal([Missing AX_CXX_COMPILE_STDCXX_14, install autoconf-archive])])
+  AX_CXX_COMPILE_STDCXX_14
 
 fi
 
