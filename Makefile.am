@@ -94,3 +94,21 @@ guru_ternary_extension_field_test_CPPFLAGS = -I include
 guru_ternary_extension_field_test_SOURCES = guru/ternary_extension_field_test.c
 guru_eta_T_3_test_CPPFLAGS = -I include
 guru_eta_T_3_test_SOURCES = guru/eta_T_3_test.c
+
+check_LTLIBRARIES = libgtest.la
+libgtest_la_SOURCES = googletest/googletest/src/gtest-all.cc
+libgtest_la_CPPFLAGS = -Igoogletest/googletest/include -Igoogletest/googletest -pthread
+
+check_PROGRAMS = gtest pbc_test
+
+gtest_SOURCES = unittests/gtest.cpp
+gtest_LDADD = libgtest.la
+gtest_LDFLAGS = -pthread
+gtest_CPPFLAGS = -Igoogletest/googletest/include -Igoogletest/googletest -pthread
+
+pbc_test_SOURCES = unittests/pbc_test.cpp
+pbc_test_LDADD = libgtest.la libpbc.la -lgmp -lm
+pbc_test_LDFLAGS = -pthread
+pbc_test_CPPFLAGS = -Igoogletest/googletest/include -Igoogletest/googletest -I include -pthread
+
+TESTS = gtest pbc_test
