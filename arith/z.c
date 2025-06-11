@@ -165,7 +165,7 @@ static int z_to_bytes(unsigned char *data, element_t e) {
   return (int)n;
 }
 
-static int z_from_bytes(element_t e, unsigned char *data) {
+static int z_from_bytes(element_t e, const unsigned char *data) {
   unsigned char *ptr;
   size_t i, n;
   mpz_ptr z = e->data;
@@ -183,7 +183,7 @@ static int z_from_bytes(element_t e, unsigned char *data) {
   }
   if (data[4] & 128) {
     neg = 1;
-    data[4] &= 127;
+    ptr[4] &= 127;
   }
   for (i=0; i<n; i++) {
     mpz_set_ui(z1, *ptr);
