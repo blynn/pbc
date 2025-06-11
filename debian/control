@@ -8,7 +8,7 @@ Section: libs
 Package: libpbc-dev
 Section: libdevel
 Architecture: any
-Depends: libpbc0 (= ${Source-Version})
+Depends: libpbc0 (= ${source:Version})
 Description: Pairing-Based Cryptography Library
   Pairing-based cryptography is a relatively young area of cryptography that
   revolves around a certain function with special properties.
