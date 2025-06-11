@@ -1,4 +1,4 @@
-= PBC Library Manual 0.5.14 =
+= PBC Library Manual 1.0.0 =
 Ben Lynn
 2006
 

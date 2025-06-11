@@ -531,7 +531,7 @@ static void fp_out_info(FILE * out, field_ptr f) {
 }
 
 void field_init_mont_fp(field_ptr f, mpz_t prime) {
-  PBC_ASSERT(!mpz_fits_ulong_p(prime), "modulus too small");
+  PBC_ASSERT(1 < mpz_size(prime), "modulus too small");
   fptr p;
   field_init(f);
   f->init = fp_init;

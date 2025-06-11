@@ -18,9 +18,9 @@ CFLAGS := $(optflags) $(warnflags)
 ifeq ($(PLATFORM),win32)
   nonlinux := .win32
   exe_suffix := .exe
-  CC := i586-mingw32msvc-gcc
-  AR := i586-mingw32msvc-ar
-  RANLIB := i586-mingw32msvc-ranlib
+  CC := i686-w64-mingw32-gcc
+  AR := i686-w64-mingw32-ar
+  RANLIB := i686-w64-mingw32-ranlib
   CPPFLAGS := $(CPPFLAGS) -I/home/blynn/cross/gmp/include
   LDFLAGS := -L/home/blynn/cross/gmp/lib
   pbc_getline_objs := pbc/pbc_getline.o
