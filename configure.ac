@@ -12,10 +12,10 @@ LT_INIT(win32-dll)
 CFLAGS=
 default_fink_path=/sw
 case $host_os in
-     darwin*) 
+     darwin*)
 	      dnl fink installation
      	      AC_MSG_CHECKING([for a fink installation at $default_fink_path])
-     	      if test -d $default_fink_path; then 
+     	      if test -d $default_fink_path; then
 	      	 AC_MSG_RESULT([found it!])
 		 AC_MSG_NOTICE([Adding -I$default_fink_path/include to CPPFLAGS])
 	      	 CPPFLAGS="-I$default_fink_path/include $CPPFLAGS"
@@ -76,7 +76,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
-AC_PROG_LEX(yywrap)
+AC_PROG_LEX([noyywrap])
 if test "x$LEX" != xflex; then
   echo "************************"
   echo "flex not found"
@@ -124,7 +124,7 @@ AC_CHECK_HEADERS_ONCE([sys/time.h])
 
 dnl setup CFLAGS
 with_enable_optimized="no"
-AC_ARG_ENABLE( optimized, 
+AC_ARG_ENABLE( optimized,
               [AS_HELP_STRING([--enable-optimized],
                               [Enable optimized build])],
               [with_enable_optimized="$withval"],
